@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>TikZ to SVG</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result-section {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .file-info {
+            background-color: #e3f2fd;
+            border: 1px solid #2196f3;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .file-info h4 {
+            margin: 0 0 10px 0;
+            color: #1976d2;
+        }
+        .file-info p {
+            margin: 5px 0;
+            color: #333;
+        }
+        .svg-preview {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .svg-preview img {
+            max-width: 100%;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .code-section {
+            margin-top: 20px;
+        }
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .code-title {
+            font-weight: bold;
+            color: #333;
+        }
+        .copy-btn {
+            background-color: #28a745;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .copy-btn:hover {
+            background-color: #218838;
+        }
+        .code-block {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .download-link {
+            display: inline-block;
+            background-color: #17a2b8;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .download-link:hover {
+            background-color: #138496;
+        }
+        .copy-link-btn {
+            display: inline-block;
+            background-color: #ffc107;
+            color: #212529;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        .copy-link-btn:hover {
+            background-color: #e0a800;
+        }
+        .error {
+            color: #dc3545;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .files-section {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .files-section h3 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .files-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+        .file-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .file-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: contain;
+            border: 1px solid #eee;
+            border-radius: 3px;
+            margin-bottom: 10px;
+        }
+        .file-card h4 {
+            margin: 0 0 5px 0;
+            color: #333;
+            font-size: 14px;
+        }
+        .file-card p {
+            margin: 3px 0;
+            font-size: 12px;
+            color: #666;
+        }
+        .file-actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        .file-actions a, .file-actions button {
+            padding: 5px 10px;
+            text-decoration: none;
+            border-radius: 3px;
+            font-size: 11px;
+            flex: 1;
+            text-align: center;
+        }
+        .view-btn {
+            background-color: #007bff;
+            color: white;
+        }
+        .download-btn {
+            background-color: #28a745;
+            color: white;
+        }
+        .file-copy-link-btn {
+            background-color: #ffc107;
+            color: #212529;
+            border: none;
+        }
+        .no-files {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Chuyển đổi TikZ sang SVG</h2>
+        
+        <form method="post">
+            <div class="form-group">
+                <label for="code">Nhập code TikZ:</label>
+                <textarea name="code" id="code" rows="10" placeholder="Nhập code TikZ của bạn ở đây...">{{ tikz_code }}</textarea>
+            </div>
+            <button type="submit">Biên dịch</button>
+        </form>
+
+        {% if svg_url %}
+            <div class="result-section">
+                {% if "Lỗi" in svg_url %}
+                    <div class="error">{{ svg_url }}</div>
+                {% else %}
+                    {% if file_info %}
+                        <div class="file-info">
+                            <h4>📁 Thông tin file đã tạo:</h4>
+                            <p><strong>Tên file:</strong> {{ file_info.filename }}</p>
+                            <p><strong>Kích thước:</strong> {{ file_info.size }} bytes</p>
+                            <p><strong>Thời gian tạo:</strong> {{ file_info.created_time }}</p>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="svg-preview">
+                        <h3>Kết quả SVG:</h3>
+                        <img src="{{ svg_url }}" alt="SVG Preview">
+                        <br>
+                        <a href="{{ svg_url }}" download class="download-link">Tải xuống SVG</a>
+                        <button class="copy-link-btn" onclick="copyToClipboard('{{ svg_full_url }}', this, '🔗 Copy Link')">🔗 Copy Link</button>
+                    </div>
+                    
+                    {% if svg_content %}
+                        <div class="code-section">
+                            <div class="code-header">
+                                <span class="code-title">Code SVG:</span>
+                                <button class="copy-btn" onclick="copySvgCode()">📋 Copy Code</button>
+                            </div>
+                            <div class="code-block" id="svgCode">{{ svg_content }}</div>
+                        </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {% if svg_files %}
+            <div class="files-section">
+                <h3>📂 Các file SVG đã tạo</h3>
+                <div class="files-grid">
+                    {% for file in svg_files %}
+                        <div class="file-card">
+                            <img src="{{ file.url }}" alt="{{ file.filename }}" onerror="this.style.display='none'">
+                            <h4>{{ file.filename }}</h4>
+                            <p><strong>Kích thước:</strong> {{ file.size }} bytes</p>
+                            <p><strong>Tạo lúc:</strong> {{ file.created_time }}</p>
+                            <div class="file-actions">
+                                <a href="{{ file.url }}" target="_blank" class="view-btn">👁️ Xem</a>
+                                <a href="{{ file.url }}" download class="download-btn">📥 Tải</a>
+                                <button class="file-copy-link-btn" onclick="copyToClipboard('{{ request.host_url.rstrip('/') ~ file.url }}', this, '🔗 Copy Link')">🔗 Copy Link</button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% else %}
+            <div class="files-section">
+                <h3>📂 Các file SVG đã tạo</h3>
+                <div class="no-files">
+                    Chưa có file SVG nào được tạo. Hãy thử chuyển đổi một code TikZ!
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        function copyToClipboard(text, buttonElement, originalText) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.opacity = 0;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            
+            if (buttonElement) {
+                const originalContent = buttonElement.innerHTML;
+                buttonElement.innerHTML = '✅ Đã copy!';
+                setTimeout(() => {
+                    buttonElement.innerHTML = originalContent;
+                }, 2000);
+            }
+        }
+
+        function copySvgCode() {
+            const codeBlock = document.getElementById('svgCode');
+            const copyBtn = document.querySelector('.copy-btn');
+            copyToClipboard(codeBlock.textContent, copyBtn, '📋 Copy Code');
+        }
+    </script>
+</body>
+</html>

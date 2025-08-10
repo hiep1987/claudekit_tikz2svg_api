@@ -1,0 +1,2670 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>TikZ to SVG</title>
+    <!-- Highlight.js CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+    <!-- CodeMirror CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material.min.css">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        /* ==== Nút chính: Biên dịch, Lưu server, Tải xuống, Xem code SVG, Copy Code ==== */
+        .btn-action,
+        .compile-save-row-btn,
+        .export-btn,
+        .copy-btn {
+          background: linear-gradient(90deg, #1976d2 0%, #2196f3 100%);
+          color: #fff;
+          padding: 12px 28px;
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          font-size: 16px;
+          font-weight: 600;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          text-decoration: none;
+          box-shadow: 0 2px 8px rgba(25, 118, 210, 0.1);
+          transition: background 0.3s, box-shadow 0.2s, transform 0.15s;
+          width: auto;
+          height: auto;
+        }
+
+        .btn-action:hover,
+        .compile-save-row-btn:hover,
+        .export-btn:hover,
+        .copy-btn:hover {
+          background: linear-gradient(90deg, #1565c0 0%, #42a5f5 100%);
+          color: #fff;
+          box-shadow: 0 4px 16px rgba(25, 118, 210, 0.18);
+          transform: translateY(-2px) scale(1.03);
+          outline: none;
+          text-decoration: none;
+        }
+
+        /* ==== Responsive (mobile) ==== */
+        @media (max-width: 1000px) {
+          .compile-save-row-btn {
+            width: 100%;
+            min-width: 0;
+            font-size: 16px;
+            padding: 14px 0;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            height: 48px;
+            box-sizing: border-box;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            white-space: nowrap;
+          }
+        }
+        
+        @media (max-width: 600px) {
+          .btn-action,
+          .compile-save-row-btn,
+          .export-btn,
+          .copy-btn {
+            width: 100%;
+            min-width: 0;
+            font-size: 17px;
+            padding: 14px 0;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            height: 48px;
+            box-sizing: border-box;
+          }
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result-section {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .file-info {
+            background-color: #e3f2fd;
+            border: 1px solid #2196f3;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .file-info h4 {
+            margin: 0 0 10px 0;
+            color: #1976d2;
+        }
+        .file-info p {
+            margin: 5px 0;
+            color: #333;
+        }
+        .svg-preview {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .svg-preview img {
+            max-width: 100%;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .code-section {
+            margin-top: 4px;
+            text-align: center;
+        }
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .code-title {
+            font-weight: bold;
+            color: #333;
+        }
+        .code-block {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            max-height: 400px;
+            overflow-y: auto;
+            position: relative;
+        }
+        .code-block pre {
+            margin: 0;
+            padding: 15px;
+            background: transparent;
+        }
+        .code-block code {
+            background: transparent;
+            padding: 0;
+        }
+        .download-link {
+            display: inline-block;
+            background-color: #17a2b8;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .download-link:hover {
+            background-color: #138496;
+        }
+        .copy-link-btn {
+            display: inline-block;
+            background-color: #ffc107;
+            color: #212529;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        .copy-link-btn:hover {
+            background-color: #e0a800;
+        }
+        .error {
+            color: #dc3545;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .files-section {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .files-section h3 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .files-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+        .file-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .file-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: contain;
+            border: 1px solid #eee;
+            border-radius: 3px;
+            margin-bottom: 10px;
+        }
+        .file-card h4 {
+            margin: 0 0 5px 0;
+            color: #333;
+            font-size: 14px;
+        }
+        .file-card p {
+            margin: 3px 0;
+            font-size: 12px;
+            color: #666;
+        }
+        .file-actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        .file-actions a, .file-actions button {
+            padding: 5px 10px;
+            text-decoration: none;
+            border-radius: 3px;
+            font-size: 11px;
+            flex: 1;
+            text-align: center;
+        }
+        .view-btn {
+            background-color: #007bff;
+            color: white;
+        }
+        .view-btn:hover {
+            background-color: #0056b3;
+        }
+        .fb-share-btn:hover {
+            background-color: #1464c7 !important;
+        }
+        .download-btn {
+            background-color: #28a745;
+            color: white;
+        }
+        .file-copy-link-btn {
+            background-color: #ffc107;
+            color: #212529;
+            border: none;
+        }
+        .file-copy-link-btn:hover {
+            background-color: #e0a800;
+        }
+        /* Hover effects cho nút trong view-mode-row */
+        #view-copy-link-btn:hover {
+            background-color: #e0a800 !important;
+        }
+        #view-download-svg-btn:hover {
+            background-color: #138496 !important;
+        }
+        .no-files {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 20px;
+        }
+        .export-section {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .export-section h4 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .export-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px 32px;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+        @media (min-width: 1000px) {
+            .export-form {
+                grid-template-columns: 1fr 1fr 1fr 1fr;
+            }
+        }
+        .export-pair {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .export-form .export-btn-group {
+            grid-column: 1/-1;
+            display: flex;
+            justify-content: center;
+            margin-top: 8px;
+        }
+        .export-form .export-btn {
+            min-width: 160px;
+        }
+        .export-input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .export-select {
+            width: 90%;
+            min-width: 120px;
+            max-width: 180px;
+            height: 40px;
+            padding: 8px 12px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            background: #f8f9fa;
+            box-sizing: border-box;
+            vertical-align: middle;
+        }
+        .export-number {
+            width: 100px;
+        }
+        .export-msg {
+            margin-top: 5px;
+            color: #388e3c;
+            font-weight: bold;
+            text-align: center;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+        #export-msg, #view-export-msg {
+            margin-top: 0;
+            text-align: center;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+        /* Layout 2 cột cho chế độ nhập và xem */
+        #input-preview-row, #view-mode-row {
+            display: flex;
+            gap: 32px;
+            margin-bottom: 24px;
+        }
+        #input-preview-row .input-col, #input-preview-row .preview-col, #view-mode-row .view-col {
+            flex: 1;
+            min-width: 0;
+        }
+        #input-preview-row .preview-col, #view-svg-preview {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            border: 1.5px solid #eee;
+            border-radius: 8px;
+            min-height: 320px;
+            min-width: 200px;
+            padding: 16px;
+            /* Thêm chiều cao tối đa và tối thiểu giống .preview-col */
+            height: 400px;
+            max-height: 100%;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        #input-preview-row .preview-col img, #view-svg-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            min-height: 200px;
+            min-width: 200px;
+            display: block;
+            margin: 0 auto;
+            object-fit: contain;
+        }
+        /* Tăng chiều cao CodeMirror trong view-mode-row */
+        #view-mode-row .CodeMirror {
+            height: 320px !important;
+            min-height: 320px !important;
+            max-height: 100% !important;
+        }
+        /* Tăng chiều cao CodeMirror trong input-preview-row */
+        #input-preview-row .CodeMirror {
+            height: 320px !important;
+            min-height: 320px !important;
+            max-height: 100% !important;
+        }
+        /* CSS cho result-tools-section */
+        #result-tools-section {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .preview-placeholder {
+            text-align: center;
+            color: #999;
+            font-style: italic;
+        }
+        .preview-placeholder p {
+            margin: 0;
+            font-size: 16px;
+        }
+        /* Responsive export-form: chỉ 1 cột khi max-width: 600px */
+        @media (max-width: 600px) {
+            .export-form {
+                grid-template-columns: 1fr;
+            }
+        }
+        /* Line numbers */
+        .hljs-ln-numbers {
+            text-align: right;
+            color: #999;
+            border-right: 1px solid #ddd;
+            vertical-align: top;
+            padding-right: 8px !important;
+            min-width: 25px;
+            }
+        .hljs-ln-code {
+            padding-left: 8px !important;
+        }
+        /* View mode code editor */
+        #view-tikz-code {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 0;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            position: relative;
+        }
+        #view-tikz-code pre {
+            margin: 0;
+            padding: 15px;
+            background: transparent;
+        }
+        #view-tikz-code code {
+            background: transparent;
+            padding: 0;
+        }
+        .CodeMirror {
+            height: 220px;
+            font-size: 15px;
+            border-radius: 6px;
+            border: 1.5px solid #bbb;
+            background: #f8f9fa;
+            overflow: auto;
+        }
+        
+        /* Đảm bảo CodeMirror trong tikz-code-block có scrollbar đẹp */
+        .tikz-code-block .CodeMirror {
+            max-height: 300px;
+            overflow-y: auto;
+            overflow-x: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+        
+        /* Tùy chỉnh scrollbar cho CodeMirror */
+        .tikz-code-block .CodeMirror-scrollbar-filler {
+            background-color: #f0f0f0;
+        }
+        
+        .tikz-code-block .CodeMirror-simplescroll-horizontal div,
+        .tikz-code-block .CodeMirror-simplescroll-vertical div {
+            background-color: #c1c1c1;
+            border-radius: 10px;
+        }
+        
+        /* Ẩn textarea gốc khi CodeMirror đã được khởi tạo */
+        .tikz-code-block .tikz-cm {
+            display: none;
+        }
+        .CodeMirror-placeholder {
+            color: #bbb !important;
+            font-style: italic;
+        }
+        /* Fix gutter/line number width for CodeMirror */
+        .CodeMirror-gutter, .CodeMirror-gutters, .CodeMirror-linenumbers {
+            width: 2.5em !important;
+            min-width: 2.5em !important;
+        }
+        .CodeMirror-linenumber, .CodeMirror-gutter-elt {
+            min-width: 2em !important;
+            width: 2em !important;
+            text-align: right !important;
+            padding-right: 0.5em !important;
+            box-sizing: content-box !important;
+        }
+        .export-form .export-col:first-child {
+            max-width: 220px;
+        }
+        @media (max-width: 900px) {
+            .export-select {
+                min-width: 100px;
+                max-width: 100%;
+            }
+        }
+        .navbar-header-user {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            /* Không dùng position:absolute */
+        }
+        
+        /* Navbar user info styles */
+        .navbar-user-info {
+            padding: 6px 14px;
+            border-radius: 6px;
+            gap: 8px;
+            background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+            color: white;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(25, 118, 210, 0.2);
+            transition: all 0.2s ease;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .navbar-user-info:hover {
+            background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+            box-shadow: 0 4px 8px rgba(25, 118, 210, 0.3);
+        }
+
+        .navbar-avatar,
+        .navbar-avatar-placeholder {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            object-fit: cover;
+            background: #eee;
+            flex-shrink: 0;
+        }
+        
+        .navbar-avatar-placeholder {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .navbar-username {
+            font-weight: 500;
+            font-size: 13.5px;
+            max-width: 100px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        @media (max-width: 600px) {
+            .navbar-header-user {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+                margin-bottom: 12px;
+            }
+            
+            .navbar-user-info {
+                padding: 8px 12px;
+                gap: 6px;
+                border-radius: 6px;
+                justify-content: center;
+            }
+
+            .navbar-avatar,
+            .navbar-avatar-placeholder {
+                width: 26px;
+                height: 26px;
+            }
+
+            .navbar-username {
+                font-size: 13px;
+                max-width: 90px;
+            }
+        }
+        .preview-col {
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            border-radius: 8px;
+        }
+        .compile-save-row-btn {
+            min-width: 160px;
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 5px;
+            height: 48px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #compile-btn.compile-save-row-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+        }
+        #compile-btn.compile-save-row-btn:hover {
+            background-color: #0056b3;
+        }
+        #save-server-btn.compile-save-row-btn:hover {
+            background-color: #e0a800;
+        }
+        .export-download-link {
+            display: inline-block;
+            background: linear-gradient(90deg, #17a2b8 0%, #138496 100%);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(23,162,184,0.2);
+            margin-top: 8px;
+        }
+
+        .export-download-link:hover {
+            background: linear-gradient(90deg, #138496 0%, #117a8b 100%);
+            box-shadow: 0 4px 12px rgba(23,162,184,0.3);
+            transform: translateY(-2px);
+            color: white;
+            text-decoration: none;
+        }
+        .export-btn-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        #export-msg {
+            margin-top: 0;
+            text-align: center;
+        }
+        .export-btn-group {
+            width: 100%;
+        }
+        #svg-code-container {
+          transition: all 0.3s ease;
+        }
+        
+        /* Hover effects cho các nút trong view mode */
+        #view-copy-link-btn:hover {
+            background: #e0a800 !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255,193,7,0.3) !important;
+        }
+        
+        #view-download-svg-btn:hover {
+            background: #138496 !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(23,162,184,0.3) !important;
+            text-decoration: none;
+        }
+        
+        #view-back-to-edit-btn:hover {
+            background: linear-gradient(90deg, #218838 0%, #1ea085 100%) !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40,167,69,0.3) !important;
+        }
+        /* Layout 2 hàng cho export-form trong view mode */
+        #view-export-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        #view-export-form .export-btn-group {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: center;
+            margin-top: 16px;
+        }
+        #view-export-form .export-btn {
+            min-width: 140px;
+        }
+        /* Responsive cho export-form trong view mode */
+        @media (max-width: 1000px) {
+            #view-export-form {
+                grid-template-columns: 1fr;
+                justify-items: center;
+                gap: 16px;
+            }
+            #view-export-form .export-pair {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: center;
+                gap: 12px;
+                width: 100%;
+                max-width: 300px;
+            }
+            #view-export-form .export-label {
+                text-align: right;
+                font-weight: 600;
+                color: #333;
+                min-width: 80px;
+                flex-shrink: 0;
+            }
+            #view-export-form .export-input,
+            #view-export-form .export-select,
+            #view-export-form .export-number {
+                width: 120px;
+                text-align: center;
+                flex-shrink: 0;
+            }
+        }
+        /* CSS cho các nút thao tác trong cột phải view mode */
+        #view-svg-actions {
+            margin-top: 16px;
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+        #view-svg-actions .view-action-btn {
+            background: #ffc107;
+            color: #212529;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 2px 8px rgba(255,193,7,0.2);
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        #view-svg-actions .view-action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255,193,7,0.3);
+        }
+        #view-svg-actions .view-download-btn {
+            background: #17a2b8;
+            color: white;
+        }
+        #view-svg-actions .view-download-btn:hover {
+            box-shadow: 0 4px 12px rgba(23,162,184,0.3);
+        }
+        /* Responsive cho các nút thao tác */
+        @media (max-width: 800px) {
+            #view-svg-actions {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+        #modal-svg-preview {
+          text-align: center;
+        }
+        #modal-svg-img {
+          display: inline-block;
+          margin: 0 auto;
+          max-width: 100%;
+          max-height: 200px;
+          object-fit: contain;
+          border: 1px solid #ddd;
+          border-radius: 8px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        /* Google Login Button Styles */
+        .google-login-btn {
+          max-width: 320px;
+          display: flex;
+          padding: 0.75rem 1.5rem;
+          font-size: 0.875rem;
+          line-height: 1.25rem;
+          font-weight: 700;
+          text-align: center;
+          text-transform: uppercase;
+          align-items: center;
+          justify-content: center;
+          border-radius: 0.5rem;
+          border: 1px solid rgba(0, 0, 0, 0.25);
+          gap: 0.75rem;
+          color: rgb(65, 63, 63);
+          background-color: #fff;
+          cursor: pointer;
+          transition: all .6s ease;
+          min-height: 48px;
+        }
+
+        .google-login-btn svg {
+          height: 24px;
+          flex-shrink: 0;
+        }
+
+        .google-login-btn:hover {
+          transform: scale(1.02);
+          background-color: #1565c0;
+          color: white;
+        }
+        #logout-btn {
+          background: #d32f2f;
+          color: white;
+          padding: 8px 16px;
+          border-radius: 6px;
+          text-decoration: none;
+          font-weight: bold;
+          font-size: 14px;
+          box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header navbar với avatar, username và nút profile -->
+    <div class="navbar-header-user">
+        {% if current_user.is_authenticated %}
+            <a href="/profile/me" class="navbar-user-info">
+                <img src="{{ url_for('static', filename='avatars/' ~ avatar) if avatar else '' }}"
+                     alt="Avatar" class="navbar-avatar"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                {% if not avatar %}
+                <div class="navbar-avatar-placeholder">
+                    {{ user_email[0].upper() }}
+                </div>
+                {% endif %}
+                <span class="navbar-username">
+                    {{ username or user_email.split('@')[0] }}
+                </span>
+            </a>
+            <a id="logout-btn" href="#" style="background:#d32f2f; color:white; padding:8px 16px; border-radius:6px; text-decoration:none; font-weight:bold; font-size:14px;">Đăng xuất</a>
+        {% else %}
+            <button class="google-login-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid" viewBox="0 0 256 262">
+                <path fill="#4285F4" d="M255.878 133.451c0-10.734-.871-18.567-2.756-26.69H130.55v48.448h71.947c-1.45 12.04-9.283 30.172-26.69 42.356l-.244 1.622 38.755 30.023 2.685.268c24.659-22.774 38.875-56.282 38.875-96.027"></path>
+                <path fill="#34A853" d="M130.55 261.1c35.248 0 64.839-11.605 86.453-31.622l-41.196-31.913c-11.024 7.688-25.82 13.055-45.257 13.055-34.523 0-63.824-22.773-74.269-54.25l-1.531.13-40.298 31.187-.527 1.465C35.393 231.798 79.49 261.1 130.55 261.1"></path>
+                <path fill="#FBBC05" d="M56.281 156.37c-2.756-8.123-4.351-16.827-4.351-25.82 0-8.994 1.595-17.697 4.206-25.82l-.073-1.73L15.26 71.312l-1.335.635C5.077 89.644 0 109.517 0 130.55s5.077 40.905 13.925 58.602l42.356-32.782"></path>
+                <path fill="#EB4335" d="M130.55 50.479c24.514 0 41.05 10.589 50.479 19.438l36.844-35.974C195.245 12.91 165.798 0 130.55 0 79.49 0 35.393 29.301 13.925 71.947l42.211 32.783c10.59-31.477 39.891-54.251 74.414-54.251"></path>
+              </svg>
+              Đăng nhập Google
+            </button>
+        {% endif %}
+    </div>
+    <div class="container">
+        <h2>Chuyển đổi TikZ sang SVG/PNG/JPEG</h2>
+
+
+    <!-- Truyền trạng thái login từ server vào JS -->
+    <script>
+      window.appState = {
+        loggedIn: {{ logged_in | tojson }},
+        userEmail: {{ user_email | tojson }},
+        username: {{ username | tojson }},
+        avatar: {{ avatar | tojson }}
+      };
+    </script>
+
+        <script>
+function updateHeaderLoginState() {
+    // Logic mới: Header đã được render từ server với avatar/username
+    // Chỉ cần xử lý các logic bổ sung
+    
+    if (window.appState.loggedIn) {
+        // Gán sự kiện cho nút đăng xuất
+        const logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn) {
+            logoutBtn.onclick = function(e) {
+                e.preventDefault();
+                document.getElementById('logout-modal').style.display = 'flex';
+            };
+        }
+        
+        // Cập nhật trạng thái nút sau khi đăng nhập
+        updateButtonStates();
+        
+        // Kiểm tra xem có ảnh SVG đang chờ hiển thị sau khi đăng nhập không
+        const pendingViewSvg = localStorage.getItem('pending_view_svg');
+        if (pendingViewSvg) {
+            try {
+                const pendingData = JSON.parse(pendingViewSvg);
+                if (pendingData.tikzCode && pendingData.svgFilename) {
+                    // Hiển thị ảnh SVG đã lưu (từ cả nút 📸 Tải ảnh PNG/JPEG và từ trang view_svg.html)
+                    showViewMode(pendingData.tikzCode, pendingData.svgFilename);
+                    // Xóa dữ liệu đã sử dụng
+                    localStorage.removeItem('pending_view_svg');
+                    
+                    // Đảm bảo view-mode-row luôn nằm trên result-section
+                    setTimeout(() => {
+                        const resultSection = document.querySelector('.result-section');
+                        const viewModeRow = document.getElementById('view-mode-row');
+                        if (resultSection && viewModeRow) {
+                            // Di chuyển view-mode-row lên trên result-section
+                            resultSection.parentNode.insertBefore(viewModeRow, resultSection);
+                        }
+                    }, 100);
+                }
+            } catch (error) {
+                console.error('Error parsing pending view SVG data:', error);
+                localStorage.removeItem('pending_view_svg');
+            }
+        }
+    } else {
+        // Gán sự kiện cho nút đăng nhập Google
+        const loginBtn = document.querySelector('.google-login-btn');
+        if (loginBtn) {
+            loginBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.location.href = "{{ url_for('google.login') }}";
+            });
+        }
+    }
+}
+document.addEventListener('DOMContentLoaded', updateHeaderLoginState);
+
+// Sau khi login → ép reload để đồng bộ session
+if (window.location.search.includes('login=1')) {
+  window.location.href = window.location.pathname;
+}
+
+// Xử lý view_svg parameter từ profile page
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const viewSvgFilename = urlParams.get('view_svg');
+    
+    if (viewSvgFilename) {
+        // Tìm file card tương ứng
+        const fileCards = document.querySelectorAll('.file-card');
+        for (let card of fileCards) {
+            const filename = card.getAttribute('data-filename');
+            if (filename === viewSvgFilename) {
+                // Lấy code TikZ từ data attribute
+                let tikzCode = card.getAttribute('data-tikz-code') || '';
+                if (!tikzCode) {
+                    const textarea = card.querySelector('.tikz-cm');
+                    if (textarea) tikzCode = textarea.value;
+                }
+                
+                // Kiểm tra đăng nhập trước khi hiển thị view mode
+                if (!window.appState.loggedIn) {
+                    // Lưu thông tin ảnh SVG vào localStorage để hiển thị sau khi đăng nhập
+                    localStorage.setItem('pending_view_svg', JSON.stringify({
+                        tikzCode: tikzCode,
+                        svgFilename: viewSvgFilename
+                    }));
+                    showLoginModal();
+                    return;
+                }
+                
+                // Hiển thị view mode
+                showViewMode(tikzCode, viewSvgFilename);
+                
+                // Xóa parameter khỏi URL
+                const newUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, newUrl);
+                break;
+            }
+        }
+    }
+});
+</script>
+
+<script>
+function setupRequireLogin() {
+  // Chỉ xử lý các nút khác, không xử lý view-btn vì đã xử lý riêng
+  document.querySelectorAll('.files-section .file-copy-link-btn, .files-section .copy-btn').forEach(function(btn) {
+    btn.onclick = function(e) {
+      if (!window.appState.loggedIn) {
+        e.preventDefault();
+        showLoginModal();
+      }
+    };
+  });
+}
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded'); // Debug
+            setupRequireLogin();
+            initializeEventListeners(); // Khởi tạo event listeners ban đầu
+        });
+
+        // Hàm khởi tạo event listeners cho các nút
+        function initializeEventListeners() {
+    // ----------------------------------------------
+    // 1. Copy link (🔗 Copy Link)
+    // ----------------------------------------------
+    document.querySelectorAll('.copy-link-btn').forEach(btn => {
+        btn.onclick = function() {
+            const link = this.getAttribute('data-link');
+            if (link) {
+                navigator.clipboard.writeText(link)
+                    .then(() => showFeedback(this, '✅ Đã copy!'))
+                    .catch(() => showFeedback(this, '❌ Lỗi copy!'));
+            }
+        };
+    });
+
+    // ----------------------------------------------
+    // 2. Copy Facebook link (🟦 Copy link Facebook)
+    // ----------------------------------------------
+    document.querySelectorAll('.copy-fb-link-btn').forEach(btn => {
+        btn.onclick = function() {
+            const link = this.getAttribute('data-link');
+            if (link) {
+                const fbLink = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`;
+                navigator.clipboard.writeText(fbLink)
+                    .then(() => showFeedback(this, '✅ Đã copy link Facebook!'))
+                    .catch(() => showFeedback(this, '❌ Lỗi copy!'));
+            }
+        };
+    });
+
+    // ----------------------------------------------
+    // 3. Xem code TikZ (📝 Xem code TikZ)
+    // ----------------------------------------------
+    document.querySelectorAll('.view-tikz-btn').forEach(btn => {
+        btn.onclick = function() {
+            const tikzCode = this.getAttribute('data-tikz-code');
+            if (tikzCode) {
+                showTikzCodeModal(tikzCode);
+            }
+        };
+    });
+
+    // ----------------------------------------------
+    // 4. Nút lưu server (💾 Lưu server)
+    // ----------------------------------------------
+    document.querySelectorAll('#save-server-btn').forEach(btn => {
+        btn.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const fileId = this.getAttribute('data-file-id');
+            const tikzCode = this.getAttribute('data-tikz-code') || "";
+            
+            if (!fileId) {
+                alert("Lỗi: không có file_id!");
+                return;
+            }
+
+            // Reset modal
+            const keywordsInput = document.getElementById('keywordsInput');
+            const suggestionsBox = document.getElementById('keywordSuggestions');
+            if (keywordsInput) keywordsInput.value = "";
+            if (suggestionsBox) {
+                suggestionsBox.innerHTML = '';
+                suggestionsBox.style.display = 'none';
+            }
+
+            // Lấy URL ảnh SVG từ preview hiện tại
+            const currentPreview = document.querySelector('.preview-col img');
+            const modalSvgImg = document.getElementById('modal-svg-img');
+            if (currentPreview && modalSvgImg) {
+                modalSvgImg.src = currentPreview.src;
+                modalSvgImg.style.display = 'block';
+            } else if (modalSvgImg) {
+                modalSvgImg.style.display = 'none';
+            }
+
+            // Kiểm tra xem có file_id hợp lệ không (tức là đã biên dịch thành công)
+            if (!fileId || fileId === 'None' || fileId === '') {
+                alert('⚠️ Cảnh báo: Chưa có ảnh SVG được biên dịch thành công.\n\nVui lòng nhấn nút "Biên dịch" trước khi lưu server.');
+                return;
+            }
+
+            // Kiểm tra xem code TikZ hiện tại có khớp với code TikZ đã được biên dịch không
+            const currentTikzCode = window.cm ? window.cm.getValue() : document.getElementById('code').value;
+            const compiledTikzCode = this.getAttribute('data-tikz-code') || "";
+            
+            // Debug: Log để kiểm tra
+            console.log('Current TikZ Code:', currentTikzCode.trim());
+            console.log('Compiled TikZ Code:', compiledTikzCode.trim());
+            console.log('Are they equal?', currentTikzCode.trim() === compiledTikzCode.trim());
+            
+            if (currentTikzCode.trim() !== compiledTikzCode.trim()) {
+                alert('⚠️ Cảnh báo: Code TikZ hiện tại khác với code TikZ đã được biên dịch.\n\nẢnh hiển thị: từ code TikZ hiện tại\nẢnh sẽ được lưu: từ code TikZ đã biên dịch\n\nVui lòng nhấn nút "Biên dịch" để cập nhật trước khi lưu server.');
+                return;
+            }
+
+            // Lưu thông tin tạm thời
+            window.pendingFileId = fileId;
+            window.pendingTikzCode = tikzCode;
+
+            // Hiện modal Bootstrap
+            const modal = new bootstrap.Modal(document.getElementById('keywordModal'));
+            modal.show();
+        };
+    });
+
+    // ----------------------------------------------
+    // 5. Nút export PNG/JPEG (Tải xuống)
+    // ----------------------------------------------
+    const exportBtn = document.getElementById('export-btn');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', async function() {
+            const svgTempId = exportBtn.getAttribute('data-file-id') || '';
+            const format = document.getElementById('export-format').value;
+            const widthVal = document.getElementById('export-width').value;
+            const heightVal = document.getElementById('export-height').value;
+            const dpiVal = document.getElementById('export-dpi').value;
+            const msg = document.getElementById('export-msg');
+
+            msg.textContent = '';
+            if ((widthVal && widthVal <= 0) || (heightVal && heightVal <= 0) || (dpiVal && dpiVal <= 0)) {
+                msg.textContent = 'Width, Height, DPI phải là số dương!';
+                return;
+            }
+
+            exportBtn.disabled = true;
+            exportBtn.textContent = 'Đang xử lý...';
+
+            try {
+                const res = await fetch('/temp_convert', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        file_id: svgTempId,
+                        fmt: format,
+                        width: widthVal || undefined,
+                        height: heightVal || undefined,
+                        dpi: dpiVal || undefined
+                    })
+                });
+                const data = await res.json();
+                if (data.url) {
+                    msg.innerHTML = `<a href="${data.url}" download class="export-download-link">Tải về ${format.toUpperCase()}</a>`;
+                } else {
+                    msg.textContent = data.error || 'Lỗi không xác định!';
+                }
+            } catch (err) {
+                msg.textContent = 'Lỗi kết nối hoặc máy chủ!';
+            }
+
+            exportBtn.disabled = false;
+            exportBtn.textContent = 'Tải xuống';
+        });
+    }
+
+    // ----------------------------------------------
+    // 6. Toggle SVG Code (📜 Xem code SVG)
+    // ----------------------------------------------
+    const toggleSvgCodeBtn = document.getElementById('toggle-svg-code-btn');
+    if (toggleSvgCodeBtn) {
+        toggleSvgCodeBtn.onclick = function() {
+            const container = document.getElementById('svg-code-container');
+            if (container) {
+                const currentlyHidden = container.style.display === 'none' || container.style.display === '';
+                container.style.display = currentlyHidden ? 'block' : 'none';
+                toggleSvgCodeBtn.textContent = currentlyHidden ? '❌ Ẩn code SVG' : '📜 Xem code SVG';
+            }
+        };
+    }
+
+    // ----------------------------------------------
+    // 7. Copy SVG Code (📋 Copy Code)
+    // ----------------------------------------------
+    const copySvgCodeBtn = document.getElementById('copy-svg-code-btn');
+    if (copySvgCodeBtn) {
+        copySvgCodeBtn.onclick = function() {
+            const codeBlock = document.getElementById('svgCode');
+            if (codeBlock) {
+                const text = codeBlock.innerText.trim();
+                navigator.clipboard.writeText(text).then(() => {
+                    copySvgCodeBtn.textContent = '✅ Đã copy!';
+                    setTimeout(() => {
+                        copySvgCodeBtn.textContent = '📋 Copy Code';
+                    }, 2000);
+                }).catch(() => {
+                    copySvgCodeBtn.textContent = '❌ Lỗi copy!';
+                    setTimeout(() => {
+                        copySvgCodeBtn.textContent = '📋 Copy Code';
+                    }, 2000);
+                });
+            }
+        };
+    }
+}
+</script>
+
+<!-- Modal đăng xuất chỉ render nếu đã login -->
+{% if current_user.is_authenticated %}
+<div id="logout-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.3); z-index:9999; align-items:center; justify-content:center;">
+  <div style="background:white; padding:32px 40px; border-radius:12px; box-shadow:0 2px 16px rgba(0,0,0,0.15); min-width:320px; text-align:center;">
+    <h3 style="margin-bottom:24px;">Đăng xuất?</h3>
+    <a href="/logout" style="display:inline-block; background:#d32f2f; color:white; padding:10px 28px; border-radius:6px; text-decoration:none; font-weight:bold;">Đăng xuất</a>
+    <button onclick="document.getElementById('logout-modal').style.display='none'" style="margin-left:18px; background:#eee; color:#333; padding:10px 28px; border-radius:6px; border:none; font-weight:bold;">Huỷ</button>
+  </div>
+</div>
+{% endif %}
+
+        <form id="tikz-form" method="post" onsubmit="console.log('Form submit event'); return submitTikzCodeAjax(event)">
+          <div id="input-preview-row" class="flex-container">
+            <!-- Cột trái: nhập code -->
+            <div class="input-col">
+              <div class="form-group">
+                <label for="code">Nhập code TikZ:</label>
+                <textarea name="code" id="code" rows="12" placeholder="Nhập code TikZ tại đây...">{{ tikz_code|default('') }}</textarea>
+              </div>
+              <div class="d-flex justify-content-end align-items-center gap-2" id="compile-save-row">
+                <button type="submit" id="compile-btn" class="compile-save-row-btn" {% if not logged_in %}title="Bạn cần đăng nhập Google để sử dụng"{% endif %}>Biên dịch</button>
+                <button
+                  type="button"
+                  id="save-server-btn"
+                  class="compile-save-row-btn"
+                  data-file-id="{{ svg_temp_id }}"
+                  data-tikz-code="{{ tikz_code | e }}"
+                  style="display: none;"
+                >
+                  💾 Lưu server
+                </button>
+              </div>
+            </div>
+            <!-- Cột phải: preview -->
+            <div class="preview-col">
+              {% if error %}
+                <div class="error">{{ error|safe }}</div>
+              {% elif svg_temp_url %}
+                <img src="{{ svg_temp_url }}" alt="SVG Preview" style="width:100%;height:100%;object-fit:contain;display:block;">
+              {% else %}
+                <div class="preview-placeholder">
+                  <p>Nhập code TikZ để xem preview real-time</p>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </form>
+
+{# Thêm block này NGAY SAU form, TRƯỚC result-tools-section #}
+{% if error %}
+    <div class="result-section">
+        <div class="error">{{ error|safe }}
+            {% if error_log_full %}
+                <br><button id="show-log-btn" style="margin-top:10px; background:#b71c1c; color:white; border:none; border-radius:4px; padding:6px 16px; cursor:pointer;">Hiển thị chi tiết log</button>
+                <pre id="full-log" style="display:none; background:#fff0f0; color:#b71c1c; border:1px solid #f5c6cb; border-radius:4px; padding:12px; margin-top:10px; max-height:400px; overflow:auto;">{{ error_log_full }}</pre>
+                <script>
+                document.getElementById('show-log-btn').onclick = function() {
+                    var log = document.getElementById('full-log');
+                    if (log.style.display === 'none') {
+                        log.style.display = 'block';
+                        this.textContent = 'Ẩn chi tiết log';
+                    } else {
+                        log.style.display = 'none';
+                        this.textContent = 'Hiển thị chi tiết log';
+                    }
+                };
+                </script>
+            {% endif %}
+        </div>
+    </div>
+{% endif %}
+
+        {% if svg_temp_url and not error %}
+          <div id="result-tools-section">
+                <div class="export-section">
+                    <h4>Xuất ảnh PNG/JPEG</h4>
+                    <form id="export-form" class="export-form">
+                        <div class="export-pair">
+                            <label for="export-format" class="export-label">Định dạng:</label>
+                            <select id="export-format" class="export-input export-select">
+                                <option value="png">PNG</option>
+                                <option value="jpeg">JPEG</option>
+                            </select>
+                        </div>
+                        <div class="export-pair">
+                            <label for="export-dpi" class="export-label">DPI:</label>
+                            <input type="number" id="export-dpi" min="1" class="export-input export-number" placeholder="Auto">
+                        </div>
+                        <div class="export-pair">
+                            <label for="export-width" class="export-label">Width (px):</label>
+                            <input type="number" id="export-width" min="1" class="export-input export-number" placeholder="Auto">
+                        </div>
+                        <div class="export-pair">
+                            <label for="export-height" class="export-label">Height (px):</label>
+                            <input type="number" id="export-height" min="1" class="export-input export-number" placeholder="Auto">
+                        </div>
+                        <div class="export-btn-group">
+                            <button id="export-btn" type="button" class="export-btn" data-file-id="{{ svg_temp_id }}">Tải xuống</button>
+                        </div>
+                    </form>
+                    <div id="export-msg" style="margin-top:5px; color:#388e3c;"></div>
+                </div>
+
+                {% if svg_content %}
+                    <div class="code-section">
+                        <button id="toggle-svg-code-btn" class="copy-btn" type="button">📜 Xem code SVG</button>
+                        <div id="svg-code-container" style="display:none; margin-top:12px;">
+                            <div class="code-header">
+                                <span class="code-title">Code SVG:</span>
+                                <button id="copy-svg-code-btn" class="copy-btn" type="button">📋 Copy Code</button>
+                            </div>
+                            <div class="code-block" id="svgCode">
+                                <pre><code class="language-xml">{{ svg_content }}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+
+
+        {% if svg_files %}
+            <div class="files-section">
+            <h3>📂 Các file SVG đã tạo</h3>
+            <div class="files-grid">
+                    {% for file in svg_files %}
+                        <div class="file-card" data-filename="{{ file.filename }}" data-tikz-code="{{ file.tikz_code | tojson | safe }}">
+                            <img src="{{ file.url }}" alt="{{ file.filename }}" onerror="this.style.display='none'">
+                            <h4>
+                              {% if file.owner_id %}
+                              <a href="/profile/{{ file.owner_id }}" style="text-decoration:none; color:inherit;">
+                                <strong>{{ file.display_name }}</strong>
+                              </a>
+                              {% else %}
+                              <strong>{{ file.display_name }}</strong>
+                              {% endif %}
+                            </h4>
+                            <p><strong>Kích thước:</strong> {{ file.size }} KB</p>
+                            <p><strong>Tạo lúc:</strong> {{ file.created_time }}</p>
+                            <div class="file-actions">
+                                <a href="{{ file.url }}" target="_blank" class="view-btn">📸 Tải ảnh PNG/JPEG</a>
+                                <button class="fb-share-btn" data-filename="{{ file.filename }}" style="background:#1877f3;color:white;font-weight:bold;">🟦 Copy link Facebook</button>
+                                <button class="file-copy-link-btn" onclick="copyToClipboard('{{ request.host_url.rstrip('/') ~ file.url }}', this, '🔗 Copy Link')">🔗 Copy Link</button>
+                                {% if file.tikz_code %}
+                                    <button class="copy-btn" onclick="toggleTikzCode(this)">📝 Xem code TikZ</button>
+                                {% endif %}
+                            </div>
+                            {% if file.tikz_code %}
+                                <div class="tikz-code-block" style="display:none; margin-top:10px;">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                                        <span style="font-weight:bold; color:#333;">Code TikZ:</span>
+                                        <button class="copy-btn" style="padding:4px 10px; font-size:12px;" onclick="copyTikzCode(this)">📋 Copy</button>
+                                    </div>
+                                    <div class="code-block" style="margin:0;">
+                                        <textarea class="tikz-cm" readonly>{{ file.tikz_code | e }}</textarea>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+                {% else %}
+            <div class="files-section">
+                <h3>📂 Các file SVG đã tạo</h3>
+                    <div class="no-files">
+                        Chưa có file SVG nào được tạo. Hãy thử chuyển đổi một code TikZ!
+                    </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <footer style='text-align:center;color:#888;font-size:14px;margin-top:40px;'>© 2024 TikZ2SVG - All rights reserved.</footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        var cm; // Khai báo global để các hàm khác truy cập được
+        function copyToClipboard(text, buttonElement, originalText) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.opacity = 0;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            
+            if (buttonElement) {
+                const originalContent = buttonElement.innerHTML;
+                buttonElement.innerHTML = '✅ Đã copy!';
+                setTimeout(() => {
+                    buttonElement.innerHTML = originalContent;
+                }, 2000);
+            }
+        }
+
+        function copySvgCode() {
+            const codeBlock = document.getElementById('svgCode');
+            const copyBtn = document.querySelector('.copy-btn');
+            copyToClipboard(codeBlock.textContent, copyBtn, '📋 Copy Code');
+        }
+
+        function copyTikzCode(btn) {
+            // Lấy code từ CodeMirror instance nếu có, nếu không thì từ textarea gốc
+            const codeBlock = btn.closest('.tikz-code-block');
+            const textarea = codeBlock.querySelector('.tikz-cm');
+            let code = '';
+            
+            // Ưu tiên lấy từ CodeMirror instance
+            if (textarea.CodeMirror) {
+                code = textarea.CodeMirror.getValue();
+                console.log('Getting code from CodeMirror instance');
+            } else {
+                // Fallback: lấy từ textarea gốc
+                code = textarea.value;
+                console.log('Getting code from original textarea');
+            }
+            
+            // Loại bỏ dòng trắng ở đầu và cuối, chỉ giữ tối đa 1 dòng trắng liên tiếp
+            let lines = code.split('\n');
+            while (lines.length && lines[0].trim() === '') lines.shift();
+            while (lines.length && lines[lines.length - 1].trim() === '') lines.pop();
+            let cleaned = [];
+            let lastBlank = false;
+            for (let line of lines) {
+                if (line.trim() === '') {
+                    if (!lastBlank) cleaned.push('');
+                    lastBlank = true;
+                } else {
+                    cleaned.push(line);
+                    lastBlank = false;
+                }
+            }
+            
+            const finalCode = cleaned.join('\n');
+            console.log('Copying code:', finalCode.substring(0, 100) + '...');
+            copyToClipboard(finalCode, btn, '📋 Copy');
+        }
+
+        function showViewMode(tikzCode, svgFilename) {
+            // Xóa block view mode cũ nếu có
+            let viewRow = document.getElementById('view-mode-row');
+            if (viewRow) viewRow.remove();
+            // Xóa block export-section cũ nếu có
+            let oldExport = document.getElementById('view-export-section');
+            if (oldExport) oldExport.remove();
+            // Ẩn form nhập code TikZ và nút Biên dịch cũ
+            const form = document.querySelector('form');
+            if (form) form.style.display = 'none';
+            // Ẩn result-tools-section nếu có
+            const resultToolsSection = document.getElementById('result-tools-section');
+            if (resultToolsSection) resultToolsSection.style.display = 'none';
+            // Tạo layout 2 cột mới
+            viewRow = document.getElementById('view-mode-row');
+            if (!viewRow) {
+                viewRow = document.createElement('div');
+                viewRow.id = 'view-mode-row';
+                viewRow.innerHTML = `
+                    <div class="view-col">
+                        <div style="margin-bottom:20px;">
+                            <h4 style="color:#333; margin-bottom:15px;">Các thao tác</h4>
+                            <div style="display:flex; flex-direction:column; gap:10px;">
+                                <button id="view-back-to-edit-btn" style="background:linear-gradient(90deg, #28a745 0%, #20c997 100%);color:white;padding:10px 20px;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 2px 8px rgba(40,167,69,0.2);transition:all 0.2s;">
+                                    ↩️ Quay về chỉnh sửa code TikZ
+                                </button>
+                            </div>
+                        </div>
+                        <div id="view-export-section">
+                            <div class="export-section">
+                                <h4>Xuất ảnh PNG/JPEG</h4>
+                                <form id="view-export-form" class="export-form">
+                                    <div class="export-pair">
+                                        <label for="view-export-format" class="export-label">Định dạng:</label>
+                                        <select id="view-export-format" class="export-input export-select">
+                                            <option value="png">PNG</option>
+                                            <option value="jpeg">JPEG</option>
+                                        </select>
+                                    </div>
+                                    <div class="export-pair">
+                                        <label for="view-export-dpi" class="export-label">DPI:</label>
+                                        <input type="number" id="view-export-dpi" min="1" class="export-input export-number" placeholder="Auto">
+                                    </div>
+                                    <div class="export-pair">
+                                        <label for="view-export-width" class="export-label">Width (px):</label>
+                                        <input type="number" id="view-export-width" min="1" class="export-input export-number" placeholder="Auto">
+                                    </div>
+                                    <div class="export-pair">
+                                        <label for="view-export-height" class="export-label">Height (px):</label>
+                                        <input type="number" id="view-export-height" min="1" class="export-input export-number" placeholder="Auto">
+                                    </div>
+                                    <div class="export-btn-group">
+                                        <button id="view-export-btn" type="button" class="export-btn">Tải xuống</button>
+                                    </div>
+                                </form>
+                                <div id="view-export-msg" style="margin-top:5px; color:#388e3c;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="view-col">
+                        <div id="view-svg-preview">
+                            <img id="view-svg-img" src="/static/${svgFilename}" alt="SVG Preview" style="width:100%;height:100%;display:block;margin:0 auto;object-fit:contain;border:1px solid #eee;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+                        </div>
+                        <div id="view-svg-actions">
+                            <button id="view-copy-link-btn" class="view-action-btn">
+                                🔗 Copy Link
+                            </button>
+                            <a id="view-download-svg-btn" href="/static/${svgFilename}" download class="view-action-btn view-download-btn">
+                                📥 Tải xuống SVG
+                            </a>
+                        </div>
+                    </div>
+                `;
+                // Thêm vào đúng vị trí phía trên form hoặc files-section
+                const container = document.querySelector('.container');
+                const filesSection = document.querySelector('.files-section');
+                if (container && form && form.parentNode === container) {
+                    container.insertBefore(viewRow, form);
+                } else if (container && filesSection) {
+                    container.insertBefore(viewRow, filesSection);
+                } else if (container) {
+                    container.appendChild(viewRow);
+                }
+            } else {
+                viewRow.style.display = '';
+                document.getElementById('view-svg-img').src = '/static/' + svgFilename;
+                // Cập nhật link download và copy link
+                const downloadBtn = document.getElementById('view-download-svg-btn');
+                if (downloadBtn) {
+                    downloadBtn.href = '/static/' + svgFilename;
+                }
+            }
+            // Lưu code TikZ vào biến để sử dụng cho nút "Quay về chỉnh sửa"
+            window.currentViewTikzCode = tikzCode;
+            
+            // Gán sự kiện cho nút Copy Link
+            const copyLinkBtn = document.getElementById('view-copy-link-btn');
+            if (copyLinkBtn) {
+                copyLinkBtn.onclick = function() {
+                    const svgUrl = window.location.origin + '/static/' + svgFilename;
+                    copyToClipboard(svgUrl, this, '🔗 Copy Link');
+                };
+            }
+            
+            // Gán sự kiện cho nút "↩️ Quay về chỉnh sửa code TikZ"
+            const backToEditBtn = document.getElementById('view-back-to-edit-btn');
+            if (backToEditBtn) {
+                backToEditBtn.onclick = function() {
+                    // Lấy code TikZ đã lưu
+                    const currentCode = window.currentViewTikzCode || tikzCode;
+                    
+                    // Lưu code vào localStorage để trang chủ có thể đọc
+                    localStorage.setItem('tikz_code_for_compile', currentCode);
+                    
+                    // Reload trang chủ
+                    window.location.href = '/';
+                };
+            }
+            // Cuộn lên khung nhập code
+            viewRow.scrollIntoView({behavior: 'smooth', block: 'center'});
+            // Ẩn nút Lưu server nếu có
+            const saveBtn = document.getElementById('save-server-btn');
+            if (saveBtn) saveBtn.style.display = 'none';
+            // Gán lại logic xuất PNG/JPEG cho file đã lưu
+            setTimeout(function() {
+                const exportBtn = document.getElementById('view-export-btn');
+            if (exportBtn) {
+                    exportBtn.onclick = async function() {
+                        const format = document.getElementById('view-export-format').value;
+                        const widthVal = document.getElementById('view-export-width').value;
+                        const heightVal = document.getElementById('view-export-height').value;
+                        const dpiVal = document.getElementById('view-export-dpi').value;
+                        const msg = document.getElementById('view-export-msg');
+                    msg.textContent = '';
+                    if ((widthVal && widthVal <= 0) || (heightVal && heightVal <= 0) || (dpiVal && dpiVal <= 0)) {
+                        msg.textContent = 'Width, Height, DPI phải là số dương!';
+                        return;
+                    }
+                    exportBtn.disabled = true;
+                    exportBtn.textContent = 'Đang xử lý...';
+                    try {
+                        const res = await fetch('/convert', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                    filename: svgFilename,
+                                    fmt: format,
+                                    width: widthVal || undefined,
+                                    height: heightVal || undefined,
+                                    dpi: dpiVal || undefined
+                                })
+                            });
+                            const data = await res.json();
+                            if (data.url) {
+                                msg.innerHTML = `<a href="${data.url}" download class="export-download-link">Tải về ${format.toUpperCase()}</a>`;
+                            } else {
+                                msg.textContent = data.error || 'Lỗi không xác định!';
+                            }
+                        } catch (err) {
+                            msg.textContent = 'Lỗi kết nối hoặc máy chủ!';
+                        }
+                        exportBtn.disabled = false;
+                        exportBtn.textContent = 'Tải xuống';
+                    };
+                }
+            }, 100);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var tikzCode = document.getElementById('code');
+            cm = CodeMirror.fromTextArea(tikzCode, {
+                mode: 'stex',
+                theme: 'material',
+                lineNumbers: true,
+                lineWrapping: true,
+                placeholder: 'Nhập code TikZ tại đây...'
+            });
+            cm.setValue({{ tikz_code|default('')|tojson|safe }});
+            
+            // Thêm sự kiện click vào CodeMirror để hiện modal đăng nhập nếu chưa đăng nhập
+            if (!window.appState.loggedIn) {
+                cm.on('mousedown', function() {
+                    showLoginModal();
+                });
+            }
+            
+            // Thêm sự kiện real-time preview cho form nhập code
+            let inputPreviewTimer;
+            cm.on('change', function() {
+                clearTimeout(inputPreviewTimer);
+                inputPreviewTimer = setTimeout(() => {
+                    updateInputPreview(cm.getValue());
+                }, 1000); // Delay 1 giây sau khi ngừng gõ
+            });
+            
+            // Gán sự kiện cho nút 📸 Tải ảnh PNG/JPEG
+            document.querySelectorAll('.view-btn').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const card = btn.closest('.file-card');
+                    // Lấy đúng tên file SVG thật từ data-filename
+                    const svgFilename = card.getAttribute('data-filename');
+                    // Ưu tiên lấy code TikZ từ data-tikz-code hoặc textarea
+                    let tikzCode = card.getAttribute('data-tikz-code') || '';
+                    if (!tikzCode) {
+                        const textarea = card.querySelector('.tikz-cm');
+                        if (textarea) tikzCode = textarea.value;
+                    }
+                    // Kiểm tra đăng nhập trước khi hiển thị view mode
+                    if (!window.appState.loggedIn) {
+                        // Lưu thông tin ảnh SVG vào localStorage để hiển thị sau khi đăng nhập
+                        localStorage.setItem('pending_view_svg', JSON.stringify({
+                            tikzCode: tikzCode,
+                            svgFilename: svgFilename
+                        }));
+                        showLoginModal();
+                        return;
+                    }
+                    showViewMode(tikzCode, svgFilename);
+                });
+            });
+            // Sự kiện copy link Facebook
+            document.querySelectorAll('.fb-share-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    const filename = btn.getAttribute('data-filename');
+                    const shareUrl = `${window.location.origin}/view_svg/${filename}`;
+                    const textArea = document.createElement('textarea');
+                    textArea.value = shareUrl;
+                    textArea.style.position = 'fixed';
+                    textArea.style.opacity = 0;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    btn.innerHTML = '✅ Đã copy link Facebook!';
+                    setTimeout(() => {
+                        btn.innerHTML = '🟦 Copy link Facebook';
+                    }, 2000);
+                });
+            });
+
+            // Nếu có code TikZ từ localStorage (từ View Mode), điền vào textarea chính
+            const tikzFromStorage = localStorage.getItem('tikz_code_for_compile');
+            if (tikzFromStorage) {
+                // Điền code vào textarea chính
+                if (window.cm && typeof window.cm.setValue === 'function') {
+                    window.cm.setValue(tikzFromStorage);
+                } else {
+                    const textarea = document.getElementById('code');
+                    if (textarea) textarea.value = tikzFromStorage;
+                }
+                // Xóa dữ liệu đã sử dụng
+                localStorage.removeItem('tikz_code_for_compile');
+            }
+            
+            // Kiểm tra xem có ảnh SVG đang chờ hiển thị sau khi đăng nhập không
+            const pendingViewSvg = localStorage.getItem('pending_view_svg');
+            if (pendingViewSvg) {
+                try {
+                    const pendingData = JSON.parse(pendingViewSvg);
+                    if (pendingData.tikzCode && pendingData.svgFilename) {
+                        if (window.appState.loggedIn) {
+                            // Đã đăng nhập: hiển thị ảnh SVG đã lưu
+                            showViewMode(pendingData.tikzCode, pendingData.svgFilename);
+                            // Xóa dữ liệu đã sử dụng
+                            localStorage.removeItem('pending_view_svg');
+                        } else {
+                            // Chưa đăng nhập: hiển thị modal đăng nhập
+                            showLoginModal();
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error parsing pending view SVG data:', error);
+                    localStorage.removeItem('pending_view_svg');
+                }
+            }
+            
+            // Đảm bảo view-mode-row luôn nằm trên result-section nếu có pending_view_svg
+            const hasPendingViewSvg = localStorage.getItem('pending_view_svg');
+            if (hasPendingViewSvg && window.appState.loggedIn) {
+                const resultSection = document.querySelector('.result-section');
+                const viewModeRow = document.getElementById('view-mode-row');
+                if (resultSection && viewModeRow) {
+                    // Di chuyển view-mode-row lên trên result-section
+                    resultSection.parentNode.insertBefore(viewModeRow, resultSection);
+                }
+            }
+            
+            // Khởi tạo preview nếu có code TikZ ban đầu
+            const initialCode = cm.getValue();
+            if (initialCode && initialCode.trim()) {
+                updateInputPreview(initialCode);
+            }
+
+            // Highlight và số dòng khi nhập code
+            function highlightTikzInput() {
+                const code = tikzCode;
+                // Xóa các span line-number cũ nếu có
+                code.querySelectorAll('.hljs-ln-numbers, .hljs-ln-code').forEach(e => e.remove());
+                hljs.highlightElement(code);
+            }
+            tikzCode.addEventListener('input', function() {
+                clearTimeout(window.tikzInputTimer);
+                window.tikzInputTimer = setTimeout(highlightTikzInput, 120);
+            });
+            // Xử lý paste giữ xuống dòng và highlight lại
+            tikzCode.addEventListener('paste', function(e) {
+                e.preventDefault();
+                var text = (e.clipboardData || window.clipboardData).getData('text');
+                // Chèn từng dòng với <br>
+                document.execCommand('insertHTML', false, text.replace(/\n/g, '<br>'));
+                setTimeout(function() {
+                    highlightTikzInput();
+                }, 10);
+            });
+            // Submit: copy code vào textarea ẩn
+                    function submitTikzCode() {
+            // Kiểm tra đăng nhập trước khi submit
+            if (!window.appState.loggedIn) {
+                showLoginModal();
+                return false;
+            }
+            tikzCode.value = cleanControlChars(cm.getValue());
+            return true;
+        }
+
+        // Hiển thị lỗi biên dịch TikZ, kèm log chi tiết nếu có
+        function displayCompileError(message, fullLog) {
+            console.log('displayCompileError called with:', { message, hasFullLog: !!fullLog });
+            // Xóa TẤT CẢ error sections cũ
+            document.querySelectorAll('.result-section, #result-section, #ajax-result-section').forEach(el => {
+                if (el.querySelector('.error') || el.querySelector('#ajax-show-log-btn')) {
+                    el.remove();
+                }
+            });
+            // Nếu không có log chi tiết thì chỉ hiện text lỗi chung
+            const section = document.createElement('div');
+            section.id = 'ajax-result-section';
+            section.className = 'result-section';
+            let html = `<div class=\"error\">Lỗi khi biên dịch!</div>`;
+            if (fullLog && fullLog.trim()) {
+                html += `<button id=\"ajax-show-log-btn\" style=\"margin-top:10px; background:#b71c1c; color:white; border:none; border-radius:4px; padding:6px 16px; cursor:pointer;\">Hiển thị chi tiết log</button>`;
+                html += `<button id=\"ajax-copy-log-btn\" style=\"display:none; margin-left:10px; background:#ffc107; color:#212529; border:none; border-radius:4px; padding:6px 16px; cursor:pointer; font-weight:bold;\">Copy log</button>`;
+                html += `<pre id=\"ajax-full-log\" style=\"display:none; background:#fff0f0; color:#b71c1c; border:1px solid #f5c6cb; border-radius:4px; padding:12px; margin-top:10px; max-height:400px; overflow:auto;\">${fullLog}</pre>`;
+            }
+            section.innerHTML = html;
+            // Insert sau form
+            const form = document.getElementById('tikz-form');
+            if (form && form.parentNode) {
+                form.parentNode.insertBefore(section, form.nextSibling);
+            }
+            // Gán event handler
+            const logBtn = document.getElementById('ajax-show-log-btn');
+            const copyBtn = document.getElementById('ajax-copy-log-btn');
+            if (logBtn) {
+                logBtn.onclick = function() {
+                    const log = document.getElementById('ajax-full-log');
+                    if (log) {
+                        if (log.style.display === 'none') {
+                            log.style.display = 'block';
+                            this.textContent = 'Ẩn chi tiết log';
+                            if (copyBtn) copyBtn.style.display = 'inline-block';
+                        } else {
+                            log.style.display = 'none';
+                            this.textContent = 'Hiển thị chi tiết log';
+                            if (copyBtn) copyBtn.style.display = 'none';
+                        }
+                    }
+                };
+                console.log('Log button event handler attached');
+            }
+            if (copyBtn) {
+                copyBtn.onclick = function() {
+                    const log = document.getElementById('ajax-full-log');
+                    if (log) {
+                        navigator.clipboard.writeText(log.textContent)
+                            .then(() => {
+                                copyBtn.textContent = '✅ Đã copy!';
+                                setTimeout(() => { copyBtn.textContent = 'Copy log'; }, 2000);
+                            })
+                            .catch(() => {
+                                copyBtn.textContent = '❌ Lỗi copy!';
+                                setTimeout(() => { copyBtn.textContent = 'Copy log'; }, 2000);
+                            });
+                    }
+                };
+            }
+        }
+
+        // Hàm AJAX mới để submit không reload trang
+        async function submitTikzCodeAjax(event) {
+            console.log('AJAX submit started'); // Debug
+            event.preventDefault(); // Ngăn form submit bình thường
+            
+            // Kiểm tra đăng nhập
+            if (!window.appState.loggedIn) {
+                showLoginModal();
+                return false;
+            }
+
+            // Lấy code từ CodeMirror
+            const tikzCode = cleanControlChars(cm.getValue());
+            if (!tikzCode.trim()) {
+                alert('Vui lòng nhập code TikZ');
+                return false;
+            }
+
+            // Hiển thị loading
+            const compileBtn = document.getElementById('compile-btn');
+            const originalText = compileBtn.textContent;
+            compileBtn.textContent = 'Đang biên dịch...';
+            compileBtn.disabled = true;
+
+            try {
+                const formData = new FormData();
+                formData.append('code', tikzCode);
+
+                const response = await fetch('/', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const html = await response.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+
+                    // KIỂM TRA LỖI CHÍNH XÁC HƠN
+                    // 1. Kiểm tra trong preview-col trước
+                    const previewColError = doc.querySelector('.preview-col .error');
+                    // 2. Kiểm tra trong result-section 
+                    const resultSectionError = doc.querySelector('.result-section .error');
+                    // 3. Kiểm tra error độc lập
+                    const standaloneError = doc.querySelector('.error');
+
+                    // Debug để kiểm tra error detection
+                    console.log('Checking for errors in response...');
+                    console.log('Preview col error:', previewColError);
+                    console.log('Result section error:', resultSectionError);
+                    console.log('Standalone error:', standaloneError);
+
+                    const errorElement = previewColError || resultSectionError || standaloneError;
+                    if (errorElement) {
+                        const msg = errorElement.innerHTML;
+                        // Tìm full log trong cùng document
+                        const fullLogEl = doc.getElementById('full-log');
+                        const fullLog = fullLogEl ? fullLogEl.textContent : '';
+                        console.log('Error detected:', msg);
+                        console.log('Full log:', fullLog ? 'Yes' : 'No');
+                        displayCompileError(msg, fullLog);
+                        return;
+                    }
+
+                    // Cập nhật preview
+                    const previewCol = document.querySelector('.preview-col');
+                    const newPreviewCol = doc.querySelector('.preview-col');
+                    if (previewCol && newPreviewCol) {
+                        previewCol.innerHTML = newPreviewCol.innerHTML;
+                    }
+
+                    // Cập nhật result-tools-section
+                    const resultToolsSection = document.getElementById('result-tools-section');
+                    const newResultToolsSection = doc.getElementById('result-tools-section');
+                    
+                    if (newResultToolsSection) {
+                        if (resultToolsSection) {
+                            resultToolsSection.innerHTML = newResultToolsSection.innerHTML;
+                            resultToolsSection.style.display = 'block';
+                        } else {
+                            // Tạo mới result-tools-section nếu chưa có
+                            const newSection = document.createElement('div');
+                            newSection.id = 'result-tools-section';
+                            newSection.innerHTML = newResultToolsSection.innerHTML;
+                            document.querySelector('form').after(newSection);
+                        }
+                        // Ẩn hoặc xóa ajax-result-section nếu có
+                        const ajaxResultSection = document.getElementById('ajax-result-section');
+                        if (ajaxResultSection) {
+                            ajaxResultSection.style.display = 'none';
+                        }
+                    } else if (resultToolsSection) {
+                        resultToolsSection.style.display = 'none';
+                    }
+
+                    // Khởi tạo lại các event listeners cho các nút mới
+                    initializeEventListeners();
+
+                    // Khởi tạo lại CodeMirror cho textarea id="code"
+                    ensureCodeMirror();
+                    
+                    // Debug: Kiểm tra nút save server có được gán event chưa
+                    const saveServerBtn = document.getElementById('save-server-btn');
+                    if (saveServerBtn) {
+                        console.log('Save server button found after AJAX update');
+                        console.log('Button onclick:', saveServerBtn.onclick);
+                    } else {
+                        console.log('Save server button not found after AJAX update');
+                    }
+
+                    // Hiện nút Lưu server sau khi biên dịch thành công
+                    if (saveServerBtn && newResultToolsSection) {
+                        // Lấy svg_temp_id mới từ nút export-btn hoặc từ DOM mới
+                        const exportBtn = newResultToolsSection.querySelector('#export-btn');
+                        if (exportBtn) {
+                            const newFileId = exportBtn.getAttribute('data-file-id');
+                            if (newFileId) saveServerBtn.setAttribute('data-file-id', newFileId);
+                        }
+                        // Lấy code TikZ mới từ CodeMirror
+                        if (window.cm && typeof window.cm.getValue === 'function') {
+                            saveServerBtn.setAttribute('data-tikz-code', window.cm.getValue());
+                        }
+                        saveServerBtn.style.display = 'inline-block';
+                    }
+                } else {
+                    // Handle HTTP errors
+                    try {
+                        const errorData = await response.json();
+                        displayCompileError(errorData.error || 'Lỗi khi biên dịch', errorData.error_log_full || '');
+                    } catch (e) {
+                        displayCompileError('Lỗi kết nối với server', '');
+                    }
+                }
+            } catch (error) {
+                console.error('AJAX Error:', error);
+                displayCompileError('Có lỗi xảy ra khi biên dịch: ' + error.message, '');
+            } finally {
+                // Khôi phục nút
+                compileBtn.textContent = originalText;
+                compileBtn.disabled = false;
+                console.log('AJAX submit completed'); // Debug
+            }
+            return false;
+        }
+        window.submitTikzCodeAjax = submitTikzCodeAjax;
+            // Highlight và placeholder ban đầu
+            highlightTikzInput();
+
+            // BỎ VÒNG LẶP NÀY - Chỉ khởi tạo CodeMirror khi cần trong toggleTikzCode
+            // document.querySelectorAll('.tikz-cm').forEach(function(textarea) {
+            //     if (!textarea.CodeMirror) {
+            //         CodeMirror.fromTextArea(textarea, {
+            //             mode: 'stex',
+            //             theme: 'material',
+            //             lineNumbers: true,
+            //             readOnly: true,
+            //             viewportMargin: Infinity
+            //         });
+            //     }
+            // });
+        });
+
+        // Đưa code ban đầu vào code block (giữ xuống dòng)
+        var tikzCodeInit = `{{ tikz_code|e }}`;
+        var tikzInput = document.getElementById('code');
+        if (tikzCodeInit && tikzCodeInit.trim() !== '') tikzInput.value = tikzCodeInit;
+        // Highlight và số dòng khi nhập code
+        function highlightTikzInput() {
+            const code = tikzInput;
+            // Xóa các span line-number cũ nếu có
+            code.querySelectorAll('.hljs-ln-numbers, .hljs-ln-code').forEach(e => e.remove());
+            hljs.highlightElement(code);
+        }
+        tikzInput.addEventListener('input', function() {
+            clearTimeout(window.tikzInputTimer);
+            window.tikzInputTimer = setTimeout(highlightTikzInput, 120);
+        });
+        // Xử lý paste giữ xuống dòng và highlight lại
+        tikzInput.addEventListener('paste', function(e) {
+            e.preventDefault();
+            var text = (e.clipboardData || window.clipboardData).getData('text');
+            // Chèn từng dòng với <br>
+            document.execCommand('insertHTML', false, text.replace(/\n/g, '<br>'));
+            setTimeout(function() {
+                highlightTikzInput();
+            }, 10);
+        });
+        // Submit: copy code vào textarea ẩn (cho real-time preview)
+        function submitTikzCodeForPreview() {
+            tikzInput.value = cleanControlChars(cm.getValue());
+            return true;
+        }
+        // Highlight và placeholder ban đầu
+        highlightTikzInput();
+
+        // Hàm cập nhật preview real-time cho form nhập code
+        async function updateInputPreview(tikzCode) {
+            if (!tikzCode.trim()) {
+                const previewContainer = document.querySelector('#input-preview-row .preview-col');
+                if (previewContainer) {
+                    previewContainer.innerHTML = '<div class="preview-placeholder"><p>Nhập code TikZ để xem preview real-time</p></div>';
+                }
+                return;
+            }
+            
+            const previewContainer = document.querySelector('#input-preview-row .preview-col');
+            if (previewContainer) {
+                // Nếu đang có ảnh SVG preview, làm mờ ảnh thay vì ẩn
+                const previewImg = previewContainer.querySelector('img');
+                if (previewImg) {
+                    previewImg.style.opacity = '0.5';
+                    previewImg.alt = 'Đang cập nhật preview...';
+                } else {
+                    previewContainer.innerHTML = '<div class="preview-placeholder"><p>Đang cập nhật preview...</p></div>';
+                }
+            }
+            
+            try {
+                const response = await fetch('/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `code=${encodeURIComponent(tikzCode)}`
+                });
+                
+                if (response.ok) {
+                    const html = await response.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    
+                    // Kiểm tra lỗi trước khi tìm SVG
+                    const previewColError = doc.querySelector('.preview-col .error');
+                    const resultSectionError = doc.querySelector('.result-section .error');
+                    const standaloneError = doc.querySelector('.error');
+                    
+                    const errorElement = previewColError || resultSectionError || standaloneError;
+                    if (errorElement) {
+                        if (previewContainer) {
+                            previewContainer.innerHTML = '<div class="preview-placeholder"><p>Code có lỗi - vui lòng sửa</p></div>';
+                        }
+                        return;
+                    }
+                    
+                    // Tìm SVG trong preview-col
+                    const newSvgUrl = doc.querySelector('.preview-col img')?.src;
+                    
+                    if (newSvgUrl && previewContainer) {
+                        // Nếu đã có img, chỉ cập nhật src và opacity
+                        let previewImg = previewContainer.querySelector('img');
+                        if (previewImg) {
+                            previewImg.src = newSvgUrl;
+                            previewImg.style.opacity = '1';
+                            previewImg.alt = 'SVG Preview (Real-time)';
+                        } else {
+                            previewContainer.innerHTML = `<img src="${newSvgUrl}" alt="SVG Preview (Real-time)" style="width:100%;height:100%;object-fit:contain;display:block;">`;
+                        }
+                    } else if (previewContainer) {
+                        previewContainer.innerHTML = '<div class="preview-placeholder"><p>Chưa có preview</p></div>';
+                    }
+                } else {
+                    if (previewContainer) {
+                        previewContainer.innerHTML = '<div class="preview-placeholder"><p>Lỗi khi tạo preview</p></div>';
+                    }
+                }
+            } catch (error) {
+                console.log('Input preview update failed:', error);
+                if (previewContainer) {
+                    previewContainer.innerHTML = '<div class="preview-placeholder"><p>Lỗi kết nối</p></div>';
+                }
+            }
+        }
+
+        // Hàm cập nhật preview real-time cho view mode
+        async function updateRealTimePreview(tikzCode) {
+            if (!tikzCode.trim()) return;
+            
+            const previewImg = document.getElementById('view-svg-img');
+            if (previewImg) {
+                previewImg.style.opacity = '0.5';
+                previewImg.alt = 'Đang cập nhật preview...';
+            }
+            
+            try {
+                const response = await fetch('/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `code=${encodeURIComponent(tikzCode)}`
+                });
+                
+                if (response.ok) {
+                    const html = await response.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    // Tìm SVG trong preview-col thay vì svg-preview
+                    const newSvgUrl = doc.querySelector('.preview-col img')?.src;
+                    
+                    if (newSvgUrl && previewImg) {
+                        previewImg.src = newSvgUrl;
+                        previewImg.style.opacity = '1';
+                        previewImg.alt = 'SVG Preview (Real-time)';
+                        
+                        // Cập nhật link download và copy link cho preview mới
+                        const downloadBtn = document.getElementById('view-download-svg-btn');
+                        if (downloadBtn) {
+                            downloadBtn.href = newSvgUrl;
+                        }
+                        
+                        // Cập nhật sự kiện copy link cho preview mới
+                        const copyLinkBtn = document.getElementById('view-copy-link-btn');
+                        if (copyLinkBtn) {
+                            copyLinkBtn.onclick = function() {
+                                copyToClipboard(newSvgUrl, this, '🔗 Copy Link');
+                            };
+                        }
+                    }
+                }
+            } catch (error) {
+                console.log('Preview update failed:', error);
+                if (previewImg) {
+                    previewImg.style.opacity = '1';
+                    previewImg.alt = 'SVG Preview';
+                }
+            }
+        }
+
+        function toggleTikzCode(btn) {
+            console.log('toggleTikzCode called');
+            const card = btn.closest('.file-card');
+            const codeBlock = card.querySelector('.tikz-code-block');
+            const textarea = codeBlock.querySelector('.tikz-cm');
+
+            console.log('Card:', card);
+            console.log('CodeBlock:', codeBlock);
+            console.log('Textarea:', textarea);
+            console.log('Textarea value:', textarea ? textarea.value : 'null');
+
+            if (!codeBlock || !textarea) {
+                console.error('Không tìm thấy code block hoặc textarea');
+                return;
+            }
+
+            if (codeBlock.style.display === 'none') {
+                // 1. **Hiển thị vùng chứa CodeMirror trước.**
+                codeBlock.style.display = 'block';
+
+                // 2. **Kiểm tra xem đã có thể hiện CodeMirror cho textarea này chưa.**
+                let cmInstance = textarea.CodeMirror;
+                if (!cmInstance) {
+                    try {
+                        // Xóa bất kỳ CodeMirror instance nào đã tồn tại trong codeBlock
+                        const existingCm = codeBlock.querySelector('.CodeMirror');
+                        if (existingCm) {
+                            existingCm.remove();
+                        }
+                        
+                        cmInstance = CodeMirror.fromTextArea(textarea, {
+                            mode: 'stex',
+                            theme: 'material',
+                            lineNumbers: true,
+                            readOnly: true,
+                            viewportMargin: Infinity,
+                            scrollbarStyle: 'native'
+                        });
+                        console.log('CodeMirror initialized for textarea');
+                    } catch (error) {
+                        console.error('Error initializing CodeMirror:', error);
+                        return;
+                    }
+                } else {
+                    console.log('CodeMirror already exists, reusing instance');
+                }
+
+                // 3. **Làm mới CodeMirror sau khi nó hiển thị hoặc vừa được khởi tạo.**
+                setTimeout(() => {
+                    if (cmInstance && typeof cmInstance.refresh === 'function') {
+                        cmInstance.refresh();
+                        console.log('CodeMirror refreshed');
+                    }
+                }, 100);
+
+                btn.innerHTML = 'Ẩn code TikZ';
+            } else {
+                // Ẩn code block nhưng giữ nguyên CodeMirror instance
+                codeBlock.style.display = 'none';
+                btn.innerHTML = '📝 Xem code TikZ';
+                console.log('Code block hidden (CodeMirror instance preserved)');
+            }
+        }
+    </script>
+    <!-- Highlight.js JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/latex.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
+    <script>
+        // Initialize highlight.js
+        document.addEventListener('DOMContentLoaded', function() {
+            hljs.highlightAll();
+            hljs.initLineNumbersOnLoad();
+        });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/stex/stex.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/display/placeholder.min.js"></script>
+    <script>
+    // Hàm loại bỏ ký tự điều khiển (trừ \n, \t)
+    function cleanControlChars(str) {
+        return str.replace(/[^\x09\x0A\x20-\x7E\xA0-\uFFFF]/g, '');
+    }
+    </script>
+    <!-- Modal đăng nhập -->
+<div id="login-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.3); z-index:9999; align-items:center; justify-content:center;">
+  <div style="background:white; padding:32px; border-radius:8px; text-align:center; max-width:90vw; margin:100px auto; box-shadow:0 4px 32px rgba(0,0,0,0.15);">
+    <p style="font-size:18px; color:#1976d2; margin-bottom:20px;">Cần đăng nhập để sử dụng chức năng này</p>
+    <button id="modal-login-btn" class="google-login-btn" style="width:80%;margin:12px auto;display:block;">
+      <svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid" viewBox="0 0 256 262">
+        <path fill="#4285F4" d="M255.878 133.451c0-10.734-.871-18.567-2.756-26.69H130.55v48.448h71.947c-1.45 12.04-9.283 30.172-26.69 42.356l-.244 1.622 38.755 30.023 2.685.268c24.659-22.774 38.875-56.282 38.875-96.027"></path>
+        <path fill="#34A853" d="M130.55 261.1c35.248 0 64.839-11.605 86.453-31.622l-41.196-31.913c-11.024 7.688-25.82 13.055-45.257 13.055-34.523 0-63.824-22.773-74.269-54.25l-1.531.13-40.298 31.187-.527 1.465C35.393 231.798 79.49 261.1 130.55 261.1"></path>
+        <path fill="#FBBC05" d="M56.281 156.37c-2.756-8.123-4.351-16.827-4.351-25.82 0-8.994 1.595-17.697 4.206-25.82l-.073-1.73L15.26 71.312l-1.335.635C5.077 89.644 0 109.517 0 130.55s5.077 40.905 13.925 58.602l42.356-32.782"></path>
+        <path fill="#EB4335" d="M130.55 50.479c24.514 0 41.05 10.589 50.479 19.438l36.844-35.974C195.245 12.91 165.798 0 130.55 0 79.49 0 35.393 29.301 13.925 71.947l42.211 32.783c10.59-31.477 39.891-54.251 74.414-54.251"></path>
+      </svg>
+      Đăng nhập Google
+    </button>
+    <br><br>
+    <button onclick="document.getElementById('login-modal').style.display='none'" style="margin-top:10px; padding:8px 18px; border-radius:6px; border:none; background:#eee; color:#1976d2; font-weight:bold; cursor:pointer;">Đóng</button>
+  </div>
+</div>
+
+    <script>
+// Kiểm tra trạng thái đăng nhập từ backend
+const isLoggedIn = {{ 'true' if user_email else 'false' }};
+// Gán sự kiện cho các nút cần đăng nhập trong files-section
+window.addEventListener('DOMContentLoaded', function() {
+  console.log('DOMContentLoaded - appState.loggedIn:', window.appState.loggedIn);
+  
+                  // Logic cho nút "📸 Tải ảnh PNG/JPEG" - cần đăng nhập (đã xử lý trong phần khởi tạo CodeMirror)
+  // Không cần xử lý ở đây vì đã có kiểm tra đăng nhập trong event listener gốc
+  
+  // Logic cho nút "🔗 Copy Link" - cần đăng nhập
+  document.querySelectorAll('.files-section .file-copy-link-btn').forEach(function(btn) {
+    if (!window.appState.loggedIn) {
+      // Lưu onclick gốc
+      const originalOnclick = btn.getAttribute('onclick');
+      btn.setAttribute('data-original-onclick', originalOnclick);
+      btn.onclick = function(e) {
+        e.preventDefault();
+        showLoginModal();
+      };
+    }
+  });
+  
+  // Logic cho nút "📝 Xem code TikZ" - cần đăng nhập
+  document.querySelectorAll('.files-section .copy-btn[onclick*="toggleTikzCode"]').forEach(function(btn) {
+    if (!window.appState.loggedIn) {
+      // Lưu onclick gốc
+      const originalOnclick = btn.getAttribute('onclick');
+      btn.setAttribute('data-original-onclick', originalOnclick);
+      btn.onclick = function(e) {
+        e.preventDefault();
+        showLoginModal();
+      };
+    }
+  });
+  
+  // Logic cho nút "📋 Copy" trong tikz-code-block - cần đăng nhập
+  document.querySelectorAll('.tikz-code-block .copy-btn[onclick*="copyTikzCode"]').forEach(function(btn) {
+    if (!window.appState.loggedIn) {
+      // Lưu onclick gốc
+      const originalOnclick = btn.getAttribute('onclick');
+      btn.setAttribute('data-original-onclick', originalOnclick);
+      btn.onclick = function(e) {
+        e.preventDefault();
+        showLoginModal();
+      };
+    }
+  });
+  
+  // Debug: Kiểm tra các nút có sẵn
+  console.log('Kiểm tra các nút:');
+  console.log('View buttons:', document.querySelectorAll('.files-section .view-btn').length);
+  console.log('Copy link buttons:', document.querySelectorAll('.files-section .file-copy-link-btn').length);
+  console.log('Copy buttons:', document.querySelectorAll('.files-section .copy-btn').length);
+  console.log('Toggle TikZ buttons:', document.querySelectorAll('.files-section .copy-btn[onclick*="toggleTikzCode"]').length);
+  console.log('Copy TikZ buttons:', document.querySelectorAll('.tikz-code-block .copy-btn[onclick*="copyTikzCode"]').length);
+  
+  // Cập nhật trạng thái nút nếu đã đăng nhập
+  updateButtonStates();
+  
+  // Thêm sự kiện cho nút biên dịch nếu chưa đăng nhập
+  const compileBtn = document.getElementById('compile-btn');
+  if (compileBtn && !window.appState.loggedIn) {
+    compileBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      showLoginModal();
+    });
+  }
+  
+  // Đảm bảo tất cả nút "🔗 Copy Link" đều có thông báo khi click
+  document.querySelectorAll('.files-section .file-copy-link-btn').forEach(function(btn) {
+    if (window.appState.loggedIn) {
+      // Nếu đã đăng nhập, đảm bảo onclick có thông báo
+      const currentOnclick = btn.getAttribute('onclick');
+      if (currentOnclick && currentOnclick.includes('copyToClipboard')) {
+        const url = currentOnclick.match(/copyToClipboard\('([^']+)'/)[1];
+        btn.onclick = function() {
+          copyToClipboard(url, this, '🔗 Copy Link');
+        };
+      }
+    }
+  });
+  
+  // Đảm bảo tất cả nút "📝 Xem code TikZ" đều hoạt động khi đã đăng nhập
+  document.querySelectorAll('.files-section .copy-btn[onclick*="toggleTikzCode"]').forEach(function(btn) {
+    if (window.appState.loggedIn) {
+      // Nếu đã đăng nhập, đảm bảo onclick hoạt động
+      btn.onclick = function() {
+        toggleTikzCode(this);
+      };
+    }
+  });
+  
+  // Đảm bảo tất cả nút "📋 Copy" trong tikz-code-block đều hoạt động khi đã đăng nhập
+  document.querySelectorAll('.tikz-code-block .copy-btn[onclick*="copyTikzCode"]').forEach(function(btn) {
+    if (window.appState.loggedIn) {
+      // Nếu đã đăng nhập, đảm bảo onclick hoạt động
+      btn.onclick = function() {
+        copyTikzCode(this);
+      };
+    }
+  });
+});
+function showLoginModal() {
+  document.getElementById('login-modal').style.display = 'flex';
+}
+
+// Hàm cập nhật trạng thái nút sau khi đăng nhập
+function updateButtonStates() {
+  if (window.appState.loggedIn) {
+    // Nút "📸 Tải ảnh PNG/JPEG" đã được xử lý trong phần khởi tạo CodeMirror
+    // Không cần xử lý ở đây vì event listener gốc đã có kiểm tra đăng nhập
+    
+    // Khôi phục nút "🔗 Copy Link" - khôi phục onclick gốc
+    document.querySelectorAll('.files-section .file-copy-link-btn').forEach(function(btn) {
+      const originalOnclick = btn.getAttribute('data-original-onclick');
+      if (originalOnclick) {
+        // Tạo lại onclick function để đảm bảo thông báo hiển thị
+        const url = originalOnclick.match(/copyToClipboard\('([^']+)'/)[1];
+        btn.onclick = function() {
+          copyToClipboard(url, this, '🔗 Copy Link');
+        };
+        btn.removeAttribute('data-original-onclick');
+      }
+    });
+    
+    // Khôi phục nút "📝 Xem code TikZ" - khôi phục onclick gốc
+    document.querySelectorAll('.files-section .copy-btn[data-original-onclick]').forEach(function(btn) {
+      const originalOnclick = btn.getAttribute('data-original-onclick');
+      if (originalOnclick) {
+        // Tạo lại onclick function để đảm bảo hoạt động
+        btn.onclick = function() {
+          toggleTikzCode(this);
+        };
+        btn.removeAttribute('data-original-onclick');
+      }
+    });
+    
+    // Khôi phục nút "📋 Copy" trong tikz-code-block - khôi phục onclick gốc
+    document.querySelectorAll('.tikz-code-block .copy-btn[data-original-onclick]').forEach(function(btn) {
+      const originalOnclick = btn.getAttribute('data-original-onclick');
+      if (originalOnclick) {
+        // Tạo lại onclick function để đảm bảo hoạt động
+        btn.onclick = function() {
+          copyTikzCode(this);
+        };
+        btn.removeAttribute('data-original-onclick');
+      }
+    });
+    
+    // Khôi phục CodeMirror - xóa sự kiện mousedown
+    if (window.cm && typeof window.cm.off === 'function') {
+      window.cm.off('mousedown');
+    }
+    
+    // Khôi phục nút biên dịch - xóa sự kiện click
+    const compileBtn = document.getElementById('compile-btn');
+    if (compileBtn) {
+      compileBtn.removeEventListener('click', showLoginModal);
+    }
+  }
+}
+
+// Thêm sự kiện click cho nút đăng nhập Google trong modal
+document.addEventListener('DOMContentLoaded', function() {
+  const modalLoginBtn = document.getElementById('modal-login-btn');
+  if (modalLoginBtn) {
+    modalLoginBtn.addEventListener('click', function() {
+      window.location.href = "{{ url_for('google.login') }}";
+    });
+  }
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var logoutLink = document.getElementById('logout-link');
+  if (logoutLink) {
+    logoutLink.addEventListener('click', function(e) {
+      e.preventDefault();
+      window.location.href = '/logout?next=/';
+    });
+  }
+});
+</script>
+
+<!-- Modal nhập từ khóa Bootstrap -->
+<div class="modal fade" id="keywordModal" tabindex="-1" aria-labelledby="keywordModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="keywordModalLabel">Nhập mô tả / từ khóa</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Ảnh SVG preview -->
+          <div id="modal-svg-preview">
+            <img id="modal-svg-img" src="" alt="SVG Preview">
+          </div>
+          <p>Nhập các từ khóa, cách nhau bằng dấu phẩy:</p>
+          <div class="position-relative">
+            <textarea id="keywordsInput" class="form-control" rows="4" placeholder="Ví dụ: toán học, hình học, đồ thị"></textarea>
+            <div id="keywordSuggestions" 
+                 class="list-group position-absolute w-100" 
+                 style="z-index:9999; max-height:200px; overflow-y:auto; display:none;"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+          <button type="button" class="btn btn-primary" id="confirmKeywordBtn">Xác nhận</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+<!-- 
+Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa do người dùng nhập:
+
+- Biến `pendingFileId` và `pendingTikzCode` lưu tạm thông tin file SVG cần lưu.
+- Khi người dùng bấm nút "Lưu server" (`save-server-btn`):
+    + Lấy `file_id` và `tikz_code` từ thuộc tính của nút.
+    + Reset ô nhập từ khóa trong modal.
+    + Hiện modal Bootstrap để người dùng nhập mô tả/từ khóa.
+- Khi người dùng bấm "Xác nhận" trong modal (`confirmKeywordBtn`):
+    + Lấy từ khóa người dùng nhập.
+    + Kiểm tra có `file_id` chưa, nếu chưa thì báo lỗi.
+    + Gửi POST request lên `/save_svg` với `file_id`, `tikz_code`, `keywords`.
+    + Nếu lưu thành công thì báo thành công và reload về trang chủ, nếu lỗi thì báo lỗi.
+    + Đóng modal sau khi gửi request.
+-->
+<script>
+    // Biến lưu tạm thông tin file cần lưu (đã chuyển thành global trong DOMContentLoaded)
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const confirmBtn = document.getElementById('confirmKeywordBtn');
+        const keywordsInput = document.getElementById('keywordsInput');
+        const suggestionsBox = document.getElementById('keywordSuggestions');
+
+        let typingTimeout = null;
+
+        // Khởi tạo biến global cho pending data
+        window.pendingFileId = null;
+        window.pendingTikzCode = "";
+
+        // Khi gõ trong ô textarea → fetch gợi ý
+        keywordsInput.addEventListener('input', function() {
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                const text = keywordsInput.value.trim();
+                const parts = text.split(',');
+                const lastPart = parts[parts.length - 1].trim();
+
+                if (lastPart.length < 1) {
+                    suggestionsBox.style.display = 'none';
+                    return;
+                }
+
+                fetch(`/api/keywords/search?q=${encodeURIComponent(lastPart)}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        suggestionsBox.innerHTML = '';
+                        if (data.length === 0) {
+                            suggestionsBox.style.display = 'none';
+                            return;
+                        }
+
+                        data.forEach(word => {
+                            const item = document.createElement('button');
+                            item.type = 'button';
+                            item.className = 'list-group-item list-group-item-action';
+                            item.textContent = word;
+                            item.addEventListener('click', () => {
+                                // Thay thế phần cuối bằng từ chọn
+                                parts[parts.length - 1] = word;
+                                keywordsInput.value = parts.map(s => s.trim()).filter(s => s).join(', ') + ', ';
+                                suggestionsBox.style.display = 'none';
+                                keywordsInput.focus();
+                            });
+                            suggestionsBox.appendChild(item);
+                        });
+                        suggestionsBox.style.display = 'block';
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        suggestionsBox.style.display = 'none';
+                    });
+            }, 300);
+        });
+
+        // Click ngoài suggestion → ẩn
+        document.addEventListener('click', function(event) {
+            if (!keywordsInput.contains(event.target) && !suggestionsBox.contains(event.target)) {
+                suggestionsBox.style.display = 'none';
+            }
+        });
+
+        // Khi bấm nút "Xác nhận" trong modal
+        if (confirmBtn) {
+            confirmBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const keywords = keywordsInput.value.trim();
+                if (!keywords) {
+                    alert('Vui lòng nhập ít nhất một từ khóa!');
+                    keywordsInput.focus();
+                    return;
+                }
+
+                if (!window.pendingFileId) {
+                    alert("Lỗi: không có file_id!");
+                    return;
+                }
+
+                fetch('/save_svg', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        file_id: window.pendingFileId,
+                        tikz_code: window.pendingTikzCode,
+                        keywords: keywords
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("Đã lưu thành công!");
+                        window.location.href = "/";
+                    } else {
+                        alert(data.error || "Có lỗi xảy ra!");
+                    }
+                })
+                .catch(err => {
+                    alert("Lỗi mạng hoặc server!");
+                });
+
+                const modal = bootstrap.Modal.getInstance(document.getElementById('keywordModal'));
+                modal.hide();
+            });
+        }
+    });
+</script>
+
+    
+    
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Hàm khởi tạo lại CodeMirror cho textarea id="code" -->
+    <script>
+        function ensureCodeMirror() {
+            const textarea = document.getElementById('code');
+            if (!textarea) return;
+            // Nếu đã có CodeMirror instance, không khởi tạo lại
+            if (textarea.nextSibling && textarea.nextSibling.classList && textarea.nextSibling.classList.contains('CodeMirror')) {
+                return;
+            }
+            window.cm = CodeMirror.fromTextArea(textarea, {
+                mode: 'stex',
+                theme: 'material',
+                lineNumbers: true,
+                placeholder: 'Nhập code TikZ tại đây...'
+            });
+        }
+    </script>
+
+    <!-- ... trong submitTikzCodeAjax, sau khi cập nhật previewCol và resultToolsSection ... -->
+    <!-- Thêm dòng này sau khi cập nhật DOM: -->
+    <!-- ensureCodeMirror(); -->
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Follower Count Logic</title>
+</head>
+<body>
+    <div class="public-profile-header">
+        <div style="display: flex; align-items: center; gap: 10px; font-size: 16px;">
+            <span style="color: rgba(255,255,255,0.7);">|</span>
+            <span>👥 1 followers</span>
+        </div>
+    </div>
+    
+    <button class="btn btn-primary follow-btn" data-user-id="5" onclick="testFollow()">
+        👥 Theo dõi
+    </button>
+    
+    <script>
+        function testFollow() {
+            console.log('Testing follow logic...');
+            
+            // Simulate successful follow response
+            const data = { success: true, message: "Successfully followed" };
+            
+            if (data.success) {
+                // Update button to unfollow
+                const followBtn = document.querySelector(`.follow-btn[data-user-id="5"]`);
+                if (followBtn) {
+                    followBtn.textContent = '👥 Bỏ theo dõi';
+                    followBtn.className = 'btn btn-secondary follow-btn';
+                    console.log('✅ Button updated successfully');
+                }
+                
+                // Update follower count
+                let followerCountElement = document.querySelector('.public-profile-header span:contains("👥")');
+                if (!followerCountElement) {
+                    // Fallback: try to find by text content
+                    const spans = document.querySelectorAll('.public-profile-header span');
+                    for (let span of spans) {
+                        if (span.textContent.includes('👥')) {
+                            followerCountElement = span;
+                            break;
+                        }
+                    }
+                }
+                
+                if (followerCountElement) {
+                    const currentText = followerCountElement.textContent;
+                    const currentCount = parseInt(currentText.match(/\d+/)[0]) || 0;
+                    followerCountElement.textContent = `👥 ${currentCount + 1} followers`;
+                    console.log(`✅ Updated follower count from ${currentCount} to ${currentCount + 1}`);
+                    console.log('New text:', followerCountElement.textContent);
+                } else {
+                    console.error('❌ Could not find follower count element');
+                }
+                
+                console.log('✅ Successfully followed user');
+            } else {
+                console.log('❌ Follow failed');
+            }
+        }
+    </script>
+</body>
+</html> 

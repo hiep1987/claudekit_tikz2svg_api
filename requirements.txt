@@ -1,0 +1,7 @@
+Flask==3.1.1 # Phiên bản bạn đang dùng
+flask-dance[google]==7.1.0 # Phiên bản bạn đang dùng
+python-dotenv
+Pillow # Cần cho xử lý ảnh
+cairosvg # Cần cho chuyển đổi SVG
+pytz # Cần cho múi giờ
+gunicorn # Cần để chạy ứng dụng với Gunicorn

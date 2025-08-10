@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>TikZ to SVG</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result-section {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .file-info {
+            background-color: #e3f2fd;
+            border: 1px solid #2196f3;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .file-info h4 {
+            margin: 0 0 10px 0;
+            color: #1976d2;
+        }
+        .file-info p {
+            margin: 5px 0;
+            color: #333;
+        }
+        .svg-preview {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .svg-preview img {
+            max-width: 100%;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .code-section {
+            margin-top: 20px;
+        }
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .code-title {
+            font-weight: bold;
+            color: #333;
+        }
+        .copy-btn {
+            background-color: #28a745;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .copy-btn:hover {
+            background-color: #218838;
+        }
+        .code-block {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .download-link {
+            display: inline-block;
+            background-color: #17a2b8;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .download-link:hover {
+            background-color: #138496;
+        }
+        .copy-link-btn {
+            display: inline-block;
+            background-color: #ffc107;
+            color: #212529;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        .copy-link-btn:hover {
+            background-color: #e0a800;
+        }
+        .error {
+            color: #dc3545;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .files-section {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .files-section h3 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .files-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+        .file-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .file-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: contain;
+            border: 1px solid #eee;
+            border-radius: 3px;
+            margin-bottom: 10px;
+        }
+        .file-card h4 {
+            margin: 0 0 5px 0;
+            color: #333;
+            font-size: 14px;
+        }
+        .file-card p {
+            margin: 3px 0;
+            font-size: 12px;
+            color: #666;
+        }
+        .file-actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        .file-actions a, .file-actions button {
+            padding: 5px 10px;
+            text-decoration: none;
+            border-radius: 3px;
+            font-size: 11px;
+            flex: 1;
+            text-align: center;
+        }
+        .view-btn {
+            background-color: #007bff;
+            color: white;
+        }
+        .download-btn {
+            background-color: #28a745;
+            color: white;
+        }
+        .file-copy-link-btn {
+            background-color: #ffc107;
+            color: #212529;
+            border: none;
+        }
+        .no-files {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 20px;
+        }
+        .export-section {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .export-section h4 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .export-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .export-label {
+            font-weight: bold;
+            color: #555;
+        }
+        .export-input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .export-select {
+            width: 100px;
+        }
+        .export-number {
+            width: 100px;
+        }
+        .export-btn {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .export-btn:hover {
+            background-color: #218838;
+        }
+        .export-msg {
+            margin-top: 5px;
+            color: #388e3c;
+            font-weight: bold;
+        }
+        /* Thêm layout 2 cột cho chế độ xem */
+        #view-mode-row {
+            display: flex;
+            gap: 32px;
+            margin-bottom: 24px;
+        }
+        #view-mode-row .view-col {
+            flex: 1;
+            min-width: 0;
+        }
+        #view-svg-preview {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            border: 1.5px solid #eee;
+            border-radius: 8px;
+            min-height: 320px;
+            min-width: 200px;
+            padding: 16px;
+        }
+        #view-svg-preview img {
+            max-width: 100%;
+            max-height: 400px;
+            display: block;
+            margin: 0 auto;
+        }
+        @media (max-width: 900px) {
+            #view-mode-row { flex-direction: column; gap: 16px; }
+            #view-svg-preview { min-height: 180px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Chuyển đổi TikZ sang SVG</h2>
+        
+        <form method="post">
+            <div class="form-group">
+                <label for="code">Nhập code TikZ:</label>
+                <textarea name="code" id="code" rows="10" placeholder="Nhập code TikZ của bạn ở đây...">{{ tikz_code }}</textarea>
+            </div>
+            <button type="submit">Biên dịch</button>
+        </form>
+
+        {% if svg_temp_url and not error %}
+            <div class="result-section">
+                <div class="svg-preview">
+                    <h3>Kết quả SVG:</h3>
+                    <img src="{{ svg_temp_url }}" alt="SVG Preview">
+                    <br>
+                    <a href="{{ svg_temp_url }}" download class="download-link">Tải xuống SVG</a>
+                    <button id="save-server-btn" class="copy-link-btn">💾 Lưu server</button>
+                </div>
+                <div class="export-section">
+                    <h4>Xuất ảnh PNG/JPEG</h4>
+                    <form id="export-form" style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-bottom:10px;">
+                        <label for="export-format" class="export-label">Định dạng:</label>
+                        <select id="export-format" class="export-input export-select">
+                            <option value="png">PNG</option>
+                            <option value="jpeg">JPEG</option>
+                        </select>
+                        <label for="export-width" class="export-label">Width (px):</label>
+                        <input type="number" id="export-width" min="1" class="export-input export-number" placeholder="Auto">
+                        <label for="export-height" class="export-label">Height (px):</label>
+                        <input type="number" id="export-height" min="1" class="export-input export-number" placeholder="Auto">
+                        <label for="export-dpi" class="export-label">DPI:</label>
+                        <input type="number" id="export-dpi" min="1" class="export-input export-number" placeholder="Auto">
+                        <button id="export-btn" type="button" class="export-btn">Tải xuống</button>
+                    </form>
+                    <div id="export-msg" style="margin-top:5px; color:#388e3c;"></div>
+                </div>
+                {% if svg_content %}
+                <div class="code-section">
+                    <div class="code-header">
+                        <span class="code-title">Code SVG:</span>
+                        <button class="copy-btn" onclick="copySvgCode()">📋 Copy Code</button>
+                    </div>
+                    <div class="code-block" id="svgCode">{{ svg_content }}</div>
+                </div>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {% if error %}
+            <div class="result-section">
+                <div class="error">{{ error|safe }}
+                    {% if error_log_full %}
+                        <br><button id="show-log-btn" style="margin-top:10px; background:#b71c1c; color:white; border:none; border-radius:4px; padding:6px 16px; cursor:pointer;">Hiển thị chi tiết log</button>
+                        <pre id="full-log" style="display:none; background:#fff0f0; color:#b71c1c; border:1px solid #f5c6cb; border-radius:4px; padding:12px; margin-top:10px; max-height:400px; overflow:auto;">{{ error_log_full }}</pre>
+                        <script>
+                        document.getElementById('show-log-btn').onclick = function() {
+                            var log = document.getElementById('full-log');
+                            if (log.style.display === 'none') {
+                                log.style.display = 'block';
+                                this.textContent = 'Ẩn chi tiết log';
+                            } else {
+                                log.style.display = 'none';
+                                this.textContent = 'Hiển thị chi tiết log';
+                            }
+                        };
+                        </script>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+
+        {% if svg_files %}
+            <div class="files-section">
+                <h3>📂 Các file SVG đã tạo</h3>
+                <div class="files-grid">
+                    {% for file in svg_files %}
+                        <div class="file-card">
+                            <img src="{{ file.url }}" alt="{{ file.filename }}" onerror="this.style.display='none'">
+                            <h4>{{ file.filename }}</h4>
+                            <p><strong>Kích thước:</strong> {{ file.size }} KB</p>
+                            <p><strong>Tạo lúc:</strong> {{ file.created_time }}</p>
+                            <div class="file-actions">
+                                <a href="{{ file.url }}" target="_blank" class="view-btn">👁️ Xem</a>
+                                <a href="{{ file.url }}" download class="download-btn">📥 Tải</a>
+                                <button class="file-copy-link-btn" onclick="copyToClipboard('{{ request.host_url.rstrip('/') ~ file.url }}', this, '🔗 Copy Link')">🔗 Copy Link</button>
+                                {% if file.tikz_code %}
+                                    <button class="copy-btn" onclick="toggleTikzCode(this)">📝 Xem code TikZ</button>
+                                {% endif %}
+                            </div>
+                            {% if file.tikz_code %}
+                                <div class="tikz-code-block" style="display:none; margin-top:10px;">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                                        <span style="font-weight:bold; color:#333;">Code TikZ:</span>
+                                        <button class="copy-btn" style="padding:4px 10px; font-size:12px;" onclick="copyTikzCode(this)">📋 Copy</button>
+                                    </div>
+                                    <pre class="code-block" style="margin:0;">{{ file.tikz_code }}</pre>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% else %}
+            <div class="files-section">
+                <h3>📂 Các file SVG đã tạo</h3>
+                <div class="no-files">
+                    Chưa có file SVG nào được tạo. Hãy thử chuyển đổi một code TikZ!
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        function copyToClipboard(text, buttonElement, originalText) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.opacity = 0;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            
+            if (buttonElement) {
+                const originalContent = buttonElement.innerHTML;
+                buttonElement.innerHTML = '✅ Đã copy!';
+                setTimeout(() => {
+                    buttonElement.innerHTML = originalContent;
+                }, 2000);
+            }
+        }
+
+        function copySvgCode() {
+            const codeBlock = document.getElementById('svgCode');
+            const copyBtn = document.querySelector('.copy-btn');
+            copyToClipboard(codeBlock.textContent, copyBtn, '📋 Copy Code');
+        }
+
+        function toggleTikzCode(btn) {
+            const card = btn.closest('.file-card');
+            const codeBlock = card.querySelector('.tikz-code-block');
+            if (codeBlock.style.display === 'none') {
+                codeBlock.style.display = 'block';
+                btn.innerHTML = 'Ẩn code TikZ';
+            } else {
+                codeBlock.style.display = 'none';
+                btn.innerHTML = '📝 Xem code TikZ';
+            }
+        }
+
+        function copyTikzCode(btn) {
+            const codeBlock = btn.closest('.tikz-code-block').querySelector('pre');
+            copyToClipboard(codeBlock.textContent, btn, '📋 Copy');
+        }
+
+        function showViewMode(tikzCode, svgFilename) {
+            // Ẩn exportSection cũ nếu có
+            let oldExport = document.getElementById('view-export-section');
+            if (oldExport) oldExport.style.display = 'none';
+            // Ẩn form nhập code TikZ và nút Biên dịch cũ
+            const form = document.querySelector('form');
+            if (form) form.style.display = 'none';
+            // Tạo layout 2 cột
+            let viewRow = document.getElementById('view-mode-row');
+            if (!viewRow) {
+                viewRow = document.createElement('div');
+                viewRow.id = 'view-mode-row';
+                viewRow.innerHTML = `
+                    <div class="view-col">
+                        <label for="code" style="font-weight:bold;">Nhập code TikZ:</label>
+                        <textarea id="view-tikz-code" rows="12" style="width:100%;font-family:'Courier New',monospace;font-size:15px;padding:12px;border-radius:6px;border:1.5px solid #bbb;"></textarea>
+                        <button id="view-compile-btn" class="export-btn" style="margin-top:12px;">Biên dịch</button>
+                    </div>
+                    <div class="view-col" id="view-svg-preview">
+                        <img id="view-svg-img" src="/static/${svgFilename}" alt="SVG Preview">
+                    </div>
+                `;
+                // Thêm vào đầu .container (trước form)
+                const container = document.querySelector('.container');
+                if (container && form) container.insertBefore(viewRow, form);
+            } else {
+                viewRow.style.display = '';
+                document.getElementById('view-svg-img').src = '/static/' + svgFilename;
+            }
+            // Đưa code TikZ vào textarea mới
+            document.getElementById('view-tikz-code').value = tikzCode;
+            // Gán lại logic cho nút Biên dịch mới
+            document.getElementById('view-compile-btn').onclick = function() {
+                // Copy code từ textarea mới vào textarea cũ (ẩn), submit form cũ
+                if (form) {
+                    const oldTextarea = form.querySelector('textarea[name="code"]');
+                    if (oldTextarea) oldTextarea.value = document.getElementById('view-tikz-code').value;
+                    form.style.display = 'block';
+                    viewRow.style.display = 'none';
+                    form.querySelector('button[type="submit"]').click();
+                }
+            };
+            // Cuộn lên khung nhập code
+            viewRow.scrollIntoView({behavior: 'smooth', block: 'center'});
+            // Hiện khối chuyển đổi PNG/JPEG cho file đã lưu
+            let exportSection = document.getElementById('view-export-section');
+            if (!exportSection) {
+                exportSection = document.createElement('div');
+                exportSection.id = 'view-export-section';
+                exportSection.innerHTML = `
+                <div class="export-section">
+                    <h4>Xuất ảnh PNG/JPEG</h4>
+                    <form id="view-export-form" style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-bottom:10px;">
+                        <label for="view-export-format" class="export-label">Định dạng:</label>
+                        <select id="view-export-format" class="export-input export-select">
+                            <option value="png">PNG</option>
+                            <option value="jpeg">JPEG</option>
+                        </select>
+                        <label for="view-export-width" class="export-label">Width (px):</label>
+                        <input type="number" id="view-export-width" min="1" class="export-input export-number" placeholder="Auto">
+                        <label for="view-export-height" class="export-label">Height (px):</label>
+                        <input type="number" id="view-export-height" min="1" class="export-input export-number" placeholder="Auto">
+                        <label for="view-export-dpi" class="export-label">DPI:</label>
+                        <input type="number" id="view-export-dpi" min="1" class="export-input export-number" placeholder="Auto">
+                        <button id="view-export-btn" type="button" class="export-btn">Tải xuống</button>
+                    </form>
+                    <div id="view-export-msg" style="margin-top:5px; color:#388e3c;"></div>
+                </div>
+                `;
+                // Thêm vào sau viewRow
+                viewRow.parentNode.insertBefore(exportSection, viewRow.nextSibling);
+            }
+            exportSection.style.display = '';
+            // Ẩn nút Lưu server nếu có
+            const saveBtn = document.getElementById('save-server-btn');
+            if (saveBtn) saveBtn.style.display = 'none';
+            // Gán lại logic xuất PNG/JPEG cho file đã lưu
+            setTimeout(function() {
+                const exportBtn = document.getElementById('view-export-btn');
+                if (exportBtn) {
+                    exportBtn.onclick = async function() {
+                        const format = document.getElementById('view-export-format').value;
+                        const widthVal = document.getElementById('view-export-width').value;
+                        const heightVal = document.getElementById('view-export-height').value;
+                        const dpiVal = document.getElementById('view-export-dpi').value;
+                        const msg = document.getElementById('view-export-msg');
+                        msg.textContent = '';
+                        if ((widthVal && widthVal <= 0) || (heightVal && heightVal <= 0) || (dpiVal && dpiVal <= 0)) {
+                            msg.textContent = 'Width, Height, DPI phải là số dương!';
+                            return;
+                        }
+                        exportBtn.disabled = true;
+                        exportBtn.textContent = 'Đang xử lý...';
+                        try {
+                            const res = await fetch('/convert', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    filename: svgFilename,
+                                    fmt: format,
+                                    width: widthVal || undefined,
+                                    height: heightVal || undefined,
+                                    dpi: dpiVal || undefined
+                                })
+                            });
+                            const data = await res.json();
+                            if (data.url) {
+                                msg.innerHTML = `<a href="${data.url}" download style="color:#388e3c;font-weight:bold;">Tải về ${format.toUpperCase()}</a>`;
+                            } else {
+                                msg.textContent = data.error || 'Lỗi không xác định!';
+                            }
+                        } catch (err) {
+                            msg.textContent = 'Lỗi kết nối hoặc máy chủ!';
+                        }
+                        exportBtn.disabled = false;
+                        exportBtn.textContent = 'Tải xuống';
+                    };
+                }
+            }, 100);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // ... existing code ...
+            // Gán sự kiện cho nút 👁️ Xem
+            document.querySelectorAll('.view-btn').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const card = btn.closest('.file-card');
+                    const tikzCode = card.querySelector('.tikz-code-block pre') ? card.querySelector('.tikz-code-block pre').textContent : '';
+                    const svgFilename = card.querySelector('h4').textContent.trim();
+                    showViewMode(tikzCode, svgFilename);
+                });
+            });
+        });
+
+        (function() {
+            const svgTempId = '{{ svg_temp_id or "" }}';
+            const tikzCode = document.getElementById('code') ? document.getElementById('code').value : '';
+            if (svgTempId) {
+                // Lưu server
+                const saveBtn = document.getElementById('save-server-btn');
+                if (saveBtn) {
+                    saveBtn.addEventListener('click', function() {
+                        saveBtn.disabled = true;
+                        saveBtn.textContent = 'Đang lưu...';
+                        fetch('/save_svg', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ file_id: svgTempId, tikz_code: tikzCode })
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                window.location.href = "/";
+                            } else {
+                                saveBtn.textContent = 'Lỗi!';
+                                alert(data.error || 'Lỗi không xác định!');
+                            }
+                        })
+                        .catch(() => {
+                            saveBtn.textContent = 'Lỗi!';
+                            alert('Lỗi kết nối!');
+                        });
+                    });
+                }
+                // Xóa file tạm khi rời trang hoặc reload
+                window.addEventListener('beforeunload', function(e) {
+                    navigator.sendBeacon('/delete_temp_svg', JSON.stringify({ file_id: svgTempId }));
+                });
+                // Chuyển đổi PNG/JPEG
+                const exportBtn = document.getElementById('export-btn');
+                if (exportBtn) {
+                    exportBtn.addEventListener('click', async function() {
+                        const format = document.getElementById('export-format').value;
+                        const widthVal = document.getElementById('export-width').value;
+                        const heightVal = document.getElementById('export-height').value;
+                        const dpiVal = document.getElementById('export-dpi').value;
+                        const msg = document.getElementById('export-msg');
+                        msg.textContent = '';
+                        if ((widthVal && widthVal <= 0) || (heightVal && heightVal <= 0) || (dpiVal && dpiVal <= 0)) {
+                            msg.textContent = 'Width, Height, DPI phải là số dương!';
+                            return;
+                        }
+                        exportBtn.disabled = true;
+                        exportBtn.textContent = 'Đang xử lý...';
+                        try {
+                            const res = await fetch('/temp_convert', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    file_id: svgTempId,
+                                    fmt: format,
+                                    width: widthVal || undefined,
+                                    height: heightVal || undefined,
+                                    dpi: dpiVal || undefined
+                                })
+                            });
+                            const data = await res.json();
+                            if (data.url) {
+                                msg.innerHTML = `<a href="${data.url}" download style="color:#388e3c;font-weight:bold;">Tải về ${format.toUpperCase()}</a>`;
+                            } else {
+                                msg.textContent = data.error || 'Lỗi không xác định!';
+                            }
+                        } catch (err) {
+                            msg.textContent = 'Lỗi kết nối hoặc máy chủ!';
+                        }
+                        exportBtn.disabled = false;
+                        exportBtn.textContent = 'Tải xuống';
+                    });
+                }
+            }
+        })();
+    </script>
+</body>
+</html>

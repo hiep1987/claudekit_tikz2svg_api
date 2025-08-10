@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+
+# Venv / build
+venv/
+.env
+*.log
+logs/
+uploads/
+*.sqlite
+*.db
+
+# Systemd/nginx sockets
+*.sock

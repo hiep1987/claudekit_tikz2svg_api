@@ -1,0 +1,7 @@
+\begin{tikzpicture}[scale=2,font=\Large]
+\coordinate (energy tip) at (0,0.1);
+\coordinate (voltage waveform tip) at (0,-4.1);
+\draw (voltage waveform tip)++(0,1) node[text width=2cm,align=center] {Voltage\waveform};
+
+\draw[domain=-3.141:3.141,smooth] plot (\x,{-5.5+sin(10*\x r)*cos(7*\x r)});
+\end{tikzpicture}

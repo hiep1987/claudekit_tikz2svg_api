@@ -1,0 +1,14 @@
+node[above] {$
+
+\draw[thick,color=black,domain=0:7.5,smooth]
+plot (\x,{sqrt(\x)}) node[anchor=south] {$y = \sqrt{x}$};
+\draw[dashed,color=black,domain=0:7.5,smooth]
+plot (\x,{(-1)*(sqrt(\x))}) node[anchor=north] {$y = -\sqrt{x}$};
+\draw[thick,color=black,domain=-1.5:5.5,samples=3]
+plot (\x,{(\x)-2}) node[anchor=south] {$y = x - 2$};
+
+\filldraw[black] (4,2) circle(2pt) node[anchor=south east] {$(4, 2)$};
+\filldraw[red] (1,-1) circle(2pt);
+\draw[red] (1.5,-1) node[anchor=west] {$(1, -1)$};
+
+\end{tikzpicture}

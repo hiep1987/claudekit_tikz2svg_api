@@ -988,23 +988,11 @@
             backToEditBtn.onclick = function() {
                 requireLogin(() => {
                     // Lấy code TikZ đã lưu (giống logic trang chủ)
-                    let currentCode = window.currentViewTikzCode || 
-                                    localStorage.getItem('tikz_code_for_edit') || 
-                                    '{{ tikz_code|default("")|tojson|safe }}';
-                    
-                    // Loại bỏ dấu ngoặc kép thừa nếu có
-                    if (currentCode && currentCode.startsWith('"') && currentCode.endsWith('"')) {
-                        currentCode = currentCode.slice(1, -1);
-                    }
-                    
-                    // Unescape các ký tự đặc biệt
-                    if (currentCode) {
-                        currentCode = currentCode.replace(/\\n/g, '\n')
-                                               .replace(/\\t/g, '\t')
-                                               .replace(/\\"/g, '"')
-                                               // KHÔNG thay thế \\\\ thành \\ vì trong TikZ, \\ là xuống dòng
-                                               // .replace(/\\\\/g, '\\');
-                    }
+                    // NOTE: Dùng trực tiếp giá trị Jinja tojson (KHÔNG bọc thêm dấu nháy) để tránh mất backslash.
+                    // để tránh phải tự "unescape" dễ làm mất ký tự backslash của TikZ.
+                    let currentCode = window.currentViewTikzCode
+                                    || localStorage.getItem('tikz_code_for_edit')
+                                    || {{ tikz_code|default("")|tojson|safe }};
                     
                     // Lưu code vào localStorage để trang chủ có thể đọc
                     localStorage.setItem('tikz_code_for_compile', currentCode);

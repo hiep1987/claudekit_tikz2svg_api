@@ -3625,15 +3625,17 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
         if (filesSection && filesSection.dataset.isOwner === 'true') {
             loadFiles();
             startFilesPolling();
+        } else {
+            // Nếu chưa đăng nhập, load public files và vẫn polling
+            loadFiles();
+            startFilesPolling();
         }
 
         // ==== Initialize touch events for buttons ====
         initializeTouchBtnEvents();
         
-        // ==== Initialize simple touch events for not logged in users ====
-        if (!window.isLoggedIn) {
-            initializeSimpleTouchEventsForNotLoggedIn();
-        }
+        // ==== Initialize touch events for all users ====
+        // Touch events đã được xử lý trong initializeTouchBtnEvents cho tất cả users
 
         // ==== Initialize CodeMirror ====
         // Kiểm tra xem CodeMirror đã được load chưa
@@ -3651,13 +3653,117 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
         }
         
         // ==== Initialize Facebook share buttons and copy link buttons ====
+        // Khởi tạo cho cả user đã đăng nhập và chưa đăng nhập
         initializeFbShareButtons();
         initializeCopyLinkButtons();
+        
+        // ==== Start login status polling (kiểm tra trạng thái đăng nhập định kỳ) ====
+        setInterval(() => {
+            refreshLoginStatusAndLoadFiles();
+        }, 30000); // Kiểm tra mỗi 30 giây
+        
+        // ==== Listen for login success events ====
+        // Kiểm tra URL để xem có phải vừa đăng nhập thành công không
+        if (window.location.search.includes('login_success=true')) {
+            console.log('🔄 Login success detected, switching to private files...');
+            setTimeout(() => {
+                stopFilesPolling();
+                refreshLoginStatusAndLoadFiles();
+            }, 1000); // Delay 1 giây để đảm bảo session đã được cập nhật
+        }
+        
+        // ==== Listen for page visibility changes ====
+        // Khi user quay lại tab, kiểm tra trạng thái đăng nhập
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                console.log('🔄 Page became visible, checking login status...');
+                refreshLoginStatusAndLoadFiles();
+            }
+        });
+        
+        // ==== Listen for focus events ====
+        // Khi user focus vào window, kiểm tra trạng thái đăng nhập
+        window.addEventListener('focus', () => {
+            console.log('🔄 Window focused, checking login status...');
+            refreshLoginStatusAndLoadFiles();
+        });
+        
+        // ==== Listen for storage events (cross-tab login/logout) ====
+        // Khi user đăng nhập/đăng xuất ở tab khác
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'login_status') {
+                console.log('🔄 Login status changed in another tab, refreshing...');
+                stopFilesPolling();
+                refreshLoginStatusAndLoadFiles();
+            }
+        });
+        
+        // ==== Listen for online/offline events ====
+        // Khi kết nối mạng thay đổi, kiểm tra trạng thái đăng nhập
+        window.addEventListener('online', () => {
+            console.log('🔄 Network online, checking login status...');
+            stopFilesPolling();
+            refreshLoginStatusAndLoadFiles();
+        });
+        
+        // ==== Listen for beforeunload events ====
+        // Khi user sắp rời khỏi trang, lưu trạng thái
+        window.addEventListener('beforeunload', () => {
+            localStorage.setItem('login_status', window.isLoggedIn ? 'logged_in' : 'logged_out');
+        });
+        
+        // ==== Check stored login status on page load ====
+        // Kiểm tra trạng thái đăng nhập đã lưu
+        const storedLoginStatus = localStorage.getItem('login_status');
+        if (storedLoginStatus && storedLoginStatus !== (window.isLoggedIn ? 'logged_in' : 'logged_out')) {
+            console.log('🔄 Stored login status differs from current, refreshing...');
+            stopFilesPolling();
+            refreshLoginStatusAndLoadFiles();
+        }
+        
+        // ==== Initialize login status in localStorage ====
+        // Khởi tạo trạng thái đăng nhập trong localStorage
+        localStorage.setItem('login_status', window.isLoggedIn ? 'logged_in' : 'logged_out');
+        
+        // ==== Log initial state ====
+        console.log('🔄 Initial login status:', window.isLoggedIn ? 'Logged in' : 'Not logged in');
+        console.log('🔄 Loading files for:', window.isLoggedIn ? 'logged in user' : 'public access');
+        console.log('🔄 Polling will be active for both logged in and public users');
+    }
+
+    // Refresh login status and load files if needed
+    function refreshLoginStatusAndLoadFiles() {
+        // Cập nhật trạng thái đăng nhập từ server
+        fetch('/api/check_login_status')
+            .then(response => response.json())
+            .then(data => {
+                const wasLoggedIn = window.isLoggedIn;
+                window.isLoggedIn = data.logged_in;
+                
+                // Cập nhật localStorage
+                localStorage.setItem('login_status', window.isLoggedIn ? 'logged_in' : 'logged_out');
+                
+                // Nếu trạng thái đăng nhập thay đổi, load files và restart polling
+                if (!wasLoggedIn && window.isLoggedIn) {
+                    console.log('🔄 User logged in, switching to private files...');
+                    stopFilesPolling();
+                    loadFiles(true); // Force load khi user vừa đăng nhập
+                    startFilesPolling();
+                } else if (wasLoggedIn && !window.isLoggedIn) {
+                    console.log('🔄 User logged out, switching to public files...');
+                    stopFilesPolling();
+                    loadFiles(true); // Force load khi user vừa đăng xuất
+                    startFilesPolling();
+                }
+            })
+            .catch(error => {
+                console.error('Error checking login status:', error);
+            });
     }
 
     // Load files from API
-    function loadFiles() {
-        console.log('🔄 loadFiles called...');
+    function loadFiles(forceLoad = false) {
+        console.log('🔄 loadFiles called...', forceLoad ? '(forced)' : '');
         const container = document.getElementById('files-container');
         console.log('🔄 Container found:', !!container);
         
@@ -3666,33 +3772,49 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
             return;
         }
         
-        fetch('/api/files')
+        // Chọn API endpoint dựa trên trạng thái đăng nhập
+        const apiEndpoint = window.isLoggedIn ? '/api/files' : '/api/public/files';
+        console.log('🔄 Using API endpoint:', apiEndpoint);
+        
+        fetch(apiEndpoint)
             .then(response => {
+                console.log('🔄 Response status:', response.status);
                 if (!response.ok) {
+                    // Nếu đã kiểm tra đăng nhập trước đó, 401 không nên xảy ra
+                    // Nhưng vẫn xử lý để đảm bảo an toàn
                     if (response.status === 401) {
-                        // User not logged in
+                        console.log('🔄 Unexpected 401 response, user session may have expired');
                         container.innerHTML = `
                             <div class="no-files">
                                 <div class="no-files-icon">🔒</div>
-                                <h4>Chưa đăng nhập</h4>
-                                <p>Vui lòng đăng nhập để xem files đã lưu</p>
+                                <h4>Phiên đăng nhập đã hết hạn</h4>
+                                <p>Vui lòng đăng nhập lại để xem files đã lưu</p>
                             </div>
                         `;
-                        return;
+                        return Promise.reject('Unauthorized'); // Prevent further processing
                     }
-                    throw new Error('Network response was not ok');
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
                 return response.json();
+            })
+            .then(data => {
+                // Xử lý response format khác nhau giữa /api/files và /api/public/files
+                const files = window.isLoggedIn ? data : (data.files || []);
+                return files;
             })
             .then(files => {
                 if (!files) return;
                 
                 if (files.length === 0) {
+                    const noFilesMessage = window.isLoggedIn 
+                        ? 'Hãy tạo và lưu một số file SVG để xem chúng ở đây'
+                        : 'Hiện tại chưa có file SVG nào được chia sẻ công khai';
+                    
                     container.innerHTML = `
                         <div class="no-files">
                             <div class="no-files-icon">📁</div>
                             <h4>Chưa có file nào</h4>
-                            <p>Hãy tạo và lưu một số file SVG để xem chúng ở đây</p>
+                            <p>${noFilesMessage}</p>
                         </div>
                     `;
                     return;
@@ -3707,7 +3829,7 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
                           👤 <a href="/profile/${file.creator_id}/svg-files" style="text-decoration: none; color: #1976d2; font-weight: 700; font-size: 13px;">
                             ${file.creator_username}
                           </a>
-                          <span style="margin-left:8px; color: #666; font-size: 11px;">${file.created_time_vn}</span>
+                          <span style="margin-left:8px; color: #666; font-size: 11px;">${file.created_time_vn || file.created_time}</span>
                         </div>
                       </div>
                       <div class="file-img-container">
@@ -3715,8 +3837,8 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
                       </div>
                       <div class="like-button-wrapper" style="position: absolute; bottom: 8px; right: 8px; z-index: 100;">
                         <div class="like-button">
-                          <input id="heart-${file.id}" type="checkbox" ${file.is_liked_by_current_user ? 'checked' : ''} />
-                          <label class="like" for="heart-${file.id}">
+                          <input id="heart-${file.id}" type="checkbox" ${file.is_liked_by_current_user ? 'checked' : ''} ${!window.isLoggedIn ? 'disabled' : ''} />
+                          <label class="like" for="heart-${file.id}" ${!window.isLoggedIn ? 'style="opacity: 0.6; cursor: not-allowed;"' : ''}>
                             <svg class="like-icon" fill-rule="nonzero" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                               <path d="m11.645 20.91-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z"></path>
                             </svg>
@@ -3783,19 +3905,43 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
                 
                 container.innerHTML = filesHTML;
                 
-                // Initialize like buttons for files
-                initializeFileLikeButtons();
+                // Initialize like buttons for files (chỉ khi đã đăng nhập)
+                if (window.isLoggedIn) {
+                    initializeFileLikeButtons();
+                }
+                
+                // Cập nhật currentFiles cho polling
+                currentFiles = files;
+                console.log('🔄 Updated currentFiles for polling:', currentFiles.length, 'files');
                 
                 // Note: Event delegation đã được setup trong DOMContentLoaded, 
                 // nên không cần re-initialize cho các element mới được thêm vào
             })
             .catch(error => {
                 console.error('Error loading files:', error);
+                
+                // Nếu đã xử lý 401 trong .then(), không hiển thị lại
+                if (error === 'Unauthorized') {
+                    return;
+                }
+                
+                // Nếu force load và có lỗi, có thể user chưa đăng nhập thực sự
+                if (forceLoad) {
+                    console.log('🔄 Force load failed, checking login status...');
+                    refreshLoginStatusAndLoadFiles();
+                    return;
+                }
+                
+                // Thông báo lỗi khác nhau cho user đã đăng nhập và chưa đăng nhập
+                const errorMessage = window.isLoggedIn 
+                    ? 'Không thể tải danh sách files của bạn. Vui lòng thử lại sau.'
+                    : 'Không thể tải danh sách files công khai. Vui lòng thử lại sau.';
+                
                 container.innerHTML = `
                     <div class="no-files">
                         <div class="no-files-icon">❌</div>
-                        <h4>Lỗi tải dữ liệu</h4>
-                        <p>Có lỗi xảy ra khi tải files. Vui lòng thử lại sau.</p>
+                        <h4>Không thể tải danh sách files</h4>
+                        <p>${errorMessage}</p>
                     </div>
                 `;
             });
@@ -3863,12 +4009,16 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
         });
     }
 
+    // Global variable to store current files for polling comparison
+    let currentFiles = [];
+    let pollingInterval = null;
+    
     // Real-time synchronization for files via polling
     function startFilesPolling() {
         console.log('🔄 Starting files polling...');
         const pollInterval = 15000; // 15 seconds
         
-        setInterval(function() {
+        pollingInterval = setInterval(function() {
             console.log('🔄 Polling files...', new Date().toLocaleTimeString());
             const container = document.getElementById('files-container');
             if (!container) {
@@ -3881,22 +4031,33 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
                 return;
             }
             
+            // Chọn API endpoint dựa trên trạng thái đăng nhập
+            const apiEndpoint = window.isLoggedIn ? '/api/files' : '/api/public/files';
+            console.log('🔄 Polling API endpoint:', apiEndpoint);
+            
             // Fetch updated files
-            console.log('🔄 Fetching /api/files...');
-            fetch('/api/files')
+            fetch(apiEndpoint)
                 .then(response => {
                     console.log('🔄 API response status:', response.status);
                     if (!response.ok) {
                         if (response.status === 401) {
-                            console.log('❌ User not logged in, stopping polling');
-                            return null;
+                            console.log('❌ User not logged in, switching to public API');
+                            // Thử lại với public API
+                            return fetch('/api/public/files');
                         }
                         throw new Error('Network response was not ok');
                     }
+                    return response;
+                })
+                .then(response => {
+                    if (!response) return null;
                     return response.json();
                 })
-                .then(files => {
-                    if (!files) return;
+                .then(data => {
+                    if (!data) return;
+                    
+                    // Xử lý response format khác nhau
+                    const files = window.isLoggedIn ? data : (data.files || []);
                     
                     // Check if there are new files or updates
                     const hasNewFiles = files.length !== currentFiles.length;
@@ -3904,7 +4065,7 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
                         const currentFile = currentFiles[index];
                         return !currentFile || 
                                currentFile.like_count !== file.like_count ||
-                               currentFile.is_liked_by_current_user !== file.is_liked_by_current_user;
+                               (window.isLoggedIn && currentFile.is_liked_by_current_user !== file.is_liked_by_current_user);
                     });
                     
                     if (hasNewFiles || hasUpdates) {
@@ -3918,6 +4079,15 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
         }, pollInterval);
         
         console.log('🔄 Started files polling (15s interval)');
+    }
+    
+    // Function to stop polling
+    function stopFilesPolling() {
+        if (pollingInterval) {
+            clearInterval(pollingInterval);
+            pollingInterval = null;
+            console.log('🔄 Stopped files polling');
+        }
     }
 
     // Touch events for buttons (2-tap logic)
@@ -4043,8 +4213,20 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
                     
                     // ✅ Thêm xử lý cho nút "Xem Code"
                     else if (btn.querySelector('.text')?.textContent === 'Xem Code' || btn.querySelector('.text')?.textContent === 'Ẩn code') {
-                        // Gọi function toggleTikzCode để hiển thị/ẩn code
-                        toggleTikzCode(btn);
+                        // Kiểm tra trạng thái đăng nhập
+                        if (window.isLoggedIn) {
+                            // Gọi function toggleTikzCode để hiển thị/ẩn code
+                            toggleTikzCode(btn);
+                        } else {
+                            // Hiển thị modal đăng nhập cho user chưa đăng nhập
+                            const loginModal = document.getElementById('login-modal');
+                            if (loginModal) {
+                                loginModal.style.display = 'flex';
+                            } else {
+                                // Fallback: redirect to login
+                                window.location.href = '/login/google';
+                            }
+                        }
                         
                         // Giữ feedback hiển thị 1 giây trước khi reset
                         setTimeout(() => {
@@ -4053,7 +4235,19 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
                         }, 1000);
                     } 
                     else {
-                        // Các nút khác: Giữ feedback hiển thị 1 giây
+                        // Các nút khác: Kiểm tra trạng thái đăng nhập
+                        if (!window.isLoggedIn) {
+                            // Hiển thị modal đăng nhập cho user chưa đăng nhập
+                            const loginModal = document.getElementById('login-modal');
+                            if (loginModal) {
+                                loginModal.style.display = 'flex';
+                            } else {
+                                // Fallback: redirect to login
+                                window.location.href = '/login/google';
+                            }
+                        }
+                        
+                        // Giữ feedback hiển thị 1 giây trước khi reset
                         setTimeout(() => {
                             btn.dataset.tapCount = '0';
                             btn.classList.remove('individual-active', 'ready-to-execute');
@@ -4067,176 +4261,7 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
     }
 
     // Function xử lý touch events đơn giản cho trường hợp chưa đăng nhập
-    function initializeSimpleTouchEventsForNotLoggedIn() {
-        if (!document.documentElement.classList.contains('is-touch')) return;
-        if (window.isLoggedIn) return; // Chỉ xử lý cho trường hợp chưa đăng nhập
-
-        // Logic 2-tap giống như đã đăng nhập
-        document.addEventListener('click', function(e) {
-            // ==== Xử lý action-toggle-btn (nút ...) cho trường hợp chưa đăng nhập ====
-            const actionToggleBtn = e.target.closest('.action-toggle-btn');
-            if (actionToggleBtn) {
-                const card = actionToggleBtn.closest('.file-card');
-                if (card) {
-                    // Đóng tất cả card khác
-                    document.querySelectorAll('.file-card.active').forEach(other => {
-                        if (other !== card) other.classList.remove('active');
-                    });
-                    // Toggle card hiện tại
-                    card.classList.toggle('active');
-                }
-                return;
-            }
-            
-            // ==== Xử lý các nút .Btn ====
-            const btn = e.target.closest('.Btn');
-            if (!btn) return;
-            
-            const card = btn.closest('.file-card');
-            if (!card) return;
-
-            if (!card.classList.contains('active')) {
-                // Mở menu trước, không thực thi lệnh ngay
-                document.querySelectorAll('.file-card.active').forEach(other => {
-                    if (other !== card) {
-                        other.classList.remove('active');
-                    }
-                });
-                card.classList.add('active');
-                // Chỉ mở menu, chờ tap tiếp theo mới thực thi lệnh
-                return;
-            }
-            
-            // Chỉ xử lý cho trường hợp chưa đăng nhập
-            if (window.isLoggedIn) return;
-            
-            // Lấy hoặc tạo tapCount
-            if (!btn.dataset.tapCount) btn.dataset.tapCount = '0';
-            const currentTapCount = parseInt(btn.dataset.tapCount);
-            
-            if (currentTapCount === 0) {
-                e.preventDefault();
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-
-                // Reset các nút khác
-                card.querySelectorAll('.Btn').forEach(otherBtn => {
-                    if (otherBtn !== btn) {
-                        otherBtn.classList.remove('individual-active', 'ready-to-execute');
-                        otherBtn.dataset.tapCount = '0';
-                    }
-                });
-
-                btn.classList.add('individual-active', 'ready-to-execute');
-                btn.dataset.tapCount = '1';
-
-                // Auto reset sau 5s
-                setTimeout(() => {
-                    if (btn.dataset.tapCount === '1') {
-                        btn.classList.remove('individual-active', 'ready-to-execute');
-                        btn.dataset.tapCount = '0';
-                    }
-                }, 5000);
-                
-                return false;
-            } 
-            else if (currentTapCount === 1) {
-                // TAP 2: Thực thi lệnh tùy theo loại nút
-                e.preventDefault();
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-
-                // ✅ Xử lý cho nút "Facebook" - CHO PHÉP HOẠT ĐỘNG khi chưa đăng nhập
-                if (btn.classList.contains('fb-share-btn') && btn.hasAttribute('data-filename')) {
-                    const filename = btn.getAttribute('data-filename');
-                    const shareUrl = `${window.location.origin}/view_svg/${filename}`;
-                    copyToClipboardWithCustomFeedback(shareUrl, btn, 'Facebook', 'Đã copy!');
-                    
-                    // Giữ feedback hiển thị 2 giây trước khi reset
-                    setTimeout(() => {
-                        btn.dataset.tapCount = '0';
-                        btn.classList.remove('individual-active', 'ready-to-execute');
-                    }, 2000);
-                }
-                // ✅ Xử lý cho nút "Copy Link" - CHO PHÉP HOẠT ĐỘNG khi chưa đăng nhập
-                else if (btn.classList.contains('file-copy-link-btn') && btn.hasAttribute('data-url')) {
-                    const url = btn.getAttribute('data-url');
-                    copyToClipboard(url, btn);
-                    
-                    // Giữ feedback hiển thị 2 giây trước khi reset
-                    setTimeout(() => {
-                        btn.dataset.tapCount = '0';
-                        btn.classList.remove('individual-active', 'ready-to-execute');
-                    }, 2000);
-                }
-                // ✅ Xử lý cho nút "Tải ảnh" - CHO PHÉP HOẠT ĐỘNG khi chưa đăng nhập
-                else if (btn.querySelector('.text')?.textContent === 'Tải ảnh') {
-                    const filename = btn.getAttribute('data-filename');
-                    if (filename) {
-                        window.location.href = `/view_svg/${filename}`;
-                    } else {
-                        console.error('Không tìm thấy data-filename cho nút Tải ảnh');
-                    }
-                    // Reset trạng thái cho nút Tải ảnh ngay lập tức vì sẽ navigate
-                    btn.dataset.tapCount = '0';
-                    btn.classList.remove('individual-active', 'ready-to-execute');
-                }
-                // ✅ Xử lý cho nút "Xem Code" - HIỂN THỊ MODAL ĐĂNG NHẬP
-                else if (btn.querySelector('.text')?.textContent === 'Xem Code') {
-                    // Hiển thị modal đăng nhập
-                    const loginModal = document.getElementById('login-modal');
-                    if (loginModal) {
-                        loginModal.style.display = 'flex';
-                    } else {
-                        // Fallback: redirect to login
-                        window.location.href = '/login/google';
-                    }
-
-                    // Giữ feedback hiển thị 1 giây trước khi reset
-                    setTimeout(() => {
-                        btn.dataset.tapCount = '0';
-                        btn.classList.remove('individual-active', 'ready-to-execute');
-                    }, 1000);
-                }
-                // ✅ Xử lý cho nút "Copy" trong TikZ code - HIỂN THỊ MODAL ĐĂNG NHẬP
-                else if (btn.classList.contains('copy-btn')) {
-                    // Hiển thị modal đăng nhập
-                    const loginModal = document.getElementById('login-modal');
-                    if (loginModal) {
-                        loginModal.style.display = 'flex';
-                    } else {
-                        // Fallback: redirect to login
-                        window.location.href = '/login/google';
-                    }
-
-                    // Giữ feedback hiển thị 1 giây trước khi reset
-                    setTimeout(() => {
-                        btn.dataset.tapCount = '0';
-                        btn.classList.remove('individual-active', 'ready-to-execute');
-                    }, 1000);
-                }
-                // ✅ Xử lý cho các nút khác - HIỂN THỊ MODAL ĐĂNG NHẬP
-                else {
-                    // Hiển thị modal đăng nhập
-                    const loginModal = document.getElementById('login-modal');
-                    if (loginModal) {
-                        loginModal.style.display = 'flex';
-                    } else {
-                        // Fallback: redirect to login
-                        window.location.href = '/login/google';
-                    }
-
-                    // Giữ feedback hiển thị 1 giây trước khi reset
-                    setTimeout(() => {
-                        btn.dataset.tapCount = '0';
-                        btn.classList.remove('individual-active', 'ready-to-execute');
-                    }, 1000);
-                }
-                
-                return false;
-            }
-        }, true); // Capture phase
-    }
+    // Đã được gộp vào initializeTouchBtnEvents để xử lý cho tất cả users
 
     // Copy to clipboard functions
     function copyToClipboard(url, btn) {
@@ -4611,48 +4636,39 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
         const fbShareBtns = document.querySelectorAll('.file-card .fb-share-btn');
         console.log('🔄 Initializing: Found', fbShareBtns.length, 'file fb-share-btn buttons');
         
-        // Chỉ thêm event listener cho desktop khi chưa đăng nhập (mobile sẽ được xử lý bởi initializeTouchBtnEvents)
-        if (!document.documentElement.classList.contains('is-touch') && !window.isLoggedIn) {
-            fbShareBtns.forEach(function(btn) {
-                // Kiểm tra xem button có đang hiển thị feedback không
-                const textDiv = btn.querySelector('.text');
-                const isShowingFeedback = textDiv && textDiv.textContent === 'Đã copy!';
+        // Cho phép hoạt động cho cả desktop và mobile, đã đăng nhập và chưa đăng nhập
+        fbShareBtns.forEach(function(btn) {
+            // Kiểm tra xem button có đang hiển thị feedback không
+            const textDiv = btn.querySelector('.text');
+            const isShowingFeedback = textDiv && textDiv.textContent === 'Đã copy!';
+            
+            if (!isShowingFeedback) {
+                // Remove existing event listeners
+                btn.replaceWith(btn.cloneNode(true));
+                const newBtn = document.querySelector(`[data-filename="${btn.getAttribute('data-filename')}"]`);
                 
-                if (!isShowingFeedback) {
-                    // Remove existing event listeners
-                    btn.replaceWith(btn.cloneNode(true));
-                    const newBtn = document.querySelector(`[data-filename="${btn.getAttribute('data-filename')}"]`);
-                    
-                    if (newBtn) {
-                        newBtn.addEventListener('click', function(e) {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            
-                            const filename = newBtn.getAttribute('data-filename');
-                            console.log('🔄 fb-share-btn clicked (desktop, not logged in), filename:', filename);
-                            
-                            if (!filename) {
-                                console.error('❌ No filename found for fb-share-btn');
-                                return;
-                            }
-                            
-                            // Hiển thị modal đăng nhập
-                            const loginModal = document.getElementById('login-modal');
-                            if (loginModal) {
-                                loginModal.style.display = 'flex';
-                            } else {
-                                // Fallback: redirect to login
-                                window.location.href = '/login/google';
-                            }
-                        });
-                    }
-                } else {
-                    console.log('🔄 Skipping fb-share-btn initialization - button is showing feedback');
+                if (newBtn) {
+                    newBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        const filename = newBtn.getAttribute('data-filename');
+                        console.log('🔄 fb-share-btn clicked, filename:', filename);
+                        
+                        if (!filename) {
+                            console.error('❌ No filename found for fb-share-btn');
+                            return;
+                        }
+                        
+                        // Tạo Facebook share URL và copy vào clipboard
+                        const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`https://tikz2svg.mathlib.io.vn/static/${filename}`)}`;
+                        copyToClipboardWithCustomFeedback(shareUrl, newBtn, 'Facebook', 'Đã copy!');
+                    });
                 }
-            });
-        } else {
-            console.log('🔄 Skipping fb-share-btn initialization - mobile will be handled by initializeTouchBtnEvents, desktop logged in will be handled by Desktop logic');
-        }
+            } else {
+                console.log('🔄 Skipping fb-share-btn initialization - button is showing feedback');
+            }
+        });
     }
 
     // Function to initialize copy link buttons
@@ -4660,37 +4676,27 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
         const copyLinkBtns = document.querySelectorAll('.file-card .file-copy-link-btn');
         console.log('🔄 Initializing: Found', copyLinkBtns.length, 'file file-copy-link-btn buttons');
         
-        // Chỉ thêm event listener cho desktop khi chưa đăng nhập (mobile sẽ được xử lý bởi initializeTouchBtnEvents)
-        if (!document.documentElement.classList.contains('is-touch') && !window.isLoggedIn) {
-            copyLinkBtns.forEach(function(btn) {
-                // Thêm event listener nếu chưa có onclick attribute
-                if (!btn.hasAttribute('onclick')) {
-                    btn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        
-                        const url = btn.getAttribute('data-url');
-                        console.log('🔄 file-copy-link-btn clicked (desktop, not logged in), url:', url);
-                        
-                        if (!url) {
-                            console.error('❌ No URL found for file-copy-link-btn');
-                            return;
-                        }
-                        
-                        // Hiển thị modal đăng nhập
-                        const loginModal = document.getElementById('login-modal');
-                        if (loginModal) {
-                            loginModal.style.display = 'flex';
-                        } else {
-                            // Fallback: redirect to login
-                            window.location.href = '/login/google';
-                        }
-                    });
-                }
-            });
-        } else {
-            console.log('🔄 Skipping copy link button initialization - mobile will be handled by initializeTouchBtnEvents, desktop logged in will be handled by Desktop logic');
-        }
+        // Cho phép hoạt động cho cả desktop và mobile, đã đăng nhập và chưa đăng nhập
+        copyLinkBtns.forEach(function(btn) {
+            // Thêm event listener nếu chưa có onclick attribute
+            if (!btn.hasAttribute('onclick')) {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const url = btn.getAttribute('data-url');
+                    console.log('🔄 file-copy-link-btn clicked, url:', url);
+                    
+                    if (!url) {
+                        console.error('❌ No URL found for file-copy-link-btn');
+                        return;
+                    }
+                    
+                    // Copy URL vào clipboard
+                    copyToClipboard(url, this, 'Copy Link');
+                });
+            }
+        });
     }
 
     // Re-initialize buttons after a short delay to ensure DOM is ready
@@ -4698,9 +4704,9 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
         initializeFbShareButtons();
         initializeCopyLinkButtons();
         
-        // ==== Thêm logic cho Desktop buttons (đã đăng nhập) ====
-        if (!document.documentElement.classList.contains('is-touch') && window.isLoggedIn) {
-            console.log('🖥️ Adding Desktop button logic (logged in)');
+        // ==== Thêm logic cho Desktop buttons (cho cả đã đăng nhập và chưa đăng nhập) ====
+        if (!document.documentElement.classList.contains('is-touch')) {
+            console.log('🖥️ Adding Desktop button logic (for all users)');
             
             // Thêm event listener cho Desktop buttons
             document.addEventListener('click', function(e) {
@@ -4851,11 +4857,8 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
             initKeywordModal();
         }
 
-        // 12) Initialize touch events for not logged in users
-        if (!window.appState.loggedIn) {
-            initializeSimpleTouchEventsForNotLoggedIn();
-            console.log('🔄 Initialized touch events for not logged in users');
-        }
+        // 12) Touch events đã được xử lý trong initializeTouchBtnEvents cho tất cả users
+        console.log('🔄 Touch events initialized for all users');
 
         console.log('DOMContentLoaded - appState.loggedIn:', window.appState && window.appState.loggedIn);
 

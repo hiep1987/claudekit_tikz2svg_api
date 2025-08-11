@@ -1141,7 +1141,7 @@
                       <div class="file-action-container">
                         <ul class="file-action-list">
                           <li class="file-action-item">
-                            <button type="button" class="Btn" data-filename="${post.filename}" onclick="window.location.href='/?view_svg=${post.filename}'">
+                            <button type="button" class="Btn" data-filename="${post.filename}" onclick="window.location.href='/view_svg/${post.filename}'">
                               <div class="sign">
                                 <i class="fas fa-image logoIcon"></i>
                               </div>
@@ -1444,7 +1444,7 @@
                     else if (btn.querySelector('.text')?.textContent === 'Tải ảnh') {
                         const filename = btn.getAttribute('data-filename');
                         if (filename) {
-                            window.location.href = `/?view_svg=${filename}`;
+                            window.location.href = `/view_svg/${filename}`;
                         } else {
                             console.error('Không tìm thấy data-filename cho nút Tải ảnh');
                         }

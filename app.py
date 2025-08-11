@@ -133,7 +133,7 @@ if not os.path.exists(ERROR_TIKZ_DIR):
 def get_svg_files():
     """Lấy danh sách các SVG đã lưu trong MySQL"""
     svg_files = []
-    current_user_id = current_user.id if current_user.is_authenticated else None
+    current_user_id = current_user.id if current_user and current_user.is_authenticated else None
     
     try:
         conn = mysql.connector.connect(
@@ -178,11 +178,16 @@ def get_svg_files():
             except Exception:
                 file_size_kb = None
                 
+            try:
+                url = url_for('static', filename=row['filename'])
+            except:
+                url = f"/static/{row['filename']}"
+                
             svg_files.append({
                 'id': row['id'],
                 'filename': row['filename'],
                 'display_name': f"Người tạo: {row['username']}" if row.get('username') else row['filename'],
-                'url': url_for('static', filename=row['filename']),
+                'url': url,
                 'size': file_size_kb,
                 'created_time': format_time_vn(row['created_at']),
                 'file_time': row['created_at'] if row['created_at'] else datetime.now(),
@@ -1041,6 +1046,75 @@ def api_files():
     except Exception as e:
         print(f"Error in api_files: {e}", flush=True)
         return jsonify([]), 500
+
+@app.route('/api/public/files')
+def api_public_files():
+    """API để lấy danh sách SVG files công khai (không cần đăng nhập)"""
+    try:
+        conn = mysql.connector.connect(
+            host=os.environ.get('DB_HOST', 'localhost'),
+            user=os.environ.get('DB_USER', 'hiep1987'),
+            password=os.environ.get('DB_PASSWORD', ''),
+            database=os.environ.get('DB_NAME', 'tikz2svg')
+        )
+        cursor = conn.cursor(dictionary=True)
+        
+        # Lấy tất cả files đã lưu (công khai)
+        cursor.execute("""
+            SELECT 
+                s.id, 
+                s.filename, 
+                s.tikz_code, 
+                s.created_at,
+                u.id as creator_id,
+                u.username as creator_username,
+                COUNT(sl.id) as like_count
+            FROM svg_image s
+            JOIN user u ON s.user_id = u.id
+            LEFT JOIN svg_like sl ON s.id = sl.svg_image_id
+            GROUP BY s.id, s.filename, s.tikz_code, s.created_at, u.id, u.username
+            ORDER BY s.created_at DESC
+            LIMIT 50
+        """)
+        
+        files = []
+        for row in cursor.fetchall():
+            try:
+                static_dir = app.config['UPLOAD_FOLDER']
+                filepath = os.path.join(static_dir, row['filename'])
+                if os.path.exists(filepath):
+                    file_size_kb = round(os.path.getsize(filepath) / 1024, 2)
+                else:
+                    file_size_kb = None
+            except Exception:
+                file_size_kb = None
+                
+            try:
+                url = url_for('static', filename=row['filename'])
+            except:
+                url = f"/static/{row['filename']}"
+                
+            files.append({
+                'id': row['id'],
+                'filename': row['filename'],
+                'tikz_code': row['tikz_code'],
+                'url': url,
+                'display_name': f"Người tạo: {row['creator_username']}" if row.get('creator_username') else row['filename'],
+                'size': file_size_kb,
+                'created_time': format_time_vn(row['created_at']),
+                'creator_id': row['creator_id'],
+                'creator_username': row['creator_username'],
+                'like_count': row['like_count'] or 0,
+                'is_liked_by_current_user': False  # Mặc định là False cho người chưa đăng nhập
+            })
+        
+        cursor.close()
+        conn.close()
+        return jsonify({'files': files})
+        
+    except Exception as e:
+        print(f"Error in api_public_files: {e}", flush=True)
+        return jsonify({'files': []}), 500
 
 @app.route('/delete_temp_svg', methods=['POST'])
 def delete_temp_svg():
@@ -1907,6 +1981,15 @@ def api_follower_count(user_id):
             "success": False,
             "error": "Database error"
         }), 500
+
+@app.route('/api/check_login_status')
+def api_check_login_status():
+    """API để kiểm tra trạng thái đăng nhập hiện tại"""
+    return jsonify({
+        'logged_in': current_user.is_authenticated,
+        'user_id': current_user.id if current_user.is_authenticated else None,
+        'username': current_user.username if current_user.is_authenticated else None
+    })
 
 @app.route('/api/follow_status/<int:user_id>', methods=['GET'])
 def api_follow_status(user_id):

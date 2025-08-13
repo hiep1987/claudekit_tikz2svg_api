@@ -1,0 +1,47 @@
+\b\begin{tikzpicture}[
+		declare function={
+			a=4;
+			b=a/4;
+			k=.6;
+			h=3;
+			yo=b*b/h;
+			go=asin(yo/b);
+			xo=a*cos(go);
+			ax=a*k;
+			bx=b*k;
+		},
+		join=round,
+		cap=round,
+		scale=.85
+		]
+		
+		% Định nghĩa các điểm
+		\\coordinate (O) at (0,0);
+		\\coordinate (S) at (0,h);
+		\\coordinate (B) at ({a*cos(60)},{b*sin(60)});
+		\\coordinate (A) at ({a*cos(-80)},{b*sin(-80)});
+		\\coordinate (I) at ($(A)!0.5!(B)$);
+		\\coordinate (H) at ($(S)!0.75!(I)$);
+		
+		% Các đoạn thẳng
+		\\draw[densely dashed]
+		(H) -- (O) -- (S) -- (I) -- (O)
+		(S) -- (B) -- (A) -- (O) -- (B);
+		
+		% Vẽ cung elip
+		\\draw[gray, densely dotted]
+		({xo},{yo}) arc ({go}:{180-go}:{a} and {b});
+		
+		% Vẽ hình kín
+		\draw
+		(S) -- (A)
+		(S) -- ({xo},{yo}) arc ({go}:{-180-go}:{a} and {b}) -- cycle;
+		
+		% Vẽ các điểm và nhãn
+		\f\foreach \p/\g in {O/-120, S/90, A/-100, B/30, I/-60, H/30} {
+			\f\fill[ball color=white] (\p) circle (.8pt);
+			
+\node[shift={(\g:.15)}, scale=.6] at (\p) {$\p$};
+		}
+		
+	\\end{tikzpicture}

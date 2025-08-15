@@ -84,9 +84,27 @@ Ví dụ:
 cd ~/dev/tikz2svg_api         # Vào thư mục dự án trên Mac
 git fetch origin main         # Cập nhật code mới nhất từ GitHub (PROD)
 git checkout main             # Đảm bảo đang ở branch main
-git rm templates/test.html    # Xóa file bình thường
+git rm templates/profile.html    # Xóa file bình thường
 git rm "udo systemctl restart tikz2svg_apiq"    # Xóa file có dấu cách (cách 1: dùng dấu nháy)
 git rm udo\ systemctl\ restart\ tikz2svg_apiq   # Xóa file có dấu cách (cách 2: escape dấu cách)
-git commit -m "Xóa file templates/test.html khỏi PROD"
+git commit -m "Xóa file profile.html khỏi PROD"
 git push origin main          # Đẩy thay đổi lên GitHub
+```
+##Ví dụ
+Bạn nên chạy lại đúng với đường dẫn thực tế:
+```bash
+git add templates/index.html templates/profile_svg_files.html templates/profile_followed_posts.html templates/view_svg.html
+git commit -m "Nav bar trên mobile"
+git push origin main
+```
+Hoặc nhanh hơn (nếu bạn muốn add mọi thay đổi trong repo, không chỉ 3 file đó):
+```bash
+git add .
+git commit -m "Cập nhật vị trí nút like"
+git push origin main
+```
+##Chạy stagewise, mở thư mục trên Mac
+```bash
+rm -f ./stagewise.json
+BROWSER=open npx stagewise@latesthay 
 ```

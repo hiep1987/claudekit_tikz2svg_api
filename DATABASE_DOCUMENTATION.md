@@ -15,6 +15,7 @@ Cơ sở dữ liệu của website TikZ to SVG API được xây dựng trên My
 CREATE TABLE `user` (
   `id` int NOT NULL AUTO_INCREMENT,
   `username` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `bio` text COLLATE utf8mb4_unicode_ci,
   `email` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `google_id` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `avatar` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -30,6 +31,7 @@ CREATE TABLE `user` (
 **Các trường:**
 - `id`: Khóa chính, tự động tăng
 - `username`: Tên người dùng (duy nhất)
+- `bio`: Mô tả/giới thiệu người dùng (HTML format)
 - `email`: Email người dùng
 - `google_id`: ID từ Google OAuth (duy nhất)
 - `avatar`: URL avatar người dùng
@@ -89,9 +91,11 @@ CREATE TABLE `keyword` (
 **Cấu trúc:**
 ```sql
 CREATE TABLE `svg_image_keyword` (
+  `id` int NOT NULL AUTO_INCREMENT,
   `svg_image_id` int NOT NULL,
   `keyword_id` int NOT NULL,
-  PRIMARY KEY (`svg_image_id`,`keyword_id`),
+  PRIMARY KEY (`id`),
+  KEY `svg_image_id` (`svg_image_id`),
   KEY `keyword_id` (`keyword_id`),
   CONSTRAINT `svg_image_keyword_ibfk_1` FOREIGN KEY (`svg_image_id`) REFERENCES `svg_image` (`id`),
   CONSTRAINT `svg_image_keyword_ibfk_2` FOREIGN KEY (`keyword_id`) REFERENCES `keyword` (`id`)
@@ -99,6 +103,7 @@ CREATE TABLE `svg_image_keyword` (
 ```
 
 **Các trường:**
+- `id`: Khóa chính, tự động tăng
 - `svg_image_id`: ID hình ảnh SVG (khóa ngoại)
 - `keyword_id`: ID từ khóa (khóa ngoại)
 
@@ -106,7 +111,7 @@ CREATE TABLE `svg_image_keyword` (
 
 **Mô tả:** Lưu trữ thông tin người dùng like các hình ảnh SVG.
 
-**Cấu trúc (được suy luận từ code):**
+**Cấu trúc:**
 ```sql
 CREATE TABLE `svg_like` (
   `id` int NOT NULL AUTO_INCREMENT,
@@ -130,7 +135,7 @@ CREATE TABLE `svg_like` (
 
 **Mô tả:** Lưu trữ thông tin người dùng follow nhau.
 
-**Cấu trúc (được suy luận từ code):**
+**Cấu trúc:**
 ```sql
 CREATE TABLE `user_follow` (
   `id` int NOT NULL AUTO_INCREMENT,
@@ -150,7 +155,7 @@ CREATE TABLE `user_follow` (
 - `followee_id`: ID người dùng được follow (khóa ngoại)
 - `created_at`: Thời gian follow
 
-### 7. Bảng `svg_action_log` - Log hoạt động
+### 7. Bảng `svg_action_log` - Log hoạt động SVG
 
 **Mô tả:** Ghi lại các hoạt động liên quan đến hình ảnh SVG.
 
@@ -177,6 +182,38 @@ CREATE TABLE `svg_action_log` (
 - `action`: Loại hành động
 - `created_at`: Thời gian thực hiện
 
+### 8. Bảng `user_action_log` - Log hoạt động người dùng
+
+**Mô tả:** Ghi lại các hoạt động liên quan đến người dùng và tương tác xã hội.
+
+**Cấu trúc:**
+```sql
+CREATE TABLE `user_action_log` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `target_user_id` int DEFAULT NULL,
+  `target_svg_id` int DEFAULT NULL,
+  `action_type` enum('follow','unfollow','like','unlike','view','share') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  KEY `target_user_id` (`target_user_id`),
+  KEY `target_svg_id` (`target_svg_id`),
+  KEY `action_type` (`action_type`),
+  CONSTRAINT `user_action_log_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`),
+  CONSTRAINT `user_action_log_ibfk_2` FOREIGN KEY (`target_user_id`) REFERENCES `user` (`id`),
+  CONSTRAINT `user_action_log_ibfk_3` FOREIGN KEY (`target_svg_id`) REFERENCES `svg_image` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
+
+**Các trường:**
+- `id`: Khóa chính, tự động tăng
+- `user_id`: ID người dùng thực hiện hành động
+- `target_user_id`: ID người dùng mục tiêu (cho follow/unfollow)
+- `target_svg_id`: ID hình ảnh mục tiêu (cho like/unlike/view/share)
+- `action_type`: Loại hành động (follow, unfollow, like, unlike, view, share)
+- `created_at`: Thời gian thực hiện
+
 ## Mối quan hệ giữa các bảng
 
 ### Sơ đồ quan hệ:
@@ -187,8 +224,11 @@ user (1) ←→ (N) svg_like
 user (1) ←→ (N) user_follow (follower)
 user (1) ←→ (N) user_follow (followee)
 user (1) ←→ (N) svg_action_log
+user (1) ←→ (N) user_action_log (actor)
+user (1) ←→ (N) user_action_log (target)
 svg_image (1) ←→ (N) svg_like
 svg_image (1) ←→ (N) svg_action_log
+svg_image (1) ←→ (N) user_action_log
 svg_image (N) ←→ (N) keyword (thông qua svg_image_keyword)
 ```
 
@@ -197,8 +237,9 @@ svg_image (N) ←→ (N) keyword (thông qua svg_image_keyword)
 1. **user → svg_image**: Một người dùng có thể tạo nhiều hình ảnh SVG
 2. **user → svg_like**: Một người dùng có thể like nhiều hình ảnh
 3. **user → user_follow**: Quan hệ follow giữa các người dùng
-4. **svg_image → keyword**: Quan hệ nhiều-nhiều thông qua bảng trung gian
-5. **svg_image → svg_action_log**: Ghi log các hoạt động với hình ảnh
+4. **user → svg_action_log**: Người dùng thực hiện các hành động với SVG
+5. **user → user_action_log**: Người dùng thực hiện các hành động xã hội
+6. **svg_image → keyword**: Quan hệ nhiều-nhiều thông qua bảng trung gian
 
 ## Cấu hình kết nối
 
@@ -267,6 +308,40 @@ ORDER BY s.created_at DESC
 LIMIT 50
 ```
 
+### 4. Phân tích hoạt động người dùng:
+```sql
+-- Lấy thống kê hoạt động của người dùng
+SELECT 
+    u.username,
+    COUNT(DISTINCT s.id) as total_svg_created,
+    COUNT(DISTINCT sl.svg_image_id) as total_likes_given,
+    COUNT(DISTINCT uf.followee_id) as total_following,
+    COUNT(DISTINCT uf2.follower_id) as total_followers
+FROM user u
+LEFT JOIN svg_image s ON u.id = s.user_id
+LEFT JOIN svg_like sl ON u.id = sl.user_id
+LEFT JOIN user_follow uf ON u.id = uf.follower_id
+LEFT JOIN user_follow uf2 ON u.id = uf2.followee_id
+WHERE u.id = ?
+GROUP BY u.id, u.username
+
+-- Lấy lịch sử hoạt động gần đây
+SELECT 
+    ual.action_type,
+    ual.created_at,
+    CASE 
+        WHEN ual.target_user_id IS NOT NULL THEN tu.username
+        WHEN ual.target_svg_id IS NOT NULL THEN si.filename
+        ELSE NULL
+    END as target_name
+FROM user_action_log ual
+LEFT JOIN user tu ON ual.target_user_id = tu.id
+LEFT JOIN svg_image si ON ual.target_svg_id = si.id
+WHERE ual.user_id = ?
+ORDER BY ual.created_at DESC
+LIMIT 20
+```
+
 ## Backup và Restore
 
 ### Backup database:
@@ -285,6 +360,7 @@ mysql -u hiep1987 -p tikz2svg < tikz2svg_database_backup.sql
 2. **SQL Injection**: Sử dụng parameterized queries để tránh SQL injection
 3. **Quyền truy cập**: Giới hạn quyền truy cập database cho ứng dụng
 4. **Backup định kỳ**: Thực hiện backup database thường xuyên
+5. **Log Security**: Bảo vệ thông tin nhạy cảm trong action logs
 
 ## Monitoring và Maintenance
 
@@ -293,12 +369,14 @@ mysql -u hiep1987 -p tikz2svg < tikz2svg_database_backup.sql
 - Số lượng hình ảnh được tạo
 - Tỷ lệ like/follow
 - Hiệu suất truy vấn database
+- Phân tích hành vi người dùng qua action logs
 
 ### Bảo trì định kỳ:
 - Tối ưu hóa index
-- Dọn dẹp dữ liệu cũ
+- Dọn dẹp dữ liệu cũ (log cũ)
 - Kiểm tra tính toàn vẹn dữ liệu
 - Cập nhật backup
+- Phân tích và tối ưu hóa action logs
 
 ---
 

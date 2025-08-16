@@ -61,9 +61,13 @@ git push origin main
 
 ### 3. Deploy lên Production
 ```bash
+# Chuẩn bị thư mục static shared (nếu chưa có)
+mkdir -p /var/www/tikz2svg_api/shared/static
+
 # Deploy từ GitHub
 sudo bash /var/www/tikz2svg_api/deploy.sh git@github.com:hiep1987/tikz2svg_api.git main
 ```
+Static đã được chuyển sang `shared/static` và cần chắc chắn thư mục này tồn tại, sẽ được deploy.sh tự tạo.
 
 ### 4. Kiểm tra Production
 ```bash
@@ -123,6 +127,8 @@ ls -1t | tail -n +6 | xargs -r sudo rm -rf
 - Commit với message không rõ ràng
 - Xóa releases mà không backup
 
+### Static files
+- Thư mục `static/` đã bỏ khỏi Git, các file SVG/PNG/avatars sẽ lưu trong `shared/static` để không mất khi deploy.
 
 ## Health endpoint
 

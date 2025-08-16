@@ -152,3 +152,8 @@ ssh -fN -L 3306:127.0.0.1:3306 h2cloud-hiep1987
 CTRL+C  # dừng Flask server
 kill -9 $(lsof -ti tcp:3306) 2>/dev/null || true  # đóng tunnel
 ```
+## 11. Chạy stagewise
+```bash
+cd ~/web/demo_site
+npx stagewise -b
+```

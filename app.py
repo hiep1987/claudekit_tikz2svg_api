@@ -18,7 +18,14 @@ import mysql.connector
 
 load_dotenv()
 
+
 app = Flask(__name__)
+
+# Health check route
+@app.route("/health")
+def health():
+    return {"status": "ok"}, 200
+
 app.config['UPLOAD_FOLDER'] = 'static'
 app.config['DEBUG'] = False # Tắt debug mode cho production
 

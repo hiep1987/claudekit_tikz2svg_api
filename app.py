@@ -19,17 +19,18 @@ import mysql.connector
 load_dotenv()
 
 
-app = Flask(__name__)
+# --- Static storage root (shared across releases) ---
+STATIC_ROOT = os.environ.get('TIKZ_SVG_DIR', '/var/www/tikz2svg_api/shared/static')
+os.makedirs(STATIC_ROOT, exist_ok=True)
+os.makedirs(os.path.join(STATIC_ROOT, 'avatars'), exist_ok=True)
+
+app = Flask(__name__, static_folder=STATIC_ROOT)
 
 # Health check route
 @app.route("/health")
 def health():
     return {"status": "ok"}, 200
 
- # --- Static storage root (shared across releases) ---
-STATIC_ROOT = os.environ.get('TIKZ_SVG_DIR', '/var/www/tikz2svg_api/shared/static')
-os.makedirs(STATIC_ROOT, exist_ok=True)
-os.makedirs(os.path.join(STATIC_ROOT, 'avatars'), exist_ok=True)
 app.config['UPLOAD_FOLDER'] = STATIC_ROOT
 app.config['DEBUG'] = False # Tắt debug mode cho production
 

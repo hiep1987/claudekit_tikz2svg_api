@@ -363,23 +363,51 @@
         
         /* Bio Editor Styling - Optimized */
         #bio-editor.ql-container.ql-snow {
-          background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%) !important;
+          background: #1e3a8a !important;
+          border: 1px solid #1e40af !important;
+          border-radius: 8px !important;
+          min-height: 120px !important;
         }
         
-        /* Direct .ql-editor styling with maximum specificity */
-        #bio-editor .ql-editor {
-          background: transparent !important;
+        /* Force background with highest priority */
+        div#bio-editor .ql-editor {
+          background: #1e3a8a !important;
+          background-color: #1e3a8a !important;
           color: white !important;
         }
         
         /* Override any inline background styles */
         #bio-editor[style*="background:white"],
-        #bio-editor[style*="background: white"] {
-          background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%) !important;
+        #bio-editor[style*="background: white"],
+        #bio-editor[style*="background:linear-gradient"],
+        #bio-editor[style*="background: linear-gradient"] {
+          background: #1e3a8a !important;
         }
         
-        /* Force white color for default text only */
-        #bio-editor .ql-editor {
+        /* Ultimate override for any inline style */
+        #bio-editor[style] {
+          background: #1e3a8a !important;
+        }
+        
+        /* Maximum specificity override for inline gradient */
+        #bio-editor[style*="linear-gradient"] {
+          background: #1e3a8a !important;
+        }
+        
+        /* Force override any background style */
+        #bio-editor {
+          background: #1e3a8a !important;
+        }
+        
+        /* Override any inline color styles in .ql-editor */
+        #bio-editor .ql-editor[style*="color: white"],
+        #bio-editor .ql-editor[style*="color:white"] {
+          color: white !important;
+        }
+        
+        /* Override any span with white color */
+        #bio-editor .ql-editor span[style*="color: white"],
+        #bio-editor .ql-editor span[style*="color:white"] {
           color: white !important;
         }
         
@@ -391,35 +419,27 @@
           /* Don't override - let Quill's color picker work */
         }
         
-        /* Force white color for list markers */
+        /* Force light color for list markers */
         #bio-editor .ql-editor ul li::marker,
         #bio-editor .ql-editor ol li::marker {
           color: white !important;
         }
         
-        /* Force white color for placeholder text */
+        /* Force light color for placeholder text */
         #bio-editor .ql-editor[data-placeholder]:before {
-          color: rgba(255,255,255,0.6) !important;
+          color: rgba(255, 255, 255, 0.7) !important;
         }
         
-        /* Maximum specificity override for Quill's default text color */
-        .ql-container.ql-snow .ql-editor {
-          color: white !important;
-        }
+
         
-        /* Ultimate override for bio editor text */
-        #bio-editor.ql-container.ql-snow .ql-editor {
-          color: white !important;
-        }
-        
-        /* Only override black/dark colors to white, allow other colors */
+        /* Only override black/dark colors to dark gray, allow other colors */
         #bio-editor .ql-editor [style*="color: black"],
         #bio-editor .ql-editor [style*="color:black"],
         #bio-editor .ql-editor [style*="color: #000"],
         #bio-editor .ql-editor [style*="color:#000"],
         #bio-editor .ql-editor [style*="color: rgb(0,0,0)"],
         #bio-editor .ql-editor [style*="color:rgb(0,0,0)"] {
-          color: white !important;
+          color: #495057 !important;
         }
         
         /* Enhanced toolbar styling */
@@ -781,7 +801,7 @@
                         <div class="info-group">
                             <label for="bio">📝 Mô tả / Giới thiệu:</label>
                             <!-- Quill Editor Container -->
-                            <div id="bio-editor" style="background:linear-gradient(135deg, #1976d2 0%, #1565c0 100%); min-height:120px;">{{ bio|safe }}</div>
+                            <div id="bio-editor" style="background: #1e3a8a !important;">{{ bio|safe }}</div>
                             <input type="hidden" name="bio" id="bio-hidden">
                             <small style="color: #666; font-size: 12px;">Bạn có thể chia sẻ về mình (hỗ trợ định dạng: B, I, U, bullets, màu sắc)</small>
                         </div>
@@ -1005,11 +1025,11 @@
                 if (bioHidden) bioHidden.value = quill.root.innerHTML;
             });
             
-            // Set default text color to white
+            // Set default text color to dark gray
             setTimeout(function() {
                 const editor = document.querySelector('#bio-editor .ql-editor');
                 if (editor && !editor.style.color) {
-                    editor.style.color = 'white';
+                    editor.style.color = '#495057';
                 }
             }, 100);
             
@@ -1018,9 +1038,9 @@
                 mutations.forEach(function(mutation) {
                     if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
                         const target = mutation.target;
-                        // Only set white color if no specific color is set
+                        // Only set dark gray color if no specific color is set
                         if (target.style.color === '' || target.style.color === 'black' || target.style.color === 'rgb(0, 0, 0)') {
-                            target.style.color = 'white';
+                            target.style.color = '#495057';
                         }
                     }
                 });

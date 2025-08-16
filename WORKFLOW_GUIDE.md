@@ -123,6 +123,15 @@ ls -1t | tail -n +6 | xargs -r sudo rm -rf
 - Commit với message không rõ ràng
 - Xóa releases mà không backup
 
+
+## Health endpoint
+
+- **Route**: `GET /health` → `{"status":"ok"}`
+- **Health-check trong deploy**:  
+  ```bash
+  curl --unix-socket /var/www/tikz2svg_api/shared/tikz2svg.sock http://localhost/health
+  ```
+
 ## Workflow tóm tắt
 
 ```

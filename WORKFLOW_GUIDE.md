@@ -120,6 +120,8 @@ ls -1t | tail -n +6 | xargs -r sudo rm -rf
 - Commit thường xuyên với message rõ ràng
 - Backup trước khi deploy lớn
 - Kiểm tra logs sau khi deploy
+- Test static files trên cả DEV và PROD sau khi thay đổi cấu hình
+- Kiểm tra cấu hình nginx khi thay đổi đường dẫn static files
 
 ### ❌ Không nên làm
 - Chỉnh sửa trực tiếp trong `/var/www/tikz2svg_api/current/`
@@ -129,6 +131,80 @@ ls -1t | tail -n +6 | xargs -r sudo rm -rf
 
 ### Static files
 - Thư mục `static/` đã bỏ khỏi Git, các file SVG/PNG/avatars sẽ lưu trong `shared/static` để không mất khi deploy.
+- **Cấu hình**: Flask app sử dụng `STATIC_ROOT = '/var/www/tikz2svg_api/shared/static'` cho cả DEV và PROD
+- **Đồng bộ**: DEV và PROD sử dụng cùng thư mục shared để đảm bảo dữ liệu nhất quán
+
+### Khắc phục vấn đề Static Files
+
+#### Vấn đề: DEV không thấy ảnh SVG như PROD
+**Nguyên nhân**: Flask app DEV sử dụng `static_folder` mặc định thay vì `STATIC_ROOT`
+
+**Giải pháp**:
+```python
+# Trong app.py - cấu hình đúng
+STATIC_ROOT = os.environ.get('TIKZ_SVG_DIR', '/var/www/tikz2svg_api/shared/static')
+os.makedirs(STATIC_ROOT, exist_ok=True)
+os.makedirs(os.path.join(STATIC_ROOT, 'avatars'), exist_ok=True)
+
+app = Flask(__name__, static_folder=STATIC_ROOT)  # Quan trọng!
+app.config['UPLOAD_FOLDER'] = STATIC_ROOT
+```
+
+#### Vấn đề: Nginx không serve static files
+**Nguyên nhân**: Cấu hình nginx trỏ sai đường dẫn
+
+**Giải pháp**:
+```bash
+# Sửa cấu hình nginx HTTPS
+sudo sed -i 's|alias /var/www/tikz2svg_api/current/static/;|alias /var/www/tikz2svg_api/shared/static/;|' /etc/nginx/sites-available/tikz2svg_api
+
+# Sửa socket path nếu cần
+sudo sed -i 's|proxy_pass http://unix:/var/www/tikz2svg_api/tikz2svg.sock;|proxy_pass http://unix:/var/www/tikz2svg_api/shared/tikz2svg.sock;|' /etc/nginx/sites-available/tikz2svg
+
+# Reload nginx
+sudo systemctl reload nginx
+```
+
+#### Test static files
+```bash
+# Test PROD
+curl -I https://tikz2svg.mathlib.io.vn/static/filename.svg
+
+# Test DEV
+curl -I http://localhost:5173/static/filename.svg
+```
+
+### Troubleshooting
+
+#### Kiểm tra nhanh khi có vấn đề static files
+```bash
+# 1. Kiểm tra file có tồn tại không
+ls -la /var/www/tikz2svg_api/shared/static/filename.svg
+
+# 2. Kiểm tra cấu hình nginx
+sudo cat /etc/nginx/sites-available/tikz2svg_api | grep "location /static/"
+
+# 3. Kiểm tra quyền truy cập
+ls -la /var/www/tikz2svg_api/shared/static/
+
+# 4. Test nginx config
+sudo nginx -t
+
+# 5. Reload nginx nếu cần
+sudo systemctl reload nginx
+```
+
+#### Debug DEV server
+```bash
+# Kiểm tra cấu hình Flask
+cd ~/dev/tikz2svg_api
+grep -n "static_folder\|STATIC_ROOT" app.py
+
+# Test DEV server
+source .venv/bin/activate
+python app.py
+# Sau đó test: curl -I http://localhost:5000/static/filename.svg
+```
 
 ## Health endpoint
 
@@ -155,7 +231,9 @@ Previous Release
 
 - **DEV workspace**: `~/dev/tikz2svg_api/`
 - **PROD workspace**: `/var/www/tikz2svg_api/`
-- **Current release**: `20250810_053746`
+- **Current release**: `20250816_041033`
 - **Service name**: `tikz2svg`
 - **Socket file**: `/var/www/tikz2svg_api/shared/tikz2svg.sock`
+- **Static files**: `/var/www/tikz2svg_api/shared/static/` (shared giữa DEV và PROD)
 - **User/Group**: `hiep1987/www-data`
+- **Nginx config**: Đã cập nhật để sử dụng shared/static

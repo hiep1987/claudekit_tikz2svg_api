@@ -13,5 +13,6 @@ uploads/
 
 # Systemd/nginx sockets
 *.sock
-# macOS system file
-.DS_Store%
+# Bỏ static khỏi Git
+static/*
+!static/.gitkeep

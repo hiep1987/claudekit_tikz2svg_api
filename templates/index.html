@@ -94,9 +94,16 @@
         .rounded-full { border-radius: 9999px; }
         .to-purple-600 { --tw-gradient-to: #9333ea; }
         .justify-center { justify-content: center; }
+        .mb-4 { margin-bottom: 1rem; }
+        .flex-grow { flex-grow: 1; }
+        .mx-4 { margin-left: 1rem; margin-right: 1rem; }
+        .overflow-hidden { overflow: hidden; }
+        .p-1\.5 { padding: 0.375rem; }
+        .text-base { font-size: 1rem; line-height: 1.5rem; }
+        .flex-shrink-0 { flex-shrink: 0; }
         
         /* Responsive breakpoints */
-        @media (min-width: 768px) {
+        @media (min-width: 920px) {
             .md\:flex { display: flex; }
             .md\:block { display: block; }
             .md\:hidden { display: none; }
@@ -152,6 +159,35 @@
         
         #mobile-menu a:hover {
           color: #2563eb !important;
+        }
+        
+        /* Mobile scroll for menu */
+        #scrollable-menu {
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+            padding-bottom: 0.75rem;
+        }
+        #scrollable-menu::-webkit-scrollbar {
+            display: none;
+        }
+        
+        #scrollable-menu-list {
+            list-style: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        
+        #scrollable-menu-list .menu-item {
+            flex-shrink: 0;
+        }
+        
+        #main-menu {
+            list-style: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
         }
     </style>
     <style>
@@ -2041,37 +2077,39 @@
     <!-- New Navigation Bar -->
     <nav class="w-full max-w-7xl mx-auto bg-white/80 backdrop-blur shadow-lg rounded-2xl p-3 flex items-center justify-between mb-8">
         <!-- Logo -->
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-shrink-0">
             <span class="bg-gradient-to-br from-blue-500 to-yellow-400 p-1.5 rounded-lg">
                 <i class="fa-solid fa-meteor text-white text-lg"></i>
             </span>
             <span class="text-lg font-bold text-gray-800">TikZ to SVG</span>
         </div>
         
-        <!-- Menu - Centered -->
-        <ul class="hidden md:flex gap-6 items-center font-medium text-gray-700" style="margin: 0; padding: 0;">
+        <!-- Menu - Desktop -->
+        <div class="hidden md:flex flex-grow mx-4 justify-center">
+          <ul id="main-menu" class="flex items-center gap-6 font-medium text-gray-700">
             <li class="menu-item relative px-2 py-1 cursor-pointer transition hover:text-blue-600">
-                <a href="/" class="block text-sm" style="line-height: 1;">Trang chủ</a>
+                <a href="/" class="block text-base" style="line-height: 1;">Trang chủ</a>
                 <div class="menu-underline"></div>
             </li>
             {% if current_user.is_authenticated %}
             <li class="menu-item relative px-2 py-1 cursor-pointer transition hover:text-blue-600">
-                <a href="/profile/{{ current_user.id }}/settings" class="block text-sm" style="line-height: 1;">Hồ sơ</a>
+                <a href="/profile/{{ current_user.id }}/settings" class="block text-base" style="line-height: 1;">Hồ sơ</a>
                 <div class="menu-underline"></div>
             </li>
             <li class="menu-item relative px-2 py-1 cursor-pointer transition hover:text-blue-600">
-                <a href="/profile/{{ current_user.id }}/svg-files" class="block text-sm" style="line-height: 1;">File SVG</a>
+                <a href="/profile/{{ current_user.id }}/svg-files" class="block text-base" style="line-height: 1;">File SVG</a>
                 <div class="menu-underline"></div>
             </li>
             <li class="menu-item relative px-2 py-1 cursor-pointer transition hover:text-blue-600">
-                <a href="/profile/{{ current_user.id }}/followed-posts" class="block text-sm" style="line-height: 1;">Bài đăng</a>
+                <a href="/profile/{{ current_user.id }}/followed-posts" class="block text-base" style="line-height: 1;">Bài đăng</a>
                 <div class="menu-underline"></div>
             </li>
             {% endif %}
-        </ul>
+          </ul>
+        </div>
         
-        <!-- Avatar/User or Login -->
-        <div class="flex items-center gap-2">
+        <!-- Avatar/User or Login & Hamburger -->
+        <div class="flex items-center gap-2 flex-shrink-0">
             {% if current_user.is_authenticated %}
                                     <div class="flex items-center gap-2">
                         <div class="flex items-center gap-2 bg-gray-100 px-2 py-1.5 rounded-lg border border-gray-200">
@@ -2098,6 +2136,30 @@
             </button>
         </div>
     </nav>
+
+    <!-- Scrollable Menu - Mobile -->
+    <div id="scrollable-menu" class="md:hidden w-full max-w-7xl mx-auto mb-8">
+        <ul id="scrollable-menu-list" class="flex items-center gap-6 font-medium text-gray-700 px-3">
+            <li class="menu-item relative px-2 py-1 cursor-pointer transition hover:text-blue-600">
+                <a href="/" class="block text-base" style="line-height: 1;">Trang chủ</a>
+                <div class="menu-underline"></div>
+            </li>
+            {% if current_user.is_authenticated %}
+            <li class="menu-item relative px-2 py-1 cursor-pointer transition hover:text-blue-600">
+                <a href="/profile/{{ current_user.id }}/settings" class="block text-base" style="line-height: 1;">Hồ sơ</a>
+                <div class="menu-underline"></div>
+            </li>
+            <li class="menu-item relative px-2 py-1 cursor-pointer transition hover:text-blue-600">
+                <a href="/profile/{{ current_user.id }}/svg-files" class="block text-base" style="line-height: 1;">File SVG</a>
+                <div class="menu-underline"></div>
+            </li>
+            <li class="menu-item relative px-2 py-1 cursor-pointer transition hover:text-blue-600">
+                <a href="/profile/{{ current_user.id }}/followed-posts" class="block text-base" style="line-height: 1;">Bài đăng</a>
+                <div class="menu-underline"></div>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
 
     <!-- Mobile Menu -->
     <div id="mobile-menu" class="fixed top-0 left-0 w-full h-full bg-black/50 z-400 hidden">

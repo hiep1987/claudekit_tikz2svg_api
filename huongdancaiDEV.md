@@ -137,12 +137,16 @@ ssh -fN -L 3306:127.0.0.1:3306 h2cloud-hiep1987
    ```bash
    ssh -fN -L 3306:127.0.0.1:3306 h2cloud-hiep1987
    ```
-2. Chạy DEV:
+2. Kiểm tra CSDL đang chạy
+  ```bash
+   lsof -iTCP:3306 -sTCP:LISTEN
+   ```
+3. Chạy DEV:
    ```bash
    cd /Users/hieplequoc/web/work/tikz2svg_api
    tikz2svg-dev-proxy
    ```
-3. Truy cập: http://127.0.0.1:5173
+4. Truy cập: http://127.0.0.1:5173
 
 ---
 

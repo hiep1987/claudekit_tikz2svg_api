@@ -18,8 +18,20 @@ import mysql.connector
 
 load_dotenv()
 
-app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'static'
+
+# --- Static storage root (shared across releases) ---
+STATIC_ROOT = os.environ.get('TIKZ_SVG_DIR', '/var/www/tikz2svg_api/shared/static')
+os.makedirs(STATIC_ROOT, exist_ok=True)
+os.makedirs(os.path.join(STATIC_ROOT, 'avatars'), exist_ok=True)
+
+app = Flask(__name__, static_folder=STATIC_ROOT)
+
+# Health check route
+@app.route("/health")
+def health():
+    return {"status": "ok"}, 200
+
+app.config['UPLOAD_FOLDER'] = STATIC_ROOT
 app.config['DEBUG'] = False # Tắt debug mode cho production
 
 # ✅ FLASK-LOGIN SETUP
@@ -1543,7 +1555,7 @@ def profile_settings(user_id):
                 old_avatar_row = cursor.fetchone()
                 old_avatar = old_avatar_row['avatar'] if old_avatar_row else None
                 if old_avatar:
-                    old_path = os.path.join('static/avatars', old_avatar)
+                    old_path = os.path.join(app.config['UPLOAD_FOLDER'], 'avatars', old_avatar)
                     if os.path.exists(old_path):
                         try:
                             os.remove(old_path)
@@ -1552,7 +1564,7 @@ def profile_settings(user_id):
 
                 # Lưu file mới
                 filename = secure_filename(avatar_file.filename)
-                save_path = os.path.join('static/avatars', filename)
+                save_path = os.path.join(app.config['UPLOAD_FOLDER'], 'avatars', filename)
                 avatar_file.save(save_path)
 
                 cursor.execute("UPDATE user SET avatar = %s WHERE id = %s", (filename, user_id))
@@ -1570,7 +1582,7 @@ def profile_settings(user_id):
                         old_avatar_row = cursor.fetchone()
                         old_avatar = old_avatar_row['avatar'] if old_avatar_row else None
                         if old_avatar:
-                            old_path = os.path.join('static/avatars', old_avatar)
+                            old_path = os.path.join(app.config['UPLOAD_FOLDER'], 'avatars', old_avatar)
                             if os.path.exists(old_path):
                                 try:
                                     os.remove(old_path)
@@ -1580,7 +1592,7 @@ def profile_settings(user_id):
                         # Tạo tên file random
                         unique_id = uuid.uuid4().hex
                         filename = f"avatar_{unique_id}.{ext}"
-                        save_path = os.path.join('static/avatars', filename)
+                        save_path = os.path.join(app.config['UPLOAD_FOLDER'], 'avatars', filename)
 
                         # Decode và lưu
                         import base64

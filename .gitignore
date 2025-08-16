@@ -14,4 +14,4 @@ uploads/
 # Systemd/nginx sockets
 *.sock
 # macOS system file
-.DS_Store
+.DS_Store%

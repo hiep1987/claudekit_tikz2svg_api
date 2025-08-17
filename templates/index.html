@@ -3643,6 +3643,39 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
             }
         });
 
+        // Khi modal mở → load tất cả keywords để hiển thị suggestions
+        const keywordModal = document.getElementById('keywordModal');
+        if (keywordModal) {
+            keywordModal.addEventListener('shown.bs.modal', function() {
+                // Load tất cả keywords khi modal mở
+                fetch('/api/keywords/search?q=')
+                    .then(res => res.json())
+                    .then(data => {
+                        suggestionsBox.innerHTML = '';
+                        if (data.length > 0) {
+                            data.forEach(word => {
+                                const item = document.createElement('button');
+                                item.type = 'button';
+                                item.className = 'list-group-item list-group-item-action';
+                                item.textContent = word;
+                                item.addEventListener('click', () => {
+                                    const currentValue = keywordsInput.value.trim();
+                                    const newValue = currentValue ? currentValue + ', ' + word : word;
+                                    keywordsInput.value = newValue + ', ';
+                                    suggestionsBox.style.display = 'none';
+                                    keywordsInput.focus();
+                                });
+                                suggestionsBox.appendChild(item);
+                            });
+                            suggestionsBox.style.display = 'block';
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error loading keywords:', err);
+                    });
+            });
+        }
+
         // Khi bấm nút "Xác nhận" trong modal
         if (confirmBtn) {
             confirmBtn.addEventListener('click', function(e) {

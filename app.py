@@ -965,7 +965,23 @@ def save_svg():
 def api_search_keywords():
     q = request.args.get('q', '').strip()
     if not q:
-        return jsonify([])
+        # Khi query rỗng, trả về tất cả keywords (giới hạn 20 từ)
+        try:
+            conn = mysql.connector.connect(
+                host=os.environ.get('DB_HOST', 'localhost'),
+                user=os.environ.get('DB_USER', 'hiep1987'),
+                password=os.environ.get('DB_PASSWORD', ''),
+                database=os.environ.get('DB_NAME', 'tikz2svg')
+            )
+            cursor = conn.cursor()
+            cursor.execute("SELECT word FROM keyword ORDER BY word LIMIT 20")
+            results = [row[0] for row in cursor.fetchall()]
+            cursor.close()
+            conn.close()
+            return jsonify(results)
+        except Exception as e:
+            print(f"[ERROR] /api/keywords/search (empty query): {e}", flush=True)
+            return jsonify([])
 
     try:
         conn = mysql.connector.connect(
@@ -974,7 +990,7 @@ def api_search_keywords():
             password=os.environ.get('DB_PASSWORD', ''),
             database=os.environ.get('DB_NAME', 'tikz2svg')
         )
-        cursor = conn.cursor(dictionary=True)
+        cursor = conn.cursor()
         cursor.execute("SELECT word FROM keyword WHERE word LIKE %s COLLATE utf8mb4_general_ci LIMIT 10", (f"%{q}%",))
         results = [row[0] for row in cursor.fetchall()]
         cursor.close()

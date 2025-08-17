@@ -16,3 +16,4 @@ uploads/
 # Bỏ static khỏi Git
 static/*
 !static/.gitkeep
+.venv/

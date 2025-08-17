@@ -181,7 +181,7 @@ def _lines_for_pgfplots_libs(libs: Iterable[str]) -> str:
 
 # 2) Template FULL (double braces), giữ nguyên {tikz_code}
 TEX_TEMPLATE = r"""
-\documentclass[12pt,tikz,border=10pt]{standalone}
+\documentclass[12pt,border=10pt]{standalone}
 
 % Unicode & ngôn ngữ
 \usepackage{fontspec}

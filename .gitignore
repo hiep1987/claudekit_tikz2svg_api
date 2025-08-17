@@ -17,3 +17,7 @@ uploads/
 static/*
 !static/.gitkeep
 .venv/
+error_tikz/
+test_*.py
+*.tex
+.DS_Store

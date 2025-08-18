@@ -161,3 +161,23 @@ kill -9 $(lsof -ti tcp:3306) 2>/dev/null || true  # đóng tunnel
 cd ~/web/demo_site
 npx stagewise -b
 ```
+
+---
+
+## 12. Thay đổi gần đây: Tách Navbar dùng chung
+
+- Đã tách thanh điều hướng (navbar) thành một template dùng chung: `templates/_navbar.html`.
+- Các trang sau đã thay phần navbar trùng lặp bằng include:
+  - `templates/index.html`
+  - `templates/profile_settings.html`
+  - `templates/profile_svg_files.html`
+  - `templates/profile_followed_posts.html`
+  - `templates/view_svg.html`
+- Cách sử dụng cho trang mới: chèn dòng sau vào vị trí navbar (ngay sau `<body>` hoặc chỗ phù hợp):
+
+```jinja
+{% include '_navbar.html' %}
+```
+
+- Template dùng chung dựa trên các biến context đã có sẵn từ Flask/Jinja: `current_user`, `current_user_email`, `current_username`, `current_avatar` (được inject qua `@app.context_processor`).
+- Lợi ích: giảm trùng lặp, dễ bảo trì giao diện và logic menu (desktop/mobile, avatar, đăng nhập/đăng xuất).

@@ -1,0 +1,106 @@
+<nav class="w-full max-w-7xl mx-auto bg-white/80 backdrop-blur shadow-lg rounded-2xl p-3 flex items-center justify-between mb-8">
+    <!-- Logo -->
+    <div class="flex items-center gap-2 flex-shrink-0">
+        <span class="bg-gradient-to-br from-blue-500 to-yellow-400 p-1.5 rounded-lg">
+            <i class="fa-solid fa-meteor text-white text-lg"></i>
+        </span>
+        <span class="text-lg font-bold text-gray-800">TikZ to SVG</span>
+    </div>
+
+    <!-- Menu - Desktop -->
+    <div class="hidden md:flex flex-grow mx-4 justify-center">
+        <ul id="main-menu" class="flex items-center gap-6 font-medium text-gray-700">
+            <li class="menu-item relative px-2 py-1 cursor-pointer transition hover:text-blue-600">
+                <a href="/" class="block text-base" style="line-height: 1;">Trang chủ</a>
+                <div class="menu-underline"></div>
+            </li>
+            {% if current_user.is_authenticated %}
+            <li class="menu-item relative px-2 py-1 cursor-pointer transition hover:text-blue-600">
+                <a href="/profile/{{ current_user.id }}/settings" class="block text-base" style="line-height: 1;">Hồ sơ</a>
+                <div class="menu-underline"></div>
+            </li>
+            <li class="menu-item relative px-2 py-1 cursor-pointer transition hover:text-blue-600">
+                <a href="/profile/{{ current_user.id }}/svg-files" class="block text-base" style="line-height: 1;">File SVG</a>
+                <div class="menu-underline"></div>
+            </li>
+            <li class="menu-item relative px-2 py-1 cursor-pointer transition hover:text-blue-600">
+                <a href="/profile/{{ current_user.id }}/followed-posts" class="block text-base" style="line-height: 1;">Bài đăng</a>
+                <div class="menu-underline"></div>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
+
+    <!-- Avatar/User or Login & Hamburger -->
+    <div class="flex items-center gap-2 flex-shrink-0">
+        {% if current_user.is_authenticated %}
+            <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 bg-gray-100 px-2 py-1.5 rounded-lg">
+                    {% if current_avatar %}
+                        <img src="{{ url_for('static', filename='avatars/' ~ current_avatar) }}" 
+                             alt="Avatar" class="w-6 h-6 rounded-full"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    {% endif %}
+                    {% if not current_avatar %}
+                        <div class="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs">
+                            {{ current_user_email[0].upper() if current_user_email else 'U' }}
+                        </div>
+                    {% endif %}
+                    <span class="text-xs font-medium text-gray-700">{{ current_username or (current_user_email.split('@')[0] if current_user_email) }}</span>
+                </div>
+                <a href="/logout" class="hidden md:block bg-gradient-to-r from-red-400 to-red-600 text-white px-3 py-1.5 rounded-xl shadow hover:scale-105 transition font-semibold text-xs" style="text-decoration: none;">Đăng xuất</a>
+            </div>
+        {% else %}
+            <button class="hidden md:block bg-gradient-to-r from-blue-400 to-yellow-400 text-white px-3 py-1.5 rounded-xl shadow hover:scale-105 transition font-semibold text-sm" onclick="window.location.href='/login/google'">Đăng nhập</button>
+        {% endif %}
+        <!-- Hamburger (mobile) -->
+        <button id="menu-toggle" class="md:hidden p-1.5 rounded-lg hover:bg-blue-100 transition">
+            <i class="fa-solid fa-bars text-lg"></i>
+        </button>
+    </div>
+</nav>
+
+<!-- Scrollable Menu - Mobile -->
+<div id="scrollable-menu" class="md:hidden w-full max-w-7xl mx-auto mb-8">
+    <ul id="scrollable-menu-list" class="flex items-center gap-6 font-medium text-gray-700 px-3">
+        <li class="menu-item relative px-2 py-1 cursor-pointer transition hover:text-blue-600">
+            <a href="/" class="block text-base" style="line-height: 1;">Trang chủ</a>
+            <div class="menu-underline"></div>
+        </li>
+        {% if current_user.is_authenticated %}
+        <li class="menu-item relative px-2 py-1 cursor-pointer transition hover:text-blue-600">
+            <a href="/profile/{{ current_user.id }}/settings" class="block text-base" style="line-height: 1;">Hồ sơ</a>
+            <div class="menu-underline"></div>
+        </li>
+        <li class="menu-item relative px-2 py-1 cursor-pointer transition hover:text-blue-600">
+            <a href="/profile/{{ current_user.id }}/svg-files" class="block text-base" style="line-height: 1;">File SVG</a>
+            <div class="menu-underline"></div>
+        </li>
+        <li class="menu-item relative px-2 py-1 cursor-pointer transition hover:text-blue-600">
+            <a href="/profile/{{ current_user.id }}/followed-posts" class="block text-base" style="line-height: 1;">Bài đăng</a>
+            <div class="menu-underline"></div>
+        </li>
+        {% endif %}
+    </ul>
+    
+</div>
+
+<!-- Mobile Menu -->
+<div id="mobile-menu" class="fixed top-0 left-0 w-full h-full bg-black/50 z-400 hidden">
+    <div class="absolute right-0 top-0 w-60 bg-white h-full shadow-lg flex flex-col p-6 gap-3">
+        <button id="close-menu" class="self-end text-2xl text-gray-500 hover:text-blue-400">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <a href="/" class="py-2 px-3 rounded-lg text-gray-700 font-medium hover:bg-blue-100 transition">Trang chủ</a>
+        {% if current_user.is_authenticated %}
+        <a href="/profile/{{ current_user.id }}/settings" class="py-2 px-3 rounded-lg text-gray-700 font-medium hover:bg-blue-100 transition">Hồ sơ</a>
+        <a href="/profile/{{ current_user.id }}/svg-files" class="py-2 px-3 rounded-lg text-gray-700 font-medium hover:bg-blue-100 transition">File SVG</a>
+        <a href="/profile/{{ current_user.id }}/followed-posts" class="py-2 px-3 rounded-lg text-gray-700 font-medium hover:bg-blue-100 transition">Bài đăng</a>
+        <a href="/logout" class="bg-gradient-to-r from-red-400 to-red-600 text-white px-4 py-2 rounded-xl shadow font-semibold mt-2 text-center" style="text-decoration: none;">Đăng xuất</a>
+        {% else %}
+        <button class="bg-gradient-to-r from-blue-400 to-yellow-400 text-white px-4 py-2 rounded-xl shadow font-semibold mt-8" onclick="window.location.href='/login/google'">Đăng nhập</button>
+        {% endif %}
+    </div>
+</div>
+
+

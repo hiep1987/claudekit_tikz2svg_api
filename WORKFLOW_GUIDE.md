@@ -237,3 +237,22 @@ Previous Release
 - **Static files**: `/var/www/tikz2svg_api/shared/static/` (shared giữa DEV và PROD)
 - **User/Group**: `hiep1987/www-data`
 - **Nginx config**: Đã cập nhật để sử dụng shared/static
+
+## Thay đổi gần đây
+
+### Refactor: Navbar dùng chung
+
+- Tạo `templates/_navbar.html` chứa toàn bộ thanh điều hướng (desktop + mobile).
+- Các trang sau đã thay navbar inline bằng include:
+  - `templates/index.html`
+  - `templates/profile_settings.html`
+  - `templates/profile_svg_files.html`
+  - `templates/profile_followed_posts.html`
+  - `templates/view_svg.html`
+- Cách dùng ở template khác:
+
+```jinja
+{% include '_navbar.html' %}
+```
+
+- Lưu ý: Navbar dựa trên các biến context: `current_user`, `current_user_email`, `current_username`, `current_avatar` (được inject bởi `@app.context_processor`).

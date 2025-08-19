@@ -2892,10 +2892,17 @@
                 html += `<pre id=\"ajax-full-log\" style=\"display:none; background:#fff0f0; color:#b71c1c; border:1px solid #f5c6cb; border-radius:4px; padding:12px; margin-top:10px; max-height:400px; overflow:auto;\">${fullLog}</pre>`;
             }
             section.innerHTML = html;
-            // Insert OUTSIDE the scroll area: ngay sau .table-scroll-x
+            // Insert OUTSIDE the scroll area: ngay sau .table-scroll-x, nhưng trước mobile hint
             const tableScroll = document.querySelector('.table-scroll-x');
+            const mobileHint = document.getElementById('mobile-scroll-hint');
             if (tableScroll && tableScroll.parentNode) {
-                tableScroll.parentNode.insertBefore(section, tableScroll.nextSibling);
+                if (mobileHint && mobileHint.parentNode) {
+                    // Insert error section trước mobile hint
+                    mobileHint.parentNode.insertBefore(section, mobileHint);
+                } else {
+                    // Insert error section sau table-scroll-x
+                    tableScroll.parentNode.insertBefore(section, tableScroll.nextSibling);
+                }
             } else {
                 // Fallback: sau form
                 const form = document.getElementById('tikz-form');

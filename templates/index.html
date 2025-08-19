@@ -193,9 +193,6 @@
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
             background-color: #f5f5f5;
         }
         .container {
@@ -204,6 +201,8 @@
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
             box-sizing: border-box;
             overflow-x: hidden;
         }
@@ -1038,10 +1037,12 @@
         
         /* CSS cho 3 block layout mới */
         .input-preview-section {
-            background: transparent;
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
             padding: 40px 0;
             margin-bottom: 0;
             border: none;
+            border-radius: 1rem;
             overflow-x: hidden; /* Ngăn horizontal scroll của section */
         }
         
@@ -1142,9 +1143,11 @@
         }
         
         .files-section-container {
-            background: transparent;
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
             padding: 40px 0;
             border: none;
+            border-radius: 1rem;
         }
 
         /* Files Grid */
@@ -2076,8 +2079,7 @@
 <body>
     {% include '_navbar.html' %}
     <!-- Block 2: Input-Preview Section -->
-    <div class="input-preview-section">
-        <div class="container">
+    <div class="input-preview-section container">
             <h2>Chuyển đổi TikZ sang SVG/PNG/JPEG</h2>
 
             <!-- Truyền trạng thái login từ server vào JS (để linter không báo lỗi) -->
@@ -2160,7 +2162,6 @@
 {% endif %}
 
         {% if svg_temp_url and not error %}
-        </div> <!-- đóng .container của input-preview-section trước khi tools -->
     </div> <!-- đóng .input-preview-section trước khi tools -->
     
     <div id="result-tools-section" class="container" style="margin-top: 16px;">
@@ -2209,14 +2210,11 @@
                 {% endif %}
             </div>
         {% else %}
-        </div> <!-- đóng .container của input-preview-section -->
     </div> <!-- đóng .input-preview-section -->
         {% endif %}
     
     <!-- Block 3: Files Section -->
-    <div class="files-section-container">
-        <div class="container">
-            <section class="files-section" data-is-owner="{{ 'true' if logged_in else 'false' }}">
+    <div class="files-section-container container files-section" data-is-owner="{{ 'true' if logged_in else 'false' }}">
                 <h3 style="color:#1976d2; margin-bottom:24px;">📁 Files đã lưu</h3>
                 <div id="files-container" class="files-grid">
                     <div class="loading-spinner" style="text-align: center; padding: 20px;">
@@ -2224,8 +2222,6 @@
                         <p style="margin-top: 10px; color: #666;">Đang tải files...</p>
                     </div>
                 </div>
-            </section>
-        </div>
     </div>
 
     <footer style='text-align:center;color:#888;font-size:14px;margin-top:40px;'>© 2024 TikZ2SVG - All rights reserved.</footer>
@@ -2896,10 +2892,18 @@
                 html += `<pre id=\"ajax-full-log\" style=\"display:none; background:#fff0f0; color:#b71c1c; border:1px solid #f5c6cb; border-radius:4px; padding:12px; margin-top:10px; max-height:400px; overflow:auto;\">${fullLog}</pre>`;
             }
             section.innerHTML = html;
-            // Insert sau form
-            const form = document.getElementById('tikz-form');
-            if (form && form.parentNode) {
-                form.parentNode.insertBefore(section, form.nextSibling);
+            // Insert OUTSIDE the scroll area: ngay sau .table-scroll-x
+            const tableScroll = document.querySelector('.table-scroll-x');
+            if (tableScroll && tableScroll.parentNode) {
+                tableScroll.parentNode.insertBefore(section, tableScroll.nextSibling);
+            } else {
+                // Fallback: sau form
+                const form = document.getElementById('tikz-form');
+                if (form && form.parentNode) {
+                    form.parentNode.insertBefore(section, form.nextSibling);
+                } else {
+                    document.body.appendChild(section);
+                }
             }
             // Gán event handler
             const logBtn = document.getElementById('ajax-show-log-btn');

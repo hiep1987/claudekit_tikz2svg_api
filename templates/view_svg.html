@@ -747,7 +747,7 @@
                 let fileInfoText = '';
                 if (data.file_size) {
                     const sizeKB = (data.file_size / 1024).toFixed(1);
-                    fileInfoText = `<div style="margin-top: 8px; font-size: 12px; color: #666; text-align: center;">Dung lượng: ${sizeKB} KB`;
+                    fileInfoText = `<div style="margin-top: 8px; font-size: 12px; color: #666; text-align: center; font-weight: bold;">Dung lượng: ${sizeKB} KB`;
                     if (data.actual_size) {
                         fileInfoText += ` | Kích thước: ${data.actual_size}`;
                     }

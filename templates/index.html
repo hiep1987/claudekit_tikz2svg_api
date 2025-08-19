@@ -2633,7 +2633,10 @@
                     const dpiVal = document.getElementById('export-dpi').value;
                     const msg = document.getElementById('export-msg');
 
+                    // Reset message area
                     msg.textContent = '';
+                    msg.className = '';
+
                     if ((widthVal && widthVal <= 0) || (heightVal && heightVal <= 0) || (dpiVal && dpiVal <= 0)) {
                         msg.textContent = 'Width, Height, DPI phải là số dương!';
                         return;
@@ -2656,7 +2659,43 @@
                         });
                         const data = await res.json();
                         if (data.url) {
-                            msg.innerHTML = `<a href="${data.url}" download class="export-download-link">Tải về ${format.toUpperCase()}</a>`;
+                            // Container to make layout clean like view_svg
+                            const container = document.createElement('div');
+                            container.style.display = 'flex';
+                            container.style.flexDirection = 'column';
+                            container.style.alignItems = 'center';
+                            container.style.gap = '6px';
+
+                            // Build link safely
+                            const link = document.createElement('a');
+                            link.href = data.url;
+                            link.download = '';
+                            link.className = 'export-download-link';
+                            link.textContent = `Tải về ${format.toUpperCase()}`;
+                            container.appendChild(link);
+
+                            // Optional: show file info if backend returns it (align with view_svg.html)
+                            if (data.file_size || data.actual_size) {
+                                const info = document.createElement('div');
+                                info.style.marginTop = '8px';
+                                info.style.fontSize = '12px';
+                                info.style.color = '#666';
+                                info.style.textAlign = 'center';
+                                info.style.fontWeight = 'bold';
+
+                                const parts = [];
+                                if (data.file_size) {
+                                    const sizeKB = (data.file_size / 1024).toFixed(1);
+                                    parts.push(`Dung lượng: ${sizeKB} KB`);
+                                }
+                                if (data.actual_size) {
+                                    parts.push(`Kích thước: ${data.actual_size}`);
+                                }
+                                info.textContent = parts.join(' | ');
+                                container.appendChild(info);
+                            }
+
+                            msg.appendChild(container);
                         } else {
                             msg.textContent = data.error || 'Lỗi không xác định!';
                         }

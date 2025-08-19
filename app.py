@@ -1562,7 +1562,18 @@ def temp_convert():
                 background.save(out_path, 'JPEG', quality=95)
             os.remove(tmp_png)
         url = f"/temp_img/{file_id}/{out_name}"
-        return jsonify({'url': url})
+
+        # Add file size and actual image dimensions similar to /convert endpoint
+        file_size = os.path.getsize(out_path) if os.path.exists(out_path) else None
+        actual_size = None
+        if os.path.exists(out_path):
+            try:
+                with Image.open(out_path) as im:
+                    actual_size = f"{im.size[0]}x{im.size[1]} pixels"
+            except Exception:
+                actual_size = None
+
+        return jsonify({'url': url, 'file_size': file_size, 'actual_size': actual_size})
     except Exception as e:
         return jsonify({'error': f'Lỗi chuyển đổi: {str(e)}'}), 500
 

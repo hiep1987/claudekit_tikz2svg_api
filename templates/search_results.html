@@ -83,7 +83,7 @@
         .p-6 { padding: 1.5rem; }
         .gap-3 { gap: 0.75rem; }
         .self-end { align-self: flex-end; }
-        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5px; }
+        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
         .mt-2 { margin-top: 0.5rem; }
         .text-center { text-align: center; }
         .mt-8 { margin-top: 2rem; }
@@ -849,7 +849,7 @@
                     <div class="file-action-container">
                         <ul class="file-action-list">
                             <li class="file-action-item">
-                                <button type="button" class="Btn" data-filename="{{ file.filename }}" onclick="window.location.href='/view_svg/{{ file.filename }}'">
+                                <button type="button" class="Btn" data-action="download-image" data-filename="{{ file.filename }}">
                                     <div class="sign">
                                         <i class="fas fa-image logoIcon"></i>
                                     </div>
@@ -857,7 +857,7 @@
                                 </button>
                             </li>
                             <li class="file-action-item">
-                                <button type="button" class="Btn fb-share-btn" data-filename="{{ file.filename }}" data-has-feedback="true">
+                                <button type="button" class="Btn" data-action="share-facebook" data-filename="{{ file.filename }}" data-has-feedback="true">
                                     <div class="sign">
                                         <i class="fab fa-facebook logoIcon"></i>
                                     </div>
@@ -865,7 +865,7 @@
                                 </button>
                             </li>
                             <li class="file-action-item">
-                                <button type="button" class="Btn file-copy-link-btn" data-url="{{ url_for('static', filename=file.filename, _external=True) }}" data-has-feedback="true">
+                                <button type="button" class="Btn" data-action="copy-link" data-url="{{ url_for('static', filename=file.filename, _external=True) }}" data-has-feedback="true">
                                     <div class="sign">
                                         <i class="fas fa-link logoIcon"></i>
                                     </div>
@@ -874,7 +874,7 @@
                             </li>
                             {% if file.tikz_code %}
                             <li class="file-action-item">
-                                <button type="button" class="Btn" onclick="toggleTikzCode(this)">
+                                <button type="button" class="Btn" data-action="toggle-code">
                                     <div class="sign">
                                         <i class="fas fa-code logoIcon"></i>
                                     </div>
@@ -993,23 +993,35 @@
         
         // Initialize action buttons (Facebook share, copy link, etc.)
         function initializeActionButtons() {
-            // Facebook share buttons
-            document.querySelectorAll('.fb-share-btn').forEach(function(btn) {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const filename = this.getAttribute('data-filename');
-                    const shareUrl = `${window.location.origin}/view_svg/${filename}`;
-                    copyToClipboard(shareUrl, this, 'Facebook', 'Đã copy!');
-                });
-            });
-            
-            // Copy link buttons
-            document.querySelectorAll('.file-copy-link-btn').forEach(function(btn) {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const url = this.getAttribute('data-url');
-                    copyToClipboard(url, this, 'Copy Link');
-                });
+            // Handle all action buttons using data-action
+            document.addEventListener('click', function(e) {
+                const btn = e.target.closest('.Btn[data-action]');
+                if (!btn) return;
+                
+                e.preventDefault();
+                const action = btn.dataset.action;
+                
+                switch (action) {
+                    case 'share-facebook':
+                        const filename = btn.getAttribute('data-filename');
+                        const shareUrl = `${window.location.origin}/view_svg/${filename}`;
+                        copyToClipboard(shareUrl, btn, 'Facebook', 'Đã copy!');
+                        break;
+                        
+                    case 'copy-link':
+                        const url = btn.getAttribute('data-url');
+                        copyToClipboard(url, btn, 'Copy Link', 'Đã copy!');
+                        break;
+                        
+                    case 'download-image':
+                        const downloadFilename = btn.getAttribute('data-filename');
+                        window.location.href = `/view_svg/${downloadFilename}`;
+                        break;
+                        
+                    case 'toggle-code':
+                        toggleTikzCode(btn);
+                        break;
+                }
             });
         }
 
@@ -1063,46 +1075,11 @@
                 }
 
                 if (currentTapCount === 1) {
-                    // execute based on handler/label
-                    const onclickAttr = btn.getAttribute('onclick') || '';
-                    const text = btn.querySelector('.text')?.textContent?.trim();
-
-                    if (text === 'Facebook') {
-                        const filename = btn.getAttribute('data-filename');
-                        const shareUrl = `${window.location.origin}/view_svg/${filename}`;
-                        copyToClipboard(shareUrl, btn, 'Facebook', 'Đã copy!');
-                        setTimeout(() => {
-                            btn.dataset.tapCount = '0';
-                            btn.classList.remove('individual-active', 'ready-to-execute');
-                        }, 2000);
-                        return;
-                    }
-
-                    if (text === 'Copy Link') {
-                        const url = btn.getAttribute('data-url');
-                        copyToClipboard(url, btn, 'Copy Link', 'Đã copy!');
-                        setTimeout(() => {
-                            btn.dataset.tapCount = '0';
-                            btn.classList.remove('individual-active', 'ready-to-execute');
-                        }, 2000);
-                        return;
-                    }
-
-                    if (text === 'Tải ảnh') {
-                        const filename = btn.getAttribute('data-filename');
-                        if (filename) window.location.href = `/view_svg/${filename}`;
-                        btn.dataset.tapCount = '0';
-                        btn.classList.remove('individual-active', 'ready-to-execute');
-                        return;
-                    }
-
-                    // Prefer robust handler detection over text
-                    if (onclickAttr.includes('toggleTikzCode') || text === 'Xem Code' || text === 'Ẩn code') {
-                        // Prevent inline onclick from firing (avoid double-toggle)
-                        e.preventDefault();
-                        e.stopPropagation();
-                        if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
-                        toggleTikzCode(btn);
+                    // Execute based on data-action attribute
+                    const action = btn.dataset.action;
+                    
+                    if (!action) {
+                        // Fallback for buttons without data-action
                         setTimeout(() => {
                             btn.dataset.tapCount = '0';
                             btn.classList.remove('individual-active', 'ready-to-execute');
@@ -1110,11 +1087,54 @@
                         return;
                     }
 
-                    // default reset
-                    setTimeout(() => {
-                        btn.dataset.tapCount = '0';
-                        btn.classList.remove('individual-active', 'ready-to-execute');
-                    }, 1000);
+                    // Prevent default behavior
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+
+                    switch (action) {
+                        case 'share-facebook':
+                            const filename = btn.getAttribute('data-filename');
+                            const shareUrl = `${window.location.origin}/view_svg/${filename}`;
+                            copyToClipboard(shareUrl, btn, 'Facebook', 'Đã copy!');
+                            setTimeout(() => {
+                                btn.dataset.tapCount = '0';
+                                btn.classList.remove('individual-active', 'ready-to-execute');
+                            }, 2000);
+                            break;
+                            
+                        case 'copy-link':
+                            const url = btn.getAttribute('data-url');
+                            copyToClipboard(url, btn, 'Copy Link', 'Đã copy!');
+                            setTimeout(() => {
+                                btn.dataset.tapCount = '0';
+                                btn.classList.remove('individual-active', 'ready-to-execute');
+                            }, 2000);
+                            break;
+                            
+                        case 'download-image':
+                            const downloadFilename = btn.getAttribute('data-filename');
+                            if (downloadFilename) window.location.href = `/view_svg/${downloadFilename}`;
+                            btn.dataset.tapCount = '0';
+                            btn.classList.remove('individual-active', 'ready-to-execute');
+                            break;
+                            
+                        case 'toggle-code':
+                            toggleTikzCode(btn);
+                            setTimeout(() => {
+                                btn.dataset.tapCount = '0';
+                                btn.classList.remove('individual-active', 'ready-to-execute');
+                            }, 1000);
+                            break;
+                            
+                        default:
+                            // Unknown action, reset after 1 second
+                            setTimeout(() => {
+                                btn.dataset.tapCount = '0';
+                                btn.classList.remove('individual-active', 'ready-to-execute');
+                            }, 1000);
+                            break;
+                    }
                 }
             }, true);
         }

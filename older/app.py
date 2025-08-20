@@ -15,7 +15,6 @@ from flask_dance.contrib.google import make_google_blueprint, google
 from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
 import mysql.connector
-from typing import Iterable
 
 load_dotenv()
 
@@ -115,375 +114,22 @@ app.config.update(
 
 print("DEBUG: Google OAuth blueprint being created...")
 
-# 1) Khai báo allowlist (có thể mở rộng dần)
-SAFE_PACKAGES = {
-    # nền tảng
-    "fontspec", "polyglossia", "xcolor", "graphicx", "geometry", "setspace",
-    # toán
-    "amsmath", "amssymb", "amsfonts", "mathtools", "physics", "siunitx", "cancel", "cases",
-          # tikz/pgf
-      "tikz", "pgfplots", "tikz-3dplot", "tkz-euclide", "tkz-tab", "pgf", "pgfkeys", "pgfornament",
-    # chuyên biệt
-    "circuitikz", "tikz-timing", "tikz-cd", "tikz-network", "tikzpeople", "tikzmark",
-    # bổ sung
-    "array", "booktabs", "multirow", "colortbl", "longtable", "tabularx",
-}
-
-# (tuỳ chọn) allowlist cho \usetikzlibrary và \usepgfplotslibrary
-SAFE_TIKZ_LIBS = {
-    "calc","math","positioning","arrows.meta","intersections","angles","quotes",
-    "decorations.markings","decorations.pathreplacing","decorations.text",
-    "patterns","patterns.meta","shadings","hobby","spy","backgrounds",
-    "shapes.geometric","shapes.symbols","shapes.arrows","shapes.multipart",
-    "fit","matrix","chains","automata","petri","mindmap","trees",
-    "graphs","graphdrawing","lindenmayersystems","fadings","shadows",
-    "external","datavisualization","datavisualization.formats.files",
-    "datavisualization.formats.files.csv","datavisualization.formats.files.json"
-}
-SAFE_PGFPLOTS_LIBS = {
-    "polar","statistics","dateplot","fillbetween","colorbrewer",
-    "groupplots","ternary","smithchart","units"
-}
-
-_pkg_re = re.compile(r"^[A-Za-z0-9\-_.]+$")
-
-def _sanitize_name(name: str, *, kind: str, allowed: set[str]) -> str:
-    name = (name or "").strip()
-    if not _pkg_re.match(name):
-        raise ValueError(f"{kind} không hợp lệ: {name!r}")
-    if name not in allowed:
-        raise ValueError(f"{kind} '{name}' không trong danh sách cho phép")
-    return name
-
-def _lines_for_usepackage(pkgs: Iterable[str]) -> str:
-    if not pkgs: return ""
-    safe = [_sanitize_name(p, kind="Gói", allowed=SAFE_PACKAGES) for p in pkgs]
-    # gom các gói phổ biến theo nhóm để gọn, phần còn lại nạp từng cái
-    groups = {"ams": {"amsmath","amssymb","amsfonts"}}
-    out = []
-    ams_in = [p for p in safe if p in groups["ams"]]
-    others = [p for p in safe if p not in groups["ams"]]
-    if ams_in:
-        out.append(r"\usepackage{amsmath,amssymb,amsfonts}")
-    for p in others:
-        out.append(fr"\usepackage{{{p}}}")
-    return "\n".join(dict.fromkeys(out))  # dedupe, giữ thứ tự
-
-def _lines_for_tikz_libs(libs: Iterable[str]) -> str:
-    if not libs: return ""
-    safe = [_sanitize_name(l, kind="Thư viện TikZ", allowed=SAFE_TIKZ_LIBS) for l in libs]
-    return "\n".join(fr"\usetikzlibrary{{{lib}}}" for lib in dict.fromkeys(safe))
-
-def _lines_for_pgfplots_libs(libs: Iterable[str]) -> str:
-    if not libs: return ""
-    safe = [_sanitize_name(l, kind="Thư viện pgfplots", allowed=SAFE_PGFPLOTS_LIBS) for l in libs]
-    return "\n".join(fr"\usepgfplotslibrary{{{l}}}" for l in dict.fromkeys(safe))
-
-# 2) Template FULL (double braces), giữ nguyên {tikz_code}
 TEX_TEMPLATE = r"""
-\documentclass[12pt,border=10pt]{standalone}
-
-% Unicode & ngôn ngữ
-\usepackage{fontspec}
-
-% Toán & đồ hoạ
-\usepackage{amsmath,amssymb,amsfonts}
-\usepackage{xcolor}
-\usepackage{graphicx}
-
-% Hệ sinh thái TikZ/PGF
-\usepackage{tikz}
-\usepackage{tikz-3dplot}
-\usepackage{pgfplots}
-\pgfplotsset{compat=1.17}
-\usepackage{tkz-euclide}
-\usepackage{tkz-tab}
-
-% Thư viện TikZ mặc định
-\usetikzlibrary{calc}
-\usetikzlibrary{math}
-\usetikzlibrary{positioning}
-\usetikzlibrary{arrows.meta}
-\usetikzlibrary{intersections}
-\usetikzlibrary{angles}
-\usetikzlibrary{quotes}
-\usetikzlibrary{decorations.markings}
-\usetikzlibrary{decorations.pathreplacing}
-\usetikzlibrary{decorations.text}
-\usetikzlibrary{patterns}
-\usetikzlibrary{patterns.meta}
-\usetikzlibrary{shadings}
-\usetikzlibrary{hobby}
-\usetikzlibrary{spy}
-\usetikzlibrary{backgrounds}
-
-% Thư viện pgfplots mặc định
-\usepgfplotslibrary{polar}
-
-% ==== EXTRA AUTO-INJECT START ====
-% (Sẽ được chèn thêm ở đây)
-% ==== EXTRA AUTO-INJECT END ====
-
-\begin{document}
+\documentclass[12pt,border=10pt]{{standalone}}
+\usepackage{{fontspec}}
+\usepackage{{polyglossia}}
+\setdefaultlanguage{{vietnamese}}
+\usepackage{{amsmath,amssymb}}
+\usepackage{{tikz,tikz-3dplot,pgfplots,tkz-tab,tkz-euclide}}
+\usepackage{{xcolor}}
+\usetikzlibrary{{math}}
+\usetikzlibrary{{calc,angles,intersections,shapes.geometric,arrows,decorations.markings,arrows.meta,patterns.meta,patterns,quotes}}
+\usetikzlibrary{{hobby,shadings,positioning}}
+\usepgfplotslibrary{{polar}}
+\begin{{document}}
 {tikz_code}
-\end{document}
+\end{{document}}
 """
-
-# 3) Hàm tạo nguồn LaTeX, chèn động \usepackage / \usetikzlibrary / \usepgfplotslibrary
-def generate_latex_source(
-    tikz_code: str,
-    extra_packages: Iterable[str] = (),
-    extra_tikz_libs: Iterable[str] = (),
-    extra_pgfplots_libs: Iterable[str] = (),
-    base_template: str = TEX_TEMPLATE,
-) -> str:
-    # Loại bỏ các dòng %!<...> khỏi TikZ code trước khi chèn vào template
-    import re
-    cleaned_tikz_code = "\n".join([
-        line for line in tikz_code.split('\n') 
-        if not re.match(r'^%!<.*>$', line.strip())
-    ])
-    
-    pkg_lines   = _lines_for_usepackage(extra_packages)
-    tikz_lines  = _lines_for_tikz_libs(extra_tikz_libs)
-    pgfl_lines  = _lines_for_pgfplots_libs(extra_pgfplots_libs)
-
-    inject = "\n".join([s for s in (pkg_lines, tikz_lines, pgfl_lines) if s])
-    if inject:
-        full = base_template.replace(
-            "% (Sẽ được chèn thêm ở đây)",
-            "% (Sẽ được chèn thêm ở đây)\n" + inject
-        )
-    else:
-        full = base_template
-    return full.replace("{tikz_code}", cleaned_tikz_code)
-
-# 4) Hàm helper để tự động phát hiện packages cần thiết từ TikZ code
-def detect_required_packages(tikz_code: str) -> tuple[list[str], list[str], list[str]]:
-    """
-    Tự động phát hiện packages, tikz libraries và pgfplots libraries cần thiết từ code TikZ
-    Hỗ trợ cú pháp thủ công: %!<...> để chỉ định packages
-    Returns: (packages, tikz_libs, pgfplots_libs)
-    """
-    code_lower = tikz_code.lower()
-    
-    # Phát hiện packages từ cú pháp thủ công %!<...>
-    manual_packages = []
-    manual_tikz_libs = []
-    manual_pgfplots_libs = []
-    
-    # Tìm tất cả các dòng bắt đầu bằng %!<
-    import re
-    manual_pattern = r'^%!<(.*?)>'
-    for line in tikz_code.split('\n'):
-        match = re.match(manual_pattern, line.strip())
-        if match:
-            manual_content = match.group(1)
-            # Phân tích nội dung trong %!<...>
-            for item in manual_content.split(','):
-                item = item.strip()
-                if item.startswith('\\usepackage{'):
-                    # Trích xuất tên package
-                    pkg_match = re.search(r'\\usepackage\{([^}]+)\}', item)
-                    if pkg_match:
-                        pkg_name = pkg_match.group(1).strip()
-                        manual_packages.append(pkg_name)
-                elif item.startswith('\\usetikzlibrary{'):
-                    # Trích xuất tên tikz library
-                    lib_match = re.search(r'\\usetikzlibrary\{([^}]+)\}', item)
-                    if lib_match:
-                        lib_name = lib_match.group(1).strip()
-                        manual_tikz_libs.append(lib_name)
-                elif item.startswith('\\usepgfplotslibrary{'):
-                    # Trích xuất tên pgfplots library
-                    lib_match = re.search(r'\\usepgfplotslibrary\{([^}]+)\}', item)
-                    if lib_match:
-                        lib_name = lib_match.group(1).strip()
-                        manual_pgfplots_libs.append(lib_name)
-    
-    # Phát hiện packages tự động
-    packages = []
-    
-    # siunitx - cho đơn vị đo lường
-    if any(cmd in tikz_code for cmd in ["\\si{", "\\SI{", "\\num{", "\\ang{", "\\unit{"]):
-        packages.append("siunitx")
-    
-    # circuitikz - cho mạch điện
-    if any(cmd in tikz_code for cmd in ["\\ohm", "\\volt", "\\ampere", "\\resistor", "\\capacitor", "\\inductor", "\\battery", "\\lamp"]):
-        packages.append("circuitikz")
-    
-    # tikz-timing - cho timing diagrams
-    if any(cmd in tikz_code for cmd in ["\\timing", "\\timingD{", "\\timingL{", "\\timingH{", "\\timingX{"]):
-        packages.append("tikz-timing")
-    
-    # physics - cho ký hiệu vật lý
-    if any(cmd in tikz_code for cmd in ["\\vec{", "\\abs{", "\\norm{", "\\order{", "\\qty{", "\\mrm{"]):
-        packages.append("physics")
-    
-    # mathtools - cho toán học nâng cao
-    if any(cmd in tikz_code for cmd in ["\\DeclarePairedDelimiter", "\\DeclareMathOperator", "\\mathclap", "\\mathllap", "\\mathrlap"]):
-        packages.append("mathtools")
-    
-    # tikz-cd - cho commutative diagrams
-    if any(cmd in tikz_code for cmd in ["\\begin{tikzcd}", "\\arrow[", "\\arrow{r}", "\\arrow{d}"]):
-        packages.append("tikz-cd")
-    
-    # tikz-network - cho network diagrams
-    if any(cmd in tikz_code for cmd in ["\\begin{tikzpicture}[network]", "\\Vertex[", "\\Edge[", "\\tikzstyle{VertexStyle}"]):
-        packages.append("tikz-network")
-    
-    # tikzpeople - cho people diagrams
-    if any(cmd in tikz_code for cmd in ["\\person[", "\\tikzstyle{PersonStyle}", "\\begin{tikzpicture}[person"]):
-        packages.append("tikzpeople")
-    
-    # tikzmark - cho annotations
-    if any(cmd in tikz_code for cmd in ["\\tikzmark{", "\\tikzmarkin{", "\\tikzmarkend{"]):
-        packages.append("tikzmark")
-    
-    # pgfornament - cho ornaments
-    if any(cmd in tikz_code for cmd in ["\\pgfornament{", "\\pgfornament[", "\\pgfornament["]):
-        packages.append("pgfornament")
-    
-    # Phát hiện tikz libraries
-    tikz_libs = []
-    
-    # decorations
-    if any(cmd in tikz_code for cmd in ["\\draw[decorate", "\\draw[decoration", "\\decorate", "\\decoration{"]):
-        tikz_libs.extend(["decorations.markings", "decorations.pathreplacing"])
-    
-    # patterns
-    if any(cmd in tikz_code for cmd in ["\\draw[pattern", "\\pattern", "\\fill[pattern"]):
-        tikz_libs.append("patterns")
-    
-    # shadings
-    if any(cmd in tikz_code for cmd in ["\\draw[shade", "\\shade", "\\shadedraw", "\\shading"]):
-        tikz_libs.append("shadings")
-    
-    # hobby curves
-    if any(cmd in tikz_code for cmd in ["\\draw[hobby", "\\hobby", "\\curve{"]):
-        tikz_libs.append("hobby")
-    
-    # spy (magnifying glass)
-    if "\\spy" in tikz_code:
-        tikz_libs.append("spy")
-    
-    # backgrounds
-    if any(cmd in tikz_code for cmd in ["\\begin{scope}[on background layer]", "\\begin{background}", "\\background"]):
-        tikz_libs.append("backgrounds")
-    
-    # intersections
-    if any(cmd in tikz_code for cmd in ["\\path[name intersections", "\\coordinate[name intersections", "\\draw[name intersections"]):
-        tikz_libs.append("intersections")
-    
-    # angles
-    if any(cmd in tikz_code for cmd in ["\\pic[angle", "\\angle", "\\draw pic[angle"]):
-        tikz_libs.append("angles")
-    
-    # quotes
-    if any(cmd in tikz_code for cmd in ["\\draw[quotes", "\\quotes", "\\draw[quotes="]):
-        tikz_libs.append("quotes")
-    
-    # positioning
-    if any(cmd in tikz_code for cmd in ["\\node[above", "\\node[below", "\\node[left", "\\node[right", "\\node[above left", "\\node[above right", "\\node[below left", "\\node[below right"]):
-        tikz_libs.append("positioning")
-    
-    # arrows.meta
-    if any(cmd in tikz_code for cmd in ["\\draw[-{", "\\draw[->{", "\\draw[<->{", "\\draw[arrows="]):
-        tikz_libs.append("arrows.meta")
-    
-    # shapes.geometric
-    if any(cmd in tikz_code for cmd in ["\\draw[regular polygon", "\\draw[star", "\\draw[diamond", "\\draw[ellipse", "\\draw[circle"]):
-        tikz_libs.append("shapes.geometric")
-    
-    # shapes.symbols
-    if any(cmd in tikz_code for cmd in ["\\draw[signal", "\\draw[tape", "\\draw[magnifying glass", "\\draw[cloud"]):
-        tikz_libs.append("shapes.symbols")
-    
-    # shapes.arrows
-    if any(cmd in tikz_code for cmd in ["\\draw[arrow box", "\\draw[strike out", "\\draw[rounded rectangle"]):
-        tikz_libs.append("shapes.arrows")
-    
-    # fit
-    if any(cmd in tikz_code for cmd in ["\\node[fit=", "\\fit{", "\\draw[fit="]):
-        tikz_libs.append("fit")
-    
-    # matrix
-    if any(cmd in tikz_code for cmd in ["\\matrix[", "\\matrix of", "\\matrix (", "\\matrix{"]):
-        tikz_libs.append("matrix")
-    
-    # chains
-    if any(cmd in tikz_code for cmd in ["\\begin{scope}[start chain", "\\chainin", "\\chainin (", "\\onchain"]):
-        tikz_libs.append("chains")
-    
-    # automata
-    if any(cmd in tikz_code for cmd in ["\\begin{tikzpicture}[automaton", "\\node[state", "\\path[->] node[state"]):
-        tikz_libs.append("automata")
-    
-    # petri
-    if any(cmd in tikz_code for cmd in ["\\begin{tikzpicture}[petri", "\\place[", "\\transition[", "\\arc["]):
-        tikz_libs.append("petri")
-    
-    # mindmap
-    if any(cmd in tikz_code for cmd in ["\\begin{tikzpicture}[mindmap", "\\concept[", "\\concept color="]):
-        tikz_libs.append("mindmap")
-    
-    # trees
-    if any(cmd in tikz_code for cmd in ["\\begin{tikzpicture}[tree", "\\node[level", "\\child[", "\\child {"]):
-        tikz_libs.append("trees")
-    
-    # graphs
-    if any(cmd in tikz_code for cmd in ["\\begin{tikzpicture}[graph", "\\graph[", "\\graph {", "\\graph ("]):
-        tikz_libs.append("graphs")
-    
-    # shadows
-    if any(cmd in tikz_code for cmd in ["\\draw[shadow", "\\shadow", "\\shadow{", "\\draw[drop shadow"]):
-        tikz_libs.append("shadows")
-    
-    # fadings
-    if any(cmd in tikz_code for cmd in ["\\begin{tikzfadingfrompicture", "\\tikzfading", "\\path[fading="]):
-        tikz_libs.append("fadings")
-    
-    # Phát hiện pgfplots libraries
-    pgfplots_libs = []
-    
-    # fillbetween
-    if any(cmd in tikz_code for cmd in ["\\addplot[fill between", "\\addplot[fillbetween", "\\fillbetween"]):
-        pgfplots_libs.append("fillbetween")
-    
-    # statistics
-    if any(cmd in tikz_code for cmd in ["\\addplot[statistics", "\\addplot[hist", "\\addplot[boxplot", "\\addplot[error bars"]):
-        pgfplots_libs.append("statistics")
-    
-    # dateplot
-    if any(cmd in tikz_code for cmd in ["\\addplot[date coordinates", "\\addplot[dateplot", "\\dateplot"]):
-        pgfplots_libs.append("dateplot")
-    
-    # colorbrewer
-    if any(cmd in tikz_code for cmd in ["\\addplot[colorbrewer", "\\colormap[colorbrewer", "\\pgfplotsset{colormap name="]):
-        pgfplots_libs.append("colorbrewer")
-    
-    # groupplots
-    if any(cmd in tikz_code for cmd in ["\\begin{groupplot}", "\\nextgroupplot", "\\groupplot[", "\\pgfplotsset{groupplot"]):
-        pgfplots_libs.append("groupplots")
-    
-    # ternary
-    if any(cmd in tikz_code for cmd in ["\\begin{ternaryaxis}", "\\ternaryaxis[", "\\addplot3[ternary", "\\ternaryaxis"]):
-        pgfplots_libs.append("ternary")
-    
-    # smithchart
-    if any(cmd in tikz_code for cmd in ["\\begin{smithchart}", "\\smithchart[", "\\addplot[smithchart", "\\smithchart"]):
-        pgfplots_libs.append("smithchart")
-    
-    # units
-    if any(cmd in tikz_code for cmd in ["\\begin{axis}[x unit=", "\\begin{axis}[y unit=", "\\addplot[unit="]):
-        pgfplots_libs.append("units")
-    
-    # Kết hợp packages tự động và thủ công
-    all_packages = list(dict.fromkeys(packages + manual_packages))  # Loại bỏ trùng lặp
-    all_tikz_libs = list(dict.fromkeys(tikz_libs + manual_tikz_libs))  # Loại bỏ trùng lặp
-    all_pgfplots_libs = list(dict.fromkeys(pgfplots_libs + manual_pgfplots_libs))  # Loại bỏ trùng lặp
-    
-    return all_packages, all_tikz_libs, all_pgfplots_libs
 
 try:
     from zoneinfo import ZoneInfo
@@ -746,25 +392,9 @@ def index():
             pdf_path = os.path.join(work_dir, "tikz.pdf")
             svg_path_tmp = os.path.join(work_dir, "tikz.svg")
             
-            # Tự động phát hiện packages cần thiết từ TikZ code
-            extra_packages, extra_tikz_libs, extra_pgfplots_libs = detect_required_packages(tikz_code)
-            
-            # Tạo nguồn LaTeX với packages được phát hiện tự động
-            try:
-                latex_source = generate_latex_source(
-                    tikz_code=tikz_code,
-                    extra_packages=extra_packages,
-                    extra_tikz_libs=extra_tikz_libs,
-                    extra_pgfplots_libs=extra_pgfplots_libs
-                )
-            except ValueError as e:
-                # Nếu có package không được phép, chỉ sử dụng template cơ bản
-                print(f"[WARN] Package không được phép: {e}", flush=True)
-                latex_source = TEX_TEMPLATE.replace("{tikz_code}", tikz_code)
-            
             # Ghi file TeX
             with open(tex_path, "w", encoding="utf-8") as f:
-                f.write(latex_source)
+                f.write(TEX_TEMPLATE.format(tikz_code=tikz_code))
             try:
                 lualatex_process = subprocess.run([
                     "lualatex", "-interaction=nonstopmode", "--output-directory=.", "tikz.tex"
@@ -965,23 +595,7 @@ def save_svg():
 def api_search_keywords():
     q = request.args.get('q', '').strip()
     if not q:
-        # Khi query rỗng, trả về tất cả keywords (giới hạn 20 từ)
-        try:
-            conn = mysql.connector.connect(
-                host=os.environ.get('DB_HOST', 'localhost'),
-                user=os.environ.get('DB_USER', 'hiep1987'),
-                password=os.environ.get('DB_PASSWORD', ''),
-                database=os.environ.get('DB_NAME', 'tikz2svg')
-            )
-            cursor = conn.cursor()
-            cursor.execute("SELECT word FROM keyword ORDER BY word LIMIT 20")
-            results = [row[0] for row in cursor.fetchall()]
-            cursor.close()
-            conn.close()
-            return jsonify(results)
-        except Exception as e:
-            print(f"[ERROR] /api/keywords/search (empty query): {e}", flush=True)
-            return jsonify([])
+        return jsonify([])
 
     try:
         conn = mysql.connector.connect(
@@ -999,65 +613,6 @@ def api_search_keywords():
     except Exception as e:
         print(f"[ERROR] /api/keywords/search: {e}", flush=True)
         return jsonify([])
-
-@app.route('/search')
-def search_results():
-    query = request.args.get('q', '').strip()
-    if not query:
-        return redirect(url_for('index'))
-    
-    try:
-        conn = mysql.connector.connect(
-            host=os.environ.get('DB_HOST', 'localhost'),
-            user=os.environ.get('DB_USER', 'hiep1987'),
-            password=os.environ.get('DB_PASSWORD', ''),
-            database=os.environ.get('DB_NAME', 'tikz2svg')
-        )
-        cursor = conn.cursor(dictionary=True)
-        
-        # Search for SVG files that match the keyword
-        cursor.execute("""
-            SELECT DISTINCT s.*, u.username as creator_username, u.id as creator_id,
-                   (SELECT COUNT(*) FROM svg_like WHERE svg_image_id = s.id) as like_count,
-                   (SELECT COUNT(*) FROM svg_like WHERE svg_image_id = s.id AND user_id = %s) as is_liked_by_current_user
-            FROM svg_image s
-            JOIN user u ON s.user_id = u.id
-            JOIN svg_image_keyword sik ON s.id = sik.svg_image_id
-            JOIN keyword k ON sik.keyword_id = k.id
-            WHERE k.word LIKE %s COLLATE utf8mb4_general_ci
-            ORDER BY s.created_at DESC
-        """, (get_user_id_from_session() or 0, f"%{query}%"))
-        
-        search_results = cursor.fetchall()
-        
-        # Format the results
-        for result in search_results:
-            result['url'] = f"/static/{result['filename']}"
-            result['created_time_vn'] = result['created_at'].strftime('%d/%m/%Y %H:%M') if result['created_at'] else ''
-            result['is_liked_by_current_user'] = bool(result['is_liked_by_current_user'])
-        
-        cursor.close()
-        conn.close()
-        
-        return render_template('search_results.html', 
-                             search_query=query,
-                             search_results=search_results,
-                             results_count=len(search_results),
-                             logged_in=current_user.is_authenticated,
-                             user_email=current_user.email if current_user.is_authenticated else None,
-                             username=current_user.username if current_user.is_authenticated else None,
-                             avatar=current_user.avatar if current_user.is_authenticated else None)
-        
-    except Exception as e:
-        print(f"[ERROR] /search: {e}", flush=True)
-        return render_template('search_results.html', 
-                             search_query=query,
-                             search_results=[],
-                             results_count=0,
-                             logged_in=current_user.is_authenticated,
-                             user_email=current_user.email if current_user.is_authenticated else None,
-                             username=current_user.username if current_user.is_authenticated else None,
-                             avatar=current_user.avatar if current_user.is_authenticated else None)
 
 def get_user_id_from_session():
     """Helper function for backward compatibility"""
@@ -1621,18 +1176,7 @@ def temp_convert():
                 background.save(out_path, 'JPEG', quality=95)
             os.remove(tmp_png)
         url = f"/temp_img/{file_id}/{out_name}"
-
-        # Add file size and actual image dimensions similar to /convert endpoint
-        file_size = os.path.getsize(out_path) if os.path.exists(out_path) else None
-        actual_size = None
-        if os.path.exists(out_path):
-            try:
-                with Image.open(out_path) as im:
-                    actual_size = f"{im.size[0]}x{im.size[1]} pixels"
-            except Exception:
-                actual_size = None
-
-        return jsonify({'url': url, 'file_size': file_size, 'actual_size': actual_size})
+        return jsonify({'url': url})
     except Exception as e:
         return jsonify({'error': f'Lỗi chuyển đổi: {str(e)}'}), 500
 
@@ -2509,101 +2053,7 @@ def api_follow_status(user_id):
             "error": "Database error"
         }), 500
 
-@app.route('/compile_with_packages', methods=['POST'])
-@login_required
-def compile_with_packages():
-    """API endpoint để biên dịch TikZ với packages tùy chỉnh"""
-    data = request.json
-    tikz_code = data.get('tikz_code', '').strip()
-    extra_packages = data.get('extra_packages', [])
-    extra_tikz_libs = data.get('extra_tikz_libs', [])
-    extra_pgfplots_libs = data.get('extra_pgfplots_libs', [])
-    
-    if not tikz_code:
-        return jsonify({"error": "Vui lòng nhập code TikZ!"}), 400
-    
-    tikz_code = clean_control_chars(tikz_code)
-    
-    try:
-        # Tạo workspace tạm
-        now = datetime.now(tz_vn)
-        file_id = str(uuid.uuid4())
-        work_dir = f"/tmp/{file_id}"
-        os.makedirs(work_dir, exist_ok=True)
-        tex_path = os.path.join(work_dir, "tikz.tex")
-        pdf_path = os.path.join(work_dir, "tikz.pdf")
-        svg_path_tmp = os.path.join(work_dir, "tikz.svg")
-        
-        # Tạo nguồn LaTeX với packages tùy chỉnh
-        try:
-            latex_source = generate_latex_source(
-                tikz_code=tikz_code,
-                extra_packages=extra_packages,
-                extra_tikz_libs=extra_tikz_libs,
-                extra_pgfplots_libs=extra_pgfplots_libs
-            )
-        except ValueError as e:
-            return jsonify({"error": f"Package không hợp lệ: {str(e)}"}), 400
-        
-        # Ghi file TeX
-        with open(tex_path, "w", encoding="utf-8") as f:
-            f.write(latex_source)
-        
-        # Biên dịch
-        lualatex_process = subprocess.run([
-            "lualatex", "-interaction=nonstopmode", "--output-directory=.", "tikz.tex"
-        ],
-        cwd=work_dir,
-        capture_output=True,
-        text=True,
-        check=True
-        )
-        
-        subprocess.run(["pdf2svg", pdf_path, svg_path_tmp],
-                       cwd=work_dir, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        
-        # Đọc SVG content
-        with open(svg_path_tmp, 'r', encoding='utf-8') as f:
-            svg_content = f.read()
-        
-        return jsonify({
-            "success": True,
-            "file_id": file_id,
-            "svg_url": f"/temp_svg/{file_id}",
-            "svg_content": svg_content
-        })
-        
-    except subprocess.CalledProcessError as ex:
-        # Xử lý lỗi biên dịch
-        log_path = os.path.join(work_dir, "tikz.log")
-        error_details = []
-        
-        if os.path.exists(log_path):
-            try:
-                with open(log_path, 'r', encoding='utf-8') as log_file:
-                    for line in log_file:
-                        if line.startswith("!") or 'error' in line.lower():
-                            error_details.append(line.strip())
-            except Exception:
-                pass
-        
-        return jsonify({
-            "error": "Lỗi khi biên dịch TikZ",
-            "details": error_details,
-            "stderr": ex.stderr if hasattr(ex, 'stderr') else None
-        }), 400
-        
-    except Exception as e:
-        return jsonify({"error": f"Lỗi không xác định: {str(e)}"}), 500
 
-@app.route('/api/available_packages')
-def api_available_packages():
-    """API endpoint để lấy danh sách packages có sẵn"""
-    return jsonify({
-        "packages": list(SAFE_PACKAGES),
-        "tikz_libraries": list(SAFE_TIKZ_LIBS),
-        "pgfplots_libraries": list(SAFE_PGFPLOTS_LIBS)
-    })
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)

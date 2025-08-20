@@ -20,6 +20,10 @@ static/*
 !static/css/
 !static/js/*.js
 !static/css/*.css
+# Allow specific file types in static
+!static/*.js
+!static/*.css
+!static/*.html
 .venv/
 error_tikz/
 test_*.py

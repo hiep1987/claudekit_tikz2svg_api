@@ -4354,8 +4354,8 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
                             
                         case 'copy-link':
                             const url = btn.getAttribute('data-url');
-                            // Ensure full URL for copy link functionality
-                            const fullUrl = url.startsWith('http') ? url : `${window.location.origin}${url}`;
+                            // Create full URL for copy link functionality
+                            const fullUrl = `${window.location.origin}${url}`;
                             copyToClipboard(fullUrl, btn, 'Copy Link', 'Đã copy!');
                             setTimeout(() => {
                                 btn.dataset.tapCount = '0';
@@ -4794,8 +4794,8 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
                     
                 case 'copy-link':
                     const url = btn.getAttribute('data-url');
-                    // Ensure full URL for copy link functionality
-                    const fullUrl = url.startsWith('http') ? url : `${window.location.origin}${url}`;
+                    // Create full URL for copy link functionality
+                    const fullUrl = `${window.location.origin}${url}`;
                     copyToClipboard(fullUrl, btn, 'Copy Link', 'Đã copy!');
                     break;
                     

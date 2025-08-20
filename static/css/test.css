@@ -1,0 +1,5 @@
+/* Test CSS file to check if .gitignore is working properly */
+.test-class {
+    color: #1976d2;
+    font-size: 14px;
+}

@@ -2479,7 +2479,7 @@
                                     </button>
                                   </li>
                                   <li class="file-action-item">
-                                    <button type="button" class="Btn" data-action="copy-link" data-url="${window.location.origin}/static/${file.filename}" data-has-feedback="true">
+                                    <button type="button" class="Btn" data-action="copy-link" data-url="/static/${file.filename}" data-has-feedback="true">
                                       <div class="sign">
                                         <i class="fas fa-link logoIcon"></i>
                                       </div>
@@ -4002,7 +4002,7 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
                       <div class="file-action-container">
                         <ul class="file-action-list">
                           <li class="file-action-item">
-                            <button type="button" class="Btn" data-filename="${file.filename}" onclick="window.location.href='/view_svg/${file.filename}'">
+                            <button type="button" class="Btn" data-action="download-image" data-filename="${file.filename}">
                               <div class="sign">
                                 <i class="fas fa-image logoIcon"></i>
                               </div>
@@ -4018,7 +4018,7 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
                             </button>
                           </li>
                           <li class="file-action-item">
-                            <button type="button" class="Btn" data-action="copy-link" data-url="${window.location.origin}/static/${file.filename}" data-has-feedback="true">
+                            <button type="button" class="Btn" data-action="copy-link" data-url="/static/${file.filename}" data-has-feedback="true">
                               <div class="sign">
                                 <i class="fas fa-link logoIcon"></i>
                               </div>
@@ -4354,7 +4354,9 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
                             
                         case 'copy-link':
                             const url = btn.getAttribute('data-url');
-                            copyToClipboard(url, btn);
+                            // Ensure full URL for copy link functionality
+                            const fullUrl = url.startsWith('http') ? url : `${window.location.origin}${url}`;
+                            copyToClipboard(fullUrl, btn, 'Copy Link', 'Đã copy!');
                             setTimeout(() => {
                                 btn.dataset.tapCount = '0';
                                 btn.classList.remove('individual-active', 'ready-to-execute');
@@ -4407,7 +4409,7 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
     // Đã được gộp vào initializeTouchBtnEvents để xử lý cho tất cả users
 
     // Copy to clipboard functions
-    function copyToClipboard(url, btn) {
+    function copyToClipboard(url, btn, originalText = 'Copy Link', feedbackText = 'Đã copy!') {
         const card = btn.closest('.file-card');
         const actionContainer = card ? card.querySelector('.file-action-container') : null;
         
@@ -4419,10 +4421,10 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
             navigator.clipboard.writeText(url).then(function() {
                 const textDiv = btn.querySelector('.text');
                 if (textDiv) {
-                    textDiv.textContent = 'Đã copy!';
+                    textDiv.textContent = feedbackText;
                     window.activeFeedbackCount++; // Tăng counter
                     setTimeout(() => { 
-                        textDiv.textContent = 'Copy Link'; 
+                        textDiv.textContent = originalText; 
                         window.activeFeedbackCount--; // Giảm counter
                     }, 3000);
                 }
@@ -4462,10 +4464,10 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
                 console.log('✅ Fallback copy successful');
                 const textDiv = btn.querySelector('.text');
                 if (textDiv) {
-                    textDiv.textContent = 'Đã copy!';
+                    textDiv.textContent = feedbackText;
                     window.activeFeedbackCount++; // Tăng counter
                     setTimeout(() => { 
-                        textDiv.textContent = 'Copy Link'; 
+                        textDiv.textContent = originalText; 
                         window.activeFeedbackCount--; // Giảm counter
                     }, 3000);
                 }
@@ -4792,7 +4794,9 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
                     
                 case 'copy-link':
                     const url = btn.getAttribute('data-url');
-                    copyToClipboard(url, btn, 'Copy Link', 'Đã copy!');
+                    // Ensure full URL for copy link functionality
+                    const fullUrl = url.startsWith('http') ? url : `${window.location.origin}${url}`;
+                    copyToClipboard(fullUrl, btn, 'Copy Link', 'Đã copy!');
                     break;
                     
                 case 'download-image':

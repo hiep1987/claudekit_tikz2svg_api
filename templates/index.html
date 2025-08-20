@@ -1164,6 +1164,7 @@
         .file-card {
           position: relative;
           min-height: 260px;
+          width: 100%;
           display: flex;
           flex-direction: column;
           justify-content: flex-start;
@@ -1171,7 +1172,7 @@
           border: 1px solid #ddd;
           border-radius: 10px;
           box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-          transition: transform 0.2s ease;
+          transition: transform 0.2s ease, width 0.3s ease;
         }
 
         .file-card:hover {
@@ -1600,6 +1601,7 @@
         }
         .tikz-code-block {
             width: 100%;
+            box-sizing: border-box;
         }
         .tikz-code-block .code-block {
             width: 100%;
@@ -1663,6 +1665,16 @@
                 gap: 12px;
             }
             
+            .file-card {
+                width: 100%;
+                min-width: 0;
+            }
+            
+            .tikz-code-block {
+                width: 100%;
+                box-sizing: border-box;
+            }
+            
             .file-actions {
                 flex-direction: column;
                 gap: 8px;
@@ -1680,6 +1692,16 @@
                 grid-template-columns: 1fr;
                 gap: 15px;
             }
+            
+            .file-card {
+                width: 100%;
+                min-width: 0;
+            }
+            
+            .tikz-code-block {
+                width: 100%;
+                box-sizing: border-box;
+            }
         }
         
         @media (max-width: 480px) {
@@ -1690,6 +1712,16 @@
             
             .files-grid {
                 gap: 10px;
+            }
+            
+            .file-card {
+                width: 100%;
+                min-width: 0;
+            }
+            
+            .tikz-code-block {
+                width: 100%;
+                box-sizing: border-box;
             }
             
             .file-actions {
@@ -2431,7 +2463,7 @@
                               <div class="file-action-container">
                                 <ul class="file-action-list">
                                   <li class="file-action-item">
-                                    <button type="button" class="Btn" data-filename="${file.filename}" onclick="window.location.href='/view_svg/${file.filename}'">
+                                    <button type="button" class="Btn" data-action="download-image" data-filename="${file.filename}">
                                       <div class="sign">
                                         <i class="fas fa-image logoIcon"></i>
                                       </div>
@@ -2439,7 +2471,7 @@
                                     </button>
                                   </li>
                                  <li class="file-action-item">
-                                    <button type="button" class="Btn fb-share-btn" data-filename="${file.filename}" data-has-feedback="true">
+                                    <button type="button" class="Btn" data-action="share-facebook" data-filename="${file.filename}" data-has-feedback="true">
                                       <div class="sign">
                                         <i class="fab fa-facebook logoIcon"></i>
                                       </div>
@@ -2447,7 +2479,7 @@
                                     </button>
                                   </li>
                                   <li class="file-action-item">
-                                    <button type="button" class="Btn file-copy-link-btn" data-url="${window.location.origin}/static/${file.filename}" data-has-feedback="true">
+                                    <button type="button" class="Btn" data-action="copy-link" data-url="${window.location.origin}/static/${file.filename}" data-has-feedback="true">
                                       <div class="sign">
                                         <i class="fas fa-link logoIcon"></i>
                                       </div>
@@ -2456,7 +2488,7 @@
                                   </li>
                                   ${file.tikz_code ? `
                                   <li class="file-action-item">
-                                    <button type="button" class="Btn" onclick="toggleTikzCode(this)">
+                                    <button type="button" class="Btn" data-action="toggle-code">
                                       <div class="sign">
                                         <i class="fas fa-code logoIcon"></i>
                                       </div>
@@ -2549,60 +2581,8 @@
 
         // Function xử lý các nút khi chưa đăng nhập
         function setupFileCardButtons() {
-            if (!window.appState.loggedIn) {
-                // Xử lý nút fb-share-btn - CHO PHÉP HOẠT ĐỘNG khi chưa đăng nhập (copy link vào clipboard)
-                document.querySelectorAll('.fb-share-btn').forEach(btn => {
-                    btn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        const filename = this.getAttribute('data-filename');
-                        if (filename) {
-                            const shareUrl = `${window.location.origin}/view_svg/${filename}`;
-                            copyToClipboardWithCustomFeedback(shareUrl, this, 'Facebook', 'Đã copy!');
-                        }
-                    });
-                });
-
-                // Xử lý nút file-copy-link-btn - CHO PHÉP HOẠT ĐỘNG khi chưa đăng nhập
-                document.querySelectorAll('.file-copy-link-btn').forEach(btn => {
-                    btn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        const url = this.getAttribute('data-url');
-                        if (url) {
-                            // Copy to clipboard
-                            if (navigator.clipboard && window.isSecureContext) {
-                                navigator.clipboard.writeText(url).then(() => {
-                                    const textDiv = this.querySelector('.text');
-                                    if (textDiv) {
-                                        textDiv.textContent = 'Đã copy!';
-                                        setTimeout(() => {
-                                            textDiv.textContent = 'Copy Link';
-                                        }, 2000);
-                                    }
-                                }).catch(() => {
-                                    // Fallback
-                                    const textArea = document.createElement('textarea');
-                                    textArea.value = url;
-                                    document.body.appendChild(textArea);
-                                    textArea.select();
-                                    document.execCommand('copy');
-                                    document.body.removeChild(textArea);
-                                    
-                                    const textDiv = this.querySelector('.text');
-                                    if (textDiv) {
-                                        textDiv.textContent = 'Đã copy!';
-                                        setTimeout(() => {
-                                            textDiv.textContent = 'Copy Link';
-                                        }, 2000);
-                                    }
-                                });
-                            }
-                        }
-                    });
-                });
-
-                // Xử lý nút "Xem Code" - KHÔNG CẦN XỬ LÝ RIÊNG NỮA VÌ toggleTikzCode ĐÃ TỰ KIỂM TRA
-                // Function toggleTikzCode và copyTikzCode đã được cập nhật để tự kiểm tra trạng thái đăng nhập
-            }
+            // Không cần xử lý riêng nữa vì initializeActionButtons đã xử lý tất cả
+            // Logic đã được chuyển sang sử dụng data-action attributes
         }
 
         // Load SVG files sẽ được gọi trong main initializer
@@ -3824,10 +3804,9 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
             }, 1000);
         }
         
-        // ==== Initialize Facebook share buttons and copy link buttons ====
+        // ==== Initialize action buttons using data-action ====
         // Khởi tạo cho cả user đã đăng nhập và chưa đăng nhập
-        initializeFbShareButtons();
-        initializeCopyLinkButtons();
+        initializeActionButtons();
         
         // ==== Start login status polling (kiểm tra trạng thái đăng nhập định kỳ) ====
         setInterval(() => {
@@ -4031,7 +4010,7 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
                             </button>
                           </li>
                          <li class="file-action-item">
-                            <button type="button" class="Btn fb-share-btn" data-filename="${file.filename}" data-has-feedback="true">
+                            <button type="button" class="Btn" data-action="share-facebook" data-filename="${file.filename}" data-has-feedback="true">
                               <div class="sign">
                                 <i class="fab fa-facebook logoIcon"></i>
                               </div>
@@ -4039,7 +4018,7 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
                             </button>
                           </li>
                           <li class="file-action-item">
-                            <button type="button" class="Btn file-copy-link-btn" data-url="${window.location.origin}/static/${file.filename}" data-has-feedback="true">
+                            <button type="button" class="Btn" data-action="copy-link" data-url="${window.location.origin}/static/${file.filename}" data-has-feedback="true">
                               <div class="sign">
                                 <i class="fas fa-link logoIcon"></i>
                               </div>
@@ -4048,7 +4027,7 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
                           </li>
                           ${file.tikz_code ? `
                           <li class="file-action-item">
-                            <button type="button" class="Btn" onclick="toggleTikzCode(this)">
+                            <button type="button" class="Btn" data-action="toggle-code">
                               <div class="sign">
                                 <i class="fas fa-code logoIcon"></i>
                               </div>
@@ -4345,85 +4324,77 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
                         }
                     }
 
-                    // ✅ Xử lý cho nút "Facebook" (không có onclick)
-                    if (btn.classList.contains('fb-share-btn') && btn.hasAttribute('data-filename')) {
-                        const filename = btn.getAttribute('data-filename');
-                        const shareUrl = `${window.location.origin}/view_svg/${filename}`;
-                        copyToClipboardWithCustomFeedback(shareUrl, btn, 'Facebook', 'Đã copy!');
-                        
-                        // Giữ feedback hiển thị 2 giây trước khi reset
-                        setTimeout(() => {
-                            btn.dataset.tapCount = '0';
-                            btn.classList.remove('individual-active', 'ready-to-execute');
-                        }, 2000);
-                    }
-
-                    // ✅ Xử lý cho nút "Copy Link" (không có onclick)
-                    else if (btn.classList.contains('file-copy-link-btn') && btn.hasAttribute('data-url')) {
-                        const url = btn.getAttribute('data-url');
-                        copyToClipboard(url, btn);
-                        
-                        // Giữ feedback hiển thị 2 giây trước khi reset
-                        setTimeout(() => {
-                            btn.dataset.tapCount = '0';
-                            btn.classList.remove('individual-active', 'ready-to-execute');
-                        }, 2000);
-                    }
-
-                    // ✅ Thêm xử lý cho nút "Tải ảnh" (có onclick)
-                    else if (btn.querySelector('.text')?.textContent === 'Tải ảnh') {
-                        const filename = btn.getAttribute('data-filename');
-                        if (filename) {
-                            window.location.href = `/view_svg/${filename}`;
-                        } else {
-                            console.error('Không tìm thấy data-filename cho nút Tải ảnh');
-                        }
-                        // Reset trạng thái cho nút Tải ảnh ngay lập tức vì sẽ navigate
-                        btn.dataset.tapCount = '0';
-                        btn.classList.remove('individual-active', 'ready-to-execute');
-                    }
+                    // Execute based on data-action attribute
+                    const action = btn.dataset.action;
                     
-                    // ✅ Thêm xử lý cho nút "Xem Code"
-                    else if (btn.querySelector('.text')?.textContent === 'Xem Code' || btn.querySelector('.text')?.textContent === 'Ẩn code') {
-                        // Kiểm tra trạng thái đăng nhập
-                        if (window.isLoggedIn) {
-                            // Gọi function toggleTikzCode để hiển thị/ẩn code
-                            toggleTikzCode(btn);
-                        } else {
-                            // Hiển thị modal đăng nhập cho user chưa đăng nhập
-                            const loginModal = document.getElementById('login-modal');
-                            if (loginModal) {
-                                loginModal.style.display = 'flex';
-                            } else {
-                                // Fallback: redirect to login
-                                window.location.href = '/login/google';
-                            }
-                        }
-                        
-                        // Giữ feedback hiển thị 1 giây trước khi reset
+                    if (!action) {
+                        // Fallback for buttons without data-action
                         setTimeout(() => {
                             btn.dataset.tapCount = '0';
                             btn.classList.remove('individual-active', 'ready-to-execute');
                         }, 1000);
-                    } 
-                    else {
-                        // Các nút khác: Kiểm tra trạng thái đăng nhập
-                        if (!window.isLoggedIn) {
-                            // Hiển thị modal đăng nhập cho user chưa đăng nhập
-                            const loginModal = document.getElementById('login-modal');
-                            if (loginModal) {
-                                loginModal.style.display = 'flex';
-                            } else {
-                                // Fallback: redirect to login
-                                window.location.href = '/login/google';
-                            }
-                        }
-                        
-                        // Giữ feedback hiển thị 1 giây trước khi reset
-                        setTimeout(() => {
+                        return;
+                    }
+
+                    // Prevent default behavior
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+
+                    switch (action) {
+                        case 'share-facebook':
+                            const filename = btn.getAttribute('data-filename');
+                            const shareUrl = `${window.location.origin}/view_svg/${filename}`;
+                            copyToClipboardWithCustomFeedback(shareUrl, btn, 'Facebook', 'Đã copy!');
+                            setTimeout(() => {
+                                btn.dataset.tapCount = '0';
+                                btn.classList.remove('individual-active', 'ready-to-execute');
+                            }, 2000);
+                            break;
+                            
+                        case 'copy-link':
+                            const url = btn.getAttribute('data-url');
+                            copyToClipboard(url, btn);
+                            setTimeout(() => {
+                                btn.dataset.tapCount = '0';
+                                btn.classList.remove('individual-active', 'ready-to-execute');
+                            }, 2000);
+                            break;
+                            
+                        case 'download-image':
+                            const downloadFilename = btn.getAttribute('data-filename');
+                            if (downloadFilename) window.location.href = `/view_svg/${downloadFilename}`;
                             btn.dataset.tapCount = '0';
                             btn.classList.remove('individual-active', 'ready-to-execute');
-                        }, 1000);
+                            break;
+                            
+                        case 'toggle-code':
+                            // Kiểm tra trạng thái đăng nhập
+                            if (window.isLoggedIn) {
+                                toggleTikzCode(btn);
+                            } else {
+                                // Hiển thị modal đăng nhập cho user chưa đăng nhập
+                                const loginModal = document.getElementById('login-modal');
+                                if (loginModal) {
+                                    loginModal.style.display = 'flex';
+                                } else {
+                                    // Fallback: redirect to login
+                                    window.location.href = '/login/google';
+                                }
+                            }
+                            setTimeout(() => {
+                                btn.dataset.tapCount = '0';
+                                btn.classList.remove('individual-active', 'ready-to-execute');
+                            }, 1000);
+                            break;
+                            
+                        default:
+                            // Unknown action, reset after 1 second
+                            setTimeout(() => {
+                                btn.dataset.tapCount = '0';
+                                btn.classList.remove('individual-active', 'ready-to-execute');
+                            }, 1000);
+                            break;
                     }
                     
                     return false;
@@ -4802,122 +4773,43 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
         });
     }
 
-    // Function to initialize Facebook share buttons
-    function initializeFbShareButtons() {
-        // Initialize Facebook share buttons for file cards
-        const fbShareBtns = document.querySelectorAll('.file-card .fb-share-btn');
-        console.log('🔄 Initializing: Found', fbShareBtns.length, 'file fb-share-btn buttons');
-        
-        // Cho phép hoạt động cho cả desktop và mobile, đã đăng nhập và chưa đăng nhập
-        fbShareBtns.forEach(function(btn) {
-            // Kiểm tra xem button có đang hiển thị feedback không
-            const textDiv = btn.querySelector('.text');
-            const isShowingFeedback = textDiv && textDiv.textContent === 'Đã copy!';
+    // Function to initialize action buttons using data-action
+    function initializeActionButtons() {
+        // Handle all action buttons using data-action
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('.Btn[data-action]');
+            if (!btn) return;
             
-            if (!isShowingFeedback) {
-                // Remove existing event listeners
-                btn.replaceWith(btn.cloneNode(true));
-                const newBtn = document.querySelector(`[data-filename="${btn.getAttribute('data-filename')}"]`);
-                
-                if (newBtn) {
-                    newBtn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        
-                        const filename = newBtn.getAttribute('data-filename');
-                        console.log('🔄 fb-share-btn clicked, filename:', filename);
-                        
-                        if (!filename) {
-                            console.error('❌ No filename found for fb-share-btn');
-                            return;
-                        }
-                        
-                        // Tạo Facebook share URL và copy vào clipboard
-                        const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(`${window.location.origin}/static/${filename}`)}`;
-                        copyToClipboardWithCustomFeedback(shareUrl, newBtn, 'Facebook', 'Đã copy!');
-                    });
-                }
-            } else {
-                console.log('🔄 Skipping fb-share-btn initialization - button is showing feedback');
-            }
-        });
-    }
-
-    // Function to initialize copy link buttons
-    function initializeCopyLinkButtons() {
-        const copyLinkBtns = document.querySelectorAll('.file-card .file-copy-link-btn');
-        console.log('🔄 Initializing: Found', copyLinkBtns.length, 'file file-copy-link-btn buttons');
-        
-        // Cho phép hoạt động cho cả desktop và mobile, đã đăng nhập và chưa đăng nhập
-        copyLinkBtns.forEach(function(btn) {
-            // Thêm event listener nếu chưa có onclick attribute
-            if (!btn.hasAttribute('onclick')) {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
+            e.preventDefault();
+            const action = btn.dataset.action;
+            
+            switch (action) {
+                case 'share-facebook':
+                    const filename = btn.getAttribute('data-filename');
+                    const shareUrl = `${window.location.origin}/view_svg/${filename}`;
+                    copyToClipboardWithCustomFeedback(shareUrl, btn, 'Facebook', 'Đã copy!');
+                    break;
                     
+                case 'copy-link':
                     const url = btn.getAttribute('data-url');
-                    console.log('🔄 file-copy-link-btn clicked, url:', url);
+                    copyToClipboard(url, btn, 'Copy Link', 'Đã copy!');
+                    break;
                     
-                    if (!url) {
-                        console.error('❌ No URL found for file-copy-link-btn');
-                        return;
-                    }
+                case 'download-image':
+                    const downloadFilename = btn.getAttribute('data-filename');
+                    window.location.href = `/view_svg/${downloadFilename}`;
+                    break;
                     
-                    // Copy URL vào clipboard
-                    copyToClipboard(url, this, 'Copy Link');
-                });
+                case 'toggle-code':
+                    toggleTikzCode(btn);
+                    break;
             }
         });
     }
 
     // Re-initialize buttons after a short delay to ensure DOM is ready
     setTimeout(function() {
-        initializeFbShareButtons();
-        initializeCopyLinkButtons();
-        
-        // ==== Thêm logic cho Desktop buttons (cho cả đã đăng nhập và chưa đăng nhập) ====
-        if (!document.documentElement.classList.contains('is-touch')) {
-            console.log('🖥️ Adding Desktop button logic (for all users)');
-            
-            // Thêm event listener cho Desktop buttons
-            document.addEventListener('click', function(e) {
-                const btn = e.target.closest('.file-card .fb-share-btn, .file-card .file-copy-link-btn');
-                if (!btn) return;
-                
-                e.preventDefault();
-                e.stopPropagation();
-                
-                if (btn.classList.contains('fb-share-btn')) {
-                    const filename = btn.getAttribute('data-filename');
-                    if (!filename) {
-                        console.error('❌ No filename found for Desktop Facebook button');
-                        return;
-                    }
-                    
-                    const shareUrl = `${window.location.origin}/view_svg/${filename}`;
-                    console.log('🖥️ Desktop Facebook Share URL:', shareUrl);
-                    
-                    // Sử dụng function copyToClipboard với custom feedback
-                    copyToClipboardWithCustomFeedback(shareUrl, btn, 'Facebook', 'Đã copy!');
-                    
-                    console.log('✅ Desktop Facebook button: Link copied successfully');
-                } else if (btn.classList.contains('file-copy-link-btn')) {
-                    const url = btn.getAttribute('data-url');
-                    if (!url) {
-                        console.error('❌ No URL found for Desktop Copy Link button');
-                        return;
-                    }
-                    
-                    console.log('🖥️ Desktop Copy Link URL:', url);
-                    
-                    // Sử dụng function copyToClipboard
-                    copyToClipboard(url, btn);
-                    
-                    console.log('✅ Desktop Copy Link button: Link copied successfully');
-                }
-            });
-        }
+        initializeActionButtons();
     }, 100);
 
     // Đóng menu khi click bên ngoài
@@ -5103,7 +4995,10 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
         // 12) Initialize search functionality
         initializeSearch();
 
-        // 12) Touch events đã được xử lý trong initializeTouchBtnEvents cho tất cả users
+        // 13) Initialize action buttons using data-action
+        initializeActionButtons();
+
+        // 14) Touch events đã được xử lý trong initializeTouchBtnEvents cho tất cả users
         console.log('🔄 Touch events initialized for all users');
 
         console.log('DOMContentLoaded - appState.loggedIn:', window.appState && window.appState.loggedIn);

@@ -13,9 +13,13 @@ uploads/
 
 # Systemd/nginx sockets
 *.sock
-# Bỏ static khỏi Git
+# Static files - allow specific files
 static/*
 !static/.gitkeep
+!static/js/
+!static/css/
+!static/js/*.js
+!static/css/*.css
 .venv/
 error_tikz/
 test_*.py

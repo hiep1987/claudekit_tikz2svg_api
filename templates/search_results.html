@@ -218,10 +218,61 @@
           list-style: none;
         }
 
+        /* Mobile responsiveness align with index */
+        @media (max-width: 768px) {
+          .files-section {
+              margin-top: 20px;
+              padding: 15px;
+          }
+          .files-grid {
+              grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+              gap: 12px;
+          }
+          .file-card {
+              width: 100%;
+              min-width: 0;
+          }
+          .file-actions {
+              flex-direction: column;
+              gap: 8px;
+          }
+          .file-actions a, .file-actions button {
+              padding: 8px 12px;
+              font-size: 12px;
+              min-height: 36px;
+          }
+        }
+
+        @media (max-width: 600px) {
+          .files-grid {
+              grid-template-columns: 1fr;
+              gap: 15px;
+          }
+          .file-card {
+              width: 100%;
+              min-width: 0;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .files-section {
+              margin-top: 15px;
+              padding: 10px;
+          }
+          .files-grid {
+              gap: 10px;
+          }
+          .file-card {
+              width: 100%;
+              min-width: 0;
+          }
+        }
+
         /* Individual File Card */
         .file-card {
           position: relative;
           min-height: 260px;
+          width: 100%;
           display: flex;
           flex-direction: column;
           justify-content: flex-start;
@@ -229,7 +280,7 @@
           border: 1px solid #ddd;
           border-radius: 10px;
           box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-          transition: transform 0.2s ease;
+          transition: transform 0.2s ease, width 0.3s ease;
         }
 
         .file-card:hover {
@@ -423,6 +474,42 @@
           text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
         }
 
+        /* Mobile button states to match index page UX */
+        @media (hover: none), (pointer: coarse) {
+          .file-card.active .file-action-container .Btn.individual-active,
+          .file-card.active .file-action-container .Btn.ready-to-execute,
+          .file-card.active .file-action-container .Btn.mobile-hover {
+            background: linear-gradient(-50deg, rgb(39, 107, 255), rgb(112, 186, 255), rgb(39, 107, 255)) !important;
+            width: 120px !important;
+            transition: width 0.3s cubic-bezier(0.4,0,0.2,1);
+            border-radius: 20px !important;
+          }
+
+          .file-card.active .file-action-container .Btn.individual-active .text,
+          .file-card.active .file-action-container .Btn.ready-to-execute .text,
+          .file-card.active .file-action-container .Btn.mobile-hover .text {
+            opacity: 1 !important;
+            width: auto !important;
+            max-width: 85px !important;
+            color: #ffffff !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+          }
+
+          .file-card.active .file-action-container .Btn:not(.individual-active):not(.ready-to-execute):not(.mobile-hover) {
+            background: linear-gradient(-50deg, rgb(39, 107, 255), rgb(112, 186, 255), rgb(39, 107, 255)) !important;
+            max-width: 10px !important;
+            border-radius: 18px !important;
+          }
+
+          .file-card.active .file-action-container .Btn .text {
+            opacity: 0.5 !important;
+            width: auto !important;
+            max-width: 120px !important;
+            color: #ffffff !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+          }
+        }
+
         /* File Info Styling */
         .file-info {
             padding: 12px;
@@ -609,6 +696,8 @@
             border: 1px solid #dee2e6;
             border-radius: 5px;
             padding: 10px;
+            width: 100%;
+            box-sizing: border-box;
         }
         
         .tikz-code-header {
@@ -897,6 +986,9 @@
             
             // Initialize action buttons
             initializeActionButtons();
+
+            // Initialize mobile 2-tap logic similar to index.html
+            initializeTouchBtnEvents();
         }
         
         // Initialize action buttons (Facebook share, copy link, etc.)
@@ -919,6 +1011,112 @@
                     copyToClipboard(url, this, 'Copy Link');
                 });
             });
+        }
+
+        // Touch events for buttons (2-tap logic) - align with index page
+        function initializeTouchBtnEvents() {
+            // Detect touch environment (class is added above already)
+            const isTouch = document.documentElement.classList.contains('is-touch');
+            if (!isTouch) return;
+
+            document.addEventListener('click', function(e) {
+                const toggle = e.target.closest('.action-toggle-btn');
+                if (toggle) {
+                    const card = toggle.closest('.file-card');
+                    if (card) {
+                        document.querySelectorAll('.file-card.active').forEach(other => {
+                            if (other !== card) other.classList.remove('active');
+                        });
+                        card.classList.toggle('active');
+                    }
+                    return;
+                }
+
+                const btn = e.target.closest('.file-card .Btn');
+                if (!btn) return;
+
+                const card = btn.closest('.file-card');
+                if (!card || !card.classList.contains('active')) return;
+
+                if (!btn.dataset.tapCount) btn.dataset.tapCount = '0';
+                const currentTapCount = parseInt(btn.dataset.tapCount);
+
+                if (currentTapCount === 0) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    // reset other buttons
+                    card.querySelectorAll('.Btn').forEach(otherBtn => {
+                        if (otherBtn !== btn) {
+                            otherBtn.classList.remove('individual-active', 'ready-to-execute');
+                            otherBtn.dataset.tapCount = '0';
+                        }
+                    });
+                    btn.classList.add('individual-active', 'ready-to-execute');
+                    btn.dataset.tapCount = '1';
+                    setTimeout(() => {
+                        if (btn.dataset.tapCount === '1') {
+                            btn.classList.remove('individual-active', 'ready-to-execute');
+                            btn.dataset.tapCount = '0';
+                        }
+                    }, 5000);
+                    return;
+                }
+
+                if (currentTapCount === 1) {
+                    // execute based on handler/label
+                    const onclickAttr = btn.getAttribute('onclick') || '';
+                    const text = btn.querySelector('.text')?.textContent?.trim();
+
+                    if (text === 'Facebook') {
+                        const filename = btn.getAttribute('data-filename');
+                        const shareUrl = `${window.location.origin}/view_svg/${filename}`;
+                        copyToClipboard(shareUrl, btn, 'Facebook', 'Đã copy!');
+                        setTimeout(() => {
+                            btn.dataset.tapCount = '0';
+                            btn.classList.remove('individual-active', 'ready-to-execute');
+                        }, 2000);
+                        return;
+                    }
+
+                    if (text === 'Copy Link') {
+                        const url = btn.getAttribute('data-url');
+                        copyToClipboard(url, btn, 'Copy Link', 'Đã copy!');
+                        setTimeout(() => {
+                            btn.dataset.tapCount = '0';
+                            btn.classList.remove('individual-active', 'ready-to-execute');
+                        }, 2000);
+                        return;
+                    }
+
+                    if (text === 'Tải ảnh') {
+                        const filename = btn.getAttribute('data-filename');
+                        if (filename) window.location.href = `/view_svg/${filename}`;
+                        btn.dataset.tapCount = '0';
+                        btn.classList.remove('individual-active', 'ready-to-execute');
+                        return;
+                    }
+
+                    // Prefer robust handler detection over text
+                    if (onclickAttr.includes('toggleTikzCode') || text === 'Xem Code' || text === 'Ẩn code') {
+                        // Prevent inline onclick from firing (avoid double-toggle)
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+                        toggleTikzCode(btn);
+                        setTimeout(() => {
+                            btn.dataset.tapCount = '0';
+                            btn.classList.remove('individual-active', 'ready-to-execute');
+                        }, 1000);
+                        return;
+                    }
+
+                    // default reset
+                    setTimeout(() => {
+                        btn.dataset.tapCount = '0';
+                        btn.classList.remove('individual-active', 'ready-to-execute');
+                    }, 1000);
+                }
+            }, true);
         }
         
         // Copy to clipboard function

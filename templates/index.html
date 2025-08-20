@@ -4432,16 +4432,16 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
                 console.error('❌ Clipboard API failed:', err);
                 console.log('🔄 Falling back to execCommand method');
                 // Fallback to execCommand
-                fallbackCopyToClipboard(url, btn);
+                fallbackCopyToClipboard(url, btn, originalText, feedbackText);
             });
         } else {
             // Fallback cho các trình duyệt không hỗ trợ Clipboard API hoặc không có quyền
             console.log('🔄 Using fallback copy method (no clipboard permission)');
-            fallbackCopyToClipboard(url, btn);
+            fallbackCopyToClipboard(url, btn, originalText, feedbackText);
         }
     }
 
-    function fallbackCopyToClipboard(url, btn) {
+    function fallbackCopyToClipboard(url, btn, originalText = 'Copy Link', feedbackText = 'Đã copy!') {
         console.log('🔄 Executing fallback copy method for URL:', url);
         
         const textArea = document.createElement('textarea');

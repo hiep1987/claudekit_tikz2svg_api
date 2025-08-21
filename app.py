@@ -857,7 +857,26 @@ def save_svg():
         return jsonify({"error": "Không tìm thấy file tạm"}), 404
 
     now = datetime.now(tz_vn)
-    google_id = session.get("google_id", "anonymous")
+    
+    # ✅ Sửa đổi: Lấy google_id từ database thay vì session
+    try:
+        conn = mysql.connector.connect(
+            host=os.environ.get('DB_HOST', 'localhost'),
+            user=os.environ.get('DB_USER', 'hiep1987'),
+            password=os.environ.get('DB_PASSWORD', ''),
+            database=os.environ.get('DB_NAME', 'tikz2svg')
+        )
+        cursor = conn.cursor()
+        cursor.execute("SELECT google_id FROM user WHERE id = %s", (current_user.id,))
+        row = cursor.fetchone()
+        google_id = row[0] if row and row[0] else "anonymous"
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print(f"❌ ERROR getting google_id from DB: {e}", flush=True)
+        # Fallback to session if DB query fails
+        google_id = session.get("google_id", "anonymous")
+    
     timestamp = now.strftime("%H%M%S%d%m%y")
     svg_filename = f"{google_id}_{timestamp}.svg"
     svg_path_final = os.path.join(app.config['UPLOAD_FOLDER'], svg_filename)

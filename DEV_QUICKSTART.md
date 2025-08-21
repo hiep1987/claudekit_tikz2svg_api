@@ -108,3 +108,38 @@ git push origin main
 rm -f ./stagewise.json
 BROWSER=open npx stagewise@latesthay 
 ```
+
+## Fix PROD Static Files (CSS/JS)
+
+### Vấn đề thường gặp
+Khi thêm file CSS/JS mới (như `file_card.css`, `file_card.js`), PROD có thể báo lỗi 404 vì:
+- File tồn tại trong `/var/www/tikz2svg_api/current/static/css/`
+- Nhưng PROD serve từ `/var/www/tikz2svg_api/shared/static/` (không có thư mục css/js)
+
+### Giải pháp: Symlink (Khuyến nghị)
+
+**Chạy lệnh sau trên PROD (chỉ làm 1 lần):**
+```bash
+# Tạo symlink từ shared đến current
+ln -sf /var/www/tikz2svg_api/current/static/css /var/www/tikz2svg_api/shared/static/css
+ln -sf /var/www/tikz2svg_api/current/static/js /var/www/tikz2svg_api/shared/static/js
+
+# Kiểm tra symlink đã tạo
+ls -la /var/www/tikz2svg_api/shared/static/
+```
+
+### Workflow tự động
+1. **DEV**: Thay đổi CSS/JS → Commit & Push
+2. **Deploy**: `deploy.sh` clone code mới về current
+3. **Symlink tự động**: shared trỏ đến file mới trong current
+4. **PROD**: CSS/JS tự động cập nhật
+
+### Kiểm tra sau khi fix
+- **URL test**: `https://tikz2svg.mathlib.io.vn/static/css/file_card.css`
+- **Browser dev tools**: Network tab xem có 404 không
+- **Functionality**: Test nút "Xem Code" có hoạt động không
+
+### Lưu ý
+- Symlink chỉ cần tạo 1 lần
+- Tự động cập nhật khi deploy
+- Không cần copy thủ công mỗi lần thay đổi

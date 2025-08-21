@@ -15,314 +15,11 @@
     <!-- File Card CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/file_card.css', v='1.1') }}">
     
-    <!-- Custom Tailwind-like CSS for Navigation Bar -->
-    <style>
-        /* Tailwind-like utility classes for production */
-        .w-full { width: 100%; }
-        .max-w-7xl { max-width: 80rem; }
-        .mx-auto { margin-left: auto; margin-right: auto; }
-        .bg-white\/80 { background-color: rgba(255, 255, 255, 0.8); }
-        .backdrop-blur { backdrop-filter: blur(8px); }
-        .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
-        .rounded-2xl { border-radius: 1rem; }
-        .p-3 { padding: 0.75rem; }
-        .flex { display: flex; }
-        .items-center { align-items: center; }
-        .justify-between { justify-content: space-between; }
-        .mb-8 { margin-bottom: 2rem; }
-        .gap-2 { gap: 0.5rem; }
-        .bg-gradient-to-br { background-image: linear-gradient(to bottom right, var(--tw-gradient-stops)); }
-        .from-blue-500 { --tw-gradient-from: #3b82f6; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(59, 130, 246, 0)); }
-        .to-yellow-400 { --tw-gradient-to: #fbbf24; }
-        .p-1\.5 { padding: 0.375rem; }
-        .rounded-lg { border-radius: 0.5rem; }
-        .text-white { color: #ffffff; }
-        .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
-        .text-gray-800 { color: #1f2937; }
-        .font-bold { font-weight: 700; }
-        .hidden { display: none; }
-        
-        .gap-6 { gap: 1.5rem; }
-        .font-medium { font-weight: 500; }
-        .text-gray-700 { color: #374151; }
-        .relative { position: relative; }
-        .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
-        .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
-        .cursor-pointer { cursor: pointer; }
-        .transition { transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
-        .hover\:text-blue-600:hover { color: #2563eb; }
-        .block { display: block; }
-        .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
-        
-        .bg-gradient-to-r { background-image: linear-gradient(to right, var(--tw-gradient-stops)); }
-        .from-red-400 { --tw-gradient-from: #f87171; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(248, 113, 113, 0)); }
-        .to-red-600 { --tw-gradient-to: #dc2626; }
-        .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
-        .py-1\.5 { padding-top: 0.375rem; padding-bottom: 0.375rem; }
-        .rounded-xl { border-radius: 0.75rem; }
-        .hover\:scale-105:hover { transform: scale(1.05); }
-        .font-semibold { font-weight: 600; }
-        .text-xs { font-size: 0.75rem; line-height: 1rem; }
-        .from-blue-400 { --tw-gradient-from: #60a5fa; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(96, 165, 250, 0)); }
-        .to-yellow-400 { --tw-gradient-to: #fbbf24; }
-        
-        .hover\:bg-blue-100:hover { background-color: #dbeafe; }
-        .text-2xl { font-size: 1.5rem; line-height: 2rem; }
-        .text-gray-500 { color: #6b7280; }
-        .hover\:text-blue-400:hover { color: #60a5fa; }
-        .fixed { position: fixed; }
-        .top-0 { top: 0px; }
-        .left-0 { left: 0px; }
-        .h-full { height: 100%; }
-        .bg-black\/50 { background-color: rgba(0, 0, 0, 0.5); }
-        .z-40 { z-index: 40; }
-        .z-50 { z-index: 50; }
-        .z-400 { z-index: 400; }
-        .absolute { position: absolute; }
-        .right-0 { right: 0px; }
-        .w-60 { width: 15rem; }
-        .bg-white { background-color: #ffffff; }
-        .flex-col { flex-direction: column; }
-        .p-6 { padding: 1.5rem; }
-        .gap-3 { gap: 0.75rem; }
-        .self-end { align-self: flex-end; }
-        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
-        .mt-2 { margin-top: 0.5rem; }
-        .text-center { text-align: center; }
-        .mt-8 { margin-top: 2rem; }
-        .w-6 { width: 1.5rem; }
-        .h-6 { height: 1.5rem; }
-        .rounded-full { border-radius: 9999px; }
-        .to-purple-600 { --tw-gradient-to: #9333ea; }
-        .justify-center { justify-content: center; }
-        .mb-4 { margin-bottom: 1rem; }
-        .flex-grow { flex-grow: 1; }
-        .mx-4 { margin-left: 1rem; margin-right: 1rem; }
-        .overflow-hidden { overflow: hidden; }
-        .p-1\.5 { padding: 0.375rem; }
-        .text-base { font-size: 1rem; line-height: 1.5rem; }
-        .flex-shrink-0 { flex-shrink: 0; }
-        
-        /* Responsive breakpoints */
-        @media (min-width: 920px) {
-            .md\:flex { display: flex; }
-            .md\:block { display: block; }
-            .md\:hidden { display: none; }
-        }
-        
-        /* New Navigation Styles */
-        .menu-underline {
-          transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
-          height: 3px;
-          width: 0;
-          background: linear-gradient(90deg, #fbbf24, #38bdf8);
-          border-radius: 2px;
-          margin: 0 auto;
-          position: absolute;
-          bottom: -2px;
-          left: 50%;
-          transform: translateX(-50%);
-        }
-        .menu-item:hover .menu-underline, .menu-item.active .menu-underline {
-          width: 80%;
-        }
-        
-        /* Override custom CSS for menu items to remove unwanted styling */
-        .menu-item {
-          list-style: none !important;
-        }
-        
-        .menu-item a {
-          text-decoration: none !important;
-          color: #374151 !important;
-        }
-        
-        /* Remove any bullet points or underlines from menu */
-        .hidden.md\\:flex {
-          list-style: none !important;
-          padding: 0 !important;
-          margin: 0 !important;
-        }
-        
-        .hidden.md\\:flex li {
-          list-style: none !important;
-        }
-        
-        .hidden.md\\:flex li a {
-          text-decoration: none !important;
-        }
-        
-        /* Fix mobile menu styling */
-        #mobile-menu a {
-          text-decoration: none !important;
-          color: #374151 !important;
-        }
-        
-        #mobile-menu a:hover {
-          color: #2563eb !important;
-        }
-        
-        /* Mobile scroll for menu */
-        #scrollable-menu {
-            overflow-x: auto;
-            white-space: nowrap;
-            -webkit-overflow-scrolling: touch;
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-            padding-bottom: 0.75rem;
-        }
-        #scrollable-menu::-webkit-scrollbar {
-            display: none;
-        }
-        
-        #scrollable-menu-list {
-            list-style: none !important;
-            padding: 0 !important;
-            margin: 0 !important;
-        }
-        
-        #scrollable-menu-list .menu-item {
-            flex-shrink: 0;
-        }
-        
-        #main-menu {
-            list-style: none !important;
-            padding: 0 !important;
-            margin: 0 !important;
-        }
-    </style>
+    <!-- Navigation CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navigation.css', v='1.0') }}">
     
-    <!-- Files Grid Styles (copied from index.html) -->
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f5f5;
-        }
-        
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            box-sizing: border-box;
-            overflow-x: hidden;
-        }
-        
-        /* Files Grid */
-        .files-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-          gap: 20px;
-          margin-top: 20px;
-          padding: 0;
-          list-style: none;
-        }
-
-        /* Mobile responsiveness align with index */
-        @media (max-width: 768px) {
-          .files-section {
-              margin-top: 20px;
-              padding: 15px;
-          }
-          .files-grid {
-              grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-              gap: 12px;
-          }
-          .file-card {
-              width: 100%;
-              min-width: 0;
-          }
-          .file-actions {
-              flex-direction: column;
-              gap: 8px;
-          }
-          .file-actions a, .file-actions button {
-              padding: 8px 12px;
-              font-size: 12px;
-              min-height: 36px;
-          }
-        }
-
-        @media (max-width: 600px) {
-          .files-grid {
-              grid-template-columns: 1fr;
-              gap: 15px;
-          }
-          .file-card {
-              width: 100%;
-              min-width: 0;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .files-section {
-              margin-top: 15px;
-              padding: 10px;
-          }
-          .files-grid {
-              gap: 10px;
-          }
-          .file-card {
-              width: 100%;
-              min-width: 0;
-          }
-        }
-
-        /* No Files */
-        .no-files {
-            text-align: center;
-            color: #666;
-            padding: 40px 20px;
-            background: #f9f9f9;
-            border-radius: 12px;
-            border: 2px dashed #ddd;
-        }
-
-        .no-files-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-            opacity: 0.5;
-        }
-
-        /* Search Results Header */
-        .search-results-header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 12px;
-        }
-
-        .search-results-header h1 {
-            font-size: 2rem;
-            margin-bottom: 10px;
-        }
-
-        .search-results-header .search-query {
-            font-size: 1.2rem;
-            opacity: 0.9;
-        }
-
-        .back-to-home {
-            display: inline-block;
-            margin-top: 15px;
-            padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            transition: background 0.3s;
-        }
-
-        .back-to-home:hover {
-            background: rgba(255, 255, 255, 0.3);
-            color: white;
-        }
-    </style>
+    <!-- Search Results CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/search_results.css', v='1.0') }}">
 </head>
 <body>
     {% include '_navbar.html' %}
@@ -363,6 +60,20 @@
 
     <footer style='text-align:center;color:#888;font-size:14px;margin-top:40px;'>© 2024 TikZ2SVG - All rights reserved.</footer>
 
+    <!-- Login Modal -->
+    <div id="login-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.3); z-index:9999; align-items:center; justify-content:center;">
+        <div style="background:white; padding:30px; border-radius:12px; text-align:center; max-width:400px; margin:20px;">
+            <h3 style="margin-bottom:20px; color:#333;">🔐 Đăng nhập để xem code</h3>
+            <p style="margin-bottom:25px; color:#666; line-height:1.5;">Bạn cần đăng nhập để xem TikZ code của ảnh SVG này.</p>
+            <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+                <a href="/login/google" style="background:#1976d2; color:white; padding:12px 24px; border-radius:6px; text-decoration:none; font-weight:bold; display:inline-flex; align-items:center; gap:8px;">
+                    <i class="fab fa-google"></i> Đăng nhập Google
+                </a>
+                <button onclick="document.getElementById('login-modal').style.display='none'" style="background:#eee; color:#333; padding:12px 24px; border-radius:6px; border:none; font-weight:bold; cursor:pointer;">Huỷ</button>
+            </div>
+        </div>
+    </div>
+
     <!-- CodeMirror JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/stex/stex.min.js"></script>
@@ -374,84 +85,11 @@
     <!-- File Card JavaScript -->
     <script src="{{ url_for('static', filename='js/file_card.js', v='1.1') }}"></script>
     
-    <!-- Search Results Page JavaScript -->
+    <!-- Search Results JavaScript -->
     <script>
-        // Global variable for login status from server
+        // Set login status from server
         var isLoggedIn = {% if logged_in %}true{% else %}false{% endif %};
-        
-
-        
-        // Initialize like buttons for search results
-        function initializeSearchResults() {
-            // Initialize like buttons if user is logged in
-            if (isLoggedIn) {
-                document.querySelectorAll('input[id^="heart-"]').forEach(function(checkbox) {
-                    checkbox.addEventListener('change', function() {
-                        const fileId = this.id.replace('heart-', '');
-                        const isLiked = this.checked;
-                        const likeButton = this.closest('.like-button');
-                        const currentNumber = likeButton.querySelector('.like-count.one');
-                        const moveNumber = likeButton.querySelector('.like-count.two');
-                        
-                        // Prevent double click
-                        this.disabled = true;
-                        
-                        // Send AJAX request to backend
-                        fetch('/like_svg', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-Requested-With': 'XMLHttpRequest'
-                            },
-                            body: JSON.stringify({
-                                svg_id: fileId,
-                                action: isLiked ? 'like' : 'unlike'
-                            })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                // Update UI with new like count
-                                const newCount = data.like_count;
-                                currentNumber.textContent = newCount;
-                                moveNumber.textContent = newCount;
-                                
-                                // Update checkbox state based on server response
-                                this.checked = data.is_liked;
-                            } else {
-                                // Revert UI if backend failed
-                                this.checked = !isLiked;
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            // Revert UI on error
-                            this.checked = !isLiked;
-                            alert('Có lỗi kết nối!');
-                        })
-                        .finally(() => {
-                            this.disabled = false;
-                        });
-                    });
-                });
-            }
-            
-            // Initialize touch events for mobile
-            if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-                document.documentElement.classList.add('is-touch');
-            }
-            
-            // Initialize file card functionality
-            initializeFileCardActions();
-            initializeFileCardTouchEvents();
-        }
-        
-
-        
-        // Initialize when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeSearchResults();
-        });
     </script>
+    <script src="{{ url_for('static', filename='js/search_results.js', v='1.0') }}"></script>
 </body>
 </html>

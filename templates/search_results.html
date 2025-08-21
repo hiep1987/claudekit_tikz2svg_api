@@ -376,10 +376,15 @@
     
     <!-- Search Results Page JavaScript -->
     <script>
+        // Global variable for login status from server
+        var isLoggedIn = {% if logged_in %}true{% else %}false{% endif %};
+        
+
+        
         // Initialize like buttons for search results
         function initializeSearchResults() {
             // Initialize like buttons if user is logged in
-            if ({{ 'true' if logged_in else 'false' }}) {
+            if (isLoggedIn) {
                 document.querySelectorAll('input[id^="heart-"]').forEach(function(checkbox) {
                     checkbox.addEventListener('change', function() {
                         const fileId = this.id.replace('heart-', '');

@@ -74,10 +74,10 @@
     
     <!-- TikZ Code Section -->
     {% if file.tikz_code %}
-    <div class="tikz-code-block" style="display:none; margin-top:10px;">
+    <div class="tikz-code-block" style="margin-top:10px;">
         <div class="tikz-code-header">
             <span>Code TikZ:</span>
-            <button class="copy-btn" onclick="copyTikzCode(this)">📋 Copy</button>
+            <button class="copy-btn" onclick="copyTikzCode(this)" type="button">📋 Copy</button>
         </div>
         <div class="code-block">
             <textarea class="tikz-cm" readonly>{{ file.tikz_code }}</textarea>
@@ -86,8 +86,4 @@
     {% endif %}
 </div>
 
-<!-- Include File Card CSS -->
-<link rel="stylesheet" href="{{ url_for('static', filename='css/file_card.css') }}">
 
-<!-- Include File Card JavaScript -->
-<script src="{{ url_for('static', filename='js/file_card.js') }}"></script>

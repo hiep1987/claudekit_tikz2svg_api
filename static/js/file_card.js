@@ -1,9 +1,4 @@
-/**
- * File Card Component JavaScript
- * Handles all file card interactions including actions, touch events, and TikZ code
- */
-
-// Initialize action buttons for file card
+// Initialize action buttons using data-action
 function initializeFileCardActions() {
     // Handle all action buttons using data-action
     document.addEventListener('click', function(e) {
@@ -31,7 +26,19 @@ function initializeFileCardActions() {
                 break;
                 
             case 'toggle-code':
-                toggleTikzCode(btn);
+                // Kiểm tra trạng thái đăng nhập - sử dụng biến từ server
+                if (typeof isLoggedIn !== 'undefined' && isLoggedIn) {
+                    toggleTikzCode(btn);
+                } else {
+                    // Hiển thị modal đăng nhập cho user chưa đăng nhập
+                    const loginModal = document.getElementById('login-modal');
+                    if (loginModal) {
+                        loginModal.style.display = 'flex';
+                    } else {
+                        // Fallback: redirect to login
+                        window.location.href = '/login/google';
+                    }
+                }
                 break;
         }
     });
@@ -40,10 +47,6 @@ function initializeFileCardActions() {
 // Touch events for buttons (2-tap logic)
 function initializeFileCardTouchEvents() {
     // Detect touch environment
-    if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-        document.documentElement.classList.add('is-touch');
-    }
-    
     const isTouch = document.documentElement.classList.contains('is-touch');
     if (!isTouch) return;
 
@@ -136,7 +139,19 @@ function initializeFileCardTouchEvents() {
                     break;
                     
                 case 'toggle-code':
-                    toggleTikzCode(btn);
+                    // Kiểm tra trạng thái đăng nhập - sử dụng biến từ server
+                    if (typeof isLoggedIn !== 'undefined' && isLoggedIn) {
+                        toggleTikzCode(btn);
+                    } else {
+                        // Hiển thị modal đăng nhập cho user chưa đăng nhập
+                        const loginModal = document.getElementById('login-modal');
+                        if (loginModal) {
+                            loginModal.style.display = 'flex';
+                        } else {
+                            // Fallback: redirect to login
+                            window.location.href = '/login/google';
+                        }
+                    }
                     setTimeout(() => {
                         btn.dataset.tapCount = '0';
                         btn.classList.remove('individual-active', 'ready-to-execute');
@@ -318,9 +333,3 @@ function fallbackCopyTikzCode(code, btn) {
     
     document.body.removeChild(textArea);
 }
-
-// Initialize file card functionality when DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-    initializeFileCardActions();
-    initializeFileCardTouchEvents();
-});

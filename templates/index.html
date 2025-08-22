@@ -249,11 +249,7 @@
             window.location.href = "{{ url_for('google.login') }}";
         }
 
-        // File cards are now rendered server-side using Jinja2 partials
-        // No need for loadSvgFiles() function anymore
 
-        // Like functionality is now handled by file_card.js
-        // No need for handleLikeClick() and setupFileCardButtons() functions anymore
 
 
 
@@ -1001,16 +997,10 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
             });
         }
 
-        // ==== Load files ====
-        const filesSection = document.querySelector('.files-section');
-        if (filesSection && filesSection.dataset.isOwner === 'true') {
-            loadFiles();
-            startFilesPolling();
-        } else {
-            // Nếu chưa đăng nhập, load public files và vẫn polling
-            loadFiles();
-            startFilesPolling();
-        }
+        // ==== Start polling for like updates ====
+        startFilesPolling();
+        
+
 
         // ==== Touch events đã được initialize trong file_card.js ====
 
@@ -1031,82 +1021,75 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
         
         // ==== Action buttons đã được initialize trong file_card.js ====
         
-        // ==== Start login status polling (kiểm tra trạng thái đăng nhập định kỳ) ====
+
+        
+        // ==== Start login status polling ====
         setInterval(() => {
-            refreshLoginStatusAndLoadFiles();
+            refreshLoginStatus();
         }, 30000); // Kiểm tra mỗi 30 giây
         
         // ==== Listen for login success events ====
-        // Kiểm tra URL để xem có phải vừa đăng nhập thành công không
         if (window.location.search.includes('login_success=true')) {
-            console.log('🔄 Login success detected, switching to private files...');
+            console.log('🔄 Login success detected, restarting polling...');
             setTimeout(() => {
                 stopFilesPolling();
-                refreshLoginStatusAndLoadFiles();
-            }, 1000); // Delay 1 giây để đảm bảo session đã được cập nhật
+                refreshLoginStatus();
+            }, 1000);
         }
         
         // ==== Listen for page visibility changes ====
-        // Khi user quay lại tab, kiểm tra trạng thái đăng nhập
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) {
                 console.log('🔄 Page became visible, checking login status...');
-                refreshLoginStatusAndLoadFiles();
+                refreshLoginStatus();
             }
         });
         
         // ==== Listen for focus events ====
-        // Khi user focus vào window, kiểm tra trạng thái đăng nhập
         window.addEventListener('focus', () => {
             console.log('🔄 Window focused, checking login status...');
-            refreshLoginStatusAndLoadFiles();
+            refreshLoginStatus();
         });
         
         // ==== Listen for storage events (cross-tab login/logout) ====
-        // Khi user đăng nhập/đăng xuất ở tab khác
         window.addEventListener('storage', (e) => {
             if (e.key === 'login_status') {
                 console.log('🔄 Login status changed in another tab, refreshing...');
                 stopFilesPolling();
-                refreshLoginStatusAndLoadFiles();
+                refreshLoginStatus();
             }
         });
         
         // ==== Listen for online/offline events ====
-        // Khi kết nối mạng thay đổi, kiểm tra trạng thái đăng nhập
         window.addEventListener('online', () => {
             console.log('🔄 Network online, checking login status...');
             stopFilesPolling();
-            refreshLoginStatusAndLoadFiles();
+            refreshLoginStatus();
         });
         
         // ==== Listen for beforeunload events ====
-        // Khi user sắp rời khỏi trang, lưu trạng thái
         window.addEventListener('beforeunload', () => {
             localStorage.setItem('login_status', window.isLoggedIn ? 'logged_in' : 'logged_out');
         });
         
         // ==== Check stored login status on page load ====
-        // Kiểm tra trạng thái đăng nhập đã lưu
         const storedLoginStatus = localStorage.getItem('login_status');
         if (storedLoginStatus && storedLoginStatus !== (window.isLoggedIn ? 'logged_in' : 'logged_out')) {
             console.log('🔄 Stored login status differs from current, refreshing...');
             stopFilesPolling();
-            refreshLoginStatusAndLoadFiles();
+            refreshLoginStatus();
         }
         
         // ==== Initialize login status in localStorage ====
-        // Khởi tạo trạng thái đăng nhập trong localStorage
         localStorage.setItem('login_status', window.isLoggedIn ? 'logged_in' : 'logged_out');
         
         // ==== Log initial state ====
         console.log('🔄 Initial login status:', window.isLoggedIn ? 'Logged in' : 'Not logged in');
-        console.log('🔄 Loading files for:', window.isLoggedIn ? 'logged in user' : 'public access');
         console.log('🔄 Polling will be active for both logged in and public users');
     }
 
-    // Refresh login status and load files if needed
-    function refreshLoginStatusAndLoadFiles() {
+    // Refresh login status and restart polling if needed
+    function refreshLoginStatus() {
         // Cập nhật trạng thái đăng nhập từ server
         fetch('/api/check_login_status')
             .then(response => response.json())
@@ -1117,16 +1100,14 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
                 // Cập nhật localStorage
                 localStorage.setItem('login_status', window.isLoggedIn ? 'logged_in' : 'logged_out');
                 
-                // Nếu trạng thái đăng nhập thay đổi, load files và restart polling
+                // Nếu trạng thái đăng nhập thay đổi, restart polling
                 if (!wasLoggedIn && window.isLoggedIn) {
-                    console.log('🔄 User logged in, switching to private files...');
+                    console.log('🔄 User logged in, restarting polling...');
                     stopFilesPolling();
-                    loadFiles(true); // Force load khi user vừa đăng nhập
                     startFilesPolling();
                 } else if (wasLoggedIn && !window.isLoggedIn) {
-                    console.log('🔄 User logged out, switching to public files...');
+                    console.log('🔄 User logged out, restarting polling...');
                     stopFilesPolling();
-                    loadFiles(true); // Force load khi user vừa đăng xuất
                     startFilesPolling();
                 }
             })
@@ -1135,215 +1116,70 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
             });
     }
 
-    // Load files from API
-    function loadFiles(forceLoad = false) {
-        console.log('🔄 loadFiles called...', forceLoad ? '(forced)' : '');
-        const container = document.getElementById('files-container');
-        console.log('🔄 Container found:', !!container);
-        
-        // Kiểm tra flag toàn cục
-        if (window.activeFeedbackCount > 0) {
-            return;
-        }
-        
-        // Chọn API endpoint dựa trên trạng thái đăng nhập
-        const apiEndpoint = window.isLoggedIn ? '/api/files' : '/api/public/files';
-        console.log('🔄 Using API endpoint:', apiEndpoint);
-        
-        fetch(apiEndpoint)
-            .then(response => {
-                console.log('🔄 Response status:', response.status);
-                if (!response.ok) {
-                    // Nếu đã kiểm tra đăng nhập trước đó, 401 không nên xảy ra
-                    // Nhưng vẫn xử lý để đảm bảo an toàn
-                    if (response.status === 401) {
-                        console.log('🔄 Unexpected 401 response, user session may have expired');
-                        container.innerHTML = `
-                            <div class="no-files">
-                                <div class="no-files-icon">🔒</div>
-                                <h4>Phiên đăng nhập đã hết hạn</h4>
-                                <p>Vui lòng đăng nhập lại để xem files đã lưu</p>
-                            </div>
-                        `;
-                        return Promise.reject('Unauthorized'); // Prevent further processing
-                    }
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                // Xử lý response format khác nhau giữa /api/files và /api/public/files
-                const files = window.isLoggedIn ? data : (data.files || []);
-                return files;
-            })
-            .then(files => {
-                if (!files) return;
-                
-                if (files.length === 0) {
-                    const noFilesMessage = window.isLoggedIn 
-                        ? 'Hãy tạo và lưu một số file SVG để xem chúng ở đây'
-                        : 'Hiện tại chưa có file SVG nào được chia sẻ công khai';
-                    
-                    container.innerHTML = `
-                        <div class="no-files">
-                            <div class="no-files-icon">📁</div>
-                            <h4>Chưa có file nào</h4>
-                            <p>${noFilesMessage}</p>
-                        </div>
-                    `;
-                    return;
-                }
-                
-                // Render files
-                const filesHTML = files.map(file => `
-                    <div class="file-card" data-file-id="${file.id}">
-                      <button class="action-toggle-btn" type="button" aria-label="Hiện menu hành động">⋯</button>
-                      <div class="file-info">
-                        <div class="file-creator" style="margin-bottom: 0; font-size: 12px;">
-                          👤 <a href="/profile/${file.creator_id}/svg-files" style="text-decoration: none; color: #1976d2; font-weight: 700; font-size: 13px;">
-                            ${file.creator_username}
-                          </a>
-                          <span style="margin-left:8px; color: #666; font-size: 11px;">${file.created_time_vn || file.created_time}</span>
-                        </div>
-                      </div>
-                      <div class="file-img-container">
-                        <img src="${file.url}" alt="${file.filename}">
-                        <div class="like-button-wrapper">
-                          <div class="like-button">
-                            <input id="heart-${file.id}" type="checkbox" ${file.is_liked_by_current_user ? 'checked' : ''} ${!window.isLoggedIn ? 'disabled' : ''} />
-                            <label class="like" for="heart-${file.id}" ${!window.isLoggedIn ? 'style="opacity: 0.6; cursor: not-allowed;"' : ''}>
-                              <svg class="like-icon" fill-rule="nonzero" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path d="m11.645 20.91-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z"></path>
-                              </svg>
-                              <span class="like-text">Likes</span>
-                            </label>
-                            <span class="like-count one">${file.like_count}</span>
-                            <span class="like-count two">${file.like_count}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="file-action-container">
-                        <ul class="file-action-list">
-                          <li class="file-action-item">
-                            <button type="button" class="Btn" data-action="download-image" data-filename="${file.filename}">
-                              <div class="sign">
-                                <i class="fas fa-image logoIcon"></i>
-                              </div>
-                              <div class="text">Tải ảnh</div>
-                            </button>
-                          </li>
-                         <li class="file-action-item">
-                            <button type="button" class="Btn" data-action="share-facebook" data-filename="${file.filename}" data-has-feedback="true">
-                              <div class="sign">
-                                <i class="fab fa-facebook logoIcon"></i>
-                              </div>
-                              <div class="text">Facebook</div>
-                            </button>
-                          </li>
-                          <li class="file-action-item">
-                            <button type="button" class="Btn" data-action="copy-link" data-url="/static/${file.filename}" data-has-feedback="true">
-                              <div class="sign">
-                                <i class="fas fa-link logoIcon"></i>
-                              </div>
-                              <div class="text">Copy Link</div>
-                            </button>
-                          </li>
-                          ${file.tikz_code ? `
-                          <li class="file-action-item">
-                            <button type="button" class="Btn" data-action="toggle-code">
-                              <div class="sign">
-                                <i class="fas fa-code logoIcon"></i>
-                              </div>
-                              <div class="text">Xem Code</div>
-                            </button>
-                          </li>
-                          ` : ''}
-
-                        </ul>
-                      </div>
-                      
-                      <!-- TikZ Code Section -->
-                      ${file.tikz_code ? `
-                      <div class="tikz-code-block" style="display:none; margin-top:10px;">
-                        <div class="tikz-code-header">
-                          <span>Code TikZ:</span>
-                          <button class="copy-btn" onclick="copyTikzCode(this)">📋 Copy</button>
-                        </div>
-                        <div class="code-block">
-                          <textarea class="tikz-cm" readonly>${file.tikz_code}</textarea>
-                        </div>
-                      </div>
-                      ` : ''}
-                    </div>
-                `).join('');
-                
-                container.innerHTML = filesHTML;
-                
-                // Like buttons đã được initialize trong file_card.js
-                
-                // Cập nhật currentFiles cho polling
-                currentFiles = files;
-                console.log('🔄 Updated currentFiles for polling:', currentFiles.length, 'files');
-                
-                // Note: Event delegation đã được setup trong DOMContentLoaded, 
-                // nên không cần re-initialize cho các element mới được thêm vào
-            })
-            .catch(error => {
-                console.error('Error loading files:', error);
-                
-                // Nếu đã xử lý 401 trong .then(), không hiển thị lại
-                if (error === 'Unauthorized') {
-                    return;
-                }
-                
-                // Nếu force load và có lỗi, có thể user chưa đăng nhập thực sự
-                if (forceLoad) {
-                    console.log('🔄 Force load failed, checking login status...');
-                    refreshLoginStatusAndLoadFiles();
-                    return;
-                }
-                
-                // Thông báo lỗi khác nhau cho user đã đăng nhập và chưa đăng nhập
-                const errorMessage = window.isLoggedIn 
-                    ? 'Không thể tải danh sách files của bạn. Vui lòng thử lại sau.'
-                    : 'Không thể tải danh sách files công khai. Vui lòng thử lại sau.';
-                
-                container.innerHTML = `
-                    <div class="no-files">
-                        <div class="no-files-icon">❌</div>
-                        <h4>Không thể tải danh sách files</h4>
-                        <p>${errorMessage}</p>
-                    </div>
-                `;
-            });
-    }
+    // Files are now rendered server-side using Jinja2 templates
+    // No need for loadFiles() function anymore - REMOVED
 
     // Function initializeFileLikeButtons đã được move vào file_card.js
 
-    // Global variable to store current files for polling comparison
-    let currentFiles = [];
+    // Global variable for polling interval
     let pollingInterval = null;
     
-    // Real-time synchronization for files via polling
-    // Updated for server-side rendering - reload page instead of dynamic loading
+    // Real-time synchronization for likes via polling
+    // Only update like counts, not entire file list
     function startFilesPolling() {
-        console.log('🔄 Starting files polling...');
+        console.log('🔄 Starting likes polling...');
+        
         const pollInterval = 15000; // 15 seconds
         
         pollingInterval = setInterval(function() {
-            console.log('🔄 Polling files...', new Date().toLocaleTimeString());
+            console.log('🔄 Polling likes...', new Date().toLocaleTimeString());
             
             // Kiểm tra flag toàn cục
             if (window.activeFeedbackCount > 0) {
                 return;
             }
             
-            // Since files are now rendered server-side, reload the page to get updates
-            console.log('🔄 Files updated, reloading page...');
-            location.reload();
+            // Fetch updated files data to check for like count changes
+            const apiEndpoint = window.isLoggedIn ? '/api/files' : '/api/public/files';
+            fetch(apiEndpoint)
+                .then(response => response.json())
+                .then(data => {
+                    // Xử lý response format khác nhau giữa /api/files và /api/public/files
+                    const files = window.isLoggedIn ? data : (data.files || []);
+                    
+                    // Only update like counts if there are changes
+                    updateLikeCounts(files);
+                })
+                .catch(error => {
+                    console.error('Error polling likes:', error);
+                });
         }, pollInterval);
         
-        console.log('🔄 Started files polling (15s interval) - page reload mode');
+        console.log('🔄 Started likes polling (15s interval)');
+    }
+    
+    // Function to update only like counts without reloading entire file list
+    function updateLikeCounts(files) {
+        files.forEach(file => {
+            const fileCard = document.querySelector(`[data-file-id="${file.id}"]`);
+            if (fileCard) {
+                // Update like count
+                const likeCountOne = fileCard.querySelector('.like-count.one');
+                const likeCountTwo = fileCard.querySelector('.like-count.two');
+                if (likeCountOne && likeCountTwo) {
+                    likeCountOne.textContent = file.like_count;
+                    likeCountTwo.textContent = file.like_count;
+                }
+                
+                // Update like button state if user is logged in
+                if (window.isLoggedIn) {
+                    const likeCheckbox = fileCard.querySelector(`input[id="heart-${file.id}"]`);
+                    if (likeCheckbox && likeCheckbox.checked !== file.is_liked_by_current_user) {
+                        likeCheckbox.checked = file.is_liked_by_current_user;
+                    }
+                }
+            }
+        });
     }
     
     // Function to stop polling
@@ -1354,6 +1190,8 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
             console.log('🔄 Stopped files polling');
         }
     }
+    
+
 
     // Function initializeTouchBtnEvents đã được move vào file_card.js
 

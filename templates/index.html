@@ -265,23 +265,38 @@
             }
         }
 
-        // Function setupRequireLogin đã được move vào file_card.js
-
-        // Hàm khởi tạo event listeners cho các nút
-        // Function initializeEventListeners đã được move vào file_card.js
-
         var cm; // Khai báo global để các hàm khác truy cập được
-        // Function copyToClipboard đã được move vào file_card.js
 
         function copySvgCode() {
             const codeBlock = document.getElementById('svgCode');
-            const copyBtn = document.querySelector('.copy-btn');
-            copyToClipboard(codeBlock.textContent, copyBtn, '📋 Copy Code');
+            const copyBtn = document.getElementById('copy-svg-code-btn');
+            if (codeBlock && copyBtn) {
+                const code = codeBlock.textContent;
+                navigator.clipboard.writeText(code).then(function() {
+                    copyBtn.textContent = '✅ Đã copy!';
+                    setTimeout(() => { 
+                        copyBtn.textContent = '📋 Copy Code'; 
+                    }, 2000);
+                }).catch(function(err) {
+                    console.error('Clipboard API failed:', err);
+                    // Fallback method
+                    const textArea = document.createElement('textarea');
+                    textArea.value = code;
+                    textArea.style.position = 'fixed';
+                    textArea.style.left = '-999999px';
+                    textArea.style.top = '-999999px';
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    copyBtn.textContent = '✅ Đã copy!';
+                    setTimeout(() => { 
+                        copyBtn.textContent = '📋 Copy Code'; 
+                    }, 2000);
+                });
+            }
         }
-
-        // Function copyTikzCode đã được move vào file_card.js
-
-        
 
         // Khởi tạo CodeMirror sẽ được gọi trong init chính
         function initCodeMirrorAndBindings() {
@@ -534,7 +549,7 @@
                         resultToolsSection.style.display = 'none';
                     }
 
-                    // Event listeners đã được xử lý trong file_card.js
+
 
                     // Khởi tạo lại CodeMirror cho textarea id="code"
                     ensureCodeMirror();
@@ -555,7 +570,117 @@
                         if (exportBtn) {
                             const newFileId = exportBtn.getAttribute('data-file-id');
                             if (newFileId) saveServerBtn.setAttribute('data-file-id', newFileId);
+                            
+                            // Thêm event listener cho export-btn sau khi được tạo động
+                            if (!exportBtn.hasAttribute('data-event-bound')) {
+                                exportBtn.setAttribute('data-event-bound', 'true');
+                                exportBtn.addEventListener('click', async function() {
+                                    const svgTempId = exportBtn.getAttribute('data-file-id') || '';
+                                    const format = document.getElementById('export-format').value;
+                                    const widthVal = document.getElementById('export-width').value;
+                                    const heightVal = document.getElementById('export-height').value;
+                                    const dpiVal = document.getElementById('export-dpi').value;
+                                    const msg = document.getElementById('export-msg');
+
+                                    // Reset message area
+                                    msg.textContent = '';
+                                    msg.className = '';
+
+                                    if ((widthVal && widthVal <= 0) || (heightVal && heightVal <= 0) || (dpiVal && dpiVal <= 0)) {
+                                        msg.textContent = 'Width, Height, DPI phải là số dương!';
+                                        return;
+                                    }
+
+                                    exportBtn.disabled = true;
+                                    exportBtn.textContent = 'Đang xử lý...';
+
+                                    try {
+                                        const res = await fetch('/temp_convert', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({
+                                                file_id: svgTempId,
+                                                fmt: format,
+                                                width: widthVal || undefined,
+                                                height: heightVal || undefined,
+                                                dpi: dpiVal || undefined
+                                            })
+                                        });
+                                        const data = await res.json();
+                                        if (data.url) {
+                                            // Container to make layout clean like view_svg
+                                            const container = document.createElement('div');
+                                            container.style.display = 'flex';
+                                            container.style.flexDirection = 'column';
+                                            container.style.alignItems = 'center';
+                                            container.style.gap = '6px';
+
+                                            // Build link safely
+                                            const link = document.createElement('a');
+                                            link.href = data.url;
+                                            link.download = '';
+                                            link.className = 'export-download-link';
+                                            link.textContent = `Tải về ${format.toUpperCase()}`;
+                                            container.appendChild(link);
+
+                                            // Optional: show file info if backend returns it (align with view_svg.html)
+                                            if (data.file_size || data.actual_size) {
+                                                const info = document.createElement('div');
+                                                info.style.marginTop = '8px';
+                                                info.style.fontSize = '12px';
+                                                info.style.color = '#666';
+                                                info.style.textAlign = 'center';
+                                                info.style.fontWeight = 'bold';
+
+                                                const parts = [];
+                                                if (data.file_size) {
+                                                    const sizeKB = (data.file_size / 1024).toFixed(1);
+                                                    parts.push(`Dung lượng: ${sizeKB} KB`);
+                                                }
+                                                if (data.actual_size) {
+                                                    parts.push(`Kích thước: ${data.actual_size}`);
+                                                }
+                                                info.textContent = parts.join(' | ');
+                                                container.appendChild(info);
+                                            }
+
+                                            msg.appendChild(container);
+                                        } else {
+                                            msg.textContent = data.error || 'Lỗi không xác định!';
+                                        }
+                                    } catch (err) {
+                                        msg.textContent = 'Lỗi kết nối hoặc máy chủ!';
+                                    }
+
+                                    exportBtn.disabled = false;
+                                    exportBtn.textContent = 'Tải xuống';
+                                });
+                            }
                         }
+                        
+                        // Thêm event listener cho toggle-svg-code-btn sau khi được tạo động
+                        const toggleSvgCodeBtn = (document.getElementById('result-tools-section') || newResultToolsSection)?.querySelector('#toggle-svg-code-btn');
+                        if (toggleSvgCodeBtn && !toggleSvgCodeBtn.hasAttribute('data-event-bound')) {
+                            toggleSvgCodeBtn.setAttribute('data-event-bound', 'true');
+                            toggleSvgCodeBtn.onclick = function() {
+                                const container = document.getElementById('svg-code-container');
+                                if (container) {
+                                    const currentlyHidden = container.style.display === 'none' || container.style.display === '';
+                                    container.style.display = currentlyHidden ? 'block' : 'none';
+                                    this.textContent = currentlyHidden ? '📜 Ẩn code SVG' : '📜 Xem code SVG';
+                                }
+                            };
+                        }
+                        
+                        // Thêm event listener cho copy-svg-code-btn sau khi được tạo động
+                        const copySvgCodeBtn = (document.getElementById('result-tools-section') || newResultToolsSection)?.querySelector('#copy-svg-code-btn');
+                        if (copySvgCodeBtn && !copySvgCodeBtn.hasAttribute('data-event-bound')) {
+                            copySvgCodeBtn.setAttribute('data-event-bound', 'true');
+                            copySvgCodeBtn.onclick = function() {
+                                copySvgCode();
+                            };
+                        }
+                        
                         // Lấy code TikZ mới từ CodeMirror
                         if (window.cm && typeof window.cm.getValue === 'function') {
                             saveServerBtn.setAttribute('data-tikz-code', window.cm.getValue());
@@ -583,22 +708,6 @@
             return false;
         }
         window.submitTikzCodeAjax = submitTikzCodeAjax;
-
-            // BỎ VÒNG LẶP NÀY - Chỉ khởi tạo CodeMirror khi cần trong toggleTikzCode
-            // document.querySelectorAll('.tikz-cm').forEach(function(textarea) {
-            //     if (!textarea.CodeMirror) {
-            //         CodeMirror.fromTextArea(textarea, {
-            //             mode: 'stex',
-            //             theme: 'material',
-            //             lineNumbers: true,
-            //             readOnly: true,
-            //             viewportMargin: Infinity
-            //         });
-            //     }
-            // });
-        // Kết thúc initCodeMirrorAndBindings
-
-        // (Đã loại bỏ khối highlight TikZ input cũ để tránh lỗi linter và trùng chức năng)
 
         // Hàm cập nhật preview real-time cho form nhập code
         async function updateInputPreview(tikzCode) {
@@ -733,7 +842,7 @@
             }
         }
 
-        // Function toggleTikzCode đã được move vào file_card.js
+
     </script>
     <!-- Highlight.js JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
@@ -774,37 +883,11 @@
         
 // Kiểm tra trạng thái đăng nhập từ backend (không dùng trực tiếp để tránh linter)
 // const isLoggedIn = {{ 'true' if user_email else 'false' }};
-// Gán sự kiện cho các nút cần đăng nhập trong files-section (đã gộp vào init chính)
-// ĐÃ GỘP VÀO INIT CHÍNH: phần dưới giữ lại để tương thích nhưng không thêm listener mới
-(function initFilesSectionBindingsOnce() {
-  // Logic cho buttons đã được xử lý trong file_card.js với data-action pattern
-  
-  // Debug: Kiểm tra các nút có sẵn (đã được thay thế bằng data-action pattern)
-  console.log('🔍 File cards sử dụng data-action pattern, không cần debug cũ');
-  
-  // Button states đã được xử lý trong file_card.js
-  
-  // Thêm sự kiện cho nút biên dịch nếu chưa đăng nhập
-  const compileBtn = document.getElementById('compile-btn');
-  if (compileBtn && !window.appState.loggedIn) {
-    compileBtn.addEventListener('click', function(e) {
-      e.preventDefault();
-      showLoginModal();
-    });
-  }
-  
-  // Button logic đã được xử lý trong file_card.js với data-action pattern
-})();
+
 function showLoginModal() {
   document.getElementById('login-modal').style.display = 'flex';
 }
 
-// Function updateButtonStates đã được move vào file_card.js
-
-// Thêm sự kiện click cho nút đăng nhập Google trong modal sẽ được gọi trong init chính
-</script>
-<script>
-// Logout link sẽ được gán trong init chính
 </script>
 
 <!-- Modal nhập từ khóa Bootstrap -->
@@ -864,6 +947,64 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
         // Khởi tạo biến global cho pending data
         window.pendingFileId = null;
         window.pendingTikzCode = "";
+
+        // Event listener cho nút save-server-btn
+        document.querySelectorAll('#save-server-btn').forEach(btn => {
+            btn.onclick = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const fileId = this.getAttribute('data-file-id');
+                const tikzCode = this.getAttribute('data-tikz-code') || "";
+                
+                if (!fileId) {
+                    alert("Lỗi: không có file_id!");
+                    return;
+                }
+
+                // Reset modal
+                const keywordsInput = document.getElementById('keywordsInput');
+                const suggestionsBox = document.getElementById('keywordSuggestions');
+                if (keywordsInput) keywordsInput.value = "";
+                if (suggestionsBox) {
+                    suggestionsBox.innerHTML = '';
+                    suggestionsBox.style.display = 'none';
+                }
+
+                // Lấy URL ảnh SVG từ preview hiện tại
+                const currentPreview = document.querySelector('.col:last-child img');
+                const modalSvgImg = document.getElementById('modal-svg-img');
+                if (currentPreview && modalSvgImg) {
+                    modalSvgImg.src = currentPreview.src;
+                    modalSvgImg.style.display = 'block';
+                } else if (modalSvgImg) {
+                    modalSvgImg.style.display = 'none';
+                }
+
+                // Kiểm tra xem có file_id hợp lệ không (tức là đã biên dịch thành công)
+                if (!fileId || fileId === 'None' || fileId === '') {
+                    alert('⚠️ Cảnh báo: Chưa có ảnh SVG được biên dịch thành công.\n\nVui lòng nhấn nút "Biên dịch" trước khi lưu server.');
+                    return;
+                }
+
+                // Kiểm tra xem code TikZ hiện tại có khớp với code TikZ đã được biên dịch không
+                const currentTikzCode = window.cm ? window.cm.getValue() : document.getElementById('code').value;
+                const compiledTikzCode = this.getAttribute('data-tikz-code') || "";
+                
+                if (currentTikzCode.trim() !== compiledTikzCode.trim()) {
+                    alert('⚠️ Cảnh báo: Code TikZ hiện tại khác với code TikZ đã được biên dịch.\n\nẢnh hiển thị: từ code TikZ hiện tại\nẢnh sẽ được lưu: từ code TikZ đã biên dịch\n\nVui lòng nhấn nút "Biên dịch" để cập nhật trước khi lưu server.');
+                    return;
+                }
+
+                // Lưu thông tin tạm thời
+                window.pendingFileId = fileId;
+                window.pendingTikzCode = tikzCode;
+
+                // Hiện modal Bootstrap
+                const modal = new bootstrap.Modal(document.getElementById('keywordModal'));
+                modal.show();
+            };
+        });
 
         // Khi gõ trong ô textarea → fetch gợi ý
         keywordsInput.addEventListener('input', function() {
@@ -999,10 +1140,10 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
 
         // ==== Start polling for like updates ====
         startFilesPolling();
+
+
         
 
-
-        // ==== Touch events đã được initialize trong file_card.js ====
 
         // ==== Initialize CodeMirror ====
         // Kiểm tra xem CodeMirror đã được load chưa
@@ -1018,8 +1159,6 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
                 }
             }, 1000);
         }
-        
-        // ==== Action buttons đã được initialize trong file_card.js ====
         
 
         
@@ -1119,8 +1258,6 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
     // Files are now rendered server-side using Jinja2 templates
     // No need for loadFiles() function anymore - REMOVED
 
-    // Function initializeFileLikeButtons đã được move vào file_card.js
-
     // Global variable for polling interval
     let pollingInterval = null;
     
@@ -1193,19 +1330,7 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
     
 
 
-    // Function initializeTouchBtnEvents đã được move vào file_card.js
 
-    // Switch statement đã được move vào file_card.js
-    // Function initializeTouchBtnEvents đã được move vào file_card.js
-
-    // Function xử lý touch events đơn giản cho trường hợp chưa đăng nhập
-    // Đã được gộp vào initializeTouchBtnEvents để xử lý cho tất cả users
-
-    // Copy to clipboard functions đã được move vào file_card.js
-
-    // Function toggleTikzCode đã được move vào file_card.js
-
-    // Function copyTikzCode đã được move vào file_card.js
 
     // Initialize CodeMirror for TikZ code blocks
     function initializeCodeMirror() {
@@ -1251,7 +1376,7 @@ Script này xử lý logic lưu file SVG lên server với mô tả/từ khóa d
         });
     }
 
-    // Function initializeActionButtons đã được move vào file_card.js
+    
 
     // Đóng menu khi click bên ngoài
     document.addEventListener('click', function (e) {

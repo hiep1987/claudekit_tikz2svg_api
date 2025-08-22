@@ -2,7 +2,7 @@
     <!-- Logo -->
     <div class="flex items-center gap-2 flex-shrink-0">
         <span class="bg-gradient-to-br from-blue-500 to-yellow-400 p-1.5 rounded-lg">
-            <i class="fa-solid fa-meteor text-white text-lg"></i>
+            <i class="fas fa-rocket text-white text-lg"></i>
         </span>
         <span class="text-lg font-bold text-gray-800">TikZ to SVG</span>
     </div>
@@ -55,7 +55,7 @@
         {% endif %}
         <!-- Hamburger (mobile) -->
         <button id="menu-toggle" class="md:hidden p-1.5 rounded-lg hover:bg-blue-100 transition">
-            <i class="fa-solid fa-bars text-lg"></i>
+            <i class="fas fa-bars text-lg"></i>
         </button>
     </div>
 </nav>
@@ -89,7 +89,7 @@
 <div id="mobile-menu" class="fixed top-0 left-0 w-full h-full bg-black/50 z-400 hidden">
     <div class="absolute right-0 top-0 w-60 bg-white h-full shadow-lg flex flex-col p-6 gap-3">
         <button id="close-menu" class="self-end text-2xl text-gray-500 hover:text-blue-400">
-            <i class="fa-solid fa-xmark"></i>
+            <i class="fas fa-times"></i>
         </button>
         <a href="/" class="py-2 px-3 rounded-lg text-gray-700 font-medium hover:bg-blue-100 transition">Trang chủ</a>
         {% if current_user.is_authenticated %}

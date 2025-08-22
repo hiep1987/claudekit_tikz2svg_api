@@ -569,6 +569,87 @@ def get_svg_files():
         print(f"[ERROR] get_svg_files(): {e}", flush=True)
     return svg_files
 
+def get_svg_files_with_likes(user_id=None):
+    """Lấy files với thông tin like cho user đã đăng nhập - Format thống nhất với search_results"""
+    svg_files = []
+    current_user_id = user_id or (current_user.id if current_user and current_user.is_authenticated else None)
+    
+    try:
+        conn = mysql.connector.connect(
+            host=os.environ.get('DB_HOST', 'localhost'),
+            user=os.environ.get('DB_USER', 'hiep1987'),
+            password=os.environ.get('DB_PASSWORD', ''),
+            database=os.environ.get('DB_NAME', 'tikz2svg')
+        )
+        cursor = conn.cursor(dictionary=True)
+        
+        # Query tương tự như search_results nhưng cho tất cả files
+        cursor.execute("""
+            SELECT DISTINCT s.*, u.username as creator_username, u.id as creator_id,
+                   (SELECT COUNT(*) FROM svg_like WHERE svg_image_id = s.id) as like_count,
+                   (SELECT COUNT(*) FROM svg_like WHERE svg_image_id = s.id AND user_id = %s) as is_liked_by_current_user
+            FROM svg_image s
+            JOIN user u ON s.user_id = u.id
+            ORDER BY s.created_at DESC
+            LIMIT 100
+        """, (current_user_id or 0,))
+        
+        rows = cursor.fetchall()
+        
+        # Format results giống như search_results
+        for row in rows:
+            row['url'] = f"/static/{row['filename']}"
+            row['created_time_vn'] = row['created_at'].strftime('%d/%m/%Y %H:%M') if row['created_at'] else ''
+            row['is_liked_by_current_user'] = bool(row['is_liked_by_current_user'])
+            svg_files.append(row)
+        
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print(f"[ERROR] get_svg_files_with_likes(): {e}", flush=True)
+    
+    return svg_files
+
+def get_public_svg_files():
+    """Lấy public files cho user chưa đăng nhập - Format thống nhất với search_results"""
+    svg_files = []
+    
+    try:
+        conn = mysql.connector.connect(
+            host=os.environ.get('DB_HOST', 'localhost'),
+            user=os.environ.get('DB_USER', 'hiep1987'),
+            password=os.environ.get('DB_PASSWORD', ''),
+            database=os.environ.get('DB_NAME', 'tikz2svg')
+        )
+        cursor = conn.cursor(dictionary=True)
+        
+        # Query cho public files (không có like info)
+        cursor.execute("""
+            SELECT DISTINCT s.*, u.username as creator_username, u.id as creator_id,
+                   (SELECT COUNT(*) FROM svg_like WHERE svg_image_id = s.id) as like_count,
+                   0 as is_liked_by_current_user
+            FROM svg_image s
+            JOIN user u ON s.user_id = u.id
+            ORDER BY s.created_at DESC
+            LIMIT 100
+        """)
+        
+        rows = cursor.fetchall()
+        
+        # Format results giống như search_results
+        for row in rows:
+            row['url'] = f"/static/{row['filename']}"
+            row['created_time_vn'] = row['created_at'].strftime('%d/%m/%Y %H:%M') if row['created_at'] else ''
+            row['is_liked_by_current_user'] = False  # User chưa đăng nhập
+            svg_files.append(row)
+        
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        print(f"[ERROR] get_public_svg_files(): {e}", flush=True)
+    
+    return svg_files
+
 def clean_control_chars(text):
     return re.sub(r'[\x00-\x08\x0B-\x1F\x7F]', '', text)
 
@@ -814,8 +895,14 @@ def index():
                     except Exception:
                         pass
                         
-    # Lấy danh sách các file SVG đã tạo
-    svg_files = get_svg_files()
+    # Lấy danh sách các file SVG đã tạo với format thống nhất
+    if logged_in:
+        # Private files cho user đã đăng nhập
+        svg_files = get_svg_files_with_likes()
+    else:
+        # Public files cho user chưa đăng nhập
+        svg_files = get_public_svg_files()
+    
     return render_template("index.html",
                            tikz_code=tikz_code,
                            svg_url=svg_url,

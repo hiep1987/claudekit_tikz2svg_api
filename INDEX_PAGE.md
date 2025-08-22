@@ -144,7 +144,22 @@ File `templates/index.html` là trang chủ chính của ứng dụng TikZ to SV
 
 ## ⚡ JavaScript Functionality
 
-### 1. **CodeMirror Integration**
+### 1. **Unified File Card System**
+```javascript
+// Tất cả file card functionality được consolidate trong file_card.js v1.2
+// Bao gồm: search_results.js + file_card.js cũ
+<script src="{{ url_for('static', filename='js/file_card.js', v='1.2') }}"></script>
+```
+
+**Features included:**
+- Action buttons (download, share, copy, view code)
+- Like/unlike functionality
+- Touch events cho mobile
+- Login modal integration
+- CodeMirror initialization cho TikZ code
+- Clipboard API với fallback
+
+### 2. **CodeMirror Integration**
 ```javascript
 function initCodeMirrorAndBindings() {
     cm = CodeMirror.fromTextArea(tikzCode, {
@@ -157,7 +172,7 @@ function initCodeMirrorAndBindings() {
 }
 ```
 
-### 2. **Real-time Preview**
+### 3. **Real-time Preview**
 ```javascript
 async function updateInputPreview(tikzCode) {
     // AJAX request để cập nhật preview real-time
@@ -168,17 +183,17 @@ async function updateInputPreview(tikzCode) {
 }
 ```
 
-### 3. **File Management**
+### 4. **File Management**
 ```javascript
 async function loadSvgFiles() {
     const apiEndpoint = window.isLoggedIn ? '/api/files' : '/api/public/files';
     const response = await fetch(apiEndpoint);
     const data = await response.json();
-    // Render file cards
+    // Render file cards với unified functionality
 }
 ```
 
-### 4. **Search Functionality**
+### 5. **Search Functionality**
 ```javascript
 function initializeSearch() {
     const searchInput = document.getElementById('main-search-input');
@@ -193,27 +208,29 @@ function initializeSearch() {
 }
 ```
 
-### 5. **Touch Events (Mobile)**
+### 6. **Data-Action Pattern**
 ```javascript
-function initializeTouchBtnEvents() {
-    document.addEventListener('click', function(e) {
-        const btn = e.target.closest('.Btn');
-        if (!btn) return;
-        
-        // 2-tap logic for mobile devices
-        if (!btn.dataset.tapCount) btn.dataset.tapCount = '0';
-        const currentTapCount = parseInt(btn.dataset.tapCount);
-        
-        if (currentTapCount === 0) {
-            // First tap - highlight button
-            btn.classList.add('individual-active', 'ready-to-execute');
-            btn.dataset.tapCount = '1';
-        } else if (currentTapCount === 1) {
-            // Second tap - execute action
-            executeButtonAction(btn);
-        }
-    });
-}
+// Unified button handling với data-action attributes
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.Btn[data-action]');
+    if (!btn) return;
+    
+    const action = btn.dataset.action;
+    switch (action) {
+        case 'download-image':
+            // Handle download
+            break;
+        case 'share-facebook':
+            // Handle Facebook share
+            break;
+        case 'copy-link':
+            // Handle copy link
+            break;
+        case 'toggle-code':
+            // Handle view TikZ code
+            break;
+    }
+});
 ```
 
 ## 🔧 Tính năng Chi tiết
@@ -229,12 +246,12 @@ function initializeTouchBtnEvents() {
 - SVG code display với syntax highlighting
 - Copy functionality cho tất cả formats
 
-### 3. **File Management**
+### 3. **File Management (Unified)**
 - Grid layout responsive
-- Like/unlike functionality
-- Share to Facebook
-- Copy direct links
-- View TikZ code với CodeMirror
+- Like/unlike functionality (consolidated)
+- Share to Facebook (consolidated)
+- Copy direct links (consolidated)
+- View TikZ code với CodeMirror (consolidated)
 - Delete files (owner only)
 
 ### 4. **Search & Discovery**
@@ -250,7 +267,7 @@ function initializeTouchBtnEvents() {
 
 ### 6. **Mobile Optimization**
 - Touch-friendly interface
-- 2-tap button activation
+- 2-tap button activation (consolidated)
 - Horizontal scroll support
 - Responsive grid layouts
 - Mobile-specific UI adjustments
@@ -459,6 +476,29 @@ function fallbackCopyToClipboard(url, btn) {
 - User analytics
 - Server health checks
 
+## 🔄 Recent Updates (Latest)
+
+### **JavaScript Consolidation (v1.2)**
+- **Merged:** `search_results.js` vào `file_card.js` v1.2
+- **Deleted:** `static/js/search_results.js` (83 lines)
+- **Fixed:** ReferenceError `updateButtonStates is not defined`
+- **Removed:** Duplicate functions và old debug code
+- **Fixed:** JavaScript loading order issues
+- **Reduced:** `index.html` từ 2,301 → 1,879 lines (-422 lines)
+
+### **Unified File Card System**
+- **Consolidated:** Tất cả file card functionality vào `file_card.js`
+- **Standardized:** Data-action pattern cho buttons
+- **Improved:** Touch events và mobile support
+- **Enhanced:** Login modal integration
+- **Optimized:** CodeMirror initialization
+
+### **Performance Improvements**
+- **Reduced:** Total codebase by 1,006 lines
+- **Eliminated:** Function conflicts và duplicate code
+- **Improved:** JavaScript loading order
+- **Enhanced:** Error handling và fallback mechanisms
+
 ---
 
-*Tài liệu này mô tả trang index.html - trang chủ chính của ứng dụng TikZ to SVG với đầy đủ tính năng chuyển đổi, quản lý file, tìm kiếm và tương tác xã hội. Trang được thiết kế responsive và tối ưu cho cả desktop và mobile với real-time updates và cross-platform synchronization.*
+*Tài liệu này mô tả trang index.html - trang chủ chính của ứng dụng TikZ to SVG với đầy đủ tính năng chuyển đổi, quản lý file, tìm kiếm và tương tác xã hội. Trang được thiết kế responsive và tối ưu cho cả desktop và mobile với real-time updates và cross-platform synchronization. Gần đây đã được cập nhật với unified JavaScript system để cải thiện maintainability và performance.*

@@ -408,6 +408,7 @@ textarea:focus {
     height: auto;
     min-height: 0;
     max-height: none;
+    font-size: 13px;
 }
 
 #compile-save-row {

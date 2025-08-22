@@ -82,14 +82,11 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- File Card JavaScript -->
-    <script src="{{ url_for('static', filename='js/file_card.js', v='1.1') }}"></script>
-    
-    <!-- Search Results JavaScript -->
+    <!-- File Card JavaScript (includes search results functionality) -->
     <script>
         // Set login status from server
         var isLoggedIn = {% if logged_in %}true{% else %}false{% endif %};
     </script>
-    <script src="{{ url_for('static', filename='js/search_results.js', v='1.0') }}"></script>
+    <script src="{{ url_for('static', filename='js/file_card.js', v='1.2') }}"></script>
 </body>
 </html>

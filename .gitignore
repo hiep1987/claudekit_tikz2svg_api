@@ -24,6 +24,11 @@ static/*
 !static/*.js
 !static/*.css
 !static/*.html
+# Allow favicon and logo files
+!static/favicon*
+!static/logo*
+!static/apple*
+!static/android*
 .venv/
 error_tikz/
 test_*.py

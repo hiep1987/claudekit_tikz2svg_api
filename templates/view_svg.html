@@ -3,6 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <title>Xem SVG - {{ display_name }}</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="48x48" href="{{ url_for('static', filename='favicon-48x48.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='android-chrome-192x192.png') }}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{{ url_for('static', filename='android-chrome-512x512.png') }}">
+    <link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='favicon-32x32.png') }}">
     <meta property="og:title" content="TikZ to SVG - {{ display_name }}" />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="{{ request.host_url.rstrip('/') ~ png_url }}" />

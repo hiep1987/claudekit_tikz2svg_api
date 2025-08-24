@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, url_for, send_file, jsonify, session, redirect, flash, make_response
+from flask import Flask, request, render_template, url_for, send_file, jsonify, session, redirect, flash, make_response, send_from_directory, render_template_string
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 import os
 import subprocess
@@ -16,14 +16,19 @@ from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
 import mysql.connector
 from typing import Iterable
+import smtplib
+import base64
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 load_dotenv()
 
 
 # --- Static storage root (shared across releases) ---
-STATIC_ROOT = os.environ.get('TIKZ_SVG_DIR', '/var/www/tikz2svg_api/shared/static')
+STATIC_ROOT = os.environ.get('TIKZ_SVG_DIR', os.path.join(os.getcwd(), 'static'))
 os.makedirs(STATIC_ROOT, exist_ok=True)
 os.makedirs(os.path.join(STATIC_ROOT, 'avatars'), exist_ok=True)
+os.makedirs(os.path.join(STATIC_ROOT, 'images'), exist_ok=True)
 
 app = Flask(__name__, static_folder=STATIC_ROOT)
 
@@ -98,13 +103,17 @@ def cleanup_tmp_folder():
                         mtime = os.path.getmtime(folder_path)
                         if now - mtime > 600:  # hơn 10 phút
                             print(f"[CLEANUP] Removing old tmp folder: {folder_path}", flush=True)
-                            import shutil
-                            shutil.rmtree(folder_path, ignore_errors=True)
+                            try:
+                                import shutil
+                                shutil.rmtree(folder_path)
+                            except Exception as e:
+                                print(f"[CLEANUP] Error removing {folder_path}: {e}", flush=True)
         except Exception as e:
-            print(f"[WARN] Cleanup error: {e}", flush=True)
-        time.sleep(300)  # chạy lại mỗi 5 phút
+            print(f"[CLEANUP] Error in cleanup: {e}", flush=True)
+        time.sleep(300)  # Chạy mỗi 5 phút
 
-threading.Thread(target=cleanup_tmp_folder, daemon=True).start()
+cleanup_thread = threading.Thread(target=cleanup_tmp_folder, daemon=True)
+cleanup_thread.start()
 
 # Session config
 app.config.update(
@@ -2710,6 +2719,429 @@ def api_available_packages():
         "tikz_libraries": list(SAFE_TIKZ_LIBS),
         "pgfplots_libraries": list(SAFE_PGFPLOTS_LIBS)
     })
+
+# ✅ EMAIL SYSTEM ROUTES
+def create_hosted_logo():
+    """Tạo logo PNG được host trên server"""
+    try:
+        # Kiểm tra xem logo đã tồn tại chưa
+        logo_path = os.path.join(STATIC_ROOT, 'images', 'email_logo.png')
+        if os.path.exists(logo_path):
+            print(f"✅ Logo đã tồn tại: {logo_path}")
+            return True
+        
+        # Đọc SVG
+        svg_path = os.path.join(STATIC_ROOT, 'logo.svg')
+        if not os.path.exists(svg_path):
+            print(f"❌ Không tìm thấy file SVG: {svg_path}")
+            return False
+            
+        with open(svg_path, 'r') as f:
+            svg_content = f.read()
+        
+        # Chuyển đổi SVG thành PNG với kích thước lớn hơn
+        png_data = cairosvg.svg2png(bytestring=svg_content.encode('utf-8'), output_width=120, output_height=120)
+        
+        # Lưu PNG vào static/images
+        with open(logo_path, 'wb') as f:
+            f.write(png_data)
+        
+        print(f"✅ Logo PNG created: {len(png_data)} bytes -> {logo_path}")
+        return True
+        
+    except Exception as e:
+        print(f"❌ Lỗi khi tạo logo: {e}")
+        return False
+
+def send_email(to_email, subject, html_content):
+    """Gửi email"""
+    try:
+        smtp_server = os.getenv('ZOHO_SMTP_SERVER', 'smtp.zoho.com')
+        smtp_port = int(os.getenv('ZOHO_SMTP_PORT', '587'))
+        email = os.getenv('ZOHO_EMAIL', 'support@tikz2svg.com')
+        password = os.getenv('ZOHO_APP_PASSWORD')
+        
+        if not password:
+            return False, "Thiếu ZOHO_APP_PASSWORD trong .env"
+        
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = subject
+        msg['From'] = email
+        msg['To'] = to_email
+        
+        html_part = MIMEText(html_content, 'html', 'utf-8')
+        msg.attach(html_part)
+        
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(email, password)
+        server.sendmail(email, to_email, msg.as_string())
+        server.quit()
+        
+        return True, "Email đã được gửi thành công!"
+    except Exception as e:
+        return False, f"Lỗi: {str(e)}"
+
+@app.route('/static/images/<path:filename>')
+def serve_logo(filename):
+    """Serve logo files"""
+    return send_from_directory(os.path.join(STATIC_ROOT, 'images'), filename)
+
+@app.route('/email-test')
+@login_required
+def email_test_page():
+    """Trang test email cho admin"""
+    return render_template_string('''
+    <!DOCTYPE html>
+    <html lang="vi">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Test Email System - TikZ2SVG</title>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+            .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+            .header { text-align: center; margin-bottom: 30px; }
+            .form-group { margin-bottom: 20px; }
+            label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
+            input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; }
+            button { background: #0984e3; color: white; padding: 12px 24px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
+            button:hover { background: #74b9ff; }
+            .result { margin-top: 20px; padding: 15px; border-radius: 5px; }
+            .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+            .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+            .loading { display: none; text-align: center; color: #666; }
+            .logo-preview { text-align: center; margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 8px; }
+            .logo-preview img { width: 60px; height: 60px; border-radius: 8px; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>📧 Test Email System</h1>
+                <p>Gửi email test với logo TikZ2SVG (hosted trên server)</p>
+            </div>
+            
+            <div class="logo-preview">
+                <h3>🎨 Logo Preview (Hosted):</h3>
+                <img src="/static/images/email_logo.png" alt="TikZ2SVG Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <p style="display:none; color: #999;">Logo sẽ được tải từ server</p>
+                <p>Logo được host trên server thay vì base64 để tương thích tốt hơn.</p>
+            </div>
+            
+            <form id="emailForm">
+                <div class="form-group">
+                    <label for="email">Email nhận:</label>
+                    <input type="email" id="email" name="email" required placeholder="your@email.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="template">Loại email:</label>
+                    <select id="template" name="template">
+                        <option value="welcome">Welcome Email</option>
+                        <option value="verification">Verification Email</option>
+                        <option value="svg_verification">SVG Verification Email</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="username">Tên người dùng:</label>
+                    <input type="text" id="username" name="username" placeholder="Tên người dùng">
+                </div>
+                
+                <button type="submit">🚀 Gửi Email Test</button>
+            </form>
+            
+            <div class="loading" id="loading">
+                <p>⏳ Đang gửi email...</p>
+            </div>
+            
+            <div class="result" id="result" style="display: none;"></div>
+        </div>
+        
+        <script>
+            document.getElementById('emailForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const loading = document.getElementById('loading');
+                const result = document.getElementById('result');
+                
+                loading.style.display = 'block';
+                result.style.display = 'none';
+                
+                const formData = new FormData(this);
+                
+                try {
+                    const response = await fetch('/api/send-test-email', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const data = await response.json();
+                    
+                    result.className = 'result ' + (data.success ? 'success' : 'error');
+                    result.innerHTML = '<strong>' + (data.success ? '✅' : '❌') + '</strong> ' + data.message;
+                    result.style.display = 'block';
+                } catch (error) {
+                    result.className = 'result error';
+                    result.innerHTML = '<strong>❌</strong> Lỗi kết nối: ' + error.message;
+                    result.style.display = 'block';
+                } finally {
+                    loading.style.display = 'none';
+                }
+            });
+        </script>
+    </body>
+    </html>
+    ''')
+
+@app.route('/api/send-test-email', methods=['POST'])
+@login_required
+def send_test_email_api():
+    """API gửi email test"""
+    try:
+        email = request.form.get('email')
+        template = request.form.get('template', 'welcome')
+        username = request.form.get('username', 'User')
+        
+        if not email:
+            return jsonify({'success': False, 'message': 'Thiếu email'})
+        
+        # Tạo logo nếu chưa có
+        if not os.path.exists('static/images/email_logo.png'):
+            if not create_hosted_logo():
+                return jsonify({'success': False, 'message': 'Không thể tạo logo'})
+        
+        # Tạo nội dung email dựa trên template
+        if template == 'welcome':
+            subject = f"Chào mừng bạn đến với TikZ2SVG, {username}!"
+            html_content = create_welcome_email(username)
+        elif template == 'verification':
+            verification_code = "123456"  # Trong thực tế sẽ tạo ngẫu nhiên
+            subject = f"Xác thực tài khoản - TikZ2SVG"
+            html_content = create_verification_email(username, verification_code)
+        else:  # svg_verification
+            subject = f"Xác thực lưu SVG - TikZ2SVG"
+            html_content = create_svg_verification_email(username, 15)
+        
+        success, message = send_email(email, subject, html_content)
+        return jsonify({'success': success, 'message': message})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Lỗi: {str(e)}'})
+
+@app.route('/api/send-welcome-email', methods=['POST'])
+def send_welcome_email_api():
+    """API gửi email chào mừng cho user mới"""
+    try:
+        data = request.json
+        email = data.get('email')
+        username = data.get('username', 'User')
+        
+        if not email:
+            return jsonify({'success': False, 'message': 'Thiếu email'})
+        
+        # Tạo logo nếu chưa có
+        if not os.path.exists('static/images/email_logo.png'):
+            create_hosted_logo()
+        
+        subject = f"Chào mừng bạn đến với TikZ2SVG, {username}!"
+        html_content = create_welcome_email(username)
+        
+        success, message = send_email(email, subject, html_content)
+        return jsonify({'success': success, 'message': message})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Lỗi: {str(e)}'})
+
+@app.route('/api/send-verification-email', methods=['POST'])
+def send_verification_email_api():
+    """API gửi email xác thực tài khoản"""
+    try:
+        data = request.json
+        email = data.get('email')
+        username = data.get('username', 'User')
+        verification_code = data.get('verification_code')
+        
+        if not email or not verification_code:
+            return jsonify({'success': False, 'message': 'Thiếu email hoặc mã xác thực'})
+        
+        # Tạo logo nếu chưa có
+        if not os.path.exists('static/images/email_logo.png'):
+            create_hosted_logo()
+        
+        subject = f"Xác thực tài khoản - TikZ2SVG"
+        html_content = create_verification_email(username, verification_code)
+        
+        success, message = send_email(email, subject, html_content)
+        return jsonify({'success': success, 'message': message})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Lỗi: {str(e)}'})
+
+@app.route('/api/send-svg-verification-email', methods=['POST'])
+def send_svg_verification_email_api():
+    """API gửi email xác thực khi lưu nhiều SVG"""
+    try:
+        data = request.json
+        email = data.get('email')
+        username = data.get('username', 'User')
+        svg_count = data.get('svg_count', 10)
+        
+        if not email:
+            return jsonify({'success': False, 'message': 'Thiếu email'})
+        
+        # Tạo logo nếu chưa có
+        if not os.path.exists('static/images/email_logo.png'):
+            create_hosted_logo()
+        
+        subject = f"Xác thực lưu SVG - TikZ2SVG"
+        html_content = create_svg_verification_email(username, svg_count)
+        
+        success, message = send_email(email, subject, html_content)
+        return jsonify({'success': success, 'message': message})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Lỗi: {str(e)}'})
+
+def create_welcome_email(username):
+    """Tạo email chào mừng với hosted logo"""
+    return f'''
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Chào mừng đến với TikZ2SVG</title>
+    </head>
+    <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="text-align: center; margin-bottom: 30px; padding: 20px; background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%); border-radius: 10px;">
+            <div style="display: inline-block; background: white; padding: 10px; border-radius: 8px; margin-bottom: 15px;">
+                <img src="http://localhost:5173/static/images/email_logo.png" alt="TikZ2SVG Logo" style="width: 60px; height: 60px;">
+            </div>
+            <h1 style="color: white; margin: 0; font-size: 24px;">TikZ2SVG</h1>
+            <p style="color: white; margin: 10px 0 0 0; font-size: 16px;">Chuyển đổi TikZ thành SVG</p>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h2 style="color: #333; margin-top: 0;">🎉 Chào mừng {username}!</h2>
+            <p style="color: #666; line-height: 1.6;">
+                Cảm ơn bạn đã đăng ký sử dụng TikZ2SVG. Chúng tôi rất vui mừng chào đón bạn!
+            </p>
+            <p style="color: #666; line-height: 1.6;">
+                Với TikZ2SVG, bạn có thể dễ dàng chuyển đổi các file TikZ thành SVG một cách nhanh chóng và chính xác.
+            </p>
+        </div>
+        
+        <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #1976d2; margin-top: 0;">🚀 Bắt đầu ngay:</h3>
+            <ul style="color: #666; line-height: 1.6;">
+                <li>Tải lên file TikZ của bạn</li>
+                <li>Chọn định dạng SVG mong muốn</li>
+                <li>Tải xuống kết quả ngay lập tức</li>
+            </ul>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px; color: #999; font-size: 12px;">
+            <p>© 2024 TikZ2SVG. All rights reserved.</p>
+            <p>Thời gian: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+        </div>
+    </body>
+    </html>
+    '''
+
+def create_verification_email(username, verification_code):
+    """Tạo email xác thực với hosted logo"""
+    return f'''
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Xác thực tài khoản - TikZ2SVG</title>
+    </head>
+    <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="text-align: center; margin-bottom: 30px; padding: 20px; background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%); border-radius: 10px;">
+            <div style="display: inline-block; background: white; padding: 10px; border-radius: 8px; margin-bottom: 15px;">
+                <img src="http://localhost:5173/static/images/email_logo.png" alt="TikZ2SVG Logo" style="width: 60px; height: 60px;">
+            </div>
+            <h1 style="color: white; margin: 0; font-size: 24px;">TikZ2SVG</h1>
+            <p style="color: white; margin: 10px 0 0 0; font-size: 16px;">Xác thực tài khoản</p>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h2 style="color: #333; margin-top: 0;">🔐 Xác thực tài khoản</h2>
+            <p style="color: #666; line-height: 1.6;">
+                Xin chào {username}, vui lòng sử dụng mã xác thực sau để hoàn tất việc đăng ký tài khoản:
+            </p>
+            
+            <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: center;">
+                <h3 style="color: #856404; margin-top: 0;">Mã xác thực:</h3>
+                <div style="font-size: 32px; font-weight: bold; color: #856404; letter-spacing: 5px; font-family: monospace;">
+                    {verification_code}
+                </div>
+            </div>
+            
+            <p style="color: #666; margin-top: 15px; font-size: 14px;">Mã này có hiệu lực trong 24 giờ</p>
+        </div>
+        
+        <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <h4 style="color: #856404; margin-top: 0;">⚠️ Lưu ý bảo mật:</h4>
+            <ul style="color: #856404; margin: 0; padding-left: 20px;">
+                <li>Không chia sẻ mã này với bất kỳ ai</li>
+                <li>Mã chỉ có hiệu lực trong 24 giờ</li>
+                <li>Nếu bạn không yêu cầu mã này, vui lòng bỏ qua email</li>
+            </ul>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px; color: #999; font-size: 12px;">
+            <p>© 2024 TikZ2SVG. All rights reserved.</p>
+            <p>Thời gian: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+        </div>
+    </body>
+    </html>
+    '''
+
+def create_svg_verification_email(username, svg_count):
+    """Tạo email xác thực khi lưu nhiều SVG"""
+    return f'''
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Xác thực lưu SVG - TikZ2SVG</title>
+    </head>
+    <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="text-align: center; margin-bottom: 30px; padding: 20px; background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%); border-radius: 10px;">
+            <div style="display: inline-block; background: white; padding: 10px; border-radius: 8px; margin-bottom: 15px;">
+                <img src="http://localhost:5173/static/images/email_logo.png" alt="TikZ2SVG Logo" style="width: 60px; height: 60px;">
+            </div>
+            <h1 style="color: white; margin: 0; font-size: 24px;">TikZ2SVG</h1>
+            <p style="color: white; margin: 10px 0 0 0; font-size: 16px;">Xác thực lưu SVG</p>
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h2 style="color: #333; margin-top: 0;">📊 Thông báo lưu SVG</h2>
+            <p style="color: #666; line-height: 1.6;">
+                Xin chào {username}, chúng tôi nhận thấy bạn đã lưu {svg_count} file SVG trong ngày hôm nay.
+            </p>
+            <p style="color: #666; line-height: 1.6;">
+                Đây là một thông báo xác thực để đảm bảo tài khoản của bạn an toàn.
+            </p>
+        </div>
+        
+        <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin: 15px 0;">
+            <h3 style="color: #2e7d32; margin-top: 0;">✅ Hoạt động bình thường</h3>
+            <p style="color: #2e7d32; line-height: 1.6;">
+                Nếu đây là bạn, không cần thực hiện thêm hành động nào.
+            </p>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px; color: #999; font-size: 12px;">
+            <p>© 2024 TikZ2SVG. All rights reserved.</p>
+            <p>Thời gian: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+        </div>
+    </body>
+    </html>
+    '''
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)

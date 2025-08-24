@@ -967,6 +967,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     console.log('DOMContentLoaded - appState.loggedIn:', window.appState && window.appState.loggedIn);
 
+    // 15) Start polling for like updates
+    startFilesPolling();
+
     // Nếu có code TikZ từ localStorage (từ View Mode), điền vào textarea chính
     // Thực thi sau khi tất cả đã được khởi tạo
     setTimeout(() => {
@@ -998,6 +1001,76 @@ if (window.location.search.includes('login=1')) {
 
 
 
+// Global variable for polling interval
+let pollingInterval = null;
+
+// Real-time synchronization for likes via polling
+// Only update like counts, not entire file list
+function startFilesPolling() {
+    console.log('🔄 Starting likes polling...');
+    
+    const pollInterval = 15000; // 15 seconds
+    
+    pollingInterval = setInterval(function() {
+        console.log('🔄 Polling likes...', new Date().toLocaleTimeString());
+        
+        // Kiểm tra flag toàn cục
+        if (window.activeFeedbackCount > 0) {
+            return;
+        }
+        
+        // Fetch updated files data to check for like count changes
+        const apiEndpoint = window.isLoggedIn ? '/api/files' : '/api/public/files';
+        fetch(apiEndpoint)
+            .then(response => response.json())
+            .then(data => {
+                // Xử lý response format khác nhau giữa /api/files và /api/public/files
+                const files = window.isLoggedIn ? data : (data.files || []);
+                
+                // Only update like counts if there are changes
+                updateLikeCounts(files);
+            })
+            .catch(error => {
+                console.error('Error polling likes:', error);
+            });
+    }, pollInterval);
+    
+    console.log('🔄 Started likes polling (15s interval)');
+}
+
+// Function to update only like counts without reloading entire file list
+function updateLikeCounts(files) {
+    files.forEach(file => {
+        const fileCard = document.querySelector(`[data-file-id="${file.id}"]`);
+        if (fileCard) {
+            // Update like count
+            const likeCountOne = fileCard.querySelector('.like-count.one');
+            const likeCountTwo = fileCard.querySelector('.like-count.two');
+            if (likeCountOne && likeCountTwo) {
+                likeCountOne.textContent = file.like_count;
+                likeCountTwo.textContent = file.like_count;
+            }
+            
+            // Update like button state if user is logged in
+            if (window.isLoggedIn) {
+                const likeCheckbox = fileCard.querySelector(`input[id="heart-${file.id}"]`);
+                if (likeCheckbox && likeCheckbox.checked !== file.is_liked_by_current_user) {
+                    likeCheckbox.checked = file.is_liked_by_current_user;
+                }
+            }
+        }
+    });
+}
+
+// Function to stop polling
+function stopFilesPolling() {
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+        pollingInterval = null;
+        console.log('🔄 Stopped files polling');
+    }
+}
+
 // Export functions for global access
 window.showLoginModal = showLoginModal;
 window.ensureCodeMirror = ensureCodeMirror;
@@ -1006,3 +1079,6 @@ window.initKeywordModal = initKeywordModal;
 window.submitTikzCodeAjax = submitTikzCodeAjax;
 window.copySvgCode = copySvgCode;
 window.updateInputPreview = updateInputPreview;
+window.startFilesPolling = startFilesPolling;
+window.stopFilesPolling = stopFilesPolling;
+window.updateLikeCounts = updateLikeCounts;

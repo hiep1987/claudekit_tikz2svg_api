@@ -3016,7 +3016,7 @@ def create_welcome_email(username):
     <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="text-align: center; margin-bottom: 30px; padding: 20px; background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%); border-radius: 10px;">
             <div style="display: inline-block; background: white; padding: 10px; border-radius: 8px; margin-bottom: 15px;">
-                <img src="http://localhost:5173/static/images/email_logo.png" alt="TikZ2SVG Logo" style="width: 60px; height: 60px;">
+                <img src="https://tikz2svg.mathlib.io.vn/static/images/email_logo.png" alt="TikZ2SVG Logo" style="width: 60px; height: 60px;">
             </div>
             <h1 style="color: white; margin: 0; font-size: 24px;">TikZ2SVG</h1>
             <p style="color: white; margin: 10px 0 0 0; font-size: 16px;">Chuyển đổi TikZ thành SVG</p>
@@ -3061,7 +3061,7 @@ def create_verification_email(username, verification_code):
     <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="text-align: center; margin-bottom: 30px; padding: 20px; background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%); border-radius: 10px;">
             <div style="display: inline-block; background: white; padding: 10px; border-radius: 8px; margin-bottom: 15px;">
-                <img src="http://localhost:5173/static/images/email_logo.png" alt="TikZ2SVG Logo" style="width: 60px; height: 60px;">
+                <img src="https://tikz2svg.mathlib.io.vn/static/images/email_logo.png" alt="TikZ2SVG Logo" style="width: 60px; height: 60px;">
             </div>
             <h1 style="color: white; margin: 0; font-size: 24px;">TikZ2SVG</h1>
             <p style="color: white; margin: 10px 0 0 0; font-size: 16px;">Xác thực tài khoản</p>
@@ -3112,7 +3112,7 @@ def create_svg_verification_email(username, svg_count):
     <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="text-align: center; margin-bottom: 30px; padding: 20px; background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%); border-radius: 10px;">
             <div style="display: inline-block; background: white; padding: 10px; border-radius: 8px; margin-bottom: 15px;">
-                <img src="http://localhost:5173/static/images/email_logo.png" alt="TikZ2SVG Logo" style="width: 60px; height: 60px;">
+                <img src="https://tikz2svg.mathlib.io.vn/static/images/email_logo.png" alt="TikZ2SVG Logo" style="width: 60px; height: 60px;">
             </div>
             <h1 style="color: white; margin: 0; font-size: 24px;">TikZ2SVG</h1>
             <p style="color: white; margin: 10px 0 0 0; font-size: 16px;">Xác thực lưu SVG</p>

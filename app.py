@@ -2823,10 +2823,10 @@ def email_test_page():
             </div>
             
             <div class="logo-preview">
-                <h3>🎨 Logo Preview (Hosted):</h3>
-                <img src="/static/images/email_logo.png" alt="TikZ2SVG Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                <p style="display:none; color: #999;">Logo sẽ được tải từ server</p>
-                <p>Logo được host trên server thay vì base64 để tương thích tốt hơn.</p>
+                <h3>🎨 Logo Preview (Production):</h3>
+                <img src="https://tikz2svg.mathlib.io.vn/static/images/email_logo.png" alt="TikZ2SVG Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" style="width: 60px; height: 60px;">
+                <p style="display:none; color: #999;">Logo sẽ được tải từ production server</p>
+                <p>Logo được host trên production server: <code>https://tikz2svg.mathlib.io.vn/static/images/email_logo.png</code></p>
             </div>
             
             <form id="emailForm">

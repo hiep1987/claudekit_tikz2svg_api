@@ -12,3 +12,4 @@ PyMySQL==1.1.0
 cryptography==41.0.7
 bcrypt==4.1.2
 email-validator==2.1.0
+Flask-Dance[google]==7.1.0

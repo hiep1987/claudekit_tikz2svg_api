@@ -18,8 +18,11 @@ static/*
 !static/.gitkeep
 !static/js/
 !static/css/
+!static/images/
 !static/js/*.js
 !static/css/*.css
+!static/images/*.png
+!static/images/*.svg
 # Allow specific file types in static
 !static/*.js
 !static/*.css

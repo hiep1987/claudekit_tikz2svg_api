@@ -15,7 +15,9 @@ ZOHO_MAIL_CONFIG = {
     'MAIL_USE_SSL': False,
     'MAIL_USERNAME': os.environ.get('ZOHO_EMAIL', 'support@tikz2svg.com'),
     'MAIL_PASSWORD': os.environ.get('ZOHO_APP_PASSWORD', 'your-app-password'),
-    'MAIL_DEFAULT_SENDER': os.environ.get('ZOHO_EMAIL', 'support@tikz2svg.com'),
+    'MAIL_DEFAULT_SENDER': (
+        f"{os.environ.get('MAIL_SENDER_NAME', os.environ.get('APP_NAME', 'TikZ2SVG'))} <{os.environ.get('ZOHO_EMAIL', 'support@tikz2svg.com')}>"
+    ),
     'MAIL_MAX_EMAILS': 10,  # Giới hạn số email gửi mỗi lần
     'MAIL_ASCII_ATTACHMENTS': False,
     'MAIL_SUPPRESS_SEND': False,  # Set True để test mode (không gửi thật)

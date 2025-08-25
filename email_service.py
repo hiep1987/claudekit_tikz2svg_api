@@ -133,9 +133,26 @@ class EmailService:
             subject = template_info['subject']
         
         try:
-            with self.app.app_context():
+            # Tạo context an toàn cho email (không phụ thuộc vào Flask-Login)
+            safe_context = context.copy()
+            safe_context.update({
+                'current_user': None,
+                'current_user_email': None,
+                'current_username': None
+            })
+            
+            # Tạo app riêng để tránh xung đột với Flask-Login
+            from flask import Flask
+            email_app = Flask(__name__)
+            email_app.config.update(self.app.config)
+            
+            # Khởi tạo Flask-Mail cho app riêng
+            from flask_mail import Mail
+            email_mail = Mail(email_app)
+            
+            with email_app.app_context():
                 # Render template
-                html_content = render_template(template_info['template'], **context)
+                html_content = render_template(template_info['template'], **safe_context)
                 
                 # Tạo message
                 msg = Message(
@@ -152,7 +169,7 @@ class EmailService:
                             msg.attach(filename, content_type or 'application/octet-stream', file_data)
                 
                 # Gửi email
-                self.mail.send(msg)
+                email_mail.send(msg)
                 
                 # Cập nhật rate limit
                 self._update_rate_limit()
@@ -176,7 +193,8 @@ class EmailService:
         context = {
             'username': username,
             'email': email,
-            'app_url': os.environ.get('APP_URL', 'https://yourdomain.com')
+            'app_url': os.environ.get('APP_URL', 'https://yourdomain.com'),
+            'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         }
         return self.send_email(email, 'welcome', context=context)
     

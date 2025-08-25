@@ -1,258 +1,308 @@
-# TikZ2SVG Development Workflow Guide
+# 📁 Cấu hình Static Files và Thư mục Làm việc - TikZ to SVG API
 
-## Cấu trúc môi trường
+## 🚨 Vấn đề Quan trọng
 
-### DEV Environment (`~/dev/tikz2svg_api/`)
-- **Mục đích**: Phát triển và test code
-- **Git repository**: `git@github.com:hiep1987/tikz2svg_api.git`
-- **Virtual environment**: `.venv/`
-- **Branch**: `main`
+### Thư mục làm việc hiện tại
+- **Ứng dụng chạy từ:** `/var/www/tikz2svg_api/current/` (do WorkingDirectory trong service)
+- **Thư mục current:** `/var/www/tikz2svg_api/current/` (symbolic link)
+- **Thư mục shared:** `/var/www/tikz2svg_api/shared/`
 
-### PRODUCTION Environment (`/var/www/tikz2svg_api/`)
-- **Mục đích**: Chạy ứng dụng thực tế
-- **Cấu trúc**: Releases với symlink `current/`
-- **Virtual environment**: `venv/`
-- **Service**: `tikz2svg` (systemd)
-
-## Quy trình làm việc
-
-
-### 1. Phát triển trong DEV
-```bash
-cd ~/dev/tikz2svg_api
-
-# Kích hoạt virtual environment
-source .venv/bin/activate
-
-# Chỉnh sửa code
-# Test ứng dụng
-python app.py
-```
-
-#### Chạy DEV server trên VPS và truy cập từ Mac
-
-1. **Trên VPS**:
-    ```bash
-    tikz2svg-dev
-    ```
-    (script đã cấu hình sẵn để chạy Flask DEV trên cổng 5173 với môi trường .env từ PROD)
-
-2. **Trên máy Mac**:
-    ```bash
-    ssh -L 5173:127.0.0.1:5173 h2cloud-hiep1987
-    ssh -L 5173:127.0.0.1:5173 hiep1987@36.50.134.234
-    ```
-    - Sau đó mở trình duyệt và truy cập `http://localhost:5173/` để xem giao diện DEV chạy trên VPS.
-
-### 2. Commit và Push
-```bash
-# Kiểm tra trạng thái
-git status
-
-# Thêm file mới
-git add .
-
-# Commit thay đổi
-git commit -m "Mô tả thay đổi"
-
-# Push lên GitHub
-git push origin main
-```
-
-### 3. Deploy lên Production
-```bash
-# Chuẩn bị thư mục static shared (nếu chưa có)
-mkdir -p /var/www/tikz2svg_api/shared/static
-
-# Deploy từ GitHub
-sudo bash /var/www/tikz2svg_api/deploy.sh git@github.com:hiep1987/tikz2svg_api.git main
-```
-Static đã được chuyển sang `shared/static` và cần chắc chắn thư mục này tồn tại, sẽ được deploy.sh tự tạo.
-
-### 4. Kiểm tra Production
-```bash
-# Kiểm tra service
-systemctl status tikz2svg
-
-# Kiểm tra socket
-curl --unix-socket /var/www/tikz2svg_api/shared/tikz2svg.sock -I http://localhost/
-
-# Kiểm tra website
-curl -I -H 'Host: tikz2svg.mathlib.io.vn' http://127.0.0.1/
-```
-
-### 5. Rollback nếu cần
-```bash
-sudo bash /var/www/tikz2svg_api/rollback.sh
-# Chọn release muốn rollback tới
-```
-
-## Lệnh hữu ích
-
-### Kiểm tra logs
-```bash
-# Logs của service
-journalctl -u tikz2svg -n 50
-
-# Logs của gunicorn
-tail -f /var/www/tikz2svg_api/shared/logs/gunicorn_error.log
-tail -f /var/www/tikz2svg_api/shared/logs/gunicorn_output.log
-```
-
-### Quản lý releases
-```bash
-# Xem danh sách releases
-ls -la /var/www/tikz2svg_api/releases/
-
-# Xem release hiện tại
-ls -la /var/www/tikz2svg_api/current
-
-# Xóa releases cũ (giữ 5 bản mới nhất)
-cd /var/www/tikz2svg_api/releases
-ls -1t | tail -n +6 | xargs -r sudo rm -rf
-```
-
-## Lưu ý quan trọng
-
-### ✅ Nên làm
-- Phát triển trong `~/dev/tikz2svg_api/`
-- Test kỹ trước khi deploy
-- Commit thường xuyên với message rõ ràng
-- Backup trước khi deploy lớn
-- Kiểm tra logs sau khi deploy
-- Test static files trên cả DEV và PROD sau khi thay đổi cấu hình
-- Kiểm tra cấu hình nginx khi thay đổi đường dẫn static files
-
-### ❌ Không nên làm
-- Chỉnh sửa trực tiếp trong `/var/www/tikz2svg_api/current/`
-- Deploy mà không test
-- Commit với message không rõ ràng
-- Xóa releases mà không backup
-
-### Static files
-- Thư mục `static/` đã bỏ khỏi Git, các file SVG/PNG/avatars sẽ lưu trong `shared/static` để không mất khi deploy.
-- **Cấu hình**: Flask app sử dụng `STATIC_ROOT = '/var/www/tikz2svg_api/shared/static'` cho cả DEV và PROD
-- **Đồng bộ**: DEV và PROD sử dụng cùng thư mục shared để đảm bảo dữ liệu nhất quán
-
-### Khắc phục vấn đề Static Files
-
-#### Vấn đề: DEV không thấy ảnh SVG như PROD
-**Nguyên nhân**: Flask app DEV sử dụng `static_folder` mặc định thay vì `STATIC_ROOT`
-
-**Giải pháp**:
+### Cấu hình STATIC_ROOT
 ```python
-# Trong app.py - cấu hình đúng
+# Trong app.py
+STATIC_ROOT = os.environ.get('TIKZ_SVG_DIR', os.path.join(os.getcwd(), 'static'))
+```
+
+**Vấn đề:** Biến môi trường `TIKZ_SVG_DIR` không được set, nên ứng dụng sử dụng:
+- `os.getcwd()` = `/var/www/tikz2svg_api/current/` (do WorkingDirectory)
+- `STATIC_ROOT` = `/var/www/tikz2svg_api/current/static/`
+
+**Nhưng thư mục `/var/www/tikz2svg_api/current/static/` là thư mục thực, không phải symbolic link!**
+
+## 📂 Cấu trúc thư mục thực tế
+
+```
+/var/www/tikz2svg_api/
+├── shared/
+│   └── static/
+│       ├── avatars/                    ← Ảnh avatar thực tế (4 files)
+│       │   ├── avatar_2de74228358b4add9401f11be264069c.png
+│       │   ├── avatar_4438c389b4c546be89ecc7b2423c5bd7.png
+│       │   ├── avatar_6e44d63b109a448799d0bf4efc514a2d.png
+│       │   └── avatar_981ea111072146589fa26c214c492b77.png
+│       ├── css -> /var/www/tikz2svg_api/current/static/css
+│       ├── js -> /var/www/tikz2svg_api/current/static/js
+│       └── images/
+├── current/ (symbolic link)
+│   └── static/                         ← ĐÃ THÀNH SYMBOLIC LINK
+│       └── (trỏ đến shared/static)
+└── static/                             ← SYMBOLIC LINK
+    └── (trỏ đến shared/static)
+```
+
+## 🔗 Symbolic Link - Giải thích chi tiết
+
+### Symbolic Link là gì?
+Symbolic link (symlink) giống như một "shortcut" hoặc "đường dẫn tắt" trong hệ thống file. Nó trỏ đến một thư mục hoặc file khác.
+
+### Ví dụ minh họa:
+
+#### **Trước khi tạo symbolic link:**
+```
+/var/www/tikz2svg_api/
+├── shared/
+│   └── static/                    ← Thư mục thực chứa file cũ
+│       ├── avatars/
+│       ├── file1.svg
+│       └── file2.png
+└── current/ (symbolic link)
+    └── static/                    ← Thư mục thực riêng biệt
+        ├── avatars/
+        ├── file3.svg              ← File mới được tạo ở đây
+        └── file4.png
+```
+
+**Vấn đề:** 
+- Ứng dụng chạy từ `current/` nên tạo file trong `current/static/`
+- Khi deploy mới, `current/` sẽ trỏ đến release mới → file bị mất
+- File trong `shared/static/` vẫn tồn tại
+
+#### **Sau khi tạo symbolic link:**
+```
+/var/www/tikz2svg_api/
+├── shared/
+│   └── static/                    ← Thư mục thực chứa tất cả file
+│       ├── avatars/
+│       ├── file1.svg
+│       ├── file2.png
+│       ├── file3.svg              ← File mới được tạo ở đây
+│       └── file4.png
+└── current/ (symbolic link)
+    └── static/                    ← Symbolic link trỏ đến shared/static
+        └── (tất cả file từ shared/static)
+```
+
+**Lợi ích:**
+- Ứng dụng vẫn chạy từ `current/` (không thay đổi)
+- File được tạo trong `shared/static/` (bền vững)
+- Khi deploy mới, file không bị mất
+
+### Cách hoạt động của symbolic link:
+
+#### **Trước khi tạo symbolic link:**
+```bash
+# Ứng dụng chạy từ current/
+cd /var/www/tikz2svg_api/current/
+
+# STATIC_ROOT = /var/www/tikz2svg_api/current/static
+# File được tạo trong current/static/file.svg (thư mục thực)
+```
+
+#### **Sau khi tạo symbolic link:**
+```bash
+# Ứng dụng vẫn chạy từ current/
+cd /var/www/tikz2svg_api/current/
+
+# STATIC_ROOT = /var/www/tikz2svg_api/current/static
+# Nhưng current/static là symbolic link trỏ đến shared/static
+# File được tạo trong shared/static/file.svg (thực tế)
+```
+
+### Quá trình tạo symbolic link:
+```bash
+# 1. Backup thư mục hiện tại
+cp -r /var/www/tikz2svg_api/current/static /var/www/tikz2svg_api/current/static_backup
+
+# 2. Copy file mới về shared/static
+cp /var/www/tikz2svg_api/current/static/file.svg /var/www/tikz2svg_api/shared/static/
+
+# 3. Xóa thư mục current/static
+rm -rf /var/www/tikz2svg_api/current/static
+
+# 4. Tạo symbolic link
+ln -s /var/www/tikz2svg_api/shared/static /var/www/tikz2svg_api/current/static
+```
+
+### Kiểm tra symbolic link:
+```bash
+# Xem symbolic link
+ls -la /var/www/tikz2svg_api/current/static
+# Kết quả: lrwxrwxrwx 1 hiep1987 hiep1987 35 Aug 25 23:09 static -> /var/www/tikz2svg_api/shared/static
+
+# Truy cập file qua symbolic link
+ls /var/www/tikz2svg_api/current/static/
+# Hiển thị tất cả file từ shared/static/
+```
+
+## 🔧 Giải pháp đề xuất
+
+### 1. Tạo symbolic link (Khuyến nghị)
+```bash
+# Tạo symbolic link từ thư mục gốc đến shared/static
+cd /var/www/tikz2svg_api/
+ln -s shared/static static
+
+# Tạo symbolic link từ current/static đến shared/static
+rm -rf /var/www/tikz2svg_api/current/static
+ln -s /var/www/tikz2svg_api/shared/static /var/www/tikz2svg_api/current/static
+```
+
+### 2. Set biến môi trường ✅ ĐÃ THỰC HIỆN
+Thêm vào file `/var/www/tikz2svg_api/shared/.env`:
+```env
+TIKZ_SVG_DIR=/var/www/tikz2svg_api/shared/static
+```
+
+### 3. Sửa code app.py
+```python
+# Thay đổi cấu hình STATIC_ROOT
 STATIC_ROOT = os.environ.get('TIKZ_SVG_DIR', '/var/www/tikz2svg_api/shared/static')
-os.makedirs(STATIC_ROOT, exist_ok=True)
-os.makedirs(os.path.join(STATIC_ROOT, 'avatars'), exist_ok=True)
-
-app = Flask(__name__, static_folder=STATIC_ROOT)  # Quan trọng!
-app.config['UPLOAD_FOLDER'] = STATIC_ROOT
 ```
 
-#### Vấn đề: Nginx không serve static files
-**Nguyên nhân**: Cấu hình nginx trỏ sai đường dẫn
+## ⚠️ Lưu ý quan trọng
 
-**Giải pháp**:
+### Vấn đề hiện tại:
+1. **Avatar files bị phân tán:** 
+   - 4 files cũ trong `shared/static/avatars/`
+   - 1 file mới trong `current/static/avatars/`
+
+2. **Cấu hình không nhất quán:**
+   - CSS/JS sử dụng symbolic links đến current
+   - Avatars sử dụng thư mục thực trong shared
+
+3. **Ứng dụng có thể không tìm thấy static files:**
+   - STATIC_ROOT trỏ đến thư mục không tồn tại
+   - Flask có thể fallback về thư mục khác
+
+### Hành động cần thiết:
+1. **Kiểm tra logs** để xem Flask có báo lỗi về static files không
+2. **Thống nhất cấu trúc** thư mục static
+3. **Test upload avatar** để đảm bảo hoạt động đúng
+4. **Backup dữ liệu** trước khi thay đổi
+
+## 🚨 Vấn đề 502 Bad Gateway - ĐÃ KHẮC PHỤC
+
+### Nguyên nhân:
+```
+FileExistsError: [Errno 17] File exists: '/var/www/tikz2svg_api/shared/static/avatars'
+```
+
+### Vấn đề cụ thể:
+- Thư mục `avatars` trong `shared/static/` đã trở thành symbolic link
+- Symbolic link trỏ đến thư mục không tồn tại: `/var/www/tikz2svg_api/current/static/avatars`
+- Ứng dụng cố gắng tạo thư mục `avatars` nhưng gặp lỗi vì nó đã tồn tại (dưới dạng symbolic link)
+
+### Giải pháp đã áp dụng:
 ```bash
-# Sửa cấu hình nginx HTTPS
-sudo sed -i 's|alias /var/www/tikz2svg_api/current/static/;|alias /var/www/tikz2svg_api/shared/static/;|' /etc/nginx/sites-available/tikz2svg_api
+# 1. Xóa symbolic link
+cd /var/www/tikz2svg_api/shared/static
+rm avatars
 
-# Sửa socket path nếu cần
-sudo sed -i 's|proxy_pass http://unix:/var/www/tikz2svg_api/tikz2svg.sock;|proxy_pass http://unix:/var/www/tikz2svg_api/shared/tikz2svg.sock;|' /etc/nginx/sites-available/tikz2svg
+# 2. Tạo lại thư mục thực
+mkdir avatars
 
-# Reload nginx
-sudo systemctl reload nginx
+# 3. Khôi phục các file avatar từ backup
+cp /var/www/tikz2svg_api/releases/20250825_164713/static/avatars/* /var/www/tikz2svg_api/shared/static/avatars/
+
+# 4. Khởi động lại service
+sudo systemctl restart tikz2svg.service
 ```
 
-#### Test static files
+### Kết quả:
+- ✅ Service `tikz2svg.service` đã chạy thành công
+- ✅ Website https://tikz2svg.mathlib.io.vn/ hoạt động bình thường
+- ✅ Trả về HTTP 200 thay vì 502 Bad Gateway
+
+## 🚨 Vấn đề File SVG được lưu sai thư mục - ĐÃ KHẮC PHỤC HOÀN TOÀN
+
+### Nguyên nhân gốc rễ:
+- **WorkingDirectory trong service:** `/var/www/tikz2svg_api/current/`
+- **STATIC_ROOT thực tế:** `/var/www/tikz2svg_api/current/static/` (thư mục thực)
+- **File được lưu trực tiếp vào:** `current/static/` thay vì `shared/static/`
+
+### Vấn đề cụ thể:
+- Service file có `WorkingDirectory=/var/www/tikz2svg_api/current/`
+- `os.getcwd()` trả về `/var/www/tikz2svg_api/current/`
+- `STATIC_ROOT` = `/var/www/tikz2svg_api/current/static/`
+- File mới được tạo trong `current/static/` (sẽ bị mất khi deploy)
+
+### Giải pháp cuối cùng đã áp dụng:
 ```bash
-# Test PROD
-curl -I https://tikz2svg.mathlib.io.vn/static/filename.svg
+# 1. Backup thư mục current/static
+cd /var/www/tikz2svg_api
+cp -r current/static current/static_backup
 
-# Test DEV
-curl -I http://localhost:5173/static/filename.svg
+# 2. Copy file mới về shared/static
+cp /var/www/tikz2svg_api/current/static/115852900894156127858_060516260825.* /var/www/tikz2svg_api/shared/static/
+
+# 3. Xóa thư mục current/static và tạo symbolic link
+rm -rf /var/www/tikz2svg_api/current/static
+ln -s /var/www/tikz2svg_api/shared/static /var/www/tikz2svg_api/current/static
+
+# 4. Thêm biến môi trường vào .env
+echo "TIKZ_SVG_DIR=/var/www/tikz2svg_api/shared/static" >> /var/www/tikz2svg_api/shared/.env
+
+# 5. Khởi động lại service
+sudo systemctl restart tikz2svg.service
 ```
 
-### Troubleshooting
+### Kết quả:
+- ✅ **File SVG mới được lưu trong `shared/static/`** (bền vững qua các lần deploy)
+- ✅ **Symbolic link `/var/www/tikz2svg_api/current/static/`** trỏ đến `shared/static/`
+- ✅ **Cấu hình `STATIC_ROOT` và `UPLOAD_FOLDER`** hoạt động đúng
+- ✅ **File không bị mất khi deploy mới**
+- ✅ **Ứng dụng vẫn chạy từ `current/` nhưng file được lưu trong `shared/`**
+- ✅ **Biến môi trường `TIKZ_SVG_DIR` đã được set trong `.env`**
 
-#### Kiểm tra nhanh khi có vấn đề static files
+## 📝 Ghi chú kỹ thuật
+
+### Flask static folder behavior:
+- Nếu `static_folder` không tồn tại, Flask sẽ tìm trong thư mục hiện tại
+- Có thể fallback về thư mục khác tùy thuộc vào cấu hình
+
+### Symbolic links:
+- `css` và `js` đã được link đúng đến `current/static/`
+- `avatars` cần được xử lý tương tự hoặc thống nhất
+
+### Environment variables:
+- File `.env` trong `shared/` được load bởi `load_dotenv()`
+- Biến `TIKZ_SVG_DIR` đã được set: `/var/www/tikz2svg_api/shared/static`
+
+### Service configuration:
+- **WorkingDirectory:** `/var/www/tikz2svg_api/current/` (trong override.conf)
+- **STATIC_ROOT thực tế:** `/var/www/tikz2svg_api/current/static/`
+- **Giải pháp:** Tạo symbolic link từ `current/static` đến `shared/static`
+
+### Troubleshooting 502 Bad Gateway:
+1. **Kiểm tra service status:** `sudo systemctl status tikz2svg.service`
+2. **Xem logs:** `sudo journalctl -u tikz2svg.service --no-pager -n 50`
+3. **Kiểm tra symbolic links:** `ls -la /var/www/tikz2svg_api/shared/static/`
+4. **Kiểm tra thư mục đích:** Đảm bảo thư mục đích của symbolic link tồn tại
+
+### Troubleshooting File lưu sai thư mục:
+1. **Kiểm tra WorkingDirectory:** `sudo cat /etc/systemd/system/tikz2svg.service.d/override.conf`
+2. **Kiểm tra STATIC_ROOT:** `python3 -c "import os; print(os.environ.get('TIKZ_SVG_DIR', os.path.join(os.getcwd(), 'static')))"`
+3. **Kiểm tra symbolic link:** `ls -la /var/www/tikz2svg_api/current/static`
+4. **Kiểm tra file mới:** `find /var/www/tikz2svg_api -name "*.svg" -newer /var/www/tikz2svg_api/current/static/`
+5. **Copy file về đúng thư mục:** `cp /var/www/tikz2svg_api/current/static/* /var/www/tikz2svg_api/shared/static/`
+
+### Kiểm tra biến môi trường:
 ```bash
-# 1. Kiểm tra file có tồn tại không
-ls -la /var/www/tikz2svg_api/shared/static/filename.svg
+# Kiểm tra biến TIKZ_SVG_DIR
+python3 -c "import os; from dotenv import load_dotenv; load_dotenv('/var/www/tikz2svg_api/shared/.env'); print('TIKZ_SVG_DIR:', os.environ.get('TIKZ_SVG_DIR'))"
 
-# 2. Kiểm tra cấu hình nginx
-sudo cat /etc/nginx/sites-available/tikz2svg_api | grep "location /static/"
-
-# 3. Kiểm tra quyền truy cập
-ls -la /var/www/tikz2svg_api/shared/static/
-
-# 4. Test nginx config
-sudo nginx -t
-
-# 5. Reload nginx nếu cần
-sudo systemctl reload nginx
+# Kiểm tra STATIC_ROOT thực tế
+python3 -c "import os; from dotenv import load_dotenv; load_dotenv('/var/www/tikz2svg_api/shared/.env'); STATIC_ROOT = os.environ.get('TIKZ_SVG_DIR', os.path.join(os.getcwd(), 'static')); print('STATIC_ROOT:', STATIC_ROOT)"
 ```
 
-#### Debug DEV server
-```bash
-# Kiểm tra cấu hình Flask
-cd ~/dev/tikz2svg_api
-grep -n "static_folder\|STATIC_ROOT" app.py
+---
+**Ngày tạo:** 25/08/2025  
+**Người tạo:** AI Assistant  
+**Mục đích:** Ghi lại vấn đề cấu hình static files để xử lý sau
 
-# Test DEV server
-source .venv/bin/activate
-python app.py
-# Sau đó test: curl -I http://localhost:5000/static/filename.svg
-```
+**Ngày khắc phục:** 25/08/2025  
+**Vấn đề đã khắc phục:** 
+1. 502 Bad Gateway do symbolic link avatars bị hỏng
+2. File SVG được lưu sai thư mục (current/static thay vì shared/static) - **ĐÃ KHẮC PHỤC HOÀN TOÀN**
+3. Biến môi trường `TIKZ_SVG_DIR` đã được thêm vào file `.env`
 
-## Health endpoint
-
-- **Route**: `GET /health` → `{"status":"ok"}`
-- **Health-check trong deploy**:  
-  ```bash
-  curl --unix-socket /var/www/tikz2svg_api/shared/tikz2svg.sock http://localhost/health
-  ```
-
-## Workflow tóm tắt
-
-```
-DEV (~/dev/tikz2svg_api/) 
-    ↓ (chỉnh sửa code)
-    ↓ (git add, commit, push)
-GitHub Repository
-    ↓ (deploy.sh)
-PRODUCTION (/var/www/tikz2svg_api/)
-    ↓ (rollback.sh nếu cần)
-Previous Release
-```
-
-## Thông tin hiện tại
-
-- **DEV workspace**: `~/dev/tikz2svg_api/`
-- **PROD workspace**: `/var/www/tikz2svg_api/`
-- **Current release**: `20250816_041033`
-- **Service name**: `tikz2svg`
-- **Socket file**: `/var/www/tikz2svg_api/shared/tikz2svg.sock`
-- **Static files**: `/var/www/tikz2svg_api/shared/static/` (shared giữa DEV và PROD)
-- **User/Group**: `hiep1987/www-data`
-- **Nginx config**: Đã cập nhật để sử dụng shared/static
-
-## Thay đổi gần đây
-
-### Refactor: Navbar dùng chung
-
-- Tạo `templates/_navbar.html` chứa toàn bộ thanh điều hướng (desktop + mobile).
-- Các trang sau đã thay navbar inline bằng include:
-  - `templates/index.html`
-  - `templates/profile_settings.html`
-  - `templates/profile_svg_files.html`
-  - `templates/profile_followed_posts.html`
-  - `templates/view_svg.html`
-- Cách dùng ở template khác:
-
-```jinja
-{% include '_navbar.html' %}
-```
-
-- Lưu ý: Navbar dựa trên các biến context: `current_user`, `current_user_email`, `current_username`, `current_avatar` (được inject bởi `@app.context_processor`).

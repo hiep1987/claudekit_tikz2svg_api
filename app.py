@@ -786,6 +786,21 @@ def load_user_info_if_missing():
                     )
                     conn.commit()
                     print(f"DEBUG: User {session['user_email']} INSERTED successfully in DB.", flush=True)
+                    
+                    # ✅ Gửi email welcome cho user mới
+                    try:
+                        email_service = get_email_service()
+                        if email_service:
+                            success = email_service.send_welcome_email(session["user_email"], default_username)
+                            if success:
+                                print(f"DEBUG: Welcome email sent successfully to {session['user_email']}", flush=True)
+                            else:
+                                print(f"DEBUG: Failed to send welcome email to {session['user_email']}", flush=True)
+                        else:
+                            print(f"DEBUG: Email service not available for welcome email to {session['user_email']}", flush=True)
+                    except Exception as email_error:
+                        print(f"ERROR sending welcome email: {email_error}", flush=True)
+                    
                     cursor.close()
                     conn.close()
                 except Exception as e:

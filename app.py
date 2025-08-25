@@ -2102,6 +2102,21 @@ def profile_settings(user_id):
         cursor = conn.cursor(dictionary=True)
 
         if request.method == 'POST':
+            # Kiểm tra xem có phải là hủy bỏ xác thực không
+            if request.form.get("cancel_verification"):
+                # Xóa thông tin xác thực
+                cursor.execute("""
+                    UPDATE user SET 
+                        profile_verification_code = NULL,
+                        profile_verification_expires_at = NULL,
+                        pending_profile_changes = NULL,
+                        profile_verification_attempts = 0
+                    WHERE id = %s
+                """, (user_id,))
+                conn.commit()
+                flash("Đã hủy bỏ thay đổi đang chờ xác thực.", "info")
+                return redirect(url_for('profile_settings', user_id=user_id))
+            
             # Kiểm tra xem có phải là xác thực không
             verification_code = request.form.get("verification_code", "").strip()
             
@@ -2126,7 +2141,15 @@ def profile_settings(user_id):
                 'avatar': current_data['avatar']  # Giữ nguyên avatar cũ cho đến khi xác thực
             }
             
-            changes_summary = get_profile_changes_summary(current_data, new_data)
+            # Kiểm tra thay đổi avatar
+            has_avatar_change = bool(avatar_cropped_data and avatar_cropped_data.startswith('data:image'))
+            print(f"🔍 DEBUG: has_avatar_change = {has_avatar_change}", flush=True)
+            print(f"🔍 DEBUG: avatar_cropped_data exists = {bool(avatar_cropped_data)}", flush=True)
+            if avatar_cropped_data:
+                print(f"🔍 DEBUG: avatar_cropped_data starts with data:image = {avatar_cropped_data.startswith('data:image')}", flush=True)
+            
+            changes_summary = get_profile_changes_summary(current_data, new_data, has_avatar_change)
+            print(f"🔍 DEBUG: changes_summary = {changes_summary}", flush=True)
             
             # Nếu có thay đổi, gửi email xác thực
             if changes_summary:
@@ -3423,7 +3446,7 @@ def generate_verification_code(length=6):
     """Tạo mã xác thực ngẫu nhiên"""
     return ''.join(random.choices(string.digits, k=length))
 
-def get_profile_changes_summary(old_data, new_data):
+def get_profile_changes_summary(old_data, new_data, has_avatar_change=False):
     """Tạo tóm tắt thay đổi profile"""
     changes = []
     
@@ -3437,8 +3460,11 @@ def get_profile_changes_summary(old_data, new_data):
             new_bio = new_bio[:50] + '...'
         changes.append(f"Mô tả: '{old_bio}' → '{new_bio}'")
     
-    if old_data.get('avatar') != new_data.get('avatar'):
-        if new_data.get('avatar'):
+    # Kiểm tra thay đổi avatar - ưu tiên has_avatar_change nếu được truyền vào
+    print(f"🔍 DEBUG: Checking avatar change - has_avatar_change={has_avatar_change}, old_avatar={old_data.get('avatar')}, new_avatar={new_data.get('avatar')}", flush=True)
+    if has_avatar_change or old_data.get('avatar') != new_data.get('avatar'):
+        print(f"🔍 DEBUG: Avatar change detected!", flush=True)
+        if has_avatar_change or new_data.get('avatar'):
             changes.append("Ảnh đại diện: Thay đổi")
         else:
             changes.append("Ảnh đại diện: Xóa")
@@ -3482,7 +3508,17 @@ def handle_profile_verification(user_id, verification_code, cursor, conn):
         
         # Kiểm tra số lần thử sai
         if attempts >= 5:
-            flash("Bạn đã nhập sai mã quá nhiều lần. Vui lòng thực hiện lại thay đổi.", "error")
+            # Xóa thông tin xác thực khi đạt giới hạn thử sai
+            cursor.execute("""
+                UPDATE user SET 
+                    profile_verification_code = NULL,
+                    profile_verification_expires_at = NULL,
+                    pending_profile_changes = NULL,
+                    profile_verification_attempts = 0
+                WHERE id = %s
+            """, (user_id,))
+            conn.commit()
+            flash("Bạn đã nhập sai mã quá nhiều lần (5 lần). Thay đổi đã bị hủy bỏ. Vui lòng thực hiện lại thay đổi.", "error")
             return redirect(url_for('profile_settings', user_id=user_id))
         
         # Kiểm tra mã xác thực
@@ -3492,7 +3528,11 @@ def handle_profile_verification(user_id, verification_code, cursor, conn):
                 UPDATE user SET profile_verification_attempts = %s WHERE id = %s
             """, (attempts + 1, user_id))
             conn.commit()
-            flash(f"Mã xác thực không đúng. Còn {5 - attempts - 1} lần thử.", "error")
+            remaining_attempts = 5 - attempts - 1
+            if remaining_attempts > 0:
+                flash(f"Mã xác thực không đúng. Còn {remaining_attempts} lần thử.", "error")
+            else:
+                flash("Mã xác thực không đúng. Đây là lần thử cuối cùng!", "error")
             return redirect(url_for('profile_settings', user_id=user_id))
         
         # Xác thực thành công - áp dụng thay đổi

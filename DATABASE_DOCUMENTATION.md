@@ -38,6 +38,10 @@ CREATE TABLE `user` (
 - `rank`: Cấp bậc người dùng
 - `score`: Điểm số người dùng
 - `created_at`: Thời gian tạo tài khoản
+- `email_preferences`: Cài đặt email (JSON format)
+- `email_verified`: Email đã xác thực hay chưa
+- `email_verification_token`: Token xác thực email
+- `email_verification_expires_at`: Thời gian hết hạn token xác thực email
 
 ### 2. Bảng `svg_image` - Lưu trữ hình ảnh SVG
 
@@ -214,6 +218,121 @@ CREATE TABLE `user_action_log` (
 - `action_type`: Loại hành động (follow, unfollow, like, unlike, view, share)
 - `created_at`: Thời gian thực hiện
 
+### 9. Bảng `email_log` - Log gửi email
+
+**Mô tả:** Ghi lại tất cả các email đã gửi để theo dõi và debug.
+
+**Cấu trúc:**
+```sql
+CREATE TABLE `email_log` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `recipient` varchar(255) NOT NULL,
+  `template` varchar(100) NOT NULL,
+  `success` boolean NOT NULL DEFAULT FALSE,
+  `error_message` text,
+  `sent_at` timestamp DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_recipient` (`recipient`),
+  KEY `idx_template` (`template`),
+  KEY `idx_sent_at` (`sent_at`),
+  KEY `idx_success` (`success`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
+
+**Các trường:**
+- `id`: Khóa chính, tự động tăng
+- `recipient`: Email người nhận
+- `template`: Loại template email (welcome, verification, svg_verification)
+- `success`: Trạng thái gửi thành công hay thất bại
+- `error_message`: Thông báo lỗi nếu gửi thất bại
+- `sent_at`: Thời gian gửi email
+
+### 10. Bảng `verification_tokens` - Quản lý token xác thực
+
+**Mô tả:** Lưu trữ tất cả các loại token xác thực (tài khoản, SVG, đặt lại mật khẩu).
+
+**Cấu trúc:**
+```sql
+CREATE TABLE `verification_tokens` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `token` varchar(255) NOT NULL UNIQUE,
+  `verification_type` varchar(50) NOT NULL,
+  `verification_code` varchar(10) NULL,
+  `expires_at` timestamp NOT NULL,
+  `used` boolean DEFAULT FALSE,
+  `used_at` timestamp NULL,
+  `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE,
+  KEY `idx_token` (`token`),
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_verification_type` (`verification_type`),
+  KEY `idx_verification_code` (`verification_code`),
+  KEY `idx_expires_at` (`expires_at`),
+  KEY `idx_used` (`used`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
+
+**Các trường:**
+- `id`: Khóa chính, tự động tăng
+- `user_id`: ID người dùng (khóa ngoại)
+- `token`: Token xác thực (duy nhất)
+- `verification_type`: Loại xác thực (account_verification, svg_verification, password_reset)
+- `verification_code`: Mã xác thực 6 số (nếu có)
+- `expires_at`: Thời gian hết hạn token
+- `used`: Đã sử dụng hay chưa
+- `used_at`: Thời gian sử dụng
+- `created_at`: Thời gian tạo token
+
+### 11. Bảng `password_reset_tokens` - Token đặt lại mật khẩu (DEPRECATED)
+
+**Mô tả:** Bảng này KHÔNG CẦN THIẾT vì hệ thống chỉ sử dụng Google OAuth. Google tự quản lý việc đặt lại mật khẩu.
+
+**Lý do không cần:**
+- Hệ thống chỉ cho phép đăng nhập qua Google OAuth
+- Không có mật khẩu local để reset
+- Google tự quản lý password reset và security
+- Bảng này được tạo để backward compatibility nhưng không sử dụng
+
+**Ghi chú:** Có thể xóa bảng này nếu muốn dọn dẹp database.
+
+### 12. Bảng `email_notifications` - Quản lý thông báo email
+
+**Mô tả:** Lưu trữ các thông báo email cần gửi cho người dùng.
+
+**Cấu trúc:**
+```sql
+CREATE TABLE `email_notifications` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `notification_type` varchar(100) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `message` text NOT NULL,
+  `action_url` varchar(500),
+  `sent` boolean DEFAULT FALSE,
+  `sent_at` timestamp NULL,
+  `created_at` timestamp DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE,
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_notification_type` (`notification_type`),
+  KEY `idx_sent` (`sent`),
+  KEY `idx_created_at` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
+
+**Các trường:**
+- `id`: Khóa chính, tự động tăng
+- `user_id`: ID người dùng (khóa ngoại)
+- `notification_type`: Loại thông báo
+- `title`: Tiêu đề thông báo
+- `message`: Nội dung thông báo
+- `action_url`: URL hành động (nếu có)
+- `sent`: Đã gửi hay chưa
+- `sent_at`: Thời gian gửi
+- `created_at`: Thời gian tạo thông báo
+
 ## Mối quan hệ giữa các bảng
 
 ### Sơ đồ quan hệ:
@@ -226,6 +345,9 @@ user (1) ←→ (N) user_follow (followee)
 user (1) ←→ (N) svg_action_log
 user (1) ←→ (N) user_action_log (actor)
 user (1) ←→ (N) user_action_log (target)
+user (1) ←→ (N) verification_tokens
+user (1) ←→ (N) password_reset_tokens (DEPRECATED)
+user (1) ←→ (N) email_notifications
 svg_image (1) ←→ (N) svg_like
 svg_image (1) ←→ (N) svg_action_log
 svg_image (1) ←→ (N) user_action_log
@@ -239,7 +361,10 @@ svg_image (N) ←→ (N) keyword (thông qua svg_image_keyword)
 3. **user → user_follow**: Quan hệ follow giữa các người dùng
 4. **user → svg_action_log**: Người dùng thực hiện các hành động với SVG
 5. **user → user_action_log**: Người dùng thực hiện các hành động xã hội
-6. **svg_image → keyword**: Quan hệ nhiều-nhiều thông qua bảng trung gian
+6. **user → verification_tokens**: Một người dùng có thể có nhiều token xác thực
+7. **user → password_reset_tokens**: (DEPRECATED) Không cần thiết với Google OAuth
+8. **user → email_notifications**: Một người dùng có thể có nhiều thông báo email
+9. **svg_image → keyword**: Quan hệ nhiều-nhiều thông qua bảng trung gian
 
 ## Cấu hình kết nối
 
@@ -342,6 +467,81 @@ ORDER BY ual.created_at DESC
 LIMIT 20
 ```
 
+### 5. Quản lý Email System:
+```sql
+-- Lấy thống kê email đã gửi
+SELECT 
+    template,
+    COUNT(*) as total_sent,
+    SUM(CASE WHEN success = 1 THEN 1 ELSE 0 END) as successful,
+    SUM(CASE WHEN success = 0 THEN 1 ELSE 0 END) as failed,
+    DATE(sent_at) as send_date
+FROM email_log
+WHERE sent_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+GROUP BY template, DATE(sent_at)
+ORDER BY send_date DESC, template
+
+-- Lấy danh sách email lỗi gần đây
+SELECT 
+    recipient,
+    template,
+    error_message,
+    sent_at
+FROM email_log
+WHERE success = 0
+ORDER BY sent_at DESC
+LIMIT 50
+
+-- Lấy token xác thực chưa hết hạn
+SELECT 
+    vt.token,
+    vt.verification_type,
+    vt.verification_code,
+    vt.expires_at,
+    u.email,
+    u.username
+FROM verification_tokens vt
+JOIN user u ON vt.user_id = u.id
+WHERE vt.used = 0 AND vt.expires_at > NOW()
+ORDER BY vt.created_at DESC
+
+-- Lấy thông báo email chưa gửi
+SELECT 
+    en.id,
+    en.notification_type,
+    en.title,
+    en.message,
+    en.created_at,
+    u.email,
+    u.username
+FROM email_notifications en
+JOIN user u ON en.user_id = u.id
+WHERE en.sent = 0
+ORDER BY en.created_at ASC
+LIMIT 100
+
+-- Cập nhật cài đặt email của người dùng
+UPDATE user 
+SET email_preferences = JSON_SET(
+    email_preferences,
+    '$.welcome', ?,
+    '$.password_reset', ?,
+    '$.svg_shared', ?,
+    '$.notifications', ?
+)
+WHERE id = ?
+
+-- Lấy người dùng chưa xác thực email
+SELECT 
+    id,
+    username,
+    email,
+    created_at
+FROM user
+WHERE email_verified = 0
+ORDER BY created_at DESC
+```
+
 ## Backup và Restore
 
 ### Backup database:
@@ -380,4 +580,4 @@ mysql -u hiep1987 -p tikz2svg < tikz2svg_database_backup.sql
 
 ---
 
-*Tài liệu này được cập nhật lần cuối: Tháng 7 năm 2025*
+*Tài liệu này được cập nhật lần cuối: Tháng 8 năm 2025*

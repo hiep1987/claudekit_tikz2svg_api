@@ -2790,7 +2790,95 @@ def serve_logo(filename):
 @app.route('/email-test')
 @login_required
 def email_test_page():
-    """Trang test email cho admin"""
+    """Trang test email cho admin với xác thực mã"""
+    # Kiểm tra mã xác thực từ session
+    if not session.get('email_test_verified'):
+        return render_template_string('''
+        <!DOCTYPE html>
+        <html lang="vi">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Xác thực - Test Email System</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+                .container { max-width: 400px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+                .header { text-align: center; margin-bottom: 30px; }
+                .form-group { margin-bottom: 20px; }
+                label { display: block; margin-bottom: 5px; font-weight: bold; color: #333; }
+                input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; text-align: center; letter-spacing: 2px; }
+                button { background: #e74c3c; color: white; padding: 12px 24px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; width: 100%; }
+                button:hover { background: #c0392b; }
+                .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 10px; border-radius: 5px; margin-bottom: 20px; display: none; }
+                .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>🔐 Xác thực Truy cập</h1>
+                    <p>Nhập mã xác thực để truy cập Email Test System</p>
+                </div>
+                
+                <div class="warning">
+                    <strong>⚠️ Cảnh báo:</strong> Đây là trang quản trị nội bộ. Chỉ admin mới được phép truy cập.
+                </div>
+                
+                <div class="error" id="error">
+                    <strong>❌ Mã xác thực không đúng!</strong>
+                </div>
+                
+                <form id="authForm">
+                    <div class="form-group">
+                        <label for="authCode">Mã xác thực:</label>
+                        <input type="text" id="authCode" name="authCode" required placeholder="Nhập mã 6 chữ số" maxlength="6" pattern="[0-9]{6}">
+                    </div>
+                    
+                    <button type="submit">🔓 Xác thực & Truy cập</button>
+                </form>
+            </div>
+            
+            <script>
+                document.getElementById('authForm').addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const authCode = document.getElementById('authCode').value;
+                    const error = document.getElementById('error');
+                    
+                    if (authCode === '964454') {
+                        // Gửi request để set session
+                        try {
+                            const response = await fetch('/api/verify-email-test', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({ authCode: authCode })
+                            });
+                            
+                            if (response.ok) {
+                                window.location.reload();
+                            } else {
+                                error.style.display = 'block';
+                            }
+                        } catch (error) {
+                            error.style.display = 'block';
+                        }
+                    } else {
+                        error.style.display = 'block';
+                        document.getElementById('authCode').value = '';
+                        document.getElementById('authCode').focus();
+                    }
+                });
+                
+                // Auto-focus vào input
+                document.getElementById('authCode').focus();
+            </script>
+        </body>
+        </html>
+        ''')
+    
+    # Nếu đã xác thực, hiển thị trang email test
     return render_template_string('''
     <!DOCTYPE html>
     <html lang="vi">
@@ -2813,13 +2901,21 @@ def email_test_page():
             .loading { display: none; text-align: center; color: #666; }
             .logo-preview { text-align: center; margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 8px; }
             .logo-preview img { width: 60px; height: 60px; border-radius: 8px; }
+            .logout-btn { background: #e74c3c; color: white; padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; float: right; }
+            .logout-btn:hover { background: #c0392b; }
+            .status-bar { background: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin-bottom: 20px; }
         </style>
     </head>
     <body>
         <div class="container">
             <div class="header">
+                <button class="logout-btn" onclick="logout()">🚪 Thoát</button>
                 <h1>📧 Test Email System</h1>
                 <p>Gửi email test với logo TikZ2SVG (hosted trên server)</p>
+            </div>
+            
+            <div class="status-bar">
+                <strong>✅ Đã xác thực:</strong> Bạn đã nhập đúng mã xác thực và được phép truy cập.
             </div>
             
             <div class="logo-preview">
@@ -2860,6 +2956,11 @@ def email_test_page():
         </div>
         
         <script>
+            function logout() {
+                fetch('/api/logout-email-test', { method: 'POST' })
+                    .then(() => window.location.reload());
+            }
+            
             document.getElementById('emailForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
@@ -2895,10 +2996,36 @@ def email_test_page():
     </html>
     ''')
 
+@app.route('/api/verify-email-test', methods=['POST'])
+@login_required
+def verify_email_test():
+    """Xác thực mã để truy cập email test"""
+    try:
+        data = request.get_json()
+        auth_code = data.get('authCode')
+        
+        if auth_code == '964454':
+            session['email_test_verified'] = True
+            return jsonify({'success': True, 'message': 'Xác thực thành công'})
+        else:
+            return jsonify({'success': False, 'message': 'Mã xác thực không đúng'}), 401
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Lỗi: {str(e)}'}), 500
+
+@app.route('/api/logout-email-test', methods=['POST'])
+@login_required
+def logout_email_test():
+    """Đăng xuất khỏi email test"""
+    session.pop('email_test_verified', None)
+    return jsonify({'success': True, 'message': 'Đã đăng xuất'})
+
 @app.route('/api/send-test-email', methods=['POST'])
 @login_required
 def send_test_email_api():
-    """API gửi email test"""
+    """API gửi email test - yêu cầu xác thực"""
+    # Kiểm tra xác thực email test
+    if not session.get('email_test_verified'):
+        return jsonify({'success': False, 'message': 'Chưa xác thực truy cập email test'}), 403
     try:
         email = request.form.get('email')
         template = request.form.get('template', 'welcome')

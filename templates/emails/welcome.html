@@ -12,77 +12,269 @@
             max-width: 600px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f5f5f5;
+            background-color: #f8f9fa;
         }
         .container {
             background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            padding: 0;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
         .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
             text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #e0e0e0;
+            position: relative;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
+        }
+        .logo-container {
+            position: relative;
+            z-index: 1;
+            margin-bottom: 20px;
+        }
+        .logo {
+            display: inline-block;
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .logo img {
+            width: 60px;
+            height: 60px;
+            display: block;
         }
         .header h1 {
-            color: #1976d2;
             margin: 0;
-            font-size: 24px;
+            font-size: 28px;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            font-size: 16px;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
         }
         .content {
-            margin: 20px 0;
+            padding: 40px 30px;
+        }
+        .welcome-message {
+            font-size: 18px;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .features {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+        .features h3 {
+            color: #2c3e50;
+            margin: 0 0 20px 0;
+            font-size: 20px;
+            text-align: center;
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .feature-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+        }
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+        .feature-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            font-size: 12px;
+        }
+        .cta-section {
+            text-align: center;
+            margin: 40px 0;
+            padding: 30px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
         }
         .btn {
             display: inline-block;
-            background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 12px 30px;
+            padding: 16px 40px;
             text-decoration: none;
-            border-radius: 6px;
-            font-weight: bold;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
             margin: 10px 5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
         .btn:hover {
-            background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        .secondary-btn {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+        }
+        .secondary-btn:hover {
+            box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
         }
         .footer {
+            background: #2c3e50;
+            color: white;
+            padding: 30px;
             text-align: center;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #e0e0e0;
-            color: #666;
+        }
+        .footer p {
+            margin: 5px 0;
             font-size: 14px;
+            opacity: 0.8;
+        }
+        .social-links {
+            margin: 20px 0;
+        }
+        .social-links a {
+            display: inline-block;
+            margin: 0 10px;
+            color: white;
+            text-decoration: none;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+        .social-links a:hover {
+            opacity: 1;
+        }
+        .highlight {
+            background: linear-gradient(120deg, #a8edea 0%, #fed6e3 100%);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                border-radius: 12px;
+            }
+            .header {
+                padding: 30px 20px;
+            }
+            .content {
+                padding: 30px 20px;
+            }
+            .btn {
+                padding: 14px 30px;
+                font-size: 15px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <div style="text-align:center;margin-bottom:30px;padding:20px;background:linear-gradient(135deg,#74b9ff 0%,#0984e3 100%);border-radius:10px">
-                <div style="display:inline-block;background:white;padding:10px;border-radius:8px;margin-bottom:15px">
-                    <img src="https://tikz2svg.mathlib.io.vn/static/images/email_logo.png" alt="TikZ2SVG Logo" style="width:60px;height:60px" />
+            <div class="logo-container">
+                <div class="logo">
+                    <img src="https://tikz2svg.mathlib.io.vn/static/images/email_logo.png" alt="TikZ2SVG Logo" />
                 </div>
-                <h1 style="color:white;margin:0;font-size:24px">TikZ2SVG</h1>
-                <p style="color:white;margin:10px 0 0 0;font-size:16px">Chuyển đổi TikZ thành SVG</p>
             </div>
             <h1>🎉 Chào mừng {{ username }}!</h1>
+            <p>Bạn đã chính thức trở thành thành viên của cộng đồng TikZ2SVG</p>
         </div>
 
         <div class="content">
-            <p>Cảm ơn bạn đã đăng ký sử dụng TikZ2SVG. Chúng tôi rất vui mừng chào đón bạn!</p>
+            <div class="welcome-message">
+                <p>Cảm ơn bạn đã đăng ký sử dụng <span class="highlight">TikZ2SVG</span>! Chúng tôi rất vui mừng chào đón bạn vào cộng đồng những người yêu thích toán học và công nghệ.</p>
+            </div>
             
-            <p>Với TikZ2SVG, bạn có thể dễ dàng chuyển đổi các file TikZ thành SVG một cách nhanh chóng và chính xác.</p>
-            
-            <div style="text-align: center; margin: 30px 0;">
-                <a href="{{ app_url }}" class="btn">🚀 Bắt đầu ngay</a>
+            <div class="features">
+                <h3>🚀 Những gì bạn có thể làm với TikZ2SVG:</h3>
+                <ul class="feature-list">
+                    <li>
+                        <div class="feature-icon">⚡</div>
+                        <strong>Chuyển đổi nhanh chóng:</strong> Chuyển đổi file TikZ thành SVG chỉ trong vài giây
+                    </li>
+                    <li>
+                        <div class="feature-icon">🎯</div>
+                        <strong>Độ chính xác cao:</strong> Giữ nguyên chất lượng và độ chính xác của hình vẽ
+                    </li>
+                    <li>
+                        <div class="feature-icon">📱</div>
+                        <strong>Responsive:</strong> SVG tự động thích ứng với mọi thiết bị
+                    </li>
+                    <li>
+                        <div class="feature-icon">🔒</div>
+                        <strong>An toàn:</strong> Dữ liệu của bạn được bảo vệ và mã hóa
+                    </li>
+                    <li>
+                        <div class="feature-icon">💾</div>
+                        <strong>Lưu trữ:</strong> Quản lý và chia sẻ file SVG dễ dàng
+                    </li>
+                </ul>
+            </div>
+
+            <div class="cta-section">
+                <h3>🎯 Sẵn sàng bắt đầu?</h3>
+                <p>Hãy khám phá ngay những tính năng tuyệt vời của TikZ2SVG!</p>
+                <div style="margin: 25px 0;">
+                    <a href="{{ app_url }}" class="btn">🚀 Bắt đầu ngay</a>
+                </div>
+                <p style="font-size: 14px; color: #6c757d; margin-top: 15px;">
+                    <strong>Địa chỉ truy cập:</strong> {{ app_url }}
+                </p>
+            </div>
+
+            <div style="background: #e3f2fd; border-radius: 8px; padding: 20px; margin: 30px 0;">
+                <h4 style="margin: 0 0 15px 0; color: #1976d2;">💡 Mẹo sử dụng:</h4>
+                <ul style="margin: 0; padding-left: 20px; color: #424242;">
+                    <li>Upload file TikZ (.tex) để chuyển đổi thành SVG</li>
+                    <li>Sử dụng tính năng preview để xem trước kết quả</li>
+                    <li>Lưu và chia sẻ file SVG với cộng đồng</li>
+                    <li>Theo dõi các bài viết mới để cập nhật tính năng</li>
+                </ul>
             </div>
         </div>
 
         <div class="footer">
+            <p><strong>TikZ2SVG</strong> - Chuyển đổi TikZ thành SVG một cách dễ dàng</p>
+            <div class="social-links">
+                <a href="{{ app_url }}/docs">📚 Tài liệu</a>
+                <a href="{{ app_url }}/support">💬 Hỗ trợ</a>
+                <a href="{{ app_url }}/community">👥 Cộng đồng</a>
+            </div>
             <p>Email này được gửi tự động từ hệ thống TikZ2SVG</p>
             <p>Thời gian: {{ timestamp if timestamp else 'N/A' }}</p>
+            <p style="font-size: 12px; opacity: 0.6; margin-top: 15px;">
+                Nếu bạn không muốn nhận email này, vui lòng liên hệ với chúng tôi để hủy đăng ký.
+            </p>
         </div>
     </div>
 </body>

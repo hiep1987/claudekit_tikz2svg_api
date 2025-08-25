@@ -3,7 +3,7 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user, login_
 import os
 import subprocess
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import time
 import glob
 import cairosvg
@@ -11,6 +11,9 @@ from PIL import Image
 Image.MAX_IMAGE_PIXELS = None  # Tắt giới hạn decompression bomb
 import re
 import traceback
+import random
+import string
+import json
 from flask_dance.contrib.google import make_google_blueprint, google
 from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
@@ -20,6 +23,7 @@ import smtplib
 import base64
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email_service import init_email_service, get_email_service
 
 load_dotenv()
 
@@ -2058,21 +2062,8 @@ def profile_user(user_id):
             cursor.execute("SELECT 1 FROM user_follow WHERE follower_id=%s AND followee_id=%s", (current_user_id, user_id))
             is_followed = cursor.fetchone() is not None
 
-        return render_template("profile.html",
-            username=user["username"],
-            avatar=user["avatar"],
-            bio=user["bio"],
-            user_email=user["email"],
-            user_id=user_id,
-            email_verified=True,
-            svg_files=svg_files,
-            is_owner=is_owner,
-            is_followed=is_followed,
-            follower_count=follower_count,
-            current_user_email=current_user.email if current_user.is_authenticated else None,
-            current_username=current_user.username if current_user.is_authenticated else None,
-            current_avatar=current_user.avatar if current_user.is_authenticated else None
-        )
+        # Redirect đến trang profile SVG files (trang chính)
+        return redirect(url_for('profile_svg_files', user_id=user_id))
     except Exception as e:
         print(f"❌ General error in profile_user: {e}", flush=True)
         import traceback
@@ -2111,79 +2102,102 @@ def profile_settings(user_id):
         cursor = conn.cursor(dictionary=True)
 
         if request.method == 'POST':
+            # Kiểm tra xem có phải là xác thực không
+            verification_code = request.form.get("verification_code", "").strip()
+            
+            if verification_code:
+                # Xử lý xác thực
+                return handle_profile_verification(user_id, verification_code, cursor, conn)
+            
+            # Xử lý thay đổi profile
             new_username = request.form.get("username", "").strip()
             new_bio = request.form.get("bio", "").strip()
             avatar_file = request.files.get('avatar')
             avatar_cropped_data = request.form.get('avatar_cropped')
 
-            # Cập nhật username và bio
-            cursor.execute("UPDATE user SET username=%s, bio=%s WHERE id=%s", (new_username, new_bio, user_id))
+            # Lấy thông tin hiện tại để so sánh
+            cursor.execute("SELECT username, bio, avatar, email FROM user WHERE id = %s", (user_id,))
+            current_data = cursor.fetchone()
             
-            # ✅ Xử lý avatar upload - File trực tiếp
-            if avatar_file and avatar_file.filename != '':
-                # Xoá avatar cũ
-                cursor.execute("SELECT avatar FROM user WHERE id = %s", (user_id,))
-                old_avatar_row = cursor.fetchone()
-                old_avatar = old_avatar_row['avatar'] if old_avatar_row else None
-                if old_avatar:
-                    old_path = os.path.join(app.config['UPLOAD_FOLDER'], 'avatars', old_avatar)
-                    if os.path.exists(old_path):
-                        try:
-                            os.remove(old_path)
-                        except Exception as e:
-                            print(f"[WARN] Không thể xóa avatar cũ: {e}", flush=True)
+            # Tạo tóm tắt thay đổi
+            new_data = {
+                'username': new_username,
+                'bio': new_bio,
+                'avatar': current_data['avatar']  # Giữ nguyên avatar cũ cho đến khi xác thực
+            }
+            
+            changes_summary = get_profile_changes_summary(current_data, new_data)
+            
+            # Nếu có thay đổi, gửi email xác thực
+            if changes_summary:
+                # Tạo mã xác thực
+                verification_code = generate_verification_code(6)
+                expires_at = datetime.now() + timedelta(hours=24)
+                
+                # Lưu thay đổi tạm thời và mã xác thực
+                pending_changes = {
+                    'username': new_username,
+                    'bio': new_bio,
+                    'avatar_file': None,
+                    'avatar_cropped_data': avatar_cropped_data
+                }
+                
+                cursor.execute("""
+                    UPDATE user SET 
+                        profile_verification_code = %s,
+                        profile_verification_expires_at = %s,
+                        pending_profile_changes = %s,
+                        profile_verification_attempts = 0
+                    WHERE id = %s
+                """, (verification_code, expires_at, json.dumps(pending_changes), user_id))
+                
+                conn.commit()
+                
+                # Gửi email xác thực
+                email_service = get_email_service()
+                print(f"🔍 DEBUG: Email service = {email_service}", flush=True)
+                
+                if email_service:
+                    print(f"🔍 DEBUG: Sending email to {current_data['email']} with code {verification_code}", flush=True)
+                    try:
+                        result = email_service.send_profile_settings_verification_email(
+                            email=current_data['email'],
+                            username=current_data['username'] or 'Người dùng',
+                            verification_code=verification_code,
+                            changes_summary=changes_summary
+                        )
+                        print(f"🔍 DEBUG: Email send result = {result}", flush=True)
+                    except Exception as e:
+                        print(f"❌ DEBUG: Email send error = {e}", flush=True)
+                        import traceback
+                        print(f"❌ DEBUG: Email error traceback = {traceback.format_exc()}", flush=True)
+                else:
+                    print(f"❌ DEBUG: Email service is None!", flush=True)
+                
+                flash("Đã gửi mã xác thực đến email của bạn. Vui lòng kiểm tra email và nhập mã để hoàn tất thay đổi.", "success")
+                return redirect(url_for('profile_settings', user_id=user_id))
+            else:
+                flash("Không có thay đổi nào được thực hiện.", "info")
+                return redirect(url_for('profile_settings', user_id=user_id))
+            
+            # Avatar sẽ được xử lý trong hàm xác thực
 
-                # Lưu file mới
-                filename = secure_filename(avatar_file.filename)
-                save_path = os.path.join(app.config['UPLOAD_FOLDER'], 'avatars', filename)
-                avatar_file.save(save_path)
-
-                cursor.execute("UPDATE user SET avatar = %s WHERE id = %s", (filename, user_id))
-
-            # ✅ Xử lý avatar upload - Base64 cropped
-            elif avatar_cropped_data and avatar_cropped_data.startswith('data:image'):
-                try:
-                    match = re.match(r'data:image/(png|jpeg|jpg|gif);base64,(.*)', avatar_cropped_data)
-                    if match:
-                        ext = match.group(1)
-                        b64_data = match.group(2)
-
-                        # Xoá avatar cũ
-                        cursor.execute("SELECT avatar FROM user WHERE id = %s", (user_id,))
-                        old_avatar_row = cursor.fetchone()
-                        old_avatar = old_avatar_row['avatar'] if old_avatar_row else None
-                        if old_avatar:
-                            old_path = os.path.join(app.config['UPLOAD_FOLDER'], 'avatars', old_avatar)
-                            if os.path.exists(old_path):
-                                try:
-                                    os.remove(old_path)
-                                except Exception as e:
-                                    print(f"[WARN] Không thể xóa avatar cũ: {e}", flush=True)
-
-                        # Tạo tên file random
-                        unique_id = uuid.uuid4().hex
-                        filename = f"avatar_{unique_id}.{ext}"
-                        save_path = os.path.join(app.config['UPLOAD_FOLDER'], 'avatars', filename)
-
-                        # Decode và lưu
-                        import base64
-                        with open(save_path, 'wb') as f:
-                            f.write(base64.b64decode(b64_data))
-
-                        # Update DB
-                        cursor.execute("UPDATE user SET avatar = %s WHERE id = %s", (filename, user_id))
-                except Exception as e:
-                    print(f"[WARN] Error saving cropped avatar: {e}", flush=True)
-                    flash("Có lỗi khi lưu ảnh đại diện đã cắt.", "error")
-
-            conn.commit()
-            flash("Đã cập nhật hồ sơ!", "success")
-            return redirect(url_for('profile_settings', user_id=user_id))
-
-        cursor.execute("SELECT id, username, avatar, bio, email FROM user WHERE id = %s", (user_id,))
+        cursor.execute("""
+            SELECT id, username, avatar, bio, email, 
+                   profile_verification_code, profile_verification_expires_at,
+                   pending_profile_changes, profile_verification_attempts
+            FROM user WHERE id = %s
+        """, (user_id,))
         user = cursor.fetchone()
         if not user:
             return "User not found", 404
+
+        # Kiểm tra xem có thay đổi đang chờ xác thực không
+        has_pending_verification = (
+            user['profile_verification_code'] is not None and 
+            user['profile_verification_expires_at'] is not None and
+            datetime.now() < user['profile_verification_expires_at']
+        )
 
         return render_template("profile_settings.html",
             username=user["username"],
@@ -2195,7 +2209,9 @@ def profile_settings(user_id):
             is_owner=is_owner,
             current_user_email=current_user.email if current_user.is_authenticated else None,
             current_username=current_user.username if current_user.is_authenticated else None,
-            current_avatar=current_user.avatar if current_user.is_authenticated else None
+            current_avatar=current_user.avatar if current_user.is_authenticated else None,
+            has_pending_verification=has_pending_verification,
+            verification_attempts=user.get('profile_verification_attempts', 0)
         )
     except Exception as e:
         print(f"❌ General error in profile_settings: {e}", flush=True)
@@ -2764,22 +2780,64 @@ def send_email(to_email, subject, html_content):
         if not password:
             return False, "Thiếu ZOHO_APP_PASSWORD trong .env"
         
+        # Đảm bảo encoding đúng cho subject và content
+        try:
+            # Encode subject nếu cần
+            if isinstance(subject, str):
+                subject = subject.encode('utf-8').decode('utf-8')
+            
+            # Encode HTML content nếu cần
+            if isinstance(html_content, str):
+                html_content = html_content.encode('utf-8').decode('utf-8')
+        except UnicodeError as ue:
+            print(f"Unicode encoding error: {ue}", flush=True)
+            # Fallback: encode as utf-8
+            subject = subject.encode('utf-8', errors='ignore').decode('utf-8')
+            html_content = html_content.encode('utf-8', errors='ignore').decode('utf-8')
+        
         msg = MIMEMultipart('alternative')
-        msg['Subject'] = subject
+        
+        # Encode subject an toàn
+        try:
+            msg['Subject'] = subject
+        except UnicodeEncodeError:
+            safe_subject = subject.encode('utf-8', errors='ignore').decode('utf-8')
+            msg['Subject'] = safe_subject
+        
         msg['From'] = email
         msg['To'] = to_email
         
-        html_part = MIMEText(html_content, 'html', 'utf-8')
+        # Sử dụng encoding rõ ràng và đảm bảo content an toàn
+        try:
+            html_part = MIMEText(html_content, 'html', 'utf-8')
+        except UnicodeEncodeError:
+            # Fallback: encode content trước khi tạo MIMEText
+            safe_html_content = html_content.encode('utf-8', errors='ignore').decode('utf-8')
+            html_part = MIMEText(safe_html_content, 'html', 'utf-8')
+        
         msg.attach(html_part)
         
         server = smtplib.SMTP(smtp_server, smtp_port)
         server.starttls()
         server.login(email, password)
-        server.sendmail(email, to_email, msg.as_string())
+        
+        # Encode message string với UTF-8
+        message_string = msg.as_string()
+        try:
+            # Thử encode với UTF-8
+            message_bytes = message_string.encode('utf-8')
+            server.sendmail(email, to_email, message_bytes)
+        except UnicodeEncodeError:
+            # Fallback: encode với ascii và ignore errors
+            message_bytes = message_string.encode('ascii', errors='ignore')
+            server.sendmail(email, to_email, message_bytes)
         server.quit()
         
         return True, "Email đã được gửi thành công!"
     except Exception as e:
+        print(f"Email send error: {e}", flush=True)
+        import traceback
+        print(f"Email error traceback: {traceback.format_exc()}", flush=True)
         return False, f"Lỗi: {str(e)}"
 
 @app.route('/static/images/<path:filename>')
@@ -3039,20 +3097,44 @@ def send_test_email_api():
             if not create_hosted_logo():
                 return jsonify({'success': False, 'message': 'Không thể tạo logo'})
         
-        # Tạo nội dung email dựa trên template
-        if template == 'welcome':
-            subject = f"Chào mừng bạn đến với TikZ2SVG, {username}!"
-            html_content = create_welcome_email(username)
-        elif template == 'verification':
-            verification_code = "123456"  # Trong thực tế sẽ tạo ngẫu nhiên
-            subject = f"Xác thực tài khoản - TikZ2SVG"
-            html_content = create_verification_email(username, verification_code)
-        else:  # svg_verification
-            subject = f"Xác thực lưu SVG - TikZ2SVG"
-            html_content = create_svg_verification_email(username, 15)
+        # Sử dụng email service thay vì hàm send_email cũ
+        email_service = get_email_service()
+        if not email_service:
+            return jsonify({'success': False, 'message': 'Email service không khả dụng'})
         
-        success, message = send_email(email, subject, html_content)
-        return jsonify({'success': success, 'message': message})
+        try:
+            # Bypass rate limit cho email-test page
+            bypass_rate_limit = True
+            
+            if template == 'welcome':
+                success = email_service.send_email(email, 'welcome', context={'username': username, 'email': email}, bypass_rate_limit=bypass_rate_limit)
+                message = "Email chào mừng đã được gửi thành công!" if success else "Không thể gửi email chào mừng"
+            elif template == 'verification':
+                verification_code = "123456"  # Trong thực tế sẽ tạo ngẫu nhiên
+                success = email_service.send_email(email, 'account_verification', context={'username': username, 'email': email, 'verification_code': verification_code}, bypass_rate_limit=bypass_rate_limit)
+                message = "Email xác thực đã được gửi thành công!" if success else "Không thể gửi email xác thực"
+            elif template == 'account_verification':
+                verification_code = "123456"  # Trong thực tế sẽ tạo ngẫu nhiên
+                success = email_service.send_email(email, 'account_verification', context={'username': username, 'email': email, 'verification_code': verification_code}, bypass_rate_limit=bypass_rate_limit)
+                message = "Email xác thực tài khoản đã được gửi thành công!" if success else "Không thể gửi email xác thực tài khoản"
+            else:  # svg_verification
+                success = email_service.send_email(email, 'svg_verification', context={
+                    'username': username, 
+                    'email': email, 
+                    'verification_code': '123456', 
+                    'svg_name': 'test.svg',
+                    'svg_width': 800,
+                    'svg_height': 600,
+                    'svg_size': 2048,
+                    'daily_limit': 10,
+                    'verification_url': f"{os.environ.get('APP_URL', 'https://yourdomain.com')}/svg/verification"
+                }, bypass_rate_limit=bypass_rate_limit)
+                message = "Email xác thực SVG đã được gửi thành công!" if success else "Không thể gửi email xác thực SVG"
+            
+            return jsonify({'success': success, 'message': message})
+        except Exception as e:
+            print(f"Email service error: {e}", flush=True)
+            return jsonify({'success': False, 'message': f'Lỗi email service: {str(e)}'})
         
     except Exception as e:
         return jsonify({'success': False, 'message': f'Lỗi: {str(e)}'})
@@ -3077,6 +3159,66 @@ def send_welcome_email_api():
         
         success, message = send_email(email, subject, html_content)
         return jsonify({'success': success, 'message': message})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Lỗi: {str(e)}'})
+
+@app.route('/api/test-email-direct', methods=['POST'])
+def test_email_direct_api():
+    """API test email trực tiếp - không cần authentication"""
+    try:
+        data = request.json or request.form
+        email = data.get('email')
+        template = data.get('template', 'welcome')
+        username = data.get('username', 'User')
+        
+        if not email:
+            return jsonify({'success': False, 'message': 'Thiếu email'})
+        
+        # Tạo logo nếu chưa có
+        if not os.path.exists('static/images/email_logo.png'):
+            if not create_hosted_logo():
+                return jsonify({'success': False, 'message': 'Không thể tạo logo'})
+        
+        # Sử dụng email service với bypass rate limit
+        email_service = get_email_service()
+        if not email_service:
+            return jsonify({'success': False, 'message': 'Email service không khả dụng'})
+        
+        try:
+            # Bypass rate limit cho test
+            bypass_rate_limit = True
+            
+            if template == 'welcome':
+                success = email_service.send_email(email, 'welcome', context={'username': username, 'email': email}, bypass_rate_limit=bypass_rate_limit)
+                message = "Email chào mừng đã được gửi thành công!" if success else "Không thể gửi email chào mừng"
+            elif template == 'account_verification':
+                verification_code = "123456"  # Test code
+                success = email_service.send_email(email, 'account_verification', context={'username': username, 'email': email, 'verification_code': verification_code}, bypass_rate_limit=bypass_rate_limit)
+                message = "Email xác thực tài khoản đã được gửi thành công!" if success else "Không thể gửi email xác thực tài khoản"
+            elif template == 'notification':
+                success = email_service.send_email(email, 'notification', context={'title': 'Test Notification', 'message': f'Đây là email test cho {username}'}, bypass_rate_limit=bypass_rate_limit)
+                message = "Email thông báo đã được gửi thành công!" if success else "Không thể gửi email thông báo"
+            elif template == 'svg_verification':
+                success = email_service.send_email(email, 'svg_verification', context={
+                    'username': username, 
+                    'email': email, 
+                    'verification_code': '123456', 
+                    'svg_name': 'test.svg',
+                    'svg_width': 800,
+                    'svg_height': 600,
+                    'svg_size': 2048,
+                    'daily_limit': 10,
+                    'verification_url': f"{os.environ.get('APP_URL', 'https://yourdomain.com')}/svg/verification"
+                }, bypass_rate_limit=bypass_rate_limit)
+                message = "Email xác thực SVG đã được gửi thành công!" if success else "Không thể gửi email xác thực SVG"
+            else:
+                return jsonify({'success': False, 'message': f'Template {template} không được hỗ trợ'})
+            
+            return jsonify({'success': success, 'message': message})
+        except Exception as e:
+            print(f"Email service error: {e}", flush=True)
+            return jsonify({'success': False, 'message': f'Lỗi email service: {str(e)}'})
         
     except Exception as e:
         return jsonify({'success': False, 'message': f'Lỗi: {str(e)}'})
@@ -3133,6 +3275,9 @@ def send_svg_verification_email_api():
 
 def create_welcome_email(username):
     """Tạo email chào mừng với hosted logo"""
+    # Đảm bảo username được encode đúng
+    safe_username = str(username).encode('utf-8', errors='ignore').decode('utf-8')
+    
     return f'''
     <!DOCTYPE html>
     <html>
@@ -3150,7 +3295,7 @@ def create_welcome_email(username):
         </div>
         
         <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h2 style="color: #333; margin-top: 0;">🎉 Chào mừng {username}!</h2>
+            <h2 style="color: #333; margin-top: 0;">🎉 Chào mừng {safe_username}!</h2>
             <p style="color: #666; line-height: 1.6;">
                 Cảm ơn bạn đã đăng ký sử dụng TikZ2SVG. Chúng tôi rất vui mừng chào đón bạn!
             </p>
@@ -3178,6 +3323,9 @@ def create_welcome_email(username):
 
 def create_verification_email(username, verification_code):
     """Tạo email xác thực với hosted logo"""
+    # Đảm bảo username được encode đúng
+    safe_username = str(username).encode('utf-8', errors='ignore').decode('utf-8')
+    
     return f'''
     <!DOCTYPE html>
     <html>
@@ -3197,7 +3345,7 @@ def create_verification_email(username, verification_code):
         <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h2 style="color: #333; margin-top: 0;">🔐 Xác thực tài khoản</h2>
             <p style="color: #666; line-height: 1.6;">
-                Xin chào {username}, vui lòng sử dụng mã xác thực sau để hoàn tất việc đăng ký tài khoản:
+                Xin chào {safe_username}, vui lòng sử dụng mã xác thực sau để hoàn tất việc đăng ký tài khoản:
             </p>
             
             <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: center;">
@@ -3269,6 +3417,154 @@ def create_svg_verification_email(username, svg_count):
     </body>
     </html>
     '''
+
+def generate_verification_code(length=6):
+    """Tạo mã xác thực ngẫu nhiên"""
+    return ''.join(random.choices(string.digits, k=length))
+
+def get_profile_changes_summary(old_data, new_data):
+    """Tạo tóm tắt thay đổi profile"""
+    changes = []
+    
+    if old_data.get('username') != new_data.get('username'):
+        changes.append(f"Tên hiển thị: '{old_data.get('username', '')}' → '{new_data.get('username', '')}'")
+    
+    if old_data.get('bio') != new_data.get('bio'):
+        old_bio = old_data.get('bio', '') or 'Không có'
+        new_bio = new_data.get('bio', '') or 'Không có'
+        if len(new_bio) > 50:
+            new_bio = new_bio[:50] + '...'
+        changes.append(f"Mô tả: '{old_bio}' → '{new_bio}'")
+    
+    if old_data.get('avatar') != new_data.get('avatar'):
+        if new_data.get('avatar'):
+            changes.append("Ảnh đại diện: Thay đổi")
+        else:
+            changes.append("Ảnh đại diện: Xóa")
+    
+    return changes
+
+def handle_profile_verification(user_id, verification_code, cursor, conn):
+    """Xử lý xác thực thay đổi profile"""
+    try:
+        # Kiểm tra mã xác thực
+        cursor.execute("""
+            SELECT profile_verification_code, profile_verification_expires_at, 
+                   pending_profile_changes, profile_verification_attempts
+            FROM user WHERE id = %s
+        """, (user_id,))
+        
+        result = cursor.fetchone()
+        if not result:
+            flash("Không tìm thấy thông tin xác thực.", "error")
+            return redirect(url_for('profile_settings', user_id=user_id))
+        
+        stored_code = result['profile_verification_code']
+        expires_at = result['profile_verification_expires_at']
+        pending_changes = json.loads(result['pending_profile_changes']) if result['pending_profile_changes'] else {}
+        attempts = result['profile_verification_attempts']
+        
+        # Kiểm tra thời gian hết hạn
+        if expires_at and datetime.now() > expires_at:
+            # Xóa thông tin xác thực hết hạn
+            cursor.execute("""
+                UPDATE user SET 
+                    profile_verification_code = NULL,
+                    profile_verification_expires_at = NULL,
+                    pending_profile_changes = NULL,
+                    profile_verification_attempts = 0
+                WHERE id = %s
+            """, (user_id,))
+            conn.commit()
+            flash("Mã xác thực đã hết hạn. Vui lòng thực hiện lại thay đổi.", "error")
+            return redirect(url_for('profile_settings', user_id=user_id))
+        
+        # Kiểm tra số lần thử sai
+        if attempts >= 5:
+            flash("Bạn đã nhập sai mã quá nhiều lần. Vui lòng thực hiện lại thay đổi.", "error")
+            return redirect(url_for('profile_settings', user_id=user_id))
+        
+        # Kiểm tra mã xác thực
+        if verification_code != stored_code:
+            # Tăng số lần thử sai
+            cursor.execute("""
+                UPDATE user SET profile_verification_attempts = %s WHERE id = %s
+            """, (attempts + 1, user_id))
+            conn.commit()
+            flash(f"Mã xác thực không đúng. Còn {5 - attempts - 1} lần thử.", "error")
+            return redirect(url_for('profile_settings', user_id=user_id))
+        
+        # Xác thực thành công - áp dụng thay đổi
+        new_username = pending_changes.get('username', '')
+        new_bio = pending_changes.get('bio', '')
+        avatar_cropped_data = pending_changes.get('avatar_cropped_data')
+        
+        # Cập nhật username và bio
+        cursor.execute("UPDATE user SET username = %s, bio = %s WHERE id = %s", 
+                      (new_username, new_bio, user_id))
+        
+        # Xử lý avatar nếu có
+        if avatar_cropped_data and avatar_cropped_data.startswith('data:image'):
+            try:
+                match = re.match(r'data:image/(png|jpeg|jpg|gif);base64,(.*)', avatar_cropped_data)
+                if match:
+                    ext = match.group(1)
+                    b64_data = match.group(2)
+                    
+                    # Xoá avatar cũ
+                    cursor.execute("SELECT avatar FROM user WHERE id = %s", (user_id,))
+                    old_avatar_row = cursor.fetchone()
+                    old_avatar = old_avatar_row['avatar'] if old_avatar_row else None
+                    if old_avatar:
+                        old_path = os.path.join(app.config['UPLOAD_FOLDER'], 'avatars', old_avatar)
+                        if os.path.exists(old_path):
+                            try:
+                                os.remove(old_path)
+                            except Exception as e:
+                                print(f"[WARN] Không thể xóa avatar cũ: {e}", flush=True)
+                    
+                    # Tạo tên file random
+                    unique_id = uuid.uuid4().hex
+                    filename = f"avatar_{unique_id}.{ext}"
+                    save_path = os.path.join(app.config['UPLOAD_FOLDER'], 'avatars', filename)
+                    
+                    # Decode và lưu
+                    with open(save_path, 'wb') as f:
+                        f.write(base64.b64decode(b64_data))
+                    
+                    # Update DB
+                    cursor.execute("UPDATE user SET avatar = %s WHERE id = %s", (filename, user_id))
+            except Exception as e:
+                print(f"[WARN] Error saving cropped avatar: {e}", flush=True)
+                flash("Có lỗi khi lưu ảnh đại diện đã cắt.", "error")
+        
+        # Xóa thông tin xác thực
+        cursor.execute("""
+            UPDATE user SET 
+                profile_verification_code = NULL,
+                profile_verification_expires_at = NULL,
+                pending_profile_changes = NULL,
+                profile_verification_attempts = 0
+            WHERE id = %s
+        """, (user_id,))
+        
+        conn.commit()
+        flash("✅ Xác thực thành công! Hồ sơ đã được cập nhật.", "success")
+        return redirect(url_for('profile_settings', user_id=user_id))
+        
+    except Exception as e:
+        print(f"❌ Error in handle_profile_verification: {e}", flush=True)
+        flash("Có lỗi xảy ra trong quá trình xác thực.", "error")
+        return redirect(url_for('profile_settings', user_id=user_id))
+
+# Khởi tạo email service ngay khi import app
+try:
+    init_email_service(app)
+    print("✅ Email service initialized successfully", flush=True)
+except Exception as e:
+    print(f"❌ Failed to initialize email service: {e}", flush=True)
+    import traceback
+    print(f"❌ Email service init error: {traceback.format_exc()}", flush=True)
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)

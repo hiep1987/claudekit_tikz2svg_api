@@ -617,6 +617,35 @@
                 <div class="actions">
                     <button type="submit" class="btn btn-primary">💾 Lưu thay đổi</button>
                 </div>
+                
+                <!-- Form xác thực -->
+                <div id="verification-section" style="display: {% if has_pending_verification %}block{% else %}none{% endif %}; margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px; border: 2px solid #e9ecef;">
+                    <h3 style="color: #1976d2; margin-bottom: 15px;">🔐 Xác thực thay đổi</h3>
+                    <p style="color: #666; margin-bottom: 20px;">
+                        Chúng tôi đã gửi mã xác thực đến email của bạn. Vui lòng nhập mã để hoàn tất thay đổi.
+                    </p>
+                    
+                    {% if verification_attempts > 0 %}
+                    <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; border-radius: 6px; margin-bottom: 15px;">
+                        <p style="color: #856404; margin: 0; font-size: 14px;">
+                            ⚠️ Bạn đã nhập sai {{ verification_attempts }} lần. Còn {{ 5 - verification_attempts }} lần thử.
+                        </p>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="info-group">
+                        <label for="verification_code">📧 Mã xác thực:</label>
+                        <input type="text" id="verification_code" name="verification_code" 
+                               placeholder="Nhập mã 6 số từ email" maxlength="6" 
+                               style="font-family: 'Courier New', monospace; font-size: 18px; text-align: center; letter-spacing: 2px;">
+                        <small style="color: #666; font-size: 12px;">Mã có hiệu lực trong 24 giờ</small>
+                    </div>
+                    
+                    <div class="actions">
+                        <button type="submit" class="btn btn-primary">✅ Xác nhận thay đổi</button>
+                        <button type="button" onclick="cancelVerification()" class="btn btn-secondary">❌ Hủy bỏ</button>
+                    </div>
+                </div>
             </form>
         </div>
     </div>
@@ -876,6 +905,51 @@
                 // Không prevent default để form submit bình thường
                 // Sau khi submit thành công, trang sẽ reload và hiển thị tên mới
                 console.log('Profile form submitted - page will reload to update username');
+            });
+        }
+        
+        // ==== Verification form logic ====
+        function showVerificationForm() {
+            document.getElementById('verification-section').style.display = 'block';
+            document.getElementById('verification_code').focus();
+        }
+        
+        function hideVerificationForm() {
+            document.getElementById('verification-section').style.display = 'none';
+            document.getElementById('verification_code').value = '';
+        }
+        
+        function cancelVerification() {
+            hideVerificationForm();
+            // Có thể thêm logic để hủy bỏ thay đổi đang chờ xác thực
+        }
+        
+        // Kiểm tra xem có thông báo xác thực không
+        const flashMessages = document.querySelectorAll('.flash');
+        flashMessages.forEach(function(message) {
+            if (message.textContent.includes('mã xác thực')) {
+                showVerificationForm();
+            }
+        });
+        
+        // Hiển thị form xác thực nếu có thay đổi đang chờ
+        {% if has_pending_verification %}
+        showVerificationForm();
+        {% endif %}
+        
+        // Auto-focus vào ô mã xác thực khi hiển thị
+        const verificationInput = document.getElementById('verification_code');
+        if (verificationInput) {
+            verificationInput.addEventListener('input', function() {
+                // Chỉ cho phép nhập số
+                this.value = this.value.replace(/[^0-9]/g, '');
+                
+                // Auto-submit khi đủ 6 số
+                if (this.value.length === 6) {
+                    setTimeout(() => {
+                        document.querySelector('form[method="POST"]').submit();
+                    }, 500);
+                }
             });
         }
         

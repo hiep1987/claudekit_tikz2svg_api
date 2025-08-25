@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - TikZ2SVG</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .header h1 {
+            color: #1976d2;
+            margin: 0;
+            font-size: 24px;
+        }
+        .content {
+            margin: 20px 0;
+        }
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            margin: 10px 5px;
+        }
+        .btn:hover {
+            background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div style="text-align:center;margin-bottom:15px;">
+                <img src="https://tikz2svg.mathlib.io.vn/static/images/email_logo.png" alt="TikZ2SVG Logo" style="width:60px;height:60px" />
+            </div>
+            <h1>{{ title }}</h1>
+        </div>
+
+        <div class="content">
+            <p>{{ message }}</p>
+            
+            {% if action_url %}
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{{ action_url }}" class="btn">🔗 Thực hiện hành động</a>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="footer">
+            <p>Email này được gửi tự động từ hệ thống TikZ2SVG</p>
+            <p>Thời gian gửi: {{ timestamp if timestamp else 'N/A' }}</p>
+        </div>
+    </div>
+</body>
+</html>

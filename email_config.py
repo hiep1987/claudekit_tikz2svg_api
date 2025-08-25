@@ -46,6 +46,10 @@ EMAIL_TEMPLATES = {
     'notification': {
         'subject': 'Thông báo mới - TikZ2SVG API',
         'template': 'emails/notification.html'
+    },
+    'profile_settings_verification': {
+        'subject': 'Xác thực thay đổi hồ sơ - TikZ2SVG API',
+        'template': 'emails/profile_settings_verification.html'
     }
 }
 
@@ -56,9 +60,9 @@ ADMIN_EMAILS = [
 
 # Cấu hình rate limiting cho email
 EMAIL_RATE_LIMIT = {
-    'max_emails_per_hour': 50,
-    'max_emails_per_day': 500,
-    'cooldown_minutes': 5  # Thời gian chờ giữa các lần gửi
+    'max_emails_per_hour': 100,  # Tăng giới hạn cho development
+    'max_emails_per_day': 1000,  # Tăng giới hạn cho development
+    'cooldown_minutes': 1  # Giảm thời gian chờ cho development (từ 5 phút xuống 1 phút)
 }
 
 # Cấu hình xác thực SVG

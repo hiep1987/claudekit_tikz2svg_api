@@ -63,14 +63,14 @@ done
 mkdir -p "${STATIC_DIR}"
 echo "[SYNC] Đồng bộ static từ VPS (không xóa files local)..."
 set +e
-rsync -avz \
+rsync -avz --ignore-errors \
   "${VPS}:/var/www/tikz2svg_api/shared/static/" \
   "${STATIC_DIR}/"
 rc=$?
 set -e
 
-# rsync trả 0 (ok) hoặc 24 (file vanished) vẫn coi là OK
-if [[ $rc -eq 0 || $rc -eq 24 ]]; then
+# rsync trả 0 (ok), 24 (file vanished), hoặc 23 (partial transfer) vẫn coi là OK
+if [[ $rc -eq 0 || $rc -eq 24 || $rc -eq 23 ]]; then
   echo "[SYNC] Hoàn tất (rc=${rc})."
 else
   echo "[!] rsync lỗi (rc=${rc}). Tiếp tục chạy DEV không đồng bộ."
@@ -94,6 +94,9 @@ done
 cd "$PROJECT_DIR" || { echo "Not found: $PROJECT_DIR"; exit 1; }
 if [[ -f ".venv/bin/activate" ]]; then
   source .venv/bin/activate
+  # Cài đặt dependencies nếu thiếu
+  echo "[DEPS] Kiểm tra dependencies..."
+  pip install -r requirements.txt --quiet
 else
   echo "[!] Không thấy .venv, tạo nhanh…"
   python3 -m venv .venv

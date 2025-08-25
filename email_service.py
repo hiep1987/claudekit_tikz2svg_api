@@ -50,11 +50,17 @@ class EmailService:
         # Kiểm tra cooldown
         if (self.rate_limit_data['last_email_time'] and 
             now - self.rate_limit_data['last_email_time'] < timedelta(minutes=EMAIL_RATE_LIMIT['cooldown_minutes'])):
+            remaining_time = EMAIL_RATE_LIMIT['cooldown_minutes'] - (now - self.rate_limit_data['last_email_time']).total_seconds() / 60
+            print(f"Rate limit: Cooldown active, {remaining_time:.1f} minutes remaining", flush=True)
             return False
         
         # Kiểm tra giới hạn
-        if (self.rate_limit_data['hourly_count'] >= EMAIL_RATE_LIMIT['max_emails_per_hour'] or
-            self.rate_limit_data['daily_count'] >= EMAIL_RATE_LIMIT['max_emails_per_day']):
+        if self.rate_limit_data['hourly_count'] >= EMAIL_RATE_LIMIT['max_emails_per_hour']:
+            print(f"Rate limit: Hourly limit reached ({self.rate_limit_data['hourly_count']}/{EMAIL_RATE_LIMIT['max_emails_per_hour']})", flush=True)
+            return False
+        
+        if self.rate_limit_data['daily_count'] >= EMAIL_RATE_LIMIT['max_emails_per_day']:
+            print(f"Rate limit: Daily limit reached ({self.rate_limit_data['daily_count']}/{EMAIL_RATE_LIMIT['max_emails_per_day']})", flush=True)
             return False
         
         return True
@@ -92,7 +98,8 @@ class EmailService:
                    template_name: str, 
                    subject: str = None, 
                    context: Dict = None,
-                   attachments: List = None) -> bool:
+                   attachments: List = None,
+                   bypass_rate_limit: bool = False) -> bool:
         """
         Gửi email sử dụng template
         
@@ -106,8 +113,10 @@ class EmailService:
         Returns:
             bool: True nếu gửi thành công, False nếu thất bại
         """
-        if not self._check_rate_limit():
+        # Kiểm tra rate limiting (trừ khi bypass)
+        if not bypass_rate_limit and not self._check_rate_limit():
             print(f"Rate limit exceeded for email to {recipient}", flush=True)
+            self._log_email_sent(recipient, template_name, False, "Rate limit exceeded")
             return False
         
         if context is None:
@@ -233,6 +242,21 @@ class EmailService:
             'app_url': os.environ.get('APP_URL', 'https://yourdomain.com')
         }
         return self.send_email(recipient_email, 'notification', context=context)
+    
+    def send_profile_settings_verification_email(self, email: str, username: str, verification_code: str, 
+                                               changes_summary: List[str] = None) -> bool:
+        """Gửi email xác thực thay đổi profile settings"""
+        verification_url = f"{os.environ.get('APP_URL', 'https://yourdomain.com')}/profile/verification"
+        context = {
+            'username': username,
+            'email': email,
+            'verification_code': verification_code,
+            'verification_url': verification_url,
+            'changes_summary': changes_summary or [],
+            'expiry_hours': 24,  # Mã có hiệu lực trong 24 giờ
+            'sent_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        }
+        return self.send_email(email, 'profile_settings_verification', context=context)
     
     def send_admin_notification(self, subject: str, message: str, error_details: str = None) -> bool:
         """Gửi thông báo cho admin"""

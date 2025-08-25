@@ -244,9 +244,13 @@ class EmailService:
         return self.send_email(recipient_email, 'notification', context=context)
     
     def send_profile_settings_verification_email(self, email: str, username: str, verification_code: str, 
-                                               changes_summary: List[str] = None) -> bool:
+                                               changes_summary: List[str] = None, user_id: int = None) -> bool:
         """Gửi email xác thực thay đổi profile settings"""
-        verification_url = f"{os.environ.get('APP_URL', 'https://yourdomain.com')}/profile/verification"
+        base_url = os.environ.get('APP_URL', 'https://yourdomain.com')
+        if user_id is not None:
+            verification_url = f"{base_url}/profile/{user_id}/settings"
+        else:
+            verification_url = f"{base_url}/profile/settings"
         context = {
             'username': username,
             'email': email,

@@ -2164,7 +2164,8 @@ def profile_settings(user_id):
                             email=current_data['email'],
                             username=current_data['username'] or 'Người dùng',
                             verification_code=verification_code,
-                            changes_summary=changes_summary
+                            changes_summary=changes_summary,
+                            user_id=user_id
                         )
                         print(f"🔍 DEBUG: Email send result = {result}", flush=True)
                     except Exception as e:

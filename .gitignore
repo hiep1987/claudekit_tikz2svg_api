@@ -42,3 +42,7 @@ test_*.py
 backup/
 *.backup
 *.bak
+
+# Error TikZ files - không đẩy lên GitHub
+error_tikz/
+*.tex

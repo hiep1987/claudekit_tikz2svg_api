@@ -35,8 +35,8 @@
     {% include '_navbar.html' %}
     
     <!-- Search Bar -->
-    <div class="container" style="margin-top: 20px; margin-bottom: 20px; overflow: visible;">
-        <div class="search-container" style="display: flex; justify-content: center; align-items: center; gap: 20px;">
+    <div class="container index-top-container">
+        <div class="search-container">
             <h3 class="search-title">Tìm kiếm ảnh SVG</h3>
             <div class="group">
                 <svg viewBox="0 0 24 24" aria-hidden="true" class="icon">
@@ -45,7 +45,7 @@
                     </g>
                 </svg>
                 <input class="input" type="search" placeholder="Tìm kiếm..." id="main-search-input" />
-                <div id="search-suggestions" class="search-suggestions" style="display: none;"></div>
+                <div id="search-suggestions" class="search-suggestions"></div>
             </div>
         </div>
     </div>
@@ -91,7 +91,7 @@
               {% if error %}
                 <div class="error">{{ error|safe }}</div>
               {% elif svg_temp_url %}
-                <img src="{{ svg_temp_url }}" alt="SVG Preview" style="width:100%;height:100%;object-fit:contain;display:block;">
+                <img src="{{ svg_temp_url }}" alt="SVG Preview" class="preview-img">
               {% else %}
                 <div class="preview-placeholder">
                   <p>Nhập code TikZ để xem preview real-time</p>
@@ -101,7 +101,7 @@
           </div>
         </div>
         <!-- Thông báo hướng dẫn cho mobile -->
-        <p id="mobile-scroll-hint" style="margin-top: 12px; color: #777; font-size: 0.9em; text-align: center; display: none;">
+        <p id="mobile-scroll-hint">
           📱 Trên điện thoại, vuốt ngang để xem đủ 2 cột
         </p>
 
@@ -110,8 +110,8 @@
             <div class="result-section">
                 <div class="error">{{ error|safe }}
                     {% if error_log_full %}
-                        <br><button id="show-log-btn" style="margin-top:10px; background:#b71c1c; color:white; border:none; border-radius:4px; padding:6px 16px; cursor:pointer;">Hiển thị chi tiết log</button>
-                        <pre id="full-log" style="display:none; background:#fff0f0; color:#b71c1c; border:1px solid #f5c6cb; border-radius:4px; padding:12px; margin-top:10px; max-height:400px; overflow:auto;">{{ error_log_full }}</pre>
+                        <br><button id="show-log-btn">Hiển thị chi tiết log</button>
+                        <pre id="full-log">{{ error_log_full }}</pre>
                     {% endif %}
                 </div>
             </div>
@@ -120,7 +120,7 @@
         {% if svg_temp_url and not error %}
     </div> <!-- đóng .input-preview-section trước khi tools -->
     
-    <div id="result-tools-section" class="container" style="margin-top: 16px;">
+    <div id="result-tools-section" class="container">
                 <div class="export-section">
                     <h4>Xuất ảnh PNG/JPEG</h4>
                     <form id="export-form" class="export-form">
@@ -147,13 +147,13 @@
                             <button id="export-btn" type="button" class="export-btn" data-file-id="{{ svg_temp_id }}">Tải xuống</button>
                         </div>
                     </form>
-                    <div id="export-msg" style="margin-top:5px; color:#388e3c;"></div>
+                    <div id="export-msg"></div>
                 </div>
 
                 {% if svg_content %}
                     <div class="code-section">
                         <button id="toggle-svg-code-btn" class="copy-btn" type="button">📜 Xem code SVG</button>
-                        <div id="svg-code-container" style="display:none; margin-top:12px;">
+                        <div id="svg-code-container">
                             <div class="code-header">
                                 <span class="code-title">Code SVG:</span>
                                 <button id="copy-svg-code-btn" class="copy-btn" type="button">📋 Copy Code</button>
@@ -171,7 +171,7 @@
     
     <!-- Block 3: Files Section -->
     <div class="files-section-container container files-section" data-is-owner="{{ 'true' if logged_in else 'false' }}">
-        <h3 style="color:#1976d2; margin-bottom:24px;">📁 Files đã lưu</h3>
+        <h3 class="files-section-title">📁 Files đã lưu</h3>
         <div id="files-container" class="files-grid">
             {% if svg_files %}
                 {% for file in svg_files %}
@@ -187,24 +187,24 @@
         </div>
     </div>
 
-    <footer style='text-align:center;color:#888;font-size:14px;margin-top:40px;'>© 2024 TikZ2SVG - All rights reserved.</footer>
+    <footer class='site-footer'>© 2024 TikZ2SVG - All rights reserved.</footer>
 
     <!-- Modal đăng nhập cho nút "Xem Code" -->
-    <div id="login-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.3); z-index:9999; align-items:center; justify-content:center;">
-      <div style="background:white; padding:32px 40px; border-radius:12px; box-shadow:0 2px 16px rgba(0,0,0,0.15); min-width:320px; text-align:center;">
-        <h3 style="margin-bottom:24px;">Đăng nhập để sử dụng tính năng này</h3>
-        <p style="margin-bottom:16px; color:#666;">Vui lòng đăng nhập để có thể:</p>
-        <ul style="margin-bottom:24px; color:#666; text-align:left; display:inline-block;">
+    <div id="login-modal">
+      <div class="login-modal-box">
+        <h3>Đăng nhập để sử dụng tính năng này</h3>
+        <p>Vui lòng đăng nhập để có thể:</p>
+        <ul>
           <li>👁️ Xem TikZ code</li>
           <li>👍 Like và unlike ảnh</li>
           <li>💾 Lưu ảnh vào server</li>
           <li>👥 Theo dõi người dùng khác</li>
         </ul>
-        <p style="margin-bottom:24px; color:#1976d2; font-weight:500;">💡 Bạn vẫn có thể sử dụng Facebook Share và Copy Link mà không cần đăng nhập!</p>
+        <p class="login-note">💡 Bạn vẫn có thể sử dụng Facebook Share và Copy Link mà không cần đăng nhập!</p>
         
         <!-- Container cho các nút - căn giữa -->
-        <div style="display:flex; justify-content:center; align-items:center; gap:12px; flex-wrap:wrap;">
-          <button id="modal-login-btn" class="google-login-btn" style="margin:0;">
+        <div class="login-modal-actions">
+          <button id="modal-login-btn" class="google-login-btn">
             <span class="google-login-content">
               <svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid" viewBox="0 0 256 262">
                 <path fill="#4285F4" d="M255.878 133.451c0-10.734-.871-18.567-2.756-26.69H130.55v48.448h71.947c-1.45 12.04-9.283 30.172-26.69 42.356l-.244 1.622 38.755 30.023 2.685.268c24.659-22.774 38.875-56.282 38.875-96.027"></path>
@@ -215,7 +215,7 @@
               Đăng nhập Google
             </span>
           </button>
-          <button onclick="document.getElementById('login-modal').style.display='none'" style="background:#eee; color:#333; padding:12px 24px; border-radius:6px; border:none; font-weight:bold; margin:0;">Huỷ</button>
+          <button onclick="document.getElementById('login-modal').style.display='none'" class="btn-cancel">Huỷ</button>
         </div>
       </div>
     </div>
@@ -237,8 +237,7 @@
               <div class="position-relative">
                 <textarea id="keywordsInput" class="form-control" rows="4" placeholder="Ví dụ: toán học, hình học, đồ thị"></textarea>
                 <div id="keywordSuggestions" 
-                     class="list-group position-absolute w-100" 
-                     style="z-index:9999; max-height:200px; overflow-y:auto; display:none;"></div>
+                     class="list-group position-absolute w-100"></div>
               </div>
             </div>
             <div class="modal-footer">

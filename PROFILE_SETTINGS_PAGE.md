@@ -523,6 +523,13 @@ if (editor) {
 - **Badge**: Icon tại `static/identity-verification-icon.svg` hiển thị cạnh trạng thái đã xác thực
 - **Giới hạn bảo mật**: Tối đa 5 lần thử, mã hết hạn sau 24 giờ
 
+### 4. **Theo dõi/Bỏ theo dõi (gắn với xác thực danh tính)**
+- Chỉ tài khoản đã xác thực danh tính (`identity_verified = true`) mới có thể sử dụng chức năng Theo dõi.
+- Ở `templates/profile_svg_files.html`:
+  - Nếu đã theo dõi: hiển thị nút "👥 Bỏ theo dõi" (active).
+  - Nếu chưa theo dõi và `current_identity_verified` = true: hiển thị nút "👥 Theo dõi" (active).
+  - Nếu chưa theo dõi và `current_identity_verified` = false: hiển thị nút Theo dõi bị vô hiệu hóa và nhắc người dùng đi xác thực (link đến `profile_verification`).
+
 ### 2. **Frontend Integration**
 - **Cropper.js**: Image cropping functionality
 - **Quill.js**: Rich text editor cho bio

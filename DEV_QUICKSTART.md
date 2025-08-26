@@ -28,6 +28,13 @@ sudo bash /var/www/tikz2svg_api/deploy.sh git@github.com:hiep1987/tikz2svg_api.g
 
 Script này sẽ kéo mã mới nhất từ kho lưu trữ và khởi động lại máy chủ production.
 
+## Tính năng mới: Xác thực danh tính và Theo dõi
+
+- Tài khoản cần "✔ Đã xác thực" để sử dụng tính năng Theo dõi người dùng khác.
+- Người dùng chưa xác thực sẽ thấy nút Theo dõi bị vô hiệu hóa kèm nhắc chuyển tới trang xác thực.
+- Luồng xác thực: `profile_settings` → nút "Xác thực tài khoản" → `profile_verification` → đồng ý điều khoản → nhận mã email → nhập mã 6 số → thành công.
+- Badge xác thực hiển thị trên avatar (navbar) và trong `profile_settings.html`.
+
 ## Khôi Phục file/thư mục từ PROD về DEV
 
 Nếu môi trường PROD đã được commit và đẩy lên GitHub, bạn có thể khôi phục một file hoặc thư mục từ PROD về DEV bằng lệnh sau:

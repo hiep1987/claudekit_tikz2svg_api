@@ -49,7 +49,12 @@
                             {{ current_user_email[0].upper() if current_user_email else 'U' }}
                         </div>
                     {% endif %}
-                    <span class="text-xs font-medium text-gray-700">{{ current_username or (current_user_email.split('@')[0] if current_user_email) }}</span>
+                    <span class="text-xs font-medium text-gray-700 flex items-center gap-1">
+                        {{ current_username or (current_user_email.split('@')[0] if current_user_email) }}
+                        {% if current_identity_verified %}
+                            <img src="{{ url_for('static', filename='identity-verification-icon.svg') }}" alt="Verified" style="width: 14px; height: 14px; vertical-align: middle;" />
+                        {% endif %}
+                    </span>
                 </div>
                 <a href="/logout" class="hidden md:block bg-gradient-to-r from-red-400 to-red-600 text-white px-3 py-1.5 rounded-xl shadow hover:scale-105 transition font-semibold text-xs" style="text-decoration: none;">Đăng xuất</a>
             </div>

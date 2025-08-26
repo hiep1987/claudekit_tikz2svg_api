@@ -12,6 +12,7 @@ File `templates/profile_settings.html` là trang cài đặt và quản lý hồ
 - Responsive design cho mobile và desktop
 - Tích hợp authentication và validation
 - Flash messages cho feedback
+- Trạng thái xác thực danh tính (Identity Verification) và quy trình xác thực
 
 ## 🏗️ Cấu trúc Trang
 
@@ -510,6 +511,17 @@ if (editor) {
 - **Form handling**: POST method với multipart/form-data
 - **File upload**: Avatar processing và storage
 - **Database updates**: User profile information
+  
+### 3. **Identity Verification Integration**
+- **Nút xác thực**: Trong `templates/profile_settings.html` hiển thị mục "🔐 Xác thực danh tính" với trạng thái:
+  - "⚠ Chưa xác thực" cho tài khoản mới
+  - "✔ Đã xác thực" kèm badge khi đã verify
+- **Luồng xác thực**:
+  1) Từ trang cài đặt, bấm "Xác thực tài khoản" → chuyển tới `profile_verification.html`
+  2) Đọc điều khoản → bấm "Tôi đồng ý và muốn xác thực" (gửi POST) → hệ thống tạo mã và gửi email
+  3) Nhập mã 6 số → xác thực thành công → về trang cài đặt hiển thị badge
+- **Badge**: Icon tại `static/identity-verification-icon.svg` hiển thị cạnh trạng thái đã xác thực
+- **Giới hạn bảo mật**: Tối đa 5 lần thử, mã hết hạn sau 24 giờ
 
 ### 2. **Frontend Integration**
 - **Cropper.js**: Image cropping functionality
@@ -537,6 +549,13 @@ File Selection → Validation → Cropper Modal → Image Cropping → Preview U
 ### 3. **Form Submission Process**
 ```
 Form Data → Validation → File Processing → Database Update → Flash Message → Page Reload
+```
+
+### 4. **Identity Verification Process**
+```
+profile_settings → (click Verify) → profile_verification (GET)
+→ (Agree + POST) tạo mã + email → (hiện form) nhập mã → xác thực
+→ cập nhật `user.identity_verified` → hiển thị badge
 ```
 
 ## 🎯 User Experience Features

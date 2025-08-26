@@ -280,6 +280,21 @@ class EmailService:
         }
         return self.send_email(email, 'profile_settings_verification', context=context)
     
+    def send_identity_verification_email(self, email: str, username: str, verification_code: str) -> bool:
+        """Gửi email xác thực danh tính tài khoản"""
+        base_url = os.environ.get('APP_URL', 'https://yourdomain.com')
+        verification_url = f"{base_url}/profile/verification"
+        context = {
+            'username': username,
+            'email': email,
+            'verification_code': verification_code,
+            'verification_url': verification_url,
+            'app_url': base_url,
+            'expiry_hours': 24,  # Mã có hiệu lực trong 24 giờ
+            'sent_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        }
+        return self.send_email(email, 'identity_verification', context=context)
+    
     def send_admin_notification(self, subject: str, message: str, error_details: str = None) -> bool:
         """Gửi thông báo cho admin"""
         context = {

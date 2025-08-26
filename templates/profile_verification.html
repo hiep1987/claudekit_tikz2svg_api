@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="vi" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Xác thực danh tính tài khoản TikZ to SVG">
+    <meta name="keywords" content="TikZ, SVG, identity verification, account verification">
+    <meta name="author" content="TikZ to SVG">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Xác thực danh tính - TikZ to SVG">
+    <meta property="og:description" content="Xác thực danh tính tài khoản TikZ to SVG">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="vi_VN">
+    <title>Xác thực danh tính - TikZ to SVG</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="48x48" href="{{ url_for('static', filename='favicon-48x48.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='android-chrome-192x192.png') }}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{{ url_for('static', filename='android-chrome-512x512.png') }}">
+    <link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='favicon-32x32.png') }}">
+    
+    <!-- Global JavaScript variables -->
+    <script>
+        window.isLoggedIn = false;
+        window.activeFeedbackCount = 0;
+        window.isOwner = false;
+    </script>
+    <script>
+        // Set values from server
+        {% if current_user.is_authenticated %}
+        window.isLoggedIn = true;
+        {% endif %}
+        {% if is_owner %}
+        window.isOwner = true;
+        {% endif %}
+    </script>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
+    <!-- Custom Tailwind-like CSS -->
+    <style>
+        /* Tailwind-like utility classes */
+        .w-full { width: 100%; }
+        .max-w-7xl { max-width: 80rem; }
+        .mx-auto { margin-left: auto; margin-right: auto; }
+        .bg-white\/80 { background-color: rgba(255, 255, 255, 0.8); }
+        .backdrop-blur { backdrop-filter: blur(8px); }
+        .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        .rounded-2xl { border-radius: 1rem; }
+        .p-3 { padding: 0.75rem; }
+        .flex { display: flex; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .mb-8 { margin-bottom: 2rem; }
+        .gap-2 { gap: 0.5rem; }
+        .bg-gradient-to-br { background-image: linear-gradient(to bottom right, var(--tw-gradient-stops)); }
+        .from-blue-500 { --tw-gradient-from: #3b82f6; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(59, 130, 246, 0)); }
+        .to-yellow-400 { --tw-gradient-to: #fbbf24; }
+        .p-1\.5 { padding: 0.375rem; }
+        .rounded-lg { border-radius: 0.5rem; }
+        .text-white { color: #ffffff; }
+        .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+        .text-gray-800 { color: #1f2937; }
+        .font-bold { font-weight: 700; }
+        .hidden { display: none; }
+        .gap-6 { gap: 1.5rem; }
+        .font-medium { font-weight: 500; }
+        .text-gray-700 { color: #374151; }
+        .relative { position: relative; }
+        .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+        .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+        .cursor-pointer { cursor: pointer; }
+        .transition { transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
+        .hover\:text-blue-600:hover { color: #2563eb; }
+        .block { display: block; }
+        .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+        .bg-gradient-to-r { background-image: linear-gradient(to right, var(--tw-gradient-stops)); }
+        .from-red-400 { --tw-gradient-from: #f87171; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(248, 113, 113, 0)); }
+        .to-red-600 { --tw-gradient-to: #dc2626; }
+        .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+        .py-1\.5 { padding-top: 0.375rem; padding-bottom: 0.375rem; }
+        .rounded-xl { border-radius: 0.75rem; }
+        .hover\:scale-105:hover { transform: scale(1.05); }
+        .font-semibold { font-weight: 600; }
+        .text-xs { font-size: 0.75rem; line-height: 1rem; }
+        .from-blue-400 { --tw-gradient-from: #60a5fa; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(96, 165, 250, 0)); }
+        .hover\:bg-blue-100:hover { background-color: #dbeafe; }
+        .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+        .text-gray-500 { color: #6b7280; }
+        .hover\:text-blue-400:hover { color: #60a5fa; }
+        .fixed { position: fixed; }
+        .top-0 { top: 0px; }
+        .left-0 { left: 0px; }
+        .h-full { height: 100%; }
+        .bg-black\/50 { background-color: rgba(0, 0, 0, 0.5); }
+        .z-40 { z-index: 40; }
+        .z-400 { z-index: 400; }
+        .absolute { position: absolute; }
+        .right-0 { right: 0px; }
+        .w-60 { width: 15rem; }
+        .bg-white { background-color: #ffffff; }
+        .flex-col { flex-direction: column; }
+        .p-6 { padding: 1.5rem; }
+        .gap-3 { gap: 0.75rem; }
+        .self-end { align-self: flex-end; }
+        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5px; }
+        .mt-2 { margin-top: 0.5rem; }
+        .text-center { text-align: center; }
+        .mt-8 { margin-top: 2rem; }
+        .w-6 { width: 1.5rem; }
+        .h-6 { height: 1.5rem; }
+        .rounded-full { border-radius: 9999px; }
+        .to-purple-600 { --tw-gradient-to: #9333ea; }
+        .justify-center { justify-content: center; }
+        .mb-4 { margin-bottom: 1rem; }
+        .flex-grow { flex-grow: 1; }
+        .mx-4 { margin-left: 1rem; margin-right: 1rem; }
+        .overflow-hidden { overflow: hidden; }
+        .text-base { font-size: 1rem; line-height: 1.5rem; }
+        .flex-shrink-0 { flex-shrink: 0; }
+        
+        /* Responsive breakpoints */
+        @media (min-width: 920px) {
+            .md\:flex { display: flex; }
+            .md\:block { display: block; }
+            .md\:hidden { display: none; }
+        }
+    </style>
+    <style>
+        body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          margin: 0 auto;
+          padding: 20px;
+          background-color: #f5f5f5;
+        }
+        
+        /* New Navigation Styles */
+        .menu-underline {
+          transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+          height: 3px;
+          width: 0;
+          background: linear-gradient(90deg, #fbbf24, #38bdf8);
+          border-radius: 2px;
+          margin: 0 auto;
+          position: absolute;
+          bottom: -2px;
+          left: 50%;
+          transform: translateX(-50%);
+        }
+        .menu-item:hover .menu-underline, .menu-item.active .menu-underline {
+          width: 80%;
+        }
+        
+        /* Override custom CSS for menu items to remove unwanted styling */
+        .menu-item {
+          list-style: none !important;
+        }
+        
+        .menu-item a {
+          text-decoration: none !important;
+          color: #374151 !important;
+        }
+        
+        .menu-item:hover a {
+          color: #2563eb !important;
+        }
+        
+        /* Remove any bullet points or underlines from menu */
+        .hidden.md\\:flex {
+          list-style: none !important;
+          padding: 0 !important;
+          margin: 0 !important;
+        }
+        
+        .hidden.md\\:flex li {
+          list-style: none !important;
+        }
+        
+        .hidden.md\\:flex li a {
+          text-decoration: none !important;
+        }
+        
+        /* Fix mobile menu styling */
+        #mobile-menu a {
+          text-decoration: none !important;
+          color: #374151 !important;
+        }
+        
+        #mobile-menu a:hover {
+          color: #2563eb !important;
+        }
+        
+        /* Mobile scroll for menu */
+        #scrollable-menu {
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+            padding-bottom: 0.75rem;
+        }
+        #scrollable-menu::-webkit-scrollbar {
+            display: none;
+        }
+        
+        #scrollable-menu-list {
+            list-style: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        
+        #scrollable-menu-list .menu-item {
+            flex-shrink: 0;
+        }
+        
+        #main-menu {
+            list-style: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        
+        .container {
+          background: white;
+          padding: 40px;
+          border-radius: 12px;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+          max-width: 1280px;
+          margin: 0 auto;
+        }
+        
+        .header {
+          text-align: center;
+          margin-bottom: 40px;
+        }
+        
+        .header h1 {
+          color: #1976d2;
+          margin-bottom: 10px;
+        }
+        
+        .header p {
+          color: #666;
+          font-size: 16px;
+        }
+        
+        .verification-section {
+          margin-bottom: 40px;
+        }
+        
+        .terms-section {
+          background: #f8f9fa;
+          padding: 30px;
+          border-radius: 8px;
+          margin-bottom: 30px;
+          border-left: 4px solid #1976d2;
+        }
+        
+        .terms-section h3 {
+          color: #1976d2;
+          margin-bottom: 20px;
+          font-size: 1.5rem;
+        }
+        
+        .terms-section h4 {
+          color: #333;
+          margin-top: 25px;
+          margin-bottom: 10px;
+          font-size: 1.2rem;
+        }
+        
+        .terms-section p, .terms-section li {
+          color: #555;
+          line-height: 1.6;
+          margin-bottom: 10px;
+        }
+        
+        .terms-section ul {
+          padding-left: 20px;
+        }
+        
+        .terms-section li {
+          margin-bottom: 8px;
+        }
+        
+        .verification-form {
+          background: #fff;
+          padding: 30px;
+          border-radius: 8px;
+          border: 2px solid #e9ecef;
+          margin-top: 30px;
+        }
+        
+        .verification-form h3 {
+          color: #1976d2;
+          margin-bottom: 15px;
+          text-align: center;
+        }
+        
+        .info-group {
+          margin-bottom: 25px;
+        }
+        
+        .info-group label {
+          display: block;
+          font-weight: bold;
+          color: #333;
+          margin-bottom: 8px;
+          font-size: 14px;
+        }
+        
+        .info-group input {
+          width: 100%;
+          padding: 12px;
+          border: 2px solid #ddd;
+          border-radius: 6px;
+          font-size: 16px;
+          box-sizing: border-box;
+        }
+        
+        .info-group input:focus {
+          outline: none;
+          border-color: #1976d2;
+        }
+        
+        .actions {
+          text-align: center;
+          margin-top: 30px;
+        }
+        
+        .btn {
+          padding: 12px 30px;
+          border: none;
+          border-radius: 6px;
+          font-size: 16px;
+          font-weight: bold;
+          cursor: pointer;
+          transition: all 0.3s;
+          margin: 0 10px;
+        }
+        
+        .btn-primary {
+          background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+          color: white;
+        }
+        
+        .btn-primary:hover {
+          background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+        }
+        
+        .btn-secondary {
+          background: #6c757d;
+          color: white;
+        }
+        
+        .btn-secondary:hover {
+          background: #5a6268;
+        }
+        
+        .flash-messages {
+          margin-bottom: 20px;
+        }
+        
+        .flash {
+          padding: 12px 20px;
+          border-radius: 6px;
+          margin-bottom: 10px;
+          font-weight: bold;
+          transition: opacity 0.3s ease;
+        }
+        
+        .flash-success {
+          background: #d4edda;
+          color: #155724;
+          border: 1px solid #c3e6cb;
+        }
+        
+        .flash-error {
+          background: #f8d7da;
+          color: #721c24;
+          border: 1px solid #f5c6cb;
+        }
+        
+        .flash-info {
+          background: #d1ecf1;
+          color: #0c5460;
+          border: 1px solid #bee5eb;
+        }
+        
+        .warning-box {
+          background: #fff3cd;
+          border: 1px solid #ffeaa7;
+          color: #856404;
+          padding: 15px;
+          border-radius: 6px;
+          margin-bottom: 20px;
+        }
+        
+        .warning-box h4 {
+          color: #856404;
+          margin-bottom: 10px;
+        }
+        
+        @media (max-width: 768px) {
+          .container {
+            padding: 20px;
+          }
+          
+          .terms-section {
+            padding: 20px;
+          }
+          
+          .verification-form {
+            padding: 20px;
+          }
+        }
+        
+        @media (max-width: 600px) {
+          .container {
+            padding: 4vw;
+          }
+          
+          .btn, .btn-primary, .btn-secondary {
+            width: 100%;
+            font-size: 17px;
+            margin: 8px 0;
+            padding: 14px 0;
+          }
+        }
+    </style>
+</head>
+<body>
+    {% include '_navbar.html' %}
+
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Xác thực danh tính tài khoản</h1>
+            <p>Để hoàn tất quá trình xác thực, vui lòng đọc và đồng ý với các quy định sau</p>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash flash-{{ 'success' if category == 'success' else 'error' if category == 'error' else 'info' }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Terms and Conditions Section -->
+        <div class="terms-section">
+            <h3>📋 Quy định và điều khoản sử dụng</h3>
+            
+            <h4>1. Quy định soạn thảo code TikZ</h4>
+            <ul>
+                <li>Code TikZ phải tuân thủ cú pháp chuẩn và không chứa mã độc hại</li>
+                <li>Không được sử dụng code để tạo nội dung phản động, bạo lực hoặc vi phạm pháp luật</li>
+                <li>Code phải được tối ưu hóa và có hiệu suất tốt</li>
+                <li>Khuyến khích sử dụng comments để giải thích code phức tạp</li>
+            </ul>
+
+            <h4>2. Bản quyền và sử dụng code</h4>
+            <ul>
+                <li>Tất cả code TikZ được chia sẻ trên nền tảng này thuộc về người tạo ra chúng</li>
+                <li>Người dùng có quyền sở hữu trí tuệ đối với code do mình tạo ra</li>
+                <li>Nền tảng TikZ to SVG không sở hữu bản quyền code của người dùng</li>
+                <li>Code được chia sẻ công khai để cộng đồng học hỏi và sử dụng</li>
+            </ul>
+
+            <h4>3. Trách nhiệm sử dụng và chia sẻ</h4>
+            <ul>
+                <li>Người dùng tự chịu trách nhiệm về nội dung code mình tạo ra</li>
+                <li>Không được sử dụng code để vi phạm quyền sở hữu trí tuệ của người khác</li>
+                <li>Phải ghi rõ nguồn khi sử dụng code của người khác</li>
+                <li>Khuyến khích chia sẻ kiến thức và hỗ trợ cộng đồng</li>
+            </ul>
+
+            <h4>4. Đồng ý cho phép sử dụng code</h4>
+            <ul>
+                <li>Bằng việc xác thực danh tính, bạn đồng ý cho phép mọi người sử dụng code của mình</li>
+                <li>Code sẽ được chia sẻ công khai để cộng đồng học hỏi</li>
+                <li>Người sử dụng code của bạn phải tuân thủ giấy phép Creative Commons</li>
+                <li>Bạn vẫn giữ quyền sở hữu và có thể rút lại quyền chia sẻ bất cứ lúc nào</li>
+            </ul>
+
+            <h4>5. Cam kết cộng đồng</h4>
+            <ul>
+                <li>Đóng góp tích cực vào sự phát triển của cộng đồng TikZ</li>
+                <li>Hỗ trợ người mới học và chia sẻ kinh nghiệm</li>
+                <li>Tôn trọng và bảo vệ quyền lợi của các thành viên khác</li>
+                <li>Báo cáo nội dung vi phạm để duy trì môi trường lành mạnh</li>
+            </ul>
+        </div>
+
+        <!-- Warning Box -->
+        <div class="warning-box">
+            <h4>⚠️ Lưu ý quan trọng</h4>
+            <p>Việc xác thực danh tính là bắt buộc để đảm bảo tính minh bạch và trách nhiệm trong cộng đồng. Sau khi xác thực thành công, tài khoản của bạn sẽ được gắn biểu tượng xác thực và có thể truy cập đầy đủ các tính năng của nền tảng.</p>
+        </div>
+
+        <!-- Verification Form -->
+        <form method="POST" class="verification-form" id="verification-form" style="display: none;">
+            <h3>📧 Xác thực email</h3>
+            <p style="color: #666; margin-bottom: 20px; text-align: center;">
+                Chúng tôi đã gửi mã xác thực đến email <strong>{{ current_user.email }}</strong>. 
+                Vui lòng nhập mã để hoàn tất xác thực danh tính.
+                <br><small style="color: #888; font-size: 13px;">💡 <strong>Lưu ý:</strong> Email có thể nằm trong thư mục Spam/Junk.</small>
+            </p>
+            
+            {% if verification_attempts > 0 %}
+            <div style="background: {% if verification_attempts >= 4 %}#f8d7da; border: 1px solid #f5c6cb;{% else %}#fff3cd; border: 1px solid #ffeaa7;{% endif %} padding: 10px; border-radius: 6px; margin-bottom: 15px;">
+                <p style="color: {% if verification_attempts >= 4 %}#721c24;{% else %}#856404;{% endif %} margin: 0; font-size: 14px;">
+                    {% if verification_attempts >= 4 %}
+                    🚨 <strong>Cảnh báo:</strong> Bạn đã nhập sai {{ verification_attempts }} lần. Còn {{ 5 - verification_attempts }} lần thử cuối cùng!
+                    {% else %}
+                    ⚠️ Bạn đã nhập sai {{ verification_attempts }} lần. Còn {{ 5 - verification_attempts }} lần thử.
+                    {% endif %}
+                </p>
+            </div>
+            {% endif %}
+            
+            <div class="info-group">
+                <label for="verification_code">📧 Mã xác thực:</label>
+                <input type="text" id="verification_code" name="verification_code" 
+                       placeholder="Nhập mã 6 số từ email" maxlength="6" 
+                       autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]*" enterkeyhint="done"
+                       autocapitalize="off" autocorrect="off" spellcheck="false"
+                       style="font-family: 'Courier New', monospace; font-size: 18px; text-align: center; letter-spacing: 2px;">
+                <small style="color: #666; font-size: 12px;">Mã có hiệu lực trong 24 giờ</small>
+            </div>
+            
+            <div class="actions">
+                <button type="submit" class="btn btn-primary">✅ Xác nhận xác thực</button>
+                <button type="button" onclick="cancelVerification()" class="btn btn-secondary">❌ Hủy bỏ</button>
+            </div>
+        </form>
+
+        <!-- Agreement Button -->
+        <form method="POST" class="actions" id="agreement-section">
+            <button type="submit" class="btn btn-primary">✅ Tôi đồng ý và muốn xác thực</button>
+            <a href="{{ url_for('profile_settings', user_id=current_user.id) }}" class="btn btn-secondary">❌ Quay lại</a>
+        </form>
+    </div>
+
+    <script>
+    // Hàm hủy bỏ xác thực
+    function cancelVerification() {
+        if (confirm('Bạn có chắc muốn hủy bỏ quá trình xác thực?')) {
+            // Gửi request hủy bỏ xác thực
+            fetch(window.location.href, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'cancel_verification=1'
+            }).then(response => {
+                if (response.ok) {
+                    // Redirect về trang profile settings
+                    window.location.href = "{{ url_for('profile_settings', user_id=current_user.id) }}";
+                }
+            }).catch(error => {
+                console.error('Error canceling verification:', error);
+                alert('Có lỗi xảy ra khi hủy bỏ xác thực. Vui lòng thử lại.');
+            });
+        }
+    }
+
+    // Hàm hiển thị form xác thực
+    function showVerificationForm() {
+        document.getElementById('verification-form').style.display = 'block';
+        document.getElementById('agreement-section').style.display = 'none';
+        document.getElementById('verification_code').focus();
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // ==== Mobile Menu Toggle ====
+        const menuToggle = document.getElementById('menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const closeMenu = document.getElementById('close-menu');
+        
+        if (menuToggle && mobileMenu && closeMenu) {
+            menuToggle.addEventListener('click', () => mobileMenu.classList.remove('hidden'));
+            closeMenu.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+            // Optional: click outside to close
+            mobileMenu.addEventListener('click', e => {
+                if(e.target === mobileMenu) mobileMenu.classList.add('hidden');
+            });
+        }
+
+        // ==== Verification code input handling ====
+        const verificationInput = document.getElementById('verification_code');
+        if (verificationInput) {
+            verificationInput.addEventListener('input', function() {
+                // Chỉ cho phép nhập số
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+        }
+
+        // Hiển thị form xác thực nếu có thay đổi đang chờ
+        {% if has_pending_verification %}
+        showVerificationForm();
+        {% endif %}
+    });
+    </script>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

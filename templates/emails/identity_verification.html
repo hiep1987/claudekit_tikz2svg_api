@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác thực danh tính tài khoản - TikZ to SVG</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .email-container {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+        .title {
+            font-size: 24px;
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+        }
+        .content {
+            margin-bottom: 30px;
+        }
+        .greeting {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .message {
+            margin-bottom: 25px;
+            color: #555;
+        }
+        .verification-code {
+            background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 25px 0;
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        .verification-code-label {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 10px;
+        }
+        .verification-code-number {
+            font-size: 32px;
+            font-weight: bold;
+        }
+        .instructions {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #1976d2;
+            margin: 25px 0;
+        }
+        .instructions h3 {
+            color: #1976d2;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        .instructions ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .instructions li {
+            margin-bottom: 8px;
+            color: #555;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        .warning strong {
+            color: #856404;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+            color: #666;
+            font-size: 14px;
+        }
+        .footer a {
+            color: #1976d2;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        .expiry-info {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            color: #1565c0;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .contact-info {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .contact-info a {
+            color: #1976d2;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <div style="text-align:center;margin-bottom:30px;padding:20px;background:linear-gradient(135deg,#74b9ff 0%,#0984e3 100%);border-radius:10px">
+                <div style="display:inline-block;background:white;padding:10px;border-radius:8px;margin-bottom:15px">
+                    <img src="https://tikz2svg.mathlib.io.vn/static/images/email_logo.png" alt="TikZ2SVG Logo" style="width:60px;height:60px" />
+                </div>
+                <h1 style="color:white;margin:0;font-size:24px">TikZ2SVG</h1>
+                <p style="color:white;margin:10px 0 0 0;font-size:16px">Chuyển đổi TikZ thành SVG</p>
+            </div>
+            <div class="logo">TikZ2SVG API</div>
+            <h1>Xác thực danh tính tài khoản</h1>
+        </div>
+
+        <div class="content">
+            <div class="greeting">
+                Xin chào <strong>{{ username }}</strong>! 👋
+            </div>
+
+            <div class="message">
+                Cảm ơn bạn đã đăng ký tài khoản tại TikZ to SVG. Để đảm bảo tính minh bạch và trách nhiệm trong cộng đồng, chúng tôi yêu cầu bạn xác thực danh tính tài khoản.
+            </div>
+
+            <div class="verification-code">
+                <div class="verification-code-label">Mã xác thực của bạn:</div>
+                <div class="verification-code-number">{{ verification_code }}</div>
+            </div>
+
+            <div class="instructions">
+                <h3>📋 Hướng dẫn xác thực:</h3>
+                <ol>
+                    <li>Truy cập trang <a href="{{ verification_url }}" style="color: #1976d2;">Xác thực danh tính</a></li>
+                    <li>Nhập mã xác thực 6 số ở trên vào ô "Mã xác thực"</li>
+                    <li>Nhấn nút "Xác nhận xác thực" để hoàn tất</li>
+                    <li>Sau khi xác thực thành công, tài khoản sẽ được gắn biểu tượng xác thực</li>
+                </ol>
+            </div>
+
+            <div class="warning">
+                <strong>⚠️ Lưu ý quan trọng:</strong><br>
+                • Mã xác thực có hiệu lực trong {{ expiry_hours }} giờ<br>
+                • Không chia sẻ mã này với bất kỳ ai<br>
+                • Email có thể nằm trong thư mục Spam/Junk
+            </div>
+
+            <div class="expiry-info">
+                <strong>⏰ Thời gian gửi:</strong> {{ sent_at }}<br>
+                <strong>⏳ Hết hạn:</strong> {{ expiry_hours }} giờ kể từ khi gửi
+            </div>
+
+            <div class="contact-info">
+                <strong>📧 Cần hỗ trợ?</strong><br>
+                Nếu bạn gặp vấn đề, vui lòng liên hệ: <a href="mailto:support@tikz2svg.com">support@tikz2svg.com</a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>
+                <strong>TikZ to SVG</strong> - Nền tảng chia sẻ và học hỏi code TikZ<br>
+                Email này được gửi tự động, vui lòng không trả lời.<br>
+                <a href="{{ verification_url }}">Truy cập trang xác thực</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

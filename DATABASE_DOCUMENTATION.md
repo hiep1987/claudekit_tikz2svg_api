@@ -43,6 +43,16 @@ CREATE TABLE `user` (
 - `email_verification_token`: Token xác thực email
 - `email_verification_expires_at`: Thời gian hết hạn token xác thực email
 
+#### (Mới) Trường xác thực danh tính
+- `identity_verified` (BOOLEAN): Trạng thái xác thực danh tính người dùng (badge xanh)
+- `identity_verification_code` (VARCHAR(6)): Mã xác thực 6 số đang hiệu lực
+- `identity_verification_expires_at` (DATETIME): Thời gian hết hạn mã xác thực
+- `identity_verification_attempts` (INT): Số lần nhập sai mã (tối đa 5)
+
+Chúng được thêm bằng script `identity_verification_setup.sql` và có index:
+- `idx_identity_verified` trên `identity_verified`
+- `idx_identity_verification_code` trên `identity_verification_code`
+
 ### 2. Bảng `svg_image` - Lưu trữ hình ảnh SVG
 
 **Mô tả:** Lưu trữ thông tin các file SVG được tạo từ mã TikZ.

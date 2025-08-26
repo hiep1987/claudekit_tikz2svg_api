@@ -52,12 +52,13 @@ login_manager.login_message = "Bạn cần đăng nhập để truy cập trang 
 
 # ✅ USER CLASS
 class User(UserMixin):
-    def __init__(self, id, email, username=None, avatar=None, bio=None):
+    def __init__(self, id, email, username=None, avatar=None, bio=None, identity_verified=False):
         self.id = id
         self.email = email
         self.username = username
         self.avatar = avatar
         self.bio = bio
+        self.identity_verified = identity_verified
     
     def get_id(self):
         return str(self.id)
@@ -73,7 +74,7 @@ def load_user(user_id):
             database=os.environ.get('DB_NAME', 'tikz2svg')
         )
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT id, email, username, avatar, bio FROM user WHERE id = %s", (user_id,))
+        cursor.execute("SELECT id, email, username, avatar, bio, identity_verified FROM user WHERE id = %s", (user_id,))
         user_data = cursor.fetchone()
         cursor.close()
         conn.close()
@@ -84,7 +85,8 @@ def load_user(user_id):
                 email=user_data['email'],
                 username=user_data['username'],
                 avatar=user_data['avatar'],
-                bio=user_data['bio']
+                bio=user_data['bio'],
+                identity_verified=bool(user_data.get('identity_verified', 0))
             )
         return None
     except Exception as e:
@@ -2224,7 +2226,8 @@ def profile_settings(user_id):
         cursor.execute("""
             SELECT id, username, avatar, bio, email, 
                    profile_verification_code, profile_verification_expires_at,
-                   pending_profile_changes, profile_verification_attempts
+                   pending_profile_changes, profile_verification_attempts,
+                   identity_verified
             FROM user WHERE id = %s
         """, (user_id,))
         user = cursor.fetchone()
@@ -2245,6 +2248,7 @@ def profile_settings(user_id):
             user_email=user["email"],
             user_id=user_id,
             email_verified=True,
+            identity_verified=user.get('identity_verified', False),
             is_owner=is_owner,
             current_user_email=current_user.email if current_user.is_authenticated else None,
             current_username=current_user.username if current_user.is_authenticated else None,
@@ -2467,12 +2471,14 @@ def inject_user_info():
         return {
             'current_user_email': current_user.email,
             'current_username': current_user.username,
-            'current_avatar': current_user.avatar
+            'current_avatar': current_user.avatar,
+            'current_identity_verified': getattr(current_user, 'identity_verified', False)
         }
     return {
         'current_user_email': None,
         'current_username': None,
-        'current_avatar': None
+        'current_avatar': None,
+        'current_identity_verified': False
     }
 
 @app.route('/api/like_counts', methods=['POST'])
@@ -3612,6 +3618,195 @@ def handle_profile_verification(user_id, verification_code, cursor, conn):
         print(f"❌ Error in handle_profile_verification: {e}", flush=True)
         flash("Có lỗi xảy ra trong quá trình xác thực.", "error")
         return redirect(url_for('profile_settings', user_id=user_id))
+
+@app.route('/profile/verification', methods=['GET', 'POST'])
+@login_required
+def profile_verification():
+    """Trang xác thực danh tính tài khoản"""
+    user_id = current_user.id
+    
+    conn = None
+    cursor = None
+    try:
+        conn = mysql.connector.connect(
+            host=os.environ.get('DB_HOST', 'localhost'),
+            user=os.environ.get('DB_USER', 'hiep1987'),
+            password=os.environ.get('DB_PASSWORD', ''),
+            database=os.environ.get('DB_NAME', 'tikz2svg')
+        )
+        cursor = conn.cursor(dictionary=True)
+        
+        if request.method == 'POST':
+            # Kiểm tra xem có phải là hủy bỏ xác thực không
+            if request.form.get("cancel_verification"):
+                # Xóa thông tin xác thực
+                cursor.execute("""
+                    UPDATE user SET 
+                        identity_verification_code = NULL,
+                        identity_verification_expires_at = NULL,
+                        identity_verification_attempts = 0
+                    WHERE id = %s
+                """, (user_id,))
+                conn.commit()
+                flash("Đã hủy bỏ quá trình xác thực danh tính.", "info")
+                return redirect(url_for('profile_settings', user_id=user_id))
+            
+            # Kiểm tra xem có phải là xác thực không
+            verification_code = request.form.get("verification_code", "").strip()
+            
+            if verification_code:
+                # Xử lý xác thực danh tính
+                return handle_identity_verification(user_id, verification_code, cursor, conn)
+            
+            # Nếu không có mã xác thực, gửi email xác thực
+            # Tạo mã xác thực
+            verification_code = generate_verification_code(6)
+            expires_at = datetime.now() + timedelta(hours=24)
+            
+            # Lưu mã xác thực
+            cursor.execute("""
+                UPDATE user SET 
+                    identity_verification_code = %s,
+                    identity_verification_expires_at = %s,
+                    identity_verification_attempts = 0
+                WHERE id = %s
+            """, (verification_code, expires_at, user_id))
+            
+            conn.commit()
+            
+            # Gửi email xác thực
+            email_service = get_email_service()
+            if email_service:
+                try:
+                    result = email_service.send_identity_verification_email(
+                        email=current_user.email,
+                        username=current_user.username or current_user.email.split('@')[0],
+                        verification_code=verification_code
+                    )
+                    if result:
+                        flash("📧 Mã xác thực đã được gửi đến email của bạn. Vui lòng kiểm tra và nhập mã để hoàn tất xác thực.", "info")
+                    else:
+                        flash("❌ Có lỗi khi gửi email xác thực. Vui lòng thử lại.", "error")
+                except Exception as e:
+                    print(f"❌ Error sending identity verification email: {e}", flush=True)
+                    flash("❌ Có lỗi khi gửi email xác thực. Vui lòng thử lại.", "error")
+            else:
+                flash("❌ Dịch vụ email không khả dụng. Vui lòng thử lại sau.", "error")
+            
+            return redirect(url_for('profile_verification'))
+        
+        # GET request - hiển thị trang
+        # Lấy thông tin xác thực hiện tại
+        cursor.execute("""
+            SELECT identity_verified, identity_verification_code, 
+                   identity_verification_expires_at, identity_verification_attempts
+            FROM user WHERE id = %s
+        """, (user_id,))
+        user_data = cursor.fetchone()
+        
+        identity_verified = user_data.get('identity_verified', False) if user_data else False
+        has_pending_verification = bool(user_data and user_data.get('identity_verification_code'))
+        verification_attempts = user_data.get('identity_verification_attempts', 0) if user_data else 0
+        
+        # Nếu đã xác thực, redirect về profile settings
+        if identity_verified:
+            flash("✅ Tài khoản của bạn đã được xác thực danh tính.", "success")
+            return redirect(url_for('profile_settings', user_id=user_id))
+        
+        return render_template("profile_verification.html",
+                             user_id=user_id,
+                             has_pending_verification=has_pending_verification,
+                             verification_attempts=verification_attempts)
+        
+    except Exception as e:
+        print(f"❌ Error in profile_verification: {e}", flush=True)
+        flash("Có lỗi xảy ra. Vui lòng thử lại.", "error")
+        return redirect(url_for('profile_settings', user_id=user_id))
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+def handle_identity_verification(user_id, verification_code, cursor, conn):
+    """Xử lý xác thực danh tính"""
+    try:
+        # Lấy thông tin xác thực
+        cursor.execute("""
+            SELECT identity_verification_code, identity_verification_expires_at, 
+                   identity_verification_attempts
+            FROM user WHERE id = %s
+        """, (user_id,))
+        user_data = cursor.fetchone()
+        
+        if not user_data or not user_data['identity_verification_code']:
+            flash("❌ Không tìm thấy mã xác thực. Vui lòng thử lại.", "error")
+            return redirect(url_for('profile_verification'))
+        
+        stored_code = user_data['identity_verification_code']
+        expires_at = user_data['identity_verification_expires_at']
+        attempts = user_data['identity_verification_attempts']
+        
+        # Kiểm tra thời gian hết hạn
+        if expires_at and datetime.now() > expires_at:
+            # Xóa mã hết hạn
+            cursor.execute("""
+                UPDATE user SET 
+                    identity_verification_code = NULL,
+                    identity_verification_expires_at = NULL,
+                    identity_verification_attempts = 0
+                WHERE id = %s
+            """, (user_id,))
+            conn.commit()
+            flash("❌ Mã xác thực đã hết hạn. Vui lòng thử lại.", "error")
+            return redirect(url_for('profile_verification'))
+        
+        # Kiểm tra số lần thử
+        if attempts >= 5:
+            # Xóa thông tin xác thực
+            cursor.execute("""
+                UPDATE user SET 
+                    identity_verification_code = NULL,
+                    identity_verification_expires_at = NULL,
+                    identity_verification_attempts = 0
+                WHERE id = %s
+            """, (user_id,))
+            conn.commit()
+            flash("❌ Bạn đã nhập sai mã quá nhiều lần (5 lần). Vui lòng thử lại.", "error")
+            return redirect(url_for('profile_verification'))
+        
+        # Kiểm tra mã xác thực
+        if verification_code != stored_code:
+            # Tăng số lần thử sai
+            cursor.execute("""
+                UPDATE user SET identity_verification_attempts = %s WHERE id = %s
+            """, (attempts + 1, user_id))
+            conn.commit()
+            remaining_attempts = 5 - attempts - 1
+            if remaining_attempts > 0:
+                flash(f"❌ Mã xác thực không đúng. Còn {remaining_attempts} lần thử.", "error")
+            else:
+                flash("❌ Mã xác thực không đúng. Đây là lần thử cuối cùng!", "error")
+            return redirect(url_for('profile_verification'))
+        
+        # Xác thực thành công
+        cursor.execute("""
+            UPDATE user SET 
+                identity_verified = TRUE,
+                identity_verification_code = NULL,
+                identity_verification_expires_at = NULL,
+                identity_verification_attempts = 0
+            WHERE id = %s
+        """, (user_id,))
+        
+        conn.commit()
+        flash("✅ Xác thực danh tính thành công! Tài khoản của bạn đã được xác thực.", "success")
+        return redirect(url_for('profile_settings', user_id=user_id))
+        
+    except Exception as e:
+        print(f"❌ Error in handle_identity_verification: {e}", flush=True)
+        flash("Có lỗi xảy ra trong quá trình xác thực.", "error")
+        return redirect(url_for('profile_verification'))
 
 # Khởi tạo email service ngay khi import app
 try:

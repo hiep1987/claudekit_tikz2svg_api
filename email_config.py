@@ -52,6 +52,10 @@ EMAIL_TEMPLATES = {
     'profile_settings_verification': {
         'subject': 'Xác thực thay đổi hồ sơ - TikZ2SVG API',
         'template': 'emails/profile_settings_verification.html'
+    },
+    'identity_verification': {
+        'subject': 'Xác thực danh tính tài khoản - TikZ2SVG API',
+        'template': 'emails/identity_verification.html'
     }
 }
 

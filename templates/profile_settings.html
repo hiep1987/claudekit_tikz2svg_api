@@ -601,6 +601,32 @@
                         </div>
 
                         <div class="info-group">
+                            <label>🔐 Xác thực danh tính:
+                                {% if identity_verified %}
+                                    <span style="color: green; font-size: 13px;">✔ Đã xác thực</span>
+                                    <img src="{{ url_for('static', filename='identity-verification-icon.svg') }}" alt="Verified" style="width: 16px; height: 16px; vertical-align: middle; margin-left: 5px;">
+                                {% else %}
+                                    <span style="color: orange; font-size: 13px;">⚠ Chưa xác thực</span>
+                                {% endif %}
+                            </label>
+                            {% if not identity_verified %}
+                                <div style="margin-top: 10px;">
+                                    <a href="{{ url_for('profile_verification') }}" class="btn btn-primary" style="font-size: 14px; padding: 8px 16px;">
+                                        🔐 Xác thực tài khoản
+                                    </a>
+                                    <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+                                        Xác thực để mở khóa đầy đủ tính năng và nhận badge xác thực
+                                    </small>
+                                </div>
+                            {% else %}
+                                <div style="background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 10px; border-radius: 6px; margin-top: 10px;">
+                                    <strong>✅ Tài khoản đã được xác thực!</strong><br>
+                                    <small>Bạn có thể truy cập đầy đủ các tính năng của nền tảng.</small>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="info-group">
                             <label for="username">👤 Tên hiển thị:</label>
                             <input type="text" id="username" name="username" value="{{ username or '' }}" 
                                    placeholder="Nhập tên hiển thị của bạn" maxlength="50">
@@ -651,6 +677,8 @@
                         <label for="verification_code">📧 Mã xác thực:</label>
                         <input type="text" id="verification_code" name="verification_code" 
                                placeholder="Nhập mã 6 số từ email" maxlength="6" 
+                               autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]*" enterkeyhint="done"
+                               autocapitalize="off" autocorrect="off" spellcheck="false"
                                style="font-family: 'Courier New', monospace; font-size: 18px; text-align: center; letter-spacing: 2px;">
                         <small style="color: #666; font-size: 12px;">Mã có hiệu lực trong 24 giờ</small>
                     </div>
@@ -984,12 +1012,8 @@
                 // Chỉ cho phép nhập số
                 this.value = this.value.replace(/[^0-9]/g, '');
                 
-                // Auto-submit khi đủ 6 số
-                if (this.value.length === 6) {
-                    setTimeout(() => {
-                        document.querySelector('form[method="POST"]').submit();
-                    }, 500);
-                }
+                // Đã tắt tính năng tự động submit khi đủ 6 số
+                // Người dùng phải bấm nút "Xác nhận thay đổi" để submit
             });
         }
         

@@ -38,7 +38,7 @@
     <div class="flex items-center gap-2 flex-shrink-0">
         {% if current_user.is_authenticated %}
             <div class="flex items-center gap-2">
-                <div class="flex items-center gap-2 bg-gray-100 px-2 py-1.5 rounded-lg">
+                <div class="flex items-center gap-2 bg-gray-100 px-2 py-1.5 rounded-lg border border-gray-300">
                     {% if current_avatar %}
                         <img src="{{ url_for('static', filename='avatars/' ~ current_avatar) }}" 
                              alt="Avatar" class="w-6 h-6 rounded-full"

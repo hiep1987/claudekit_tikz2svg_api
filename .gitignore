@@ -37,3 +37,8 @@ error_tikz/
 test_*.py
 *.tex
 .DS_Store
+
+# Backup files - không đẩy lên GitHub
+backup/
+*.backup
+*.bak

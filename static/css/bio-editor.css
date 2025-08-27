@@ -1,0 +1,34 @@
+/* Bio Editor Styling - Simplified */
+/* Container styling */
+#bio-editor.ql-container.ql-snow {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: 1px solid #764ba2;
+  border-radius: 8px;
+  min-height: 120px;
+}
+
+/* Editor content */
+#bio-editor .ql-editor {
+  color: white;
+}
+
+/* List markers */
+#bio-editor .ql-editor ul li::marker,
+#bio-editor .ql-editor ol li::marker {
+  color: white;
+}
+
+/* Placeholder text */
+#bio-editor .ql-editor[data-placeholder]:before {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Override black text to dark gray */
+#bio-editor .ql-editor [style*="color: black"],
+#bio-editor .ql-editor [style*="color:black"],
+#bio-editor .ql-editor [style*="color: #000"],
+#bio-editor .ql-editor [style*="color:#000"],
+#bio-editor .ql-editor [style*="color: rgb(0,0,0)"],
+#bio-editor .ql-editor [style*="color:rgb(0,0,0)"] {
+  color: #495057;
+}

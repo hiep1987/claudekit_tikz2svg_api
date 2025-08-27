@@ -21,523 +21,20 @@
     <link rel="icon" type="image/png" sizes="512x512" href="{{ url_for('static', filename='android-chrome-512x512.png') }}">
     <link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='favicon-32x32.png') }}">
     
-    <!-- Global JavaScript variables -->
-    <script>
-        window.isLoggedIn = false;
-        window.activeFeedbackCount = 0;
-        window.isOwner = false;
-    </script>
-    <script>
-        // Set values from server
-        {% if current_user.is_authenticated %}
-        window.isLoggedIn = true;
-        {% endif %}
-        {% if is_owner %}
-        window.isOwner = true;
-        {% endif %}
-    </script>
+    <!-- Navigation CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navigation.css', v='1.0') }}">
     
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Cropper.js CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
     
-    <!-- Custom Tailwind-like CSS - Production Ready -->
-    <style>
-        /* Tailwind-like utility classes for production */
-        .w-full { width: 100%; }
-        .max-w-7xl { max-width: 80rem; }
-        .mx-auto { margin-left: auto; margin-right: auto; }
-        .bg-white\/80 { background-color: rgba(255, 255, 255, 0.8); }
-        .backdrop-blur { backdrop-filter: blur(8px); }
-        .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
-        .rounded-2xl { border-radius: 1rem; }
-        .p-3 { padding: 0.75rem; }
-        .flex { display: flex; }
-        .items-center { align-items: center; }
-        .justify-between { justify-content: space-between; }
-        .mb-8 { margin-bottom: 2rem; }
-        .gap-2 { gap: 0.5rem; }
-        .bg-gradient-to-br { background-image: linear-gradient(to bottom right, var(--tw-gradient-stops)); }
-        .from-blue-500 { --tw-gradient-from: #3b82f6; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(59, 130, 246, 0)); }
-        .to-yellow-400 { --tw-gradient-to: #fbbf24; }
-        .p-1\.5 { padding: 0.375rem; }
-        .rounded-lg { border-radius: 0.5rem; }
-        .text-white { color: #ffffff; }
-        .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
-        .text-gray-800 { color: #1f2937; }
-        .font-bold { font-weight: 700; }
-        .hidden { display: none; }
-        .gap-6 { gap: 1.5rem; }
-        .font-medium { font-weight: 500; }
-        .text-gray-700 { color: #374151; }
-        .relative { position: relative; }
-        .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
-        .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
-        .cursor-pointer { cursor: pointer; }
-        .transition { transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
-        .hover\:text-blue-600:hover { color: #2563eb; }
-        .block { display: block; }
-        .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
-        .bg-gradient-to-r { background-image: linear-gradient(to right, var(--tw-gradient-stops)); }
-        .from-red-400 { --tw-gradient-from: #f87171; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(248, 113, 113, 0)); }
-        .to-red-600 { --tw-gradient-to: #dc2626; }
-        .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
-        .py-1\.5 { padding-top: 0.375rem; padding-bottom: 0.375rem; }
-        .rounded-xl { border-radius: 0.75rem; }
-        .hover\:scale-105:hover { transform: scale(1.05); }
-        .font-semibold { font-weight: 600; }
-        .text-xs { font-size: 0.75rem; line-height: 1rem; }
-        .from-blue-400 { --tw-gradient-from: #60a5fa; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(96, 165, 250, 0)); }
-        .hover\:bg-blue-100:hover { background-color: #dbeafe; }
-        .text-2xl { font-size: 1.5rem; line-height: 2rem; }
-        .text-gray-500 { color: #6b7280; }
-        .hover\:text-blue-400:hover { color: #60a5fa; }
-        .fixed { position: fixed; }
-        .top-0 { top: 0px; }
-        .left-0 { left: 0px; }
-        .h-full { height: 100%; }
-        .bg-black\/50 { background-color: rgba(0, 0, 0, 0.5); }
-        .z-40 { z-index: 40; }
-        .z-400 { z-index: 400; }
-        .absolute { position: absolute; }
-        .right-0 { right: 0px; }
-        .w-60 { width: 15rem; }
-        .bg-white { background-color: #ffffff; }
-        .flex-col { flex-direction: column; }
-        .p-6 { padding: 1.5rem; }
-        .gap-3 { gap: 0.75rem; }
-        .self-end { align-self: flex-end; }
-        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5px; }
-        .mt-2 { margin-top: 0.5rem; }
-        .text-center { text-align: center; }
-        .mt-8 { margin-top: 2rem; }
-        .w-6 { width: 1.5rem; }
-        .h-6 { height: 1.5rem; }
-        .rounded-full { border-radius: 9999px; }
-        .to-purple-600 { --tw-gradient-to: #9333ea; }
-        .justify-center { justify-content: center; }
-        .mb-4 { margin-bottom: 1rem; }
-        .flex-grow { flex-grow: 1; }
-        .mx-4 { margin-left: 1rem; margin-right: 1rem; }
-        .overflow-hidden { overflow: hidden; }
-        .text-base { font-size: 1rem; line-height: 1.5rem; }
-        .flex-shrink-0 { flex-shrink: 0; }
-        
-        /* Responsive breakpoints */
-        @media (min-width: 920px) {
-            .md\:flex { display: flex; }
-            .md\:block { display: block; }
-            .md\:hidden { display: none; }
-        }
-    </style>
-    <style>
-        body {
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          margin: 0 auto;
-          padding: 20px;
-          background-color: #f5f5f5;
-        }
-        
-        /* New Navigation Styles */
-        .menu-underline {
-          transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
-          height: 3px;
-          width: 0;
-          background: linear-gradient(90deg, #fbbf24, #38bdf8);
-          border-radius: 2px;
-          margin: 0 auto;
-          position: absolute;
-          bottom: -2px;
-          left: 50%;
-          transform: translateX(-50%);
-        }
-        .menu-item:hover .menu-underline, .menu-item.active .menu-underline {
-          width: 80%;
-        }
-        
-        /* Override custom CSS for menu items to remove unwanted styling */
-        .menu-item {
-          list-style: none !important;
-        }
-        
-        .menu-item a {
-          text-decoration: none !important;
-          color: #374151 !important;
-        }
-        
-        .menu-item:hover a {
-          color: #2563eb !important;
-        }
-        
-        /* Remove any bullet points or underlines from menu */
-        .hidden.md\\:flex {
-          list-style: none !important;
-          padding: 0 !important;
-          margin: 0 !important;
-        }
-        
-        .hidden.md\\:flex li {
-          list-style: none !important;
-        }
-        
-        .hidden.md\\:flex li a {
-          text-decoration: none !important;
-        }
-        
-        /* Fix mobile menu styling */
-        #mobile-menu a {
-          text-decoration: none !important;
-          color: #374151 !important;
-        }
-        
-        #mobile-menu a:hover {
-          color: #2563eb !important;
-        }
-        
-        /* Mobile scroll for menu */
-        #scrollable-menu {
-            overflow-x: auto;
-            white-space: nowrap;
-            -webkit-overflow-scrolling: touch;
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-            padding-bottom: 0.75rem;
-        }
-        #scrollable-menu::-webkit-scrollbar {
-            display: none;
-        }
-        
-        #scrollable-menu-list {
-            list-style: none !important;
-            padding: 0 !important;
-            margin: 0 !important;
-        }
-        
-        #scrollable-menu-list .menu-item {
-            flex-shrink: 0;
-        }
-        
-        #main-menu {
-            list-style: none !important;
-            padding: 0 !important;
-            margin: 0 !important;
-        }
-        
-        .container {
-          background: white;
-          padding: 40px;
-          border-radius: 12px;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-          max-width: 1280px;
-          margin: 0 auto;
-        }
-        
-        .header {
-          text-align: center;
-          margin-bottom: 40px;
-        }
-        
-        .header h1 {
-          color: #1976d2;
-          margin-bottom: 10px;
-        }
-        
-        .header p {
-          color: #666;
-          font-size: 16px;
-        }
-        
-        .profile-section {
-          display: grid;
-          grid-template-columns: 1fr 2fr;
-          gap: 40px;
-          margin-bottom: 40px;
-        }
-        
-        .avatar-section {
-          text-align: center;
-        }
-        
-        .avatar-container {
-          position: relative;
-          display: inline-block;
-          margin-bottom: 20px;
-        }
-        
-        .avatar,
-        .avatar-placeholder {
-          width: 150px;
-          height: 150px;
-          border-radius: 50%;
-          object-fit: cover;
-          border: 4px solid #e0e0e0;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-        
-        .avatar-placeholder {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: white;
-          font-size: 48px;
-          font-weight: bold;
-        }
-        
-        .avatar-upload {
-          margin-top: 15px;
-        }
-        
-        .avatar-upload input[type="file"] {
-          display: none;
-        }
-        
-
-        
-        /* Bio Editor Styling - Optimized */
-        #bio-editor.ql-container.ql-snow {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-          border: 1px solid #764ba2 !important;
-          border-radius: 8px !important;
-          min-height: 120px !important;
-        }
-        
-        /* Force background with highest priority */
-        div#bio-editor .ql-editor {
-          color: white !important;
-        }
-        
-        /* Override any inline background styles */
-        #bio-editor[style*="background:white"],
-        #bio-editor[style*="background: white"],
-        #bio-editor[style*="background:linear-gradient"],
-        #bio-editor[style*="background: linear-gradient"] {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-        }
-        
-        /* Ultimate override for any inline style */
-        #bio-editor[style] {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-        }
-        
-        /* Maximum specificity override for inline gradient */
-        #bio-editor[style*="linear-gradient"] {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-        }
-        
-        /* Force override any background style */
-        #bio-editor {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-        }
-        
-        /* Override any inline color styles in .ql-editor */
-        #bio-editor .ql-editor[style*="color: white"],
-        #bio-editor .ql-editor[style*="color:white"] {
-          color: white !important;
-        }
-        
-        /* Override any span with white color */
-        #bio-editor .ql-editor span[style*="color: white"],
-        #bio-editor .ql-editor span[style*="color:white"] {
-          color: white !important;
-        }
-        
-        /* Allow colored text from Quill color picker */
-        #bio-editor .ql-editor [style*="color: #"],
-        #bio-editor .ql-editor [style*="color:#"],
-        #bio-editor .ql-editor [style*="color: rgb"],
-        #bio-editor .ql-editor [style*="color:rgb"] {
-          /* Don't override - let Quill's color picker work */
-        }
-        
-        /* Force light color for list markers */
-        #bio-editor .ql-editor ul li::marker,
-        #bio-editor .ql-editor ol li::marker {
-          color: white !important;
-        }
-        
-        /* Force light color for placeholder text */
-        #bio-editor .ql-editor[data-placeholder]:before {
-          color: rgba(255, 255, 255, 0.7) !important;
-        }
-        
-
-        
-        /* Only override black/dark colors to dark gray, allow other colors */
-        #bio-editor .ql-editor [style*="color: black"],
-        #bio-editor .ql-editor [style*="color:black"],
-        #bio-editor .ql-editor [style*="color: #000"],
-        #bio-editor .ql-editor [style*="color:#000"],
-        #bio-editor .ql-editor [style*="color: rgb(0,0,0)"],
-        #bio-editor .ql-editor [style*="color:rgb(0,0,0)"] {
-          color: #495057 !important;
-        }
-        
-
-        
-        .avatar-upload label {
-          background: #1976d2;
-          color: white;
-          padding: 10px 20px;
-          border-radius: 6px;
-          cursor: pointer;
-          font-size: 14px;
-          transition: background 0.3s;
-        }
-        
-        .avatar-upload label:hover {
-          background: #1565c0;
-        }
-        
-        .info-section {
-          padding: 20px;
-          background: #f8f9fa;
-          border-radius: 8px;
-        }
-        
-        .info-group {
-          margin-bottom: 25px;
-        }
-        
-        .info-group label {
-          display: block;
-          font-weight: bold;
-          color: #333;
-          margin-bottom: 8px;
-          font-size: 14px;
-        }
-        
-        .info-group input,
-        .info-group textarea {
-          width: 100%;
-          padding: 12px;
-          border: 2px solid #ddd;
-          border-radius: 6px;
-          font-size: 16px;
-          box-sizing: border-box;
-        }
-        
-        .info-group input:focus,
-        .info-group textarea:focus {
-          outline: none;
-          border-color: #1976d2;
-        }
-        
-        .info-group .readonly {
-          background: #f5f5f5;
-          color: #666;
-          cursor: not-allowed;
-          border-color: #ddd;
-        }
-        
-        .actions {
-          text-align: center;
-          margin-top: 30px;
-        }
-        
-        #save-button-section {
-          transition: opacity 0.3s ease;
-        }
-        
-        .btn {
-          padding: 12px 30px;
-          border: none;
-          border-radius: 6px;
-          font-size: 16px;
-          font-weight: bold;
-          cursor: pointer;
-          transition: all 0.3s;
-          margin: 0 10px;
-        }
-        
-        .btn-primary {
-          background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
-          color: white;
-        }
-        
-        .btn-primary:hover {
-          background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
-        }
-        
-        .btn-secondary {
-          background: #6c757d;
-          color: white;
-        }
-        
-        .btn-secondary:hover {
-          background: #5a6268;
-        }
-        
-        .flash-messages {
-          margin-bottom: 20px;
-        }
-        
-        .flash {
-          padding: 12px 20px;
-          border-radius: 6px;
-          margin-bottom: 10px;
-          font-weight: bold;
-          transition: opacity 0.3s ease;
-        }
-        
-        .flash-success {
-          background: #d4edda;
-          color: #155724;
-          border: 1px solid #c3e6cb;
-        }
-        
-        .flash-error {
-          background: #f8d7da;
-          color: #721c24;
-          border: 1px solid #f5c6cb;
-        }
-        
-
-
-
-        
-        @media (max-width: 768px) {
-          .profile-section {
-            grid-template-columns: 1fr;
-            gap: 20px;
-          }
-        
-          .container {
-            padding: 20px;
-          }
-        }
-        
-        @media (max-width: 600px) {
-            .container {
-            padding: 4vw;
-          }
-        
-          .avatar, .avatar-placeholder {
-            width: 80px;
-            height: 80px;
-            font-size: 32px;
-          }
-        
-          .btn, .btn-primary, .btn-secondary {
-            width: 100%;
-            font-size: 17px;
-            margin: 8px 0;
-            padding: 14px 0;
-          }
-          
-          .google-login-btn {
-            max-width: 280px;
-            padding: 8px 16px;
-            font-size: 14px;
-            min-height: 40px;
-            margin: 0 auto;
-          }
-          
-          .google-login-btn svg {
-            height: 20px;
-          }
-        }
-        </style>
+    <!-- Quill Editor CSS -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    
+    <!-- Bio Editor Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bio-editor.css', v='1.0') }}">
+    
+    <!-- Profile Settings Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/profile_settings.css', v='1.0') }}">
 
 </head>
 <body>
@@ -578,10 +75,10 @@
                             {% endif %}
                         </div>
                         <div class="avatar-upload">
-                            <input type="file" id="avatar-input" name="avatar" accept="image/*" onchange="openCropperModal(this)">
+                            <input type="file" id="avatar-input" name="avatar" accept="image/*">
                             <label for="avatar-input">📷 Chọn ảnh đại diện</label>
                         </div>
-                        <p style="font-size: 12px; color: #666; margin-top: 10px;">
+                        <p class="text-small">
                             Hỗ trợ: JPG, PNG, GIF (tối đa 5MB)
                         </p>
                     </div>
@@ -591,35 +88,35 @@
                         <div class="info-group">
                             <label for="email">📧 Email:
                                 {% if email_verified %}
-                                    <span style="color: green; font-size: 13px;">✔ Đã xác thực</span>
+                                    <span class="text-success">✔ Đã xác thực</span>
                                 {% else %}
-                                    <span style="color: orange; font-size: 13px;">⚠ Chưa xác thực</span>
+                                    <span class="text-warning">⚠ Chưa xác thực</span>
                                 {% endif %}
                             </label>
                             <input type="email" id="email" value="{{ user_email }}" class="readonly" readonly>
-                            <small style="color: #666; font-size: 12px;">Email không thể thay đổi</small>
+                            <small class="text-muted">Email không thể thay đổi</small>
                         </div>
 
                         <div class="info-group">
                             <label>🔐 Xác thực danh tính:
                                 {% if identity_verified %}
-                                    <span style="color: green; font-size: 13px;">✔ Đã xác thực</span>
-                                    <img src="{{ url_for('static', filename='identity-verification-icon.svg') }}" alt="Verified" style="width: 16px; height: 16px; vertical-align: middle; margin-left: 5px;">
+                                    <span class="text-success">✔ Đã xác thực</span>
+                                    <img src="{{ url_for('static', filename='identity-verification-icon.svg') }}" alt="Verified" class="verification-icon">
                                 {% else %}
-                                    <span style="color: orange; font-size: 13px;">⚠ Chưa xác thực</span>
+                                    <span class="text-warning">⚠ Chưa xác thực</span>
                                 {% endif %}
                             </label>
                             {% if not identity_verified %}
-                                <div style="margin-top: 10px;">
-                                    <a href="{{ url_for('profile_verification') }}" class="btn btn-primary" style="font-size: 14px; padding: 8px 16px;">
+                                <div class="verification-button-container">
+                                    <a href="{{ url_for('profile_verification') }}" class="btn btn-primary verification-button">
                                         🔐 Xác thực tài khoản
                                     </a>
-                                    <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+                                    <small class="text-muted-block">
                                         Xác thực để mở khóa đầy đủ tính năng và nhận badge xác thực
                                     </small>
                                 </div>
                             {% else %}
-                                <div style="background: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 10px; border-radius: 6px; margin-top: 10px;">
+                                <div class="verification-success">
                                     <strong>✅ Tài khoản đã được xác thực!</strong><br>
                                     <small>Bạn có thể truy cập đầy đủ các tính năng của nền tảng.</small>
                                 </div>
@@ -630,7 +127,7 @@
                             <label for="username">👤 Tên hiển thị:</label>
                             <input type="text" id="username" name="username" value="{{ username or '' }}" 
                                    placeholder="Nhập tên hiển thị của bạn" maxlength="50">
-                            <small style="color: #666; font-size: 12px;">Tên sẽ hiển thị trong ứng dụng</small>
+                            <small class="text-muted">Tên sẽ hiển thị trong ứng dụng</small>
                         </div>
 
                         <div class="info-group">
@@ -638,7 +135,7 @@
                             <!-- Quill Editor Container -->
                             <div id="bio-editor">{{ bio|safe }}</div>
                             <input type="hidden" name="bio" id="bio-hidden">
-                            <small style="color: #666; font-size: 12px;">Bạn có thể chia sẻ về mình (hỗ trợ định dạng: B, I, U, bullets, màu sắc)</small>
+                            <small class="text-muted">Bạn có thể chia sẻ về mình (hỗ trợ định dạng: B, I, U, bullets, màu sắc)</small>
                         </div>
                     </div>
                 </div>
@@ -649,16 +146,16 @@
                 </div>
                 
                 <!-- Form xác thực -->
-                <div id="verification-section" style="display: {% if has_pending_verification %}block{% else %}none{% endif %}; margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px; border: 2px solid #e9ecef;">
-                    <h3 style="color: #1976d2; margin-bottom: 15px; text-align: center;">🔐 Xác thực thay đổi</h3>
-                    <p style="color: #666; margin-bottom: 20px;">
+                <div id="verification-section" class="verification-section{% if has_pending_verification %} show{% endif %}">
+                    <h3 class="verification-title">🔐 Xác thực thay đổi</h3>
+                    <p class="verification-text">
                         Chúng tôi đã gửi mã xác thực đến email của bạn. Vui lòng nhập mã để hoàn tất thay đổi.
-                        <br><small style="color: #888; font-size: 13px;">💡 <strong>Lưu ý:</strong> Email có thể nằm trong thư mục Spam/Junk. Nếu không nhận được email, vui lòng liên hệ <a href="mailto:support@tikz2svg.com" style="color: #1976d2;">support@tikz2svg.com</a> để được hỗ trợ.</small>
+                        <br><small class="verification-note">💡 <strong>Lưu ý:</strong> Email có thể nằm trong thư mục Spam/Junk. Nếu không nhận được email, vui lòng liên hệ <a href="mailto:support@tikz2svg.com" class="verification-link">support@tikz2svg.com</a> để được hỗ trợ.</small>
                     </p>
                     
                     {% if verification_attempts > 0 %}
-                    <div style="background: {% if verification_attempts >= 4 %}#f8d7da; border: 1px solid #f5c6cb;{% else %}#fff3cd; border: 1px solid #ffeaa7;{% endif %} padding: 10px; border-radius: 6px; margin-bottom: 15px;">
-                        <p style="color: {% if verification_attempts >= 4 %}#721c24;{% else %}#856404;{% endif %} margin: 0; font-size: 14px;">
+                    <div class="verification-alert {% if verification_attempts >= 4 %}verification-alert-danger{% else %}verification-alert-warning{% endif %}">
+                        <p class="{% if verification_attempts >= 4 %}verification-alert-text-danger{% else %}verification-alert-text-warning{% endif %}">
                             {% if verification_attempts >= 4 %}
                             🚨 <strong>Cảnh báo:</strong> Bạn đã nhập sai {{ verification_attempts }} lần. Còn {{ 5 - verification_attempts }} lần thử cuối cùng!
                             {% else %}
@@ -666,7 +163,7 @@
                             {% endif %}
                         </p>
                         {% if verification_attempts >= 3 %}
-                        <p style="color: {% if verification_attempts >= 4 %}#721c24;{% else %}#856404;{% endif %} margin: 5px 0 0 0; font-size: 12px;">
+                        <p class="verification-alert-hint {% if verification_attempts >= 4 %}verification-alert-text-danger{% else %}verification-alert-text-warning{% endif %}">
                             💡 <strong>Gợi ý:</strong> Kiểm tra lại email, bao gồm thư mục Spam/Junk. Hoặc nhấn "Hủy bỏ" để thử lại từ đầu.
                         </p>
                         {% endif %}
@@ -679,13 +176,13 @@
                                placeholder="Nhập mã 6 số từ email" maxlength="6" 
                                autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]*" enterkeyhint="done"
                                autocapitalize="off" autocorrect="off" spellcheck="false"
-                               style="font-family: 'Courier New', monospace; font-size: 18px; text-align: center; letter-spacing: 2px;">
-                        <small style="color: #666; font-size: 12px;">Mã có hiệu lực trong 24 giờ</small>
+                               class="verification-code-input">
+                        <small class="text-muted">Mã có hiệu lực trong 24 giờ</small>
                     </div>
                     
                     <div class="actions">
                         <button type="submit" class="btn btn-primary">✅ Xác nhận thay đổi</button>
-                        <button type="button" onclick="cancelVerification()" class="btn btn-secondary">❌ Hủy bỏ</button>
+                        <button type="button" id="cancel-verification-btn" class="btn btn-secondary">❌ Hủy bỏ</button>
                     </div>
                 </div>
             </form>
@@ -695,335 +192,27 @@
 
 
     <!-- Modal cropper avatar -->
-    <div id="avatar-cropper-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); z-index:10000; align-items:center; justify-content:center;">
-      <div style="background:white; padding:32px 24px; border-radius:14px; box-shadow:0 2px 16px rgba(0,0,0,0.18); min-width:320px; text-align:center; position:relative;">
-        <h3 style="margin-bottom:18px;">Chỉnh sửa ảnh đại diện</h3>
-        <div style="display:flex; justify-content:center; align-items:center;">
-          <div style="width:220px; height:220px; border-radius:50%; overflow:hidden; background:#eee; display:flex; align-items:center; justify-content:center;">
-            <img id="cropper-image" src="" style="max-width:100%; min-width:100%; min-height:100%; display:block;" alt="Cropper Preview">
+    <div id="avatar-cropper-modal" class="avatar-cropper-modal">
+      <div class="cropper-modal-content">
+        <h3 class="cropper-modal-title">Chỉnh sửa ảnh đại diện</h3>
+        <div class="cropper-preview-container">
+          <div class="cropper-preview">
+            <img id="cropper-image" src="" class="cropper-image" alt="Cropper Preview">
           </div>
         </div>
-        <div style="margin-top:18px;">
+        <div class="cropper-actions">
           <button type="button" id="crop-avatar-btn" class="btn btn-primary">Cắt & Lưu</button>
-          <button type="button" onclick="closeCropperModal()" class="btn btn-secondary">Huỷ</button>
+          <button type="button" id="close-cropper-btn" class="btn btn-secondary">Huỷ</button>
         </div>
       </div>
     </div>
 
     <!-- JavaScript cho header -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet"/>
     
     <!-- Quill Editor -->
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
-
-    <script>
-    let cropper = null;
-    let selectedFile = null;
-    
-    // Hàm hủy bỏ xác thực - đặt ở global scope
-    function cancelVerification() {
-        if (confirm('Bạn có chắc muốn hủy bỏ thay đổi đang chờ xác thực?')) {
-            // Gửi request hủy bỏ xác thực
-            fetch(window.location.href, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: 'cancel_verification=1'
-            }).then(response => {
-                if (response.ok) {
-                    // Reload trang để cập nhật trạng thái
-                    window.location.reload();
-                }
-            }).catch(error => {
-                console.error('Error canceling verification:', error);
-                alert('Có lỗi xảy ra khi hủy bỏ xác thực. Vui lòng thử lại.');
-            });
-        }
-    }
-
-    function openCropperModal(input) {
-        if (input.files && input.files[0]) {
-            const file = input.files[0];
-            const maxSize = 5 * 1024 * 1024; // 5MB
-            if (file.size > maxSize) {
-                alert('File quá lớn! Vui lòng chọn file nhỏ hơn 5MB.');
-                input.value = '';
-                return;
-            }
-            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
-            if (!allowedTypes.includes(file.type)) {
-                alert('Chỉ chấp nhận file ảnh: JPG, PNG, GIF');
-                input.value = '';
-                return;
-            }
-            selectedFile = file;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = document.getElementById('cropper-image');
-                img.src = e.target.result;
-                document.getElementById('avatar-cropper-modal').style.display = 'flex';
-                // Destroy old cropper if exists
-                if (cropper) cropper.destroy();
-                cropper = new Cropper(img, {
-                    aspectRatio: 1,
-                    viewMode: 1,
-                    dragMode: 'move',
-                    background: false,
-                    guides: false,
-                    autoCropArea: 1,
-                    movable: true,
-                    zoomable: true,
-                    rotatable: false,
-                    scalable: false,
-                    cropBoxResizable: false,
-                    cropBoxMovable: false,
-                    minContainerWidth: 220,
-                    minContainerHeight: 220,
-                    ready() {
-                        // Cropper is ready
-                    }
-                });
-            };
-            reader.readAsDataURL(file);
-        }
-    }
-    function closeCropperModal() {
-        document.getElementById('avatar-cropper-modal').style.display = 'none';
-        if (cropper) cropper.destroy();
-        cropper = null;
-        selectedFile = null;
-        document.getElementById('avatar-input').value = '';
-    }
-    document.getElementById('crop-avatar-btn').addEventListener('click', function() {
-        if (cropper) {
-            // Lấy canvas hình tròn
-            const canvas = cropper.getCroppedCanvas({ width: 300, height: 300, imageSmoothingQuality: 'high' });
-            // Tạo canvas tròn
-            const circleCanvas = document.createElement('canvas');
-            circleCanvas.width = 300;
-            circleCanvas.height = 300;
-            const ctx = circleCanvas.getContext('2d');
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(150, 150, 150, 0, 2 * Math.PI);
-            ctx.closePath();
-            ctx.clip();
-            ctx.drawImage(canvas, 0, 0, 300, 300);
-            ctx.restore();
-            // Preview lên avatar
-            const avatarPreview = document.getElementById('avatar-preview');
-            if (avatarPreview) {
-                avatarPreview.src = circleCanvas.toDataURL('image/png');
-            } else {
-                // Nếu chưa có img, thay thế placeholder
-                const avatarPlaceholder = document.getElementById('avatar-placeholder');
-                if (avatarPlaceholder) {
-                    const newImg = document.createElement('img');
-                    newImg.src = circleCanvas.toDataURL('image/png');
-                    newImg.alt = 'Avatar Preview';
-                    newImg.className = 'avatar';
-                    newImg.id = 'avatar-preview';
-                    avatarPlaceholder.parentNode.replaceChild(newImg, avatarPlaceholder);
-                }
-            }
-            // Tạo file blob để submit
-            circleCanvas.toBlob(function(blob) {
-                // Tạo file input ẩn để submit
-                let hiddenInput = document.getElementById('avatar-cropped-blob');
-                if (!hiddenInput) {
-                    hiddenInput = document.createElement('input');
-                    hiddenInput.type = 'hidden';
-                    hiddenInput.name = 'avatar_cropped';
-                    hiddenInput.id = 'avatar-cropped-blob';
-                    document.querySelector('form').appendChild(hiddenInput);
-                }
-                // Đọc blob thành base64
-                const reader = new FileReader();
-                reader.onloadend = function() {
-                    hiddenInput.value = reader.result;
-                };
-                reader.readAsDataURL(blob);
-            }, 'image/png');
-            closeCropperModal();
-        }
-    });
-    </script>
-
-    <script>
-    // Suppress deprecated DOMNodeInserted warnings silently
-    const originalAddEventListener = EventTarget.prototype.addEventListener;
-    EventTarget.prototype.addEventListener = function(type, listener, options) {
-        if (type === 'DOMNodeInserted' || type === 'DOMNodeRemoved' || type === 'DOMSubtreeModified') {
-            // Silently suppress deprecated MutationEvents without logging
-            return;
-        }
-        return originalAddEventListener.call(this, type, listener, options);
-    };
-    
-    document.addEventListener('DOMContentLoaded', function () {
-        // ==== Mobile Menu Toggle ====
-        const menuToggle = document.getElementById('menu-toggle');
-        const mobileMenu = document.getElementById('mobile-menu');
-        const closeMenu = document.getElementById('close-menu');
-        
-        if (menuToggle && mobileMenu && closeMenu) {
-            menuToggle.addEventListener('click', () => mobileMenu.classList.remove('hidden'));
-            closeMenu.addEventListener('click', () => mobileMenu.classList.add('hidden'));
-            // Optional: click outside to close
-            mobileMenu.addEventListener('click', e => {
-                if(e.target === mobileMenu) mobileMenu.classList.add('hidden');
-            });
-        }
-
-        // ==== Quill Editor Initialization ====
-        let quill;
-        const bioEditor = document.getElementById('bio-editor');
-        if (bioEditor) {
-            quill = new Quill('#bio-editor', {
-                theme: 'snow',
-                modules: {
-                    toolbar: [
-                        ['bold', 'italic', 'underline', 'strike'],
-                        [{ 'header': [1, 2, 3, false] }],
-                        [{ list: 'ordered' }, { list: 'bullet' }],
-                        [{ 'align': [] }],
-                        [{
-                            color: [
-                                '#ffffff', // Trắng (mặc định)
-                                '#ffeb3b', // Vàng chanh (tương phản tốt)
-                                '#ff9800', // Cam (nổi bật)
-                                '#ff5722', // Đỏ cam (cảnh báo)
-                                '#e91e63', // Hồng (nổi bật)
-                                '#9c27b0', // Tím (sang trọng)
-                                '#673ab7', // Tím đậm
-                                '#3f51b5', // Xanh tím
-                                '#2196f3', // Xanh dương nhạt
-                                '#00bcd4', // Cyan
-                                '#009688', // Teal
-                                '#4caf50', // Xanh lá
-                                '#8bc34a', // Xanh lá nhạt
-                                '#cddc39', // Vàng xanh
-                                '#ffc107', // Vàng đậm
-                                '#ff9800', // Cam
-                                '#795548', // Nâu
-                                '#9e9e9e', // Xám
-                                '#607d8b'  // Xanh xám
-                            ]
-                        }],
-                        ['clean']
-                    ]
-                },
-                placeholder: 'Viết gì đó về bản thân...'
-            });
-            quill.on('text-change', function () {
-                const bioHidden = document.getElementById('bio-hidden');
-                if (bioHidden) bioHidden.value = quill.root.innerHTML;
-            });
-            
-            // Set default text color to dark gray
-            setTimeout(function() {
-                const editor = document.querySelector('#bio-editor .ql-editor');
-                if (editor && !editor.style.color) {
-                    editor.style.color = '#495057';
-                }
-            }, 100);
-            
-            // Observer to handle color changes
-            const observer = new MutationObserver(function(mutations) {
-                mutations.forEach(function(mutation) {
-                    if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-                        const target = mutation.target;
-                        // Only set dark gray color if no specific color is set
-                        if (target.style.color === '' || target.style.color === 'black' || target.style.color === 'rgb(0, 0, 0)') {
-                            target.style.color = '#495057';
-                        }
-                    }
-                });
-            });
-            
-            // Start observing
-            const editor = document.querySelector('#bio-editor .ql-editor');
-            if (editor) {
-                observer.observe(editor, {
-                    childList: true,
-                    subtree: true,
-                    attributes: true,
-                    attributeFilter: ['style']
-                });
-            }
-            
-            console.log('✅ Modern MutationObserver initialized for bio editor');
-        }
-
-        // ==== Profile form submission logic ====
-        const profileForm = document.querySelector('form[method="POST"]');
-        if (profileForm) {
-            profileForm.addEventListener('submit', function () {
-                if (quill) {
-                    const bioHidden = document.getElementById('bio-hidden');
-                    if (bioHidden) bioHidden.value = quill.root.innerHTML;
-                }
-                // Không prevent default để form submit bình thường
-                // Sau khi submit thành công, trang sẽ reload và hiển thị tên mới
-                console.log('Profile form submitted - page will reload to update username');
-            });
-        }
-        
-        // ==== Verification form logic ====
-        function showVerificationForm() {
-            document.getElementById('verification-section').style.display = 'block';
-            document.getElementById('save-button-section').style.display = 'none';
-            document.getElementById('verification_code').focus();
-        }
-        
-        function hideVerificationForm() {
-            document.getElementById('verification-section').style.display = 'none';
-            document.getElementById('save-button-section').style.display = 'block';
-            document.getElementById('verification_code').value = '';
-        }
-        
-
-        
-        // Kiểm tra xem có thông báo xác thực không
-        const flashMessages = document.querySelectorAll('.flash');
-        flashMessages.forEach(function(message) {
-            if (message.textContent.includes('mã xác thực')) {
-                showVerificationForm();
-            }
-        });
-        
-        // Hiển thị form xác thực nếu có thay đổi đang chờ
-        {% if has_pending_verification %}
-        showVerificationForm();
-        {% endif %}
-        
-        // Ẩn nút lưu thay đổi nếu có xác thực đang chờ
-        {% if has_pending_verification %}
-        document.getElementById('save-button-section').style.display = 'none';
-        {% endif %}
-        
-        // Auto-focus vào ô mã xác thực khi hiển thị
-        const verificationInput = document.getElementById('verification_code');
-        if (verificationInput) {
-            verificationInput.addEventListener('input', function() {
-                // Chỉ cho phép nhập số
-                this.value = this.value.replace(/[^0-9]/g, '');
-                
-                // Đã tắt tính năng tự động submit khi đủ 6 số
-                // Người dùng phải bấm nút "Xác nhận thay đổi" để submit
-            });
-        }
-        
-
-        
-
-        
-
-    });
-    </script>
+    <script src="{{ url_for('static', filename='js/profile_settings.js', v='1.0') }}"></script>
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

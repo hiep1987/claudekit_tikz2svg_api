@@ -1,0 +1,195 @@
+// Profile Settings page JS - encapsulated to avoid global scope pollution
+(function () {
+  let cropper = null;
+  let selectedFile = null;
+
+  function handleCancelVerification() {
+    if (!confirm('Bạn có chắc muốn hủy bỏ thay đổi đang chờ xác thực?')) return;
+    fetch(window.location.href, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'cancel_verification=1'
+    }).then(r => { if (r.ok) window.location.reload(); })
+      .catch(err => {
+        console.error('Error canceling verification:', err);
+        alert('Có lỗi xảy ra khi hủy bỏ xác thực. Vui lòng thử lại.');
+      });
+  }
+
+  function openCropper(input) {
+    if (!(input && input.files && input.files[0])) return;
+    const file = input.files[0];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) { alert('File quá lớn! Vui lòng chọn file nhỏ hơn 5MB.'); input.value=''; return; }
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) { alert('Chỉ chấp nhận file ảnh: JPG, PNG, GIF'); input.value=''; return; }
+    selectedFile = file;
+    const reader = new FileReader();
+    reader.onload = function(e){
+      const img = document.getElementById('cropper-image');
+      img.src = e.target.result;
+      document.getElementById('avatar-cropper-modal').classList.add('show');
+      if (cropper) cropper.destroy();
+      cropper = new Cropper(img, {
+        aspectRatio: 1,
+        viewMode: 1,
+        dragMode: 'move',
+        background: false,
+        guides: false,
+        autoCropArea: 1,
+        movable: true,
+        zoomable: true,
+        rotatable: false,
+        scalable: false,
+        cropBoxResizable: false,
+        cropBoxMovable: false,
+        minContainerWidth: 220,
+        minContainerHeight: 220,
+      });
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function closeCropper(){
+    document.getElementById('avatar-cropper-modal').classList.remove('show');
+    if (cropper) cropper.destroy();
+    cropper = null;
+    selectedFile = null;
+    const input = document.getElementById('avatar-input');
+    if (input) input.value = '';
+  }
+
+  function handleCropAndAttach(){
+    if (!cropper) return;
+    const canvas = cropper.getCroppedCanvas({ width: 300, height: 300, imageSmoothingQuality: 'high' });
+    const circleCanvas = document.createElement('canvas');
+    circleCanvas.width = 300; circleCanvas.height = 300;
+    const ctx = circleCanvas.getContext('2d');
+    ctx.save(); ctx.beginPath(); ctx.arc(150,150,150,0,2*Math.PI); ctx.closePath(); ctx.clip();
+    ctx.drawImage(canvas,0,0,300,300); ctx.restore();
+    const avatarPreview = document.getElementById('avatar-preview');
+    if (avatarPreview) {
+      avatarPreview.src = circleCanvas.toDataURL('image/png');
+    } else {
+      const avatarPlaceholder = document.getElementById('avatar-placeholder');
+      if (avatarPlaceholder) {
+        const newImg = document.createElement('img');
+        newImg.src = circleCanvas.toDataURL('image/png');
+        newImg.alt = 'Avatar Preview';
+        newImg.className = 'avatar';
+        newImg.id = 'avatar-preview';
+        avatarPlaceholder.parentNode.replaceChild(newImg, avatarPlaceholder);
+      }
+    }
+    circleCanvas.toBlob(function(blob){
+      let hiddenInput = document.getElementById('avatar-cropped-blob');
+      if (!hiddenInput) {
+        hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'avatar_cropped';
+        hiddenInput.id = 'avatar-cropped-blob';
+        document.querySelector('form').appendChild(hiddenInput);
+      }
+      const reader = new FileReader();
+      reader.onloadend = function(){ hiddenInput.value = reader.result; };
+      reader.readAsDataURL(blob);
+    }, 'image/png');
+    closeCropper();
+  }
+
+  // Suppress deprecated MutationEvents globally (kept from inline script)
+  (function suppressDeprecatedMutationEvents(){
+    const originalAddEventListener = EventTarget.prototype.addEventListener;
+    EventTarget.prototype.addEventListener = function(type, listener, options) {
+      if (type === 'DOMNodeInserted' || type === 'DOMNodeRemoved' || type === 'DOMSubtreeModified') {
+        return;
+      }
+      return originalAddEventListener.call(this, type, listener, options);
+    };
+  })();
+
+  document.addEventListener('DOMContentLoaded', function () {
+    // Mobile menu
+    const menuToggle = document.getElementById('menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const closeMenu = document.getElementById('close-menu');
+    if (menuToggle && mobileMenu && closeMenu) {
+      menuToggle.addEventListener('click', () => mobileMenu.classList.remove('hidden'));
+      closeMenu.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+      mobileMenu.addEventListener('click', e => { if(e.target === mobileMenu) mobileMenu.classList.add('hidden'); });
+    }
+
+    // Quill init
+    let quill;
+    const bioEditor = document.getElementById('bio-editor');
+    if (bioEditor) {
+      quill = new Quill('#bio-editor', {
+        theme: 'snow',
+        modules: {
+          toolbar: [
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ 'header': [1, 2, 3, false] }],
+            [{ list: 'ordered' }, { list: 'bullet' }],
+            [{ 'align': [] }],
+            [{ color: ['#ffffff','#ffeb3b','#ff9800','#ff5722','#e91e63','#9c27b0','#673ab7','#3f51b5','#2196f3','#00bcd4','#009688','#4caf50','#8bc34a','#cddc39','#ffc107','#ff9800','#795548','#9e9e9e','#607d8b'] }],
+            ['clean']
+          ]
+        },
+        placeholder: 'Viết gì đó về bản thân...'
+      });
+      quill.on('text-change', function () {
+        const bioHidden = document.getElementById('bio-hidden');
+        if (bioHidden) bioHidden.value = quill.root.innerHTML;
+      });
+      console.log('✅ Quill initialized for bio editor');
+    }
+
+    // Verification helpers in page scope
+    function showVerificationForm() {
+      const sec = document.getElementById('verification-section');
+      if (sec) sec.classList.add('show');
+      const sb = document.getElementById('save-button-section');
+      if (sb) sb.style.display = 'none';
+      const code = document.getElementById('verification_code');
+      if (code) code.focus();
+    }
+    function hideVerificationForm() {
+      const sec = document.getElementById('verification-section');
+      if (sec) sec.classList.remove('show');
+      const sb = document.getElementById('save-button-section');
+      if (sb) sb.style.display = 'block';
+      const code = document.getElementById('verification_code');
+      if (code) code.value = '';
+    }
+
+    // Show form if a flash mentions verification
+    const flashMessages = document.querySelectorAll('.flash');
+    flashMessages.forEach(function(message) {
+      if (message.textContent.includes('mã xác thực')) {
+        showVerificationForm();
+      }
+    });
+
+    // Bind inputs and buttons
+    const verificationInput = document.getElementById('verification_code');
+    if (verificationInput) {
+      verificationInput.addEventListener('input', function() {
+        this.value = this.value.replace(/[^0-9]/g, '');
+      });
+    }
+
+    const fileInput = document.getElementById('avatar-input');
+    if (fileInput) fileInput.addEventListener('change', function(){ openCropper(this); });
+
+    const cropBtn = document.getElementById('crop-avatar-btn');
+    if (cropBtn) cropBtn.addEventListener('click', handleCropAndAttach);
+
+    const closeBtn = document.getElementById('close-cropper-btn');
+    if (closeBtn) closeBtn.addEventListener('click', closeCropper);
+
+    const cancelBtn = document.getElementById('cancel-verification-btn');
+    if (cancelBtn) cancelBtn.addEventListener('click', handleCancelVerification);
+  });
+})();
+
+

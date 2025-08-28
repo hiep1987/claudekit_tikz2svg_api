@@ -27,6 +27,10 @@ function showLoginModal() {
     document.getElementById('login-modal').style.display = 'flex';
 }
 
+function hideLoginModal() {
+    document.getElementById('login-modal').style.display = 'none';
+}
+
 function updateHeaderLoginState() {
     // Logic mới: Header đã được render từ server với avatar/username
     // Chỉ cần xử lý các logic bổ sung
@@ -889,8 +893,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 5) Event listeners đã được xử lý trong file_card.js
 
-    // 6) Smooth scroll hint + touch scroll (theo cấu trúc table-scroll-x)
-    (function setupHorizontalScrollUX() {
+    // 6) Smooth scroll hint + touch scroll – run after full load to avoid early layout thrash
+    function setupHorizontalScrollUX() {
         const mobileHint = document.getElementById('mobile-scroll-hint');
         const scrollHost = document.querySelector('.table-scroll-x');
         function showMobileScrollHint() {
@@ -922,24 +926,38 @@ document.addEventListener('DOMContentLoaded', function() {
             }, { passive: true });
             scrollHost.addEventListener('touchend', function() { isScrolling = false; }, { passive: true });
         }
-    })();
-
-    // 7) Init CodeMirror + preview real-time
-    if (typeof initCodeMirrorAndBindings === 'function') {
-        initCodeMirrorAndBindings();
     }
 
-    // 8) Init highlight.js
-    if (window.hljs) {
-        hljs.highlightAll();
-        if (hljs.initLineNumbersOnLoad) hljs.initLineNumbersOnLoad();
-    }
+    // Defer heavy layout work until all stylesheets/fonts are loaded
+    window.addEventListener('load', function() {
+        // 6) Horizontal scroll UX (after full load)
+        setupHorizontalScrollUX();
+
+        // 7) Init CodeMirror + preview real-time (after CSS ready)
+        if (typeof initCodeMirrorAndBindings === 'function') {
+            initCodeMirrorAndBindings();
+        }
+
+        // 8) Init highlight.js (after CSS ready)
+        if (window.hljs) {
+            hljs.highlightAll();
+            if (hljs.initLineNumbersOnLoad) hljs.initLineNumbersOnLoad();
+        }
+    });
 
     // 9) Modal login button
     const modalLoginBtn = document.getElementById('modal-login-btn');
     if (modalLoginBtn) {
         modalLoginBtn.addEventListener('click', function() {
-            window.location.href = "{{ url_for('google.login') }}";
+            window.location.href = window.appState.loginUrl;
+        });
+    }
+
+    // 9.5) Modal cancel button
+    const modalCancelBtn = document.querySelector('#login-modal .btn-cancel');
+    if (modalCancelBtn) {
+        modalCancelBtn.addEventListener('click', function() {
+            hideLoginModal();
         });
     }
 

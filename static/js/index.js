@@ -53,16 +53,7 @@
         document.getElementById('login-modal').style.display = 'none';
     }
 
-    function updateHeaderLoginState() {
-        // Logic mới: Header đã được render từ server với avatar/username
-        // Chỉ cần xử lý các logic bổ sung
-        
-        if (window.appState.loggedIn) {
-            // Button states đã được xử lý trong file_card.js
-            
-            // Kiểm tra xem có ảnh SVG đang chờ hiển thị sau khi đăng nhập không
-        }
-    }
+
 
     // CodeMirror initialization
     function ensureCodeMirror() {
@@ -894,18 +885,12 @@
             window.FileCardComponent.init();
         }
 
-        // 3) Mobile menu
-        const menuToggle = document.getElementById('menu-toggle');
-        const mobileMenu = document.getElementById('mobile-menu');
-        const closeMenu = document.getElementById('close-menu');
-        if (menuToggle && mobileMenu && closeMenu) {
-            menuToggle.addEventListener('click', () => mobileMenu.classList.remove('hidden'));
-            closeMenu.addEventListener('click', () => mobileMenu.classList.add('hidden'));
-            mobileMenu.addEventListener('click', e => { if (e.target === mobileMenu) mobileMenu.classList.add('hidden'); });
+        // 3) Initialize Navigation component
+        if (window.NavigationComponent && typeof window.NavigationComponent.init === 'function') {
+            window.NavigationComponent.init();
         }
 
-        // 4) Header login state + pending view svg injection
-        updateHeaderLoginState();
+        // 4) Header login state đã được xử lý trong navigation.js
 
         // 5) Event listeners, polling, cleanup đã được xử lý trong file_card.js
 
@@ -975,14 +960,7 @@
             });
         }
 
-        // 10) Logout link
-        const logoutLink = document.getElementById('logout-link');
-        if (logoutLink) {
-            logoutLink.addEventListener('click', function(e) {
-                e.preventDefault();
-                window.location.href = '/logout?next=/';
-            });
-        }
+
 
         // 11) Keyword modal behaviors
         initKeywordModal();

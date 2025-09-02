@@ -9,9 +9,7 @@
 
     // Private variables (không pollute global scope)
     let isLoggedIn = false;
-    let activeFeedbackCount = 0;
     let cm = null; // CodeMirror instance
-    let pollingInterval = null;
 
     // Initialize app state from HTML
     function initializeAppState() {
@@ -871,121 +869,7 @@
         });
     }
 
-    // Real-time synchronization for likes via polling
-    // Only update like counts, not entire file list
-    function startFilesPolling() {
-        console.log('🔄 Starting likes polling...');
-        
-        const pollInterval = 15000; // 15 seconds
-        
-        pollingInterval = setInterval(function() {
-            console.log('🔄 Polling likes...', new Date().toLocaleTimeString());
-            
-            // Kiểm tra flag toàn cục
-            if (activeFeedbackCount > 0) {
-                return;
-            }
-            
-            // Fetch updated files data to check for like count changes
-            const apiEndpoint = isLoggedIn ? '/api/files' : '/api/public/files';
-            fetch(apiEndpoint)
-                .then(response => response.json())
-                .then(data => {
-                    // Xử lý response format khác nhau giữa /api/files và /api/public/files
-                    const files = isLoggedIn ? data : (data.files || []);
-                    
-                    // Only update like counts if there are changes
-                    updateLikeCounts(files);
-                })
-                .catch(error => {
-                    console.error('Error polling likes:', error);
-                });
-        }, pollInterval);
-        
-        console.log('🔄 Started likes polling (15s interval)');
-    }
 
-    // Function to update only like counts without reloading entire file list
-    function updateLikeCounts(files) {
-        files.forEach(file => {
-            const fileCard = document.querySelector(`[data-file-id="${file.id}"]`);
-            if (fileCard) {
-                // Update like count
-                const likeCountOne = fileCard.querySelector('.like-count.one');
-                const likeCountTwo = fileCard.querySelector('.like-count.two');
-                if (likeCountOne && likeCountTwo) {
-                    likeCountOne.textContent = file.like_count;
-                    likeCountTwo.textContent = file.like_count;
-                }
-                
-                // Update like button state if user is logged in
-                if (isLoggedIn) {
-                    const likeCheckbox = fileCard.querySelector(`input[id="heart-${file.id}"]`);
-                    if (likeCheckbox && likeCheckbox.checked !== file.is_liked_by_current_user) {
-                        likeCheckbox.checked = file.is_liked_by_current_user;
-                    }
-                }
-            }
-        });
-    }
-
-    // Function to stop polling
-    function stopFilesPolling() {
-        if (pollingInterval) {
-            clearInterval(pollingInterval);
-            pollingInterval = null;
-            console.log('🔄 Stopped files polling');
-        }
-    }
-
-    // Cleanup function for page unload
-    function cleanupOnPageUnload() {
-        console.log('🧹 Cleaning up resources on page unload...');
-        
-        // Stop polling
-        stopFilesPolling();
-        
-        // Clear any pending timeouts
-        if (window.inputPreviewTimer) {
-            clearTimeout(window.inputPreviewTimer);
-            window.inputPreviewTimer = null;
-        }
-        
-        if (window.typingTimeout) {
-            clearTimeout(window.typingTimeout);
-            window.typingTimeout = null;
-        }
-        
-        // Clear any other intervals or timeouts if needed
-        // Add more cleanup logic here as needed
-        
-        console.log('🧹 Cleanup completed');
-    }
-
-    // Setup cleanup event listeners
-    function setupCleanupEventListeners() {
-        // Cleanup when user navigates away from the page
-        window.addEventListener('pagehide', cleanupOnPageUnload);
-        
-        // Cleanup when user closes the tab/window
-        window.addEventListener('beforeunload', cleanupOnPageUnload);
-        
-        // Cleanup when user navigates to a different page (SPA navigation)
-        window.addEventListener('unload', cleanupOnPageUnload);
-        
-        // Cleanup when page becomes hidden (user switches tabs)
-        document.addEventListener('visibilitychange', function() {
-            if (document.hidden) {
-                console.log('📱 Page hidden, pausing polling...');
-                stopFilesPolling();
-            } else {
-                console.log('📱 Page visible, resuming polling...');
-                startFilesPolling();
-            }
-        });
-        
-        console.log('🧹 Cleanup event listeners setup complete');
-    }
 
     // Initialize form event listeners
     function initializeFormEvents() {
@@ -1003,13 +887,7 @@
         // 0) Initialize app state first
         initializeAppState();
         
-        // 0.5) Setup cleanup event listeners
-        setupCleanupEventListeners();
-        
-        // 1) Touch device detection
-        if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-            document.documentElement.classList.add('is-touch');
-        }
+
 
         // 2) Initialize File Card component (single entry point)
         if (window.FileCardComponent && typeof window.FileCardComponent.init === 'function') {
@@ -1029,7 +907,7 @@
         // 4) Header login state + pending view svg injection
         updateHeaderLoginState();
 
-        // 5) Event listeners đã được xử lý trong file_card.js
+        // 5) Event listeners, polling, cleanup đã được xử lý trong file_card.js
 
         // 6) Smooth scroll hint + touch scroll – run after full load to avoid early layout thrash
         function setupHorizontalScrollUX() {
@@ -1115,15 +993,14 @@
         // 13) Initialize form events
         initializeFormEvents();
         
-        // 14) Action buttons đã được initialize trong file_card.js
+        // 14) Action buttons, polling, cleanup đã được initialize trong file_card.js
 
         // 15) Touch events đã được xử lý trong initializeTouchBtnEvents cho tất cả users
         console.log('🔄 Touch events initialized for all users');
 
         console.log('DOMContentLoaded - appState.loggedIn:', window.appState && window.appState.loggedIn);
 
-        // 16) Start polling for like updates
-        startFilesPolling();
+
 
         // Nếu có code TikZ từ localStorage (từ View Mode), điền vào textarea chính
         // Thực thi sau khi tất cả đã được khởi tạo
@@ -1163,9 +1040,6 @@
     window.submitTikzCodeAjax = submitTikzCodeAjax;
     window.copySvgCode = copySvgCode;
     window.updateInputPreview = updateInputPreview;
-    window.startFilesPolling = startFilesPolling;
-    window.stopFilesPolling = stopFilesPolling;
-    window.updateLikeCounts = updateLikeCounts;
-    window.cleanupOnPageUnload = cleanupOnPageUnload;
+
 
 })();

@@ -12,6 +12,21 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
     font-variant-ligatures: contextual;
 }
 
+/* Files Section Container */
+.files-section-container {
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(8px);
+    padding: 40px 0;
+    border: none;
+    border-radius: 1rem;
+}
+
+/* Files Section Title */
+.files-section-title {
+    color: #1976d2;
+    margin-bottom: 24px;
+}
+
 /* Files Grid */
 .files-grid {
   display: grid;
@@ -46,7 +61,7 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
 .file-img-container {
   position: relative;
   overflow: visible;
-  border-radius: 10px 10px 0 0;
+  border-radius: 10px;
   background: #fff;
   min-height: 180px;
   width: 100%;
@@ -63,9 +78,9 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
   transition: transform 0.3s ease;
 }
 
-.file-card:hover .file-img-container img {
+/* .file-card:hover .file-img-container img {
   transform: scale(1.03);
-}
+} */
 
 /* Overlay Action Menu */
 .file-action-container {
@@ -389,6 +404,7 @@ input[id^="heart-"]:checked ~ .like-count.two {
     justify-content: flex-end;
     margin-top: 8px;
     z-index: 100;
+    border-radius: 10px;
 }
 
 /* TikZ Code Section Styles */
@@ -499,8 +515,40 @@ input[id^="heart-"]:checked ~ .like-count.two {
     border-radius: 10px;
 }
 
+/* No Files State */
+.no-files {
+    text-align: center;
+    padding: 40px 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 2px dashed #dee2e6;
+    margin: 20px 0;
+}
+
+.no-files-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.6;
+}
+
+.no-files h4 {
+    color: #6c757d;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.no-files p {
+    color: #868e96;
+    margin: 0;
+    font-size: 14px;
+}
+
 /* Mobile responsiveness */
 @media (max-width: 768px) {
+  .files-section-container {
+      padding: 20px 0;
+      margin-top: 30px;
+  }
   .files-section {
       margin-top: 20px;
       padding: 15px;
@@ -536,6 +584,10 @@ input[id^="heart-"]:checked ~ .like-count.two {
 }
 
 @media (max-width: 480px) {
+  .files-section-container {
+      padding: 15px 0;
+      margin-top: 25px;
+  }
   .files-section {
       margin-top: 15px;
       padding: 10px;

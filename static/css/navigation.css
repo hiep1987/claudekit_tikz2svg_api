@@ -1,4 +1,23 @@
 /* Tailwind-like utility classes for production */
+
+/* Global font stack for better cross-platform compatibility */
+body, input, button, textarea, select, option, label, span, div, p, h1, h2, h3, h4, h5, h6, a, li, ul, ol, nav, header, footer, main, section, article, aside {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* Preserve monospace fonts for code editors */
+.CodeMirror, .CodeMirror * {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Cascadia Code', 'Inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace !important;
+  font-feature-settings: "liga" 1, "calt" 1;
+  font-variant-ligatures: contextual;
+}
+
+/* Preserve monospace for any code-related elements */
+pre, code, .code, .tikz-code, textarea[name="code"] {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Cascadia Code', 'Inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace !important;
+  font-feature-settings: "liga" 1, "calt" 1;
+  font-variant-ligatures: contextual;
+}
 .w-full { width: 100%; }
 .max-w-7xl { max-width: 80rem; }
 .mx-auto { margin-left: auto; margin-right: auto; }
@@ -91,6 +110,12 @@
     .md\:hidden { display: none; }
 }
 
+@media (max-width: 919px) {
+    .md\:flex { display: none; }
+    .md\:block { display: none; }
+    .md\:hidden { display: block; }
+}
+
 /* New Navigation Styles */
 .menu-underline {
   transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
@@ -134,13 +159,59 @@
 }
 
 /* Fix mobile menu styling */
+#mobile-menu {
+  z-index: 1000;
+  transition: opacity 0.3s ease;
+}
+
+#mobile-menu.hidden {
+  display: none !important;
+}
+
 #mobile-menu a {
   text-decoration: none !important;
   color: #374151 !important;
+  display: block;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: all 0.2s ease;
 }
 
 #mobile-menu a:hover {
   color: #2563eb !important;
+  background-color: #f3f4f6;
+}
+
+#mobile-menu button {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+#mobile-menu button:hover {
+  background-color: #f3f4f6;
+}
+
+#close-menu {
+  background: none !important;
+  border: none !important;
+  font-size: 24px;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  transition: color 0.2s ease;
+}
+
+#close-menu:hover {
+  color: #374151;
 }
 
 /* Mobile scroll for menu */
@@ -170,6 +241,41 @@
     list-style: none !important;
     padding: 0 !important;
     margin: 0 !important;
+}
+
+/* Hamburger button styling */
+#menu-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+#menu-toggle:hover {
+    background-color: #f3f4f6;
+}
+
+#menu-toggle i {
+    font-size: 18px;
+    color: #374151;
+    transition: color 0.2s ease;
+}
+
+#menu-toggle:hover i {
+    color: #2563eb;
+}
+
+/* Ensure hamburger is visible on mobile */
+@media (max-width: 919px) {
+    #menu-toggle {
+        display: flex !important;
+    }
 }
 
 /* Moved login modal styles to login_modal.css */

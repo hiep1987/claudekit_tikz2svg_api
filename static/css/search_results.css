@@ -1,13 +1,27 @@
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f5f5f5;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    background-color: #fafafa;
+}
+
+/* Preserve monospace fonts for code editors */
+.CodeMirror, .CodeMirror * {
+    font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Cascadia Code', 'Inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace !important;
+    font-feature-settings: "liga" 1, "calt" 1;
+    font-variant-ligatures: contextual;
+}
+
+/* Preserve monospace for any code-related elements */
+pre, code, .code, .tikz-code, textarea[name="code"] {
+    font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Cascadia Code', 'Inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace !important;
+    font-feature-settings: "liga" 1, "calt" 1;
+    font-variant-ligatures: contextual;
 }
 
 .container {
     background: white;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    padding: 32px;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
@@ -29,7 +43,7 @@ body {
 @media (max-width: 768px) {
   .files-section {
       margin-top: 20px;
-      padding: 15px;
+      padding: 20px;
   }
   .files-grid {
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -64,7 +78,7 @@ body {
 @media (max-width: 480px) {
   .files-section {
       margin-top: 15px;
-      padding: 10px;
+      padding: 16px;
   }
   .files-grid {
       gap: 10px;
@@ -81,7 +95,7 @@ body {
     color: #666;
     padding: 40px 20px;
     background: #f9f9f9;
-    border-radius: 12px;
+    border-radius: 16px;
     border: 2px dashed #ddd;
 }
 
@@ -98,7 +112,7 @@ body {
     padding: 20px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    border-radius: 12px;
+    border-radius: 16px;
 }
 
 .search-results-header h1 {

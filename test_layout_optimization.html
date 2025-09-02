@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Layout Optimization</title>
+    
+    <!-- Simulate external CSS loading -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material.min.css">
+    
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .success { background-color: #d4edda; color: #155724; }
+        .warning { background-color: #fff3cd; color: #856404; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        textarea { width: 100%; height: 200px; }
+    </style>
+</head>
+<body>
+    <h1>Test Layout Optimization</h1>
+    
+    <div class="test-section">
+        <h3>CSS Loading Status</h3>
+        <div id="css-status" class="status">Checking...</div>
+    </div>
+    
+    <div class="test-section">
+        <h3>CodeMirror Initialization</h3>
+        <textarea id="test-code" placeholder="Test CodeMirror initialization..."></textarea>
+        <div id="codemirror-status" class="status">Waiting...</div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Console Log</h3>
+        <div id="console-log" style="background: #f8f9fa; padding: 10px; height: 200px; overflow-y: auto; font-family: monospace; font-size: 12px;"></div>
+    </div>
+
+    <script>
+        // Helper function to check if CSS is ready
+        function isCSSReady() {
+            const stylesheets = Array.from(document.styleSheets);
+            const externalStylesheets = stylesheets.filter(sheet => {
+                try {
+                    return sheet.href && sheet.href.startsWith('http');
+                } catch (e) {
+                    return false;
+                }
+            });
+            
+            if (externalStylesheets.length === 0) {
+                return true;
+            }
+            
+            return externalStylesheets.every(sheet => {
+                try {
+                    return sheet.cssRules && sheet.cssRules.length > 0;
+                } catch (e) {
+                    return true;
+                }
+            });
+        }
+
+        // Safe wrapper for layout operations
+        function safeLayoutOperation(operation) {
+            if (!isCSSReady()) {
+                log('CSS not ready, delaying operation...');
+                setTimeout(() => safeLayoutOperation(operation), 50);
+                return;
+            }
+            
+            if (document.readyState !== 'complete' && document.readyState !== 'interactive') {
+                log('Document not ready, delaying operation...');
+                setTimeout(() => safeLayoutOperation(operation), 50);
+                return;
+            }
+            
+            try {
+                operation();
+            } catch (error) {
+                log('Layout operation failed: ' + error.message, 'error');
+            }
+        }
+
+        // Logging function
+        function log(message, type = 'info') {
+            const consoleLog = document.getElementById('console-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.style.color = type === 'error' ? 'red' : type === 'warning' ? 'orange' : 'black';
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            consoleLog.appendChild(logEntry);
+            consoleLog.scrollTop = consoleLog.scrollHeight;
+        }
+
+        // Update status displays
+        function updateStatus() {
+            const cssStatus = document.getElementById('css-status');
+            const cmStatus = document.getElementById('codemirror-status');
+            
+            if (isCSSReady()) {
+                cssStatus.textContent = '✅ CSS is ready';
+                cssStatus.className = 'status success';
+            } else {
+                cssStatus.textContent = '⏳ CSS is loading...';
+                cssStatus.className = 'status warning';
+            }
+            
+            if (document.readyState === 'complete') {
+                log('Document ready state: complete');
+            } else if (document.readyState === 'interactive') {
+                log('Document ready state: interactive');
+            } else {
+                log('Document ready state: ' + document.readyState);
+            }
+        }
+
+        // Test CodeMirror initialization
+        function testCodeMirror() {
+            const textarea = document.getElementById('test-code');
+            const cmStatus = document.getElementById('codemirror-status');
+            
+            if (typeof CodeMirror === 'undefined') {
+                cmStatus.textContent = '❌ CodeMirror library not loaded';
+                cmStatus.className = 'status error';
+                log('CodeMirror library not available', 'error');
+                return;
+            }
+            
+            try {
+                const cm = CodeMirror.fromTextArea(textarea, {
+                    mode: 'javascript',
+                    theme: 'material',
+                    lineNumbers: true,
+                    placeholder: 'Test CodeMirror...'
+                });
+                
+                cmStatus.textContent = '✅ CodeMirror initialized successfully';
+                cmStatus.className = 'status success';
+                log('CodeMirror initialized successfully');
+            } catch (error) {
+                cmStatus.textContent = '❌ CodeMirror initialization failed: ' + error.message;
+                cmStatus.className = 'status error';
+                log('CodeMirror initialization failed: ' + error.message, 'error');
+            }
+        }
+
+        // Load CodeMirror library
+        function loadCodeMirror() {
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js';
+            script.onload = function() {
+                log('CodeMirror library loaded');
+                safeLayoutOperation(testCodeMirror);
+            };
+            script.onerror = function() {
+                log('Failed to load CodeMirror library', 'error');
+            };
+            document.head.appendChild(script);
+        }
+
+        // Initialize test
+        document.addEventListener('DOMContentLoaded', function() {
+            log('DOMContentLoaded event fired');
+            updateStatus();
+            
+            // Update status periodically
+            setInterval(updateStatus, 1000);
+            
+            // Load CodeMirror and test initialization
+            loadCodeMirror();
+        });
+
+        window.addEventListener('load', function() {
+            log('Window load event fired');
+            updateStatus();
+        });
+    </script>
+</body>
+</html>

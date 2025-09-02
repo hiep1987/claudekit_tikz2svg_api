@@ -1,3 +1,17 @@
+/* Preserve monospace fonts for code editors */
+.CodeMirror, .CodeMirror * {
+    font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Cascadia Code', 'Inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace !important;
+    font-feature-settings: "liga" 1, "calt" 1;
+    font-variant-ligatures: contextual;
+}
+
+/* Preserve monospace for any code-related elements */
+pre, code, .code, .tikz-code, textarea[name="code"] {
+    font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Cascadia Code', 'Inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace !important;
+    font-feature-settings: "liga" 1, "calt" 1;
+    font-variant-ligatures: contextual;
+}
+
 /* Files Grid */
 .files-grid {
   display: grid;
@@ -318,7 +332,7 @@ input[id^="heart-"] {
 .like-text {
     color: #e0e0e0;
     font-size: 12px;
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
     font-weight: 500;
 }
 

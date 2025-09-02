@@ -1,3 +1,6 @@
+;(function() {
+"use strict";
+
 // Initialize action buttons using data-action
 function initializeFileCardActions() {
     // Handle all action buttons using data-action
@@ -26,8 +29,8 @@ function initializeFileCardActions() {
                 break;
                 
             case 'toggle-code':
-                // Kiểm tra trạng thái đăng nhập - sử dụng biến từ server
-                if (typeof isLoggedIn !== 'undefined' && isLoggedIn) {
+                // Kiểm tra trạng thái đăng nhập - sử dụng helper function
+                if (isUserLoggedIn()) {
                     toggleTikzCode(btn);
                 } else {
                     // Hiển thị modal đăng nhập cho user chưa đăng nhập
@@ -139,8 +142,8 @@ function initializeFileCardTouchEvents() {
                     break;
                     
                 case 'toggle-code':
-                    // Kiểm tra trạng thái đăng nhập - sử dụng biến từ server
-                    if (typeof isLoggedIn !== 'undefined' && isLoggedIn) {
+                    // Kiểm tra trạng thái đăng nhập - sử dụng helper function
+                    if (isUserLoggedIn()) {
                         toggleTikzCode(btn);
                     } else {
                         // Hiển thị modal đăng nhập cho user chưa đăng nhập
@@ -334,12 +337,20 @@ function fallbackCopyTikzCode(code, btn) {
     document.body.removeChild(textArea);
 }
 
+// ===== HELPER FUNCTIONS =====
+
+// Safe function to check login status
+function isUserLoggedIn() {
+    // Use window.appState that should be initialized by index.js
+    return window.appState && window.appState.loggedIn === true;
+}
+
 // ===== LIKE BUTTON FUNCTIONALITY (from search_results.js) =====
 
 // Initialize like buttons for file cards
 function initializeLikeButtons() {
     // Initialize like buttons if user is logged in
-    if (typeof isLoggedIn !== 'undefined' && isLoggedIn) {
+    if (isUserLoggedIn()) {
         document.querySelectorAll('input[id^="heart-"]').forEach(function(checkbox) {
             checkbox.addEventListener('change', function() {
                 const fileId = this.id.replace('heart-', '');
@@ -419,9 +430,9 @@ function initializeFileCardComponent() {
     }
 }
 
-// ===== DOM READY LISTENER =====
+// Expose module initializer
+window.FileCardComponent = {
+    init: initializeFileCardComponent
+};
 
-// Initialize when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    initializeFileCardComponent();
-});
+})();

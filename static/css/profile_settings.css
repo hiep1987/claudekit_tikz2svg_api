@@ -2,19 +2,33 @@
 
 /* Body styling */
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   margin: 0 auto;
   padding: 20px;
-  background-color: #f5f5f5;
+  background-color: #fafafa;
+}
+
+/* Preserve monospace fonts for code editors */
+.CodeMirror, .CodeMirror * {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Cascadia Code', 'Inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace !important;
+  font-feature-settings: "liga" 1, "calt" 1;
+  font-variant-ligatures: contextual;
+}
+
+/* Preserve monospace for any code-related elements */
+pre, code, .code, .tikz-code, textarea[name="code"] {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Cascadia Code', 'Inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace !important;
+  font-feature-settings: "liga" 1, "calt" 1;
+  font-variant-ligatures: contextual;
 }
 
 /* Container styling */
 .container {
   background: white;
-  padding: 40px;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-  max-width: 1280px;
+  padding: 32px;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -148,9 +162,9 @@ body {
 }
 
 .btn {
-  padding: 12px 30px;
+  padding: 12px 32px;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
@@ -396,13 +410,13 @@ body {
   }
 
   .container {
-    padding: 20px;
+    padding: 24px;
   }
 }
 
 @media (max-width: 600px) {
   .container {
-    padding: 4vw;
+    padding: 20px;
   }
 
   .avatar, .avatar-placeholder {

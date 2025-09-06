@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{# Cấu hình các thành phần cần include #}
+{% set include_highlight_js = true %}
+{% set include_codemirror = true %}
+{% set include_file_card = true %}
+{% set include_navigation = true %}
+{% set include_login_modal = true %}
+{% set include_navbar = true %}
+
+{# Override meta tags #}
+{% block meta %}
+<meta name="description" content="Trang chủ TikZ to SVG - Chuyển đổi TikZ code thành SVG">
+<meta name="keywords" content="TikZ, SVG, LaTeX, homepage, convert">
+<meta name="author" content="TikZ to SVG">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="TikZ to SVG - Trang chủ">
+<meta property="og:description" content="Chuyển đổi TikZ code thành SVG vector graphics">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="vi_VN">
+{% endblock %}
+
+{# Page title #}
+{% block title %}TikZ to SVG - Trang chủ{% endblock %}
+
+{# Page-specific CSS #}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/index.css', v='1.0') }}">
+{% endblock %}
+
+{# JavaScript variables in head #}
+{% block head_js %}
+<script id="app-state" type="application/json">{{ app_state|tojson }}</script>
+{% endblock %}
+
+{# Page content #}
+{% block content %}
+<!-- Search Bar -->
+<div class="page-container index-top-container">
+    <div class="search-container">
+        <h3 class="search-title">Tìm kiếm ảnh SVG</h3>
+        <div class="group">
+            <svg viewBox="0 0 24 24" aria-hidden="true" class="icon">
+                <g>
+                    <path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z"></path>
+                </g>
+            </svg>
+            <input class="input" type="search" placeholder="Tìm kiếm..." id="main-search-input" />
+            <div id="search-suggestions" class="search-suggestions"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Input-Preview Section -->
+<div class="input-preview-section page-container">
+    <!-- Nội dung trang chủ -->
+</div>
+{% endblock %}
+
+{# Page-specific JavaScript #}
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/index.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/file_card.js') }}" defer></script>
+{% endblock %}

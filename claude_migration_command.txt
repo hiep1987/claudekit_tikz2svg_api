@@ -1,0 +1,31 @@
+Dựa trên migration_analysis.md và migration_procedure.md, hãy tạo QUY TRÌNH MIGRATION BASE TEMPLATE tối ưu với:
+
+1. **PHÂN TÍCH DEPENDENCIES**: Đọc dependency matrix từ migration_analysis.md và xác định:
+   - Templates nào có dependencies tương tự (nhóm lại)
+   - Thứ tự migration từ đơn giản đến phức tạp
+   - Risk level cho từng template
+
+2. **TẠO CHECKLIST THỰC THI**: Từ migration_procedure.md, tạo checklist step-by-step:
+   - Commands backup cụ thể
+   - Thứ tự migration theo complexity level
+   - Testing checklist sau mỗi migration
+   - Rollback procedure
+
+3. **SPECIAL CASES HANDLING**: Xử lý các trường hợp đặc biệt:
+   - view_svg.html với body attributes
+   - profile_settings.html với external libraries
+   - index.html với complex app state
+
+4. **VALIDATION FRAMEWORK**: Tạo framework kiểm tra:
+   - Functional testing points
+   - Visual parity checks  
+   - Performance metrics
+   - Error monitoring
+
+5. **RISK MITIGATION**: Đưa ra:
+   - Backup strategy
+   - Rollback procedures
+   - Contingency plans
+   - Success criteria
+
+Kết quả cần là một quy trình chi tiết, từng bước cụ thể, có thể thực hiện ngay mà ít rủi ro nhất.

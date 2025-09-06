@@ -822,6 +822,24 @@ def load_user_info_if_missing():
                         login_user(user, remember=True)
                         print(f"DEBUG: User {user.email} logged into Flask-Login", flush=True)
 
+# Test route for base template
+@app.route("/test-base-template")
+def test_base_template():
+    """Route để test base template với example_using_base.html"""
+    logged_in = current_user.is_authenticated
+    user_email = current_user.email if logged_in else None
+    
+    # Tạo app_state giống như trang chủ
+    app_state = {
+        'loggedIn': logged_in,
+        'userEmail': user_email
+    }
+    
+    return render_template('example_using_base.html', 
+                         app_state=app_state,
+                         logged_in=logged_in,
+                         current_user_email=user_email)
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     print(f"DEBUG: Index route accessed - method: {request.method}")

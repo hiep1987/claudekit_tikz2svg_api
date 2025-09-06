@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO Meta Tags (có thể override) -->
+    {% block meta %}
+    <meta name="description" content="TikZ to SVG - Chuyển đổi TikZ code thành SVG vector graphics">
+    <meta name="keywords" content="TikZ, SVG, LaTeX, vector graphics, math">
+    <meta name="author" content="TikZ to SVG">
+    <meta name="robots" content="index, follow">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="vi_VN">
+    {% endblock %}
+    
+    <!-- Page Title -->
+    <title>{% block title %}TikZ to SVG{% endblock %}</title>
+    
+    <!-- Favicon (cố định cho tất cả trang) -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="48x48" href="{{ url_for('static', filename='favicon-48x48.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='android-chrome-192x192.png') }}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{{ url_for('static', filename='android-chrome-512x512.png') }}">
+    <link rel="shortcut icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    
+    <!-- Core CSS Libraries (có điều kiện) -->
+    {% if include_highlight_js %}
+    <!-- Highlight.js CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+    {% endif %}
+    
+    {% if include_codemirror %}
+    <!-- CodeMirror CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material.min.css">
+    {% endif %}
+    
+    <!-- Bootstrap CSS (cố định cho tất cả trang) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
+    
+    <!-- Programming Fonts (cố định cho tất cả trang) -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Fira+Code:wght@400;500;600&family=Source+Code+Pro:wght@400;500;600&family=Inconsolata:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Common CSS Files -->
+    {% if include_file_card %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/file_card.css', v='1.1') }}">
+    {% endif %}
+    
+    {% if include_navigation %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navigation.css', v='1.0') }}">
+    {% endif %}
+    
+    {% if include_login_modal %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login_modal.css', v='1.0') }}">
+    {% endif %}
+    
+    <!-- Page-specific CSS -->
+    {% block extra_css %}{% endblock %}
+    
+    <!-- Page-specific JavaScript Variables -->
+    {% block head_js %}{% endblock %}
+</head>
+<body{% block body_attrs %}{% endblock %}>
+    <!-- TikZ App Container Scope -->
+    <div class="tikz-app">
+    
+    <!-- Navigation (có thể tắt) -->
+    {% if include_navbar %}
+    {% include 'partials/_navbar.html' %}
+    {% endif %}
+    
+    <!-- Page Content -->
+    {% block content %}{% endblock %}
+    
+    <!-- Footer -->
+    {% block footer %}
+    <footer class='site-footer'>© 2024 TikZ2SVG - All rights reserved.</footer>
+    {% endblock %}
+    
+    <!-- Login Modal (có điều kiện) -->
+    {% if include_login_modal %}
+    {% include 'partials/_login_modal.html' %}
+    {% endif %}
+    
+    </div>
+    
+    <!-- Page-specific JavaScript -->
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

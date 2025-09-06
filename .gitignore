@@ -47,3 +47,4 @@ older/
 # Error TikZ files - không đẩy lên GitHub
 error_tikz/
 *.tex
+templates/backup_*/

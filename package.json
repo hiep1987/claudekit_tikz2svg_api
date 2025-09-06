@@ -1,0 +1,28 @@
+{
+  "name": "tikz2svg-api",
+  "version": "1.0.0",
+  "description": "TikZ to SVG converter with CSS linting",
+  "main": "app.py",
+  "scripts": {
+    "lint:css": "stylelint \"static/css/**/*.css\"",
+    "lint:css:fix": "stylelint \"static/css/**/*.css\" --fix",
+    "lint:css:report": "stylelint \"static/css/**/*.css\" --formatter json > stylelint-report.json"
+  },
+  "devDependencies": {
+    "stylelint": "^16.23.1",
+    "stylelint-config-standard": "^36.0.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "."
+  },
+  "keywords": [
+    "tikz",
+    "svg",
+    "latex",
+    "css",
+    "linting"
+  ],
+  "author": "TikZ2SVG Team",
+  "license": "MIT"
+}

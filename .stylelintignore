@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+venv/
+
+# Minified files
+**/*.min.css
+
+# Vendor files
+**/vendor/**/*.css
+
+# Backup files
+**/*.backup*
+older/**/*.css
+
+# Build output
+dist/
+build/
+
+# CDN files
+**/cdn/**/*.css
+**/external/**/*.css

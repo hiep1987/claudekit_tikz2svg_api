@@ -99,7 +99,7 @@ function initializeFileCardTouchEvents() {
                     btn.classList.remove('individual-active', 'ready-to-execute');
                     btn.dataset.tapCount = '0';
                 }
-            }, 5000);
+            }, 1500); // Reduced from 5000ms to 1500ms for better UX
             return;
         }
 

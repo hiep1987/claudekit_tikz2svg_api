@@ -13,31 +13,30 @@
     <meta property="og:locale" content="vi_VN">
     <title>File SVG của tôi - TikZ to SVG</title>
     <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
     <link rel="icon" type="image/png" sizes="48x48" href="{{ url_for('static', filename='favicon-48x48.png') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
     <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='android-chrome-192x192.png') }}">
     <link rel="icon" type="image/png" sizes="512x512" href="{{ url_for('static', filename='android-chrome-512x512.png') }}">
-    <link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='favicon-32x32.png') }}">
+    <link rel="shortcut icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     
     <!-- Global state (JSON to satisfy linter) -->
-    <script id="app-state" type="application/json">{{ {
-        'isLoggedIn': (True if current_user.is_authenticated else False),
-        'isOwner': (True if is_owner else False)
-    } | tojson | safe }}</script>
     <script>
-        (function(){
-            try {
-                var state = JSON.parse(document.getElementById('app-state').textContent);
-                window.isLoggedIn = !!state.isLoggedIn;
-                window.isOwner = !!state.isOwner;
-            } catch (e) {
-                window.isLoggedIn = false;
-                window.isOwner = false;
-            }
-            window.activeFeedbackCount = 0;
-        })();
+        // ATTEMPT TO MATCH search_results.html EXACTLY
+        var isLoggedIn = {{ 'true' if current_user.is_authenticated else 'false' }};
+        
+        // Initialize window.appState for file_card.js compatibility (EXACTLY like search_results.html)
+        window.appState = {
+            loggedIn: isLoggedIn,
+            userEmail: {% if current_user_email %}'{{ current_user_email }}'{% else %}null{% endif %}
+        };
+        
+        // Debug comparison with search_results.html
+        console.log('🔬 EXACT COPY of search_results.html approach:');
+        console.log('isLoggedIn variable:', isLoggedIn);
+        console.log('window.appState:', window.appState);
     </script>
     
     <!-- Bootstrap CSS -->
@@ -47,8 +46,14 @@
     <!-- Programming Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Fira+Code:wght@400;500;600&family=Source+Code+Pro:wght@400;500;600&family=Inconsolata:wght@400;500;600&display=swap" rel="stylesheet">
     
+    <!-- File Card CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/file_card.css', v='1.1') }}">
+    
     <!-- Navigation CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/navigation.css', v='1.0') }}">
+    
+    <!-- Login Modal CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login_modal.css', v='1.0') }}">
     
     <!-- Page-specific CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/profile_svg_files.css', v='1.0') }}">
@@ -59,9 +64,13 @@
 
 </head>
 <body>
+    <!-- TikZ App Container Scope -->
+    <div class="tikz-app">
+    
     {% include 'partials/_navbar.html' %}
 
-    <div class="container">
+    <div class="page-container">
+        <div class="profile-svg-content-container">
         <!-- Public Profile Header -->
         <div class="public-profile-header">
             <div class="profile-info">
@@ -126,137 +135,26 @@
                 {% endif %}
             </h3>
             {% if svg_files %}
+            <!-- Set logged_in variable for file_card.html compatibility -->
+            {% set logged_in = current_user.is_authenticated %}
             <div class="files-grid">
                 {% for file in svg_files %}
-                <div class="file-card" data-id="{{ file.id }}">
-                  <button class="action-toggle-btn" type="button" aria-label="Hiện menu hành động">⋯</button>
-                  <div class="file-img-container">
-                    <img src="{{ file.url }}" alt="{{ file.filename }}">
-                    <!-- Nút Like mới - chỉ hiển thị khi đã đăng nhập -->
-                    {% if current_user.is_authenticated %}
-                    <div class="like-button-wrapper">
-                      <div class="like-button">
-                        <input id="heart-{{ file.id }}" type="checkbox" {% if file.is_liked_by_current_user %}checked{% endif %} />
-                        <label class="like" for="heart-{{ file.id }}">
-                          <svg
-                            class="like-icon"
-                            fill-rule="nonzero"
-                            viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              d="m11.645 20.91-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z"
-                            ></path>
-                          </svg>
-                          <span class="like-text">Likes</span>
-                        </label>
-                        <span class="like-count one">{{ file.like_count }}</span>
-                        <span class="like-count two">{{ file.like_count }}</span>
-                      </div>
-                    </div>
-                    {% else %}
-                    <!-- Hiển thị số like khi chưa đăng nhập -->
-                    <div class="like-display">
-                      <span class="heart-icon">❤️</span>
-                      <span class="like-count">{{ file.like_count }}</span>
-                    </div>
-                    {% endif %}
-                  </div>
-
-                  <div class="file-action-container">
-                    <ul class="file-action-list">
-                      <li class="file-action-item">
-                        <button type="button" class="Btn download-btn" data-filename="{{ file.filename }}">
-                          <div class="sign">
-                            <i class="fas fa-image logoIcon"></i>
-                          </div>
-                          <div class="text">Tải ảnh</div>
-                        </button>
-                      </li>
-                      <li class="file-action-item">
-                        <button type="button" class="Btn fb-share-btn" data-filename="{{ file.filename }}" data-has-feedback="true">
-                          <div class="sign">
-                            <i class="fab fa-facebook logoIcon"></i>
-                          </div>
-                          <div class="text">Facebook</div>
-                        </button>
-                      </li>
-                      <li class="file-action-item">
-                        <button type="button" class="Btn file-copy-link-btn" data-url="{{ request.host_url.rstrip('/') ~ file.url }}" data-has-feedback="true">
-                          <div class="sign">
-                            <i class="fas fa-link logoIcon"></i>
-                          </div>
-                          <div class="text">Copy Link</div>
-                        </button>
-                      </li>
-                      {% if file.tikz_code %}
-                      <li class="file-action-item">
-                        <button type="button" class="Btn view-code-btn" data-filename="{{ file.filename }}">
-                          <div class="sign">
-                            <i class="fas fa-code logoIcon"></i>
-                          </div>
-                          <div class="text">Xem Code</div>
-                        </button>
-                      </li>
-                      {% endif %}
-                      <!-- Nút xóa chỉ hiển thị khi user xem profile của chính mình -->
-                      {% if is_owner %}
-                      <li class="file-action-item">
-                        <button type="button" class="Btn delete-btn">
-                          <div class="sign">
-                            <i class="fas fa-trash logoIcon"></i>
-                          </div>
-                          <div class="text">Xóa ảnh</div>
-                        </button>
-                      </li>
-                      {% endif %}
-                    </ul>
-                  </div>
-                  
-
-                  <!-- Info Section -->
-                  <div class="file-info">
-                    <div class="file-meta">
-                      <span class="label">Tạo lúc:</span> {{ file.created_time }}
-                    </div>
-                    {% if file.size %}
-                      <div class="file-meta">
-                        <span class="label">Kích thước:</span> {{ file.size }} KB
-                      </div>
-                    {% else %}
-                      <div class="file-meta">
-                        <span class="label">Kích thước:</span> Không xác định
-                      </div>
-                    {% endif %}
-                    {% if file.creator_id and file.creator_username %}
-                      <div class="file-creator">
-                        👤 <a href="/profile/{{ file.creator_id }}">
-                          {{ file.creator_username }}
-                        </a>
-                      </div>
-                    {% endif %}
-                  </div>
-
-                  <!-- TikZ Code Section -->
-                  {% if file.tikz_code %}
-                  <div class="tikz-code-block">
-                    <div class="tikz-code-header">
-                      <span>Code TikZ:</span>
-                      <button class="copy-btn copy-tikz-btn">📋 Copy</button>
-                    </div>
-                    <div class="code-block">
-                      <textarea class="tikz-cm" readonly>{{ file.tikz_code | e }}</textarea>
-                    </div>
-                  </div>
-                  {% endif %}
-                </div>
+                    {% include 'partials/_file_card.html' %}
                 {% endfor %}
             </div>
             {% else %}
-            <div class="empty-state">Chưa có file SVG nào được tạo. Hãy thử chuyển đổi một code TikZ!</div>
+            <div class="no-files">
+                <div class="no-files-icon">📂</div>
+                <h4>Chưa có file SVG nào</h4>
+                <p>Hãy thử chuyển đổi một code TikZ để tạo file SVG đầu tiên!</p>
+            </div>
             {% endif %}
         </section>
+        </div>
     </div>
+
+    <!-- Login Modal (shared component) -->
+    {% include 'partials/_login_modal.html' %}
 
     <!-- Modal đăng xuất chỉ render nếu đã login -->
     {% if user_email %}
@@ -269,48 +167,139 @@
     </div>
     {% endif %}
 
-    <!-- Modal đăng nhập cho trường hợp chưa đăng nhập -->
-    {% if not current_user.is_authenticated %}
-    <div id="login-modal" class="modal-overlay">
-      <div class="modal-content">
-        <h3>Đăng nhập để sử dụng tính năng này</h3>
-        <p>Vui lòng đăng nhập để có thể:</p>
-        <ul>
-          <li>👍 Like và unlike ảnh</li>
-          <li>👁️ Xem TikZ code</li>
-          <li>🗑️ Xóa ảnh của bạn</li>
-          <li>👥 Theo dõi người dùng khác</li>
-        </ul>
-        <p class="login-note">💡 Bạn vẫn có thể sử dụng Facebook Share và Copy Link mà không cần đăng nhập!</p>
-        <button class="google-login-btn modal-login-btn">
-          <i class="fab fa-google"></i>Đăng nhập với Google
-        </button>
-        <button class="btn-cancel cancel-login-btn">Huỷ</button>
-      </div>
-    </div>
-    {% endif %}
-
-    <!-- Modal xác nhận xóa ảnh -->
-    <div id="delete-confirm-modal" class="modal-overlay delete-modal">
-      <div class="modal-content">
-        <h3>Bạn có chắc muốn xóa ảnh này?</h3>
-        <div class="delete-warning">Hành động này không thể hoàn tác!</div>
-        <div class="btn-container">
-          <button id="confirm-delete-btn" class="btn btn-primary btn-delete">Xóa</button>
-          <button id="cancel-delete-btn" class="btn btn-secondary">Hủy</button>
-        </div>
-      </div>
-    </div>
+    </div> <!-- End .tikz-app -->
 
     <!-- CodeMirror libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/stex/stex.min.js"></script>
     
-    <!-- Page-specific JavaScript -->
-    <script src="{{ url_for('static', filename='js/profile_svg_files.js', v='1.0') }}"></script>
-    
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Navigation JavaScript - Shared component -->
+    <script src="{{ url_for('static', filename='js/navigation.js', v='1.0') }}"></script>
+    
+    <!-- File Card JavaScript - Shared component -->
+    <script src="{{ url_for('static', filename='js/file_card.js', v='1.2') }}"></script>
+    
+    <!-- Debug and Initialization Script -->
+    <script>
+        // Debug ALL template variables and context
+        console.log('🔍 DEEP DEBUG Profile SVG Files:');
+        console.log('isLoggedIn variable:', isLoggedIn);
+        console.log('window.appState:', window.appState);
+        console.log('appState.loggedIn:', window.appState ? window.appState.loggedIn : 'appState undefined');
+        console.log('appState.userEmail:', window.appState ? window.appState.userEmail : 'appState undefined');
+        console.log('isUserLoggedIn():', typeof window.isUserLoggedIn === 'function' ? window.isUserLoggedIn() : 'function not available');
+        
+        // Check file_card.html template context - THIS IS CRITICAL
+        console.log('🚨 Template Context Debug:');
+        console.log('- current_user.is_authenticated:', {{ current_user.is_authenticated }});
+        console.log('- logged_in variable (for file_card):', {{ logged_in if logged_in is defined else 'UNDEFINED' }});
+        
+        // Test like button elements with detailed analysis
+        const likeInputs = document.querySelectorAll('input[id^="heart-"]');
+        console.log('📌 Found like button inputs:', likeInputs.length);
+        likeInputs.forEach((input, index) => {
+            console.log(`- Like input ${index + 1}:`, {
+                id: input.id, 
+                checked: input.checked,
+                disabled: input.disabled,
+                hasChangeListener: input.onchange ? 'Yes' : 'No'
+            });
+        });
+        
+        // Check if file cards have the necessary data
+        const fileCards = document.querySelectorAll('.file-card');
+        console.log('📂 Found file cards:', fileCards.length);
+        fileCards.forEach((card, index) => {
+            const likeInput = card.querySelector('input[id^="heart-"]');
+            console.log(`- File card ${index + 1}:`, {
+                dataFileId: card.getAttribute('data-file-id'),
+                hasLikeInput: !!likeInput,
+                likeInputId: likeInput ? likeInput.id : 'none',
+                isLikeInputDisabled: likeInput ? likeInput.disabled : 'N/A'
+            });
+        });
+        
+        // Compare with search_results.html approach - simplified appState
+        console.log('🔬 Testing search_results.html approach...');
+        
+        // Ensure file card component is initialized
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                console.log('🔄 DOMContentLoaded - Checking FileCardComponent...');
+                console.log('window.FileCardComponent exists:', !!window.FileCardComponent);
+                console.log('FileCardComponent.init function exists:', !!(window.FileCardComponent && typeof window.FileCardComponent.init === 'function'));
+                
+                if (window.FileCardComponent && typeof window.FileCardComponent.init === 'function') {
+                    console.log('🔄 Manually initializing FileCardComponent...');
+                    window.FileCardComponent.init();
+                    
+                    // Test like functionality after init with more details
+                    setTimeout(() => {
+                        const testInput = document.querySelector('input[id^="heart-"]');
+                        if (testInput) {
+                            console.log('🧪 Testing like button after init:');
+                            console.log('- Element ID:', testInput.id);
+                            console.log('- Disabled:', testInput.disabled);
+                            console.log('- Current checked state:', testInput.checked);
+                            console.log('- Parent elements:', testInput.closest('.like-button'));
+                            console.log('- Has event listeners:', testInput.onclick ? 'onclick' : 'no onclick');
+                            
+                            // Try to manually trigger to test
+                            console.log('🧪 Attempting manual trigger test...');
+                            if (!testInput.disabled) {
+                                // Don't actually trigger, just test if we could
+                                console.log('✅ Like button is enabled - should work if event listeners are attached');
+                            } else {
+                                console.log('❌ Like button is disabled - this is why it doesn\'t work!');
+                            }
+                        }
+                    }, 100);
+                } else {
+                    console.warn('⚠️ FileCardComponent not available');
+                }
+            }, 200);
+        });
+    </script>
+    
+    <!-- Profile SVG Files JavaScript - Page specific (TEMPORARILY DISABLED FOR DEBUGGING) -->
+    <!--<script src="{{ url_for('static', filename='js/profile_svg_files.js', v='1.0') }}"></script>-->
+    
+    <!-- EMERGENCY DEBUG SCRIPT - Manual like button test -->
+    <script>
+        // TEST: Force enable like buttons for testing and add manual event listeners
+        // This can be removed once confirmed working with file_card.js
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                const likeInputs = document.querySelectorAll('input[id^="heart-"]');
+                console.log('🆘 EMERGENCY DEBUG: Testing manual like functionality');
+                console.log('📌 Found like buttons:', likeInputs.length);
+                
+                // Just test if like buttons are properly enabled now
+                likeInputs.forEach((input, index) => {
+                    console.log(`- Like button ${index + 1}:`, {
+                        id: input.id, 
+                        disabled: input.disabled,
+                        checked: input.checked
+                    });
+                    
+                    if (input.disabled) {
+                        console.log(`❌ Like button ${input.id} still disabled - template issue`);
+                        // Force enable for testing
+                        input.disabled = false;
+                        console.log(`🔧 Force-enabled ${input.id} for testing`);
+                    } else {
+                        console.log(`✅ Like button ${input.id} properly enabled`);
+                    }
+                });
+                
+                // Let file_card.js handle the actual functionality
+                console.log('🎯 Letting file_card.js handle like functionality...');
+            }, 600);
+        });
+    </script>
 
 </body>
 </html> 

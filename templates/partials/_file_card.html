@@ -69,6 +69,16 @@
                 </button>
             </li>
             {% endif %}
+            {% if current_user.is_authenticated and file.creator_id == current_user.id %}
+            <li class="file-action-item">
+                <button type="button" class="Btn" data-action="delete-file" data-file-id="{{ file.id }}">
+                    <div class="sign">
+                        <i class="fas fa-trash logoIcon"></i>
+                    </div>
+                    <div class="text">Xóa file</div>
+                </button>
+            </li>
+            {% endif %}
         </ul>
     </div>
     

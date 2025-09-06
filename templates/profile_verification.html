@@ -2,7 +2,7 @@
 <html lang="vi" dir="ltr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="description" content="Xác thực danh tính tài khoản TikZ to SVG">
     <meta name="keywords" content="TikZ, SVG, identity verification, account verification">
     <meta name="author" content="TikZ to SVG">
@@ -13,13 +13,14 @@
     <meta property="og:locale" content="vi_VN">
     <title>Xác thực danh tính - TikZ to SVG</title>
     <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
     <link rel="icon" type="image/png" sizes="48x48" href="{{ url_for('static', filename='favicon-48x48.png') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
     <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='android-chrome-192x192.png') }}">
     <link rel="icon" type="image/png" sizes="512x512" href="{{ url_for('static', filename='android-chrome-512x512.png') }}">
-    <link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='favicon-32x32.png') }}">
+    <link rel="shortcut icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     
     <!-- Global JavaScript variables -->
     <script>
@@ -37,6 +38,11 @@
         {% endif %}
     </script>
     
+    <!-- Highlight.js CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+    <!-- CodeMirror CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material.min.css">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
@@ -46,15 +52,20 @@
     
     <!-- Navigation CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/navigation.css', v='1.0') }}">
+    <!-- Login Modal CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login_modal.css', v='1.0') }}">
     
     <!-- Profile Verification CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/profile_verification.css', v='1.0') }}">
 </head>
 <body>
+    <!-- TikZ App Container Scope -->
+    <div class="tikz-app">
+    
     {% include 'partials/_navbar.html' %}
 
-    <div class="container" {% if has_pending_verification %}data-pending-verification="true"{% endif %}>
-        <div class="header">
+    <div class="page-container verification-container" {% if has_pending_verification %}data-pending-verification="true"{% endif %}>
+        <div class="verification-header">
             <h1>🔐 Xác thực danh tính tài khoản</h1>
             <p>Để hoàn tất quá trình xác thực, vui lòng đọc và đồng ý với các quy định sau</p>
         </div>
@@ -167,10 +178,23 @@
         </form>
     </div>
 
-    <!-- Profile Verification JavaScript -->
-    <script src="{{ url_for('static', filename='js/profile_verification.js', v='1.0') }}"></script>
+    <footer class='site-footer'>© 2024 TikZ2SVG - All rights reserved.</footer>
 
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% include 'partials/_login_modal.html' %}
+
+    </div> <!-- End .tikz-app -->
+
+    <!-- External JavaScript Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/latex.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/stex/stex.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/display/placeholder.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Application JavaScript -->
+    <script src="{{ url_for('static', filename='js/navigation.js', v='1.0') }}"></script>
+    <script src="{{ url_for('static', filename='js/profile_verification.js', v='1.0') }}"></script>
 </body>
 </html>

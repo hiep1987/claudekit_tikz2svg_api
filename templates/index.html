@@ -37,10 +37,13 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css', v='1.0') }}">
 </head>
 <body>
+    <!-- TikZ App Container Scope -->
+    <div class="tikz-app">
+    
     {% include 'partials/_navbar.html' %}
     
     <!-- Search Bar -->
-    <div class="container index-top-container">
+    <div class="page-container index-top-container">
         <div class="search-container">
             <h3 class="search-title">Tìm kiếm ảnh SVG</h3>
             <div class="group">
@@ -56,7 +59,7 @@
     </div>
     
     <!-- Block 2: Input-Preview Section -->
-    <div class="input-preview-section container">
+    <div class="input-preview-section page-container">
         <h2>Chuyển đổi TikZ sang SVG/PNG/JPEG</h2>
 
         <!-- Truyền trạng thái login từ server vào JS (để linter không báo lỗi) -->
@@ -126,7 +129,7 @@
         {% if svg_temp_url and not error %}
     </div> <!-- đóng .input-preview-section trước khi tools -->
     
-    <div id="result-tools-section" class="container">
+    <div id="result-tools-section" class="page-container">
                 <div class="export-section">
                     <h4>Xuất ảnh PNG/JPEG</h4>
                     <form id="export-form" class="export-form">
@@ -176,7 +179,7 @@
         {% endif %}
     
     <!-- Block 3: Files Section -->
-    <div class="files-section-container container files-section" data-is-owner="{{ 'true' if logged_in else 'false' }}">
+    <div class="files-section-container page-container files-section" data-is-owner="{{ 'true' if logged_in else 'false' }}">
         <h3 class="files-section-title">📁 Files đã lưu</h3>
         <div id="files-container" class="files-grid">
             {% if svg_files %}
@@ -224,6 +227,8 @@
           </div>
         </div>
     </div>
+
+    </div> <!-- End .tikz-app -->
 
     <!-- External JavaScript Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>

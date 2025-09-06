@@ -3,8 +3,19 @@
 
 // ===== NAVIGATION COMPONENT =====
 
+// ===== INITIALIZATION =====
+let isNavigationInitialized = false;
+
 // Initialize navigation component
 function initializeNavigationComponent() {
+    if (isNavigationInitialized) {
+        console.log('🔄 NavigationComponent already initialized, skipping...');
+        return;
+    }
+    
+    console.log('🚀 Initializing NavigationComponent...');
+    isNavigationInitialized = true;
+    
     // Initialize mobile menu
     initializeMobileMenu();
     
@@ -81,5 +92,24 @@ window.NavigationComponent = {
     init: initializeNavigationComponent,
     updateHeaderLoginState: updateHeaderLoginState
 };
+
+// Auto-initialize when DOM is ready if not already initialized by other scripts
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+        // Small delay to ensure other scripts can initialize first
+        setTimeout(() => {
+            if (!isNavigationInitialized && window.NavigationComponent && typeof window.NavigationComponent.init === 'function') {
+                window.NavigationComponent.init();
+            }
+        }, 50);
+    });
+} else {
+    // DOM already loaded, initialize immediately if not already done
+    setTimeout(() => {
+        if (!isNavigationInitialized && window.NavigationComponent && typeof window.NavigationComponent.init === 'function') {
+            window.NavigationComponent.init();
+        }
+    }, 50);
+}
 
 })();

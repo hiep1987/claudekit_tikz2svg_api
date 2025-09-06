@@ -43,6 +43,13 @@ function initializeFileCardActions() {
                     }
                 }
                 break;
+                
+            case 'delete-file':
+                const fileId = btn.getAttribute('data-file-id');
+                if (fileId && confirm('Bạn có chắc muốn xóa file này? Hành động này không thể hoàn tác!')) {
+                    deleteFile(fileId, btn);
+                }
+                break;
         }
     });
 }
@@ -351,13 +358,29 @@ function isUserLoggedIn() {
 function initializeLikeButtons() {
     // Initialize like buttons if user is logged in
     if (isUserLoggedIn()) {
-        document.querySelectorAll('input[id^="heart-"]').forEach(function(checkbox) {
+        // Support multiple prefixes: heart- and followed-heart-
+        const selectors = 'input[id^="heart-"], input[id^="followed-heart-"]';
+        document.querySelectorAll(selectors).forEach(function(checkbox) {
             checkbox.addEventListener('change', function() {
-                const fileId = this.id.replace('heart-', '');
+                // Extract fileId from different prefixes
+                let fileId;
+                if (this.id.startsWith('followed-heart-')) {
+                    fileId = this.id.replace('followed-heart-', '');
+                } else {
+                    fileId = this.id.replace('heart-', '');
+                }
+                
                 const isLiked = this.checked;
                 const likeButton = this.closest('.like-button');
                 const currentNumber = likeButton.querySelector('.like-count.one');
                 const moveNumber = likeButton.querySelector('.like-count.two');
+                
+                // Get current count and calculate optimistic new count
+                const currentCount = parseInt(currentNumber.textContent) || 0;
+                const optimisticCount = isLiked ? currentCount + 1 : Math.max(0, currentCount - 1);
+                
+                // Instant UI feedback: show optimistic count
+                moveNumber.textContent = optimisticCount;
                 
                 // Prevent double click
                 this.disabled = true;
@@ -377,10 +400,12 @@ function initializeLikeButtons() {
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Update UI with new like count
-                        const newCount = data.like_count;
-                        currentNumber.textContent = newCount;
-                        moveNumber.textContent = newCount;
+                        // Update with actual server count
+                        const serverCount = data.like_count;
+                        
+                        // Update both displays to server count
+                        currentNumber.textContent = serverCount;
+                        moveNumber.textContent = serverCount;
                         
                         // Update checkbox state based on server response
                         this.checked = data.is_liked;
@@ -403,10 +428,66 @@ function initializeLikeButtons() {
     }
 }
 
-// ===== MAIN INITIALIZATION (from search_results.js) =====
+// ===== DELETE FILE FUNCTIONALITY =====
+
+// Delete file function
+function deleteFile(fileId, btn) {
+    const fileCard = btn.closest('.file-card');
+    if (!fileCard) return;
+
+    // Disable button to prevent double-click
+    btn.disabled = true;
+    const originalText = btn.querySelector('.text').textContent;
+    btn.querySelector('.text').textContent = 'Đang xóa...';
+    
+    fetch(`/delete_svg`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+            svg_image_id: fileId
+        })
+    })
+    .then(response => {
+        if (response.ok) {
+            // Animate card removal
+            fileCard.style.transition = 'all 0.3s ease';
+            fileCard.style.transform = 'scale(0.8)';
+            fileCard.style.opacity = '0';
+            
+            setTimeout(() => {
+                fileCard.remove();
+                console.log(`✅ File ${fileId} deleted successfully`);
+            }, 300);
+        } else {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+    })
+    .catch(error => {
+        console.error('❌ Error deleting file:', error);
+        alert('Có lỗi xảy ra khi xóa file. Vui lòng thử lại.');
+        
+        // Re-enable button
+        btn.disabled = false;
+        btn.querySelector('.text').textContent = originalText;
+    });
+}
 
 // Initialize file card component with all functionality
+// ===== INITIALIZATION =====
+let isFileCardInitialized = false;
+
 function initializeFileCardComponent() {
+    if (isFileCardInitialized) {
+        console.log('🔄 FileCardComponent already initialized, skipping...');
+        return;
+    }
+    
+    console.log('🚀 Initializing FileCardComponent...');
+    isFileCardInitialized = true;
+    
     // Initialize like buttons if user is logged in
     initializeLikeButtons();
     
@@ -485,8 +566,16 @@ function updateLikeCounts(files) {
             const likeCountOne = fileCard.querySelector('.like-count.one');
             const likeCountTwo = fileCard.querySelector('.like-count.two');
             if (likeCountOne && likeCountTwo) {
-                likeCountOne.textContent = file.like_count;
-                likeCountTwo.textContent = file.like_count;
+                const oldCount = parseInt(likeCountOne.textContent) || 0;
+                const newCount = file.like_count;
+                
+                likeCountOne.textContent = newCount;
+                
+                // Only update .two if it's different (avoid disrupting ongoing animations)
+                if (parseInt(likeCountTwo.textContent) !== newCount) {
+                    // For polling updates, show the target number
+                    likeCountTwo.textContent = newCount;
+                }
             }
             
             // Update like button state if user is logged in
@@ -565,10 +654,30 @@ window.FileCardComponent = {
     init: initializeFileCardComponent
 };
 
+// Auto-initialize when DOM is ready if not already initialized by other scripts
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+        // Small delay to ensure other scripts can initialize first
+        setTimeout(() => {
+            if (!isFileCardInitialized && window.FileCardComponent && typeof window.FileCardComponent.init === 'function') {
+                window.FileCardComponent.init();
+            }
+        }, 100);
+    });
+} else {
+    // DOM already loaded, initialize immediately if not already done
+    setTimeout(() => {
+        if (!isFileCardInitialized && window.FileCardComponent && typeof window.FileCardComponent.init === 'function') {
+            window.FileCardComponent.init();
+        }
+    }, 100);
+}
+
 // Expose necessary functions to global scope
 window.startFilesPolling = startFilesPolling;
 window.stopFilesPolling = stopFilesPolling;
 window.updateLikeCounts = updateLikeCounts;
 window.cleanupOnPageUnload = cleanupOnPageUnload;
+window.copyTikzCode = copyTikzCode;
 
 })();

@@ -284,6 +284,9 @@
                     console.log('Error detected:', msg);
                     console.log('Full log:', fullLog ? 'Yes' : 'No');
                     displayCompileError(msg, fullLog);
+                    // Reset button ngay khi có lỗi
+                    compileBtn.textContent = originalText;
+                    compileBtn.disabled = false;
                     return;
                 }
 

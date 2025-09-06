@@ -18,11 +18,13 @@
     }
 
     function isLoggedIn() {
-        return window.isLoggedIn || false;
+        // Use consistent appState logic from file_card.js
+        return window.appState && window.appState.loggedIn === true;
     }
 
     function isOwner() {
-        return window.isOwner || false;
+        // Use consistent appState logic
+        return window.appState && window.appState.isOwner === true;
     }
 
     function resetButtonTapState(btn) {
@@ -670,7 +672,9 @@
         });
 
         // Delete modal event listeners
-        document.getElementById('confirm-delete-btn').addEventListener('click', function() {
+        const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+        if (confirmDeleteBtn) {
+            confirmDeleteBtn.addEventListener('click', function() {
             if (deleteSvgId && deleteCardElem) {
                 fetch('/delete_svg', {
                     method: 'POST',
@@ -700,20 +704,30 @@
                 });
             }
         });
+        }
 
-        document.getElementById('cancel-delete-btn').addEventListener('click', function() {
-            document.getElementById('delete-confirm-modal').style.display = 'none';
-            deleteSvgId = null;
-            deleteCardElem = null;
-        });
+        const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+        if (cancelDeleteBtn) {
+            cancelDeleteBtn.addEventListener('click', function() {
+                const deleteModal = document.getElementById('delete-confirm-modal');
+                if (deleteModal) {
+                    deleteModal.style.display = 'none';
+                    deleteSvgId = null;
+                    deleteCardElem = null;
+                }
+            });
+        }
 
-        document.getElementById('delete-confirm-modal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                this.style.display = 'none';
-                deleteSvgId = null;
-                deleteCardElem = null;
-            }
-        });
+        const deleteModal = document.getElementById('delete-confirm-modal');
+        if (deleteModal) {
+            deleteModal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.style.display = 'none';
+                    deleteSvgId = null;
+                    deleteCardElem = null;
+                }
+            });
+        }
 
         // Logout button logic
         const logoutBtn = document.getElementById('logout-btn');
@@ -780,49 +794,8 @@
             });
         }
 
-        // Like buttons
-        document.querySelectorAll('input[id^="heart-"]').forEach(function(checkbox) {
-            checkbox.addEventListener('change', function() {
-                const fileId = this.id.replace('heart-', '');
-                const isLiked = this.checked;
-                const likeButton = this.closest('.like-button');
-                const currentNumber = likeButton.querySelector('.like-count.one');
-                const moveNumber = likeButton.querySelector('.like-count.two');
-                
-                this.disabled = true;
-                
-                fetch('/like_svg', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: JSON.stringify({
-                        svg_id: fileId,
-                        action: isLiked ? 'like' : 'unlike'
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const newCount = data.like_count;
-                        currentNumber.textContent = newCount;
-                        moveNumber.textContent = newCount;
-                        this.checked = data.is_liked;
-                    } else {
-                        this.checked = !isLiked;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    this.checked = !isLiked;
-                    alert('Có lỗi kết nối!');
-                })
-                .finally(() => {
-                    this.disabled = false;
-                });
-            });
-        });
+        // NOTE: Like buttons are handled by file_card.js FileCardComponent.init()
+        // This file focuses on profile-specific functionality
     }
 
     // ===== INITIALIZATION =====
@@ -831,6 +804,15 @@
         
         if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
             document.documentElement.classList.add('is-touch');
+        }
+        
+        // Initialize FileCard component for like buttons and other file card functionality
+        // Make sure this runs after file_card.js has loaded
+        if (window.FileCardComponent && typeof window.FileCardComponent.init === 'function') {
+            console.log('🔄 Initializing FileCardComponent from profile_svg_files.js');
+            window.FileCardComponent.init();
+        } else {
+            console.warn('⚠️ FileCardComponent not available in profile_svg_files.js');
         }
         
         initializeButtonEventListeners();

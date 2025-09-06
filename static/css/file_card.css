@@ -1,19 +1,19 @@
 /* Preserve monospace fonts for code editors */
-.CodeMirror, .CodeMirror * {
+.tikz-app .CodeMirror, .CodeMirror * {
     font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Cascadia Code', 'Inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace !important;
     font-feature-settings: "liga" 1, "calt" 1;
     font-variant-ligatures: contextual;
 }
 
 /* Preserve monospace for any code-related elements */
-pre, code, .code, .tikz-code, textarea[name="code"] {
+.tikz-app pre, .tikz-app code, .tikz-app .code, .tikz-app .tikz-code, .tikz-app textarea[name="code"] {
     font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Cascadia Code', 'Inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace !important;
     font-feature-settings: "liga" 1, "calt" 1;
     font-variant-ligatures: contextual;
 }
 
 /* Files Section Container */
-.files-section-container {
+.tikz-app .files-section-container {
     background-color: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(8px);
     padding: 40px 0;
@@ -22,13 +22,13 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
 }
 
 /* Files Section Title */
-.files-section-title {
+.tikz-app .files-section-title {
     color: #1976d2;
     margin-bottom: 24px;
 }
 
 /* Files Grid */
-.files-grid {
+.tikz-app .files-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 20px;
@@ -38,7 +38,7 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
 }
 
 /* Individual File Card */
-.file-card {
+.tikz-app .file-card {
   position: relative;
   min-height: 260px;
   width: 100%;
@@ -52,13 +52,13 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
   transition: transform 0.2s ease, width 0.3s ease;
 }
 
-.file-card:hover {
+.tikz-app .file-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.12);
 }
 
 /* Image Section */
-.file-img-container {
+.tikz-app .file-img-container {
   position: relative;
   overflow: visible;
   border-radius: 10px;
@@ -69,7 +69,7 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
   flex-direction: column;
 }
 
-.file-img-container img {
+.tikz-app .file-img-container img {
   width: 100%;
   height: 180px;
   object-fit: contain;
@@ -83,7 +83,7 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
 } */
 
 /* Overlay Action Menu */
-.file-action-container {
+.tikz-app .file-action-container {
   display: none;
   opacity: 0;
   pointer-events: none;
@@ -97,9 +97,9 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
 
 /* Desktop hover logic */
 @media (hover: hover) and (pointer: fine) {
-  .file-img-container:hover + .file-action-container,
-  .file-action-container:hover,
-  .file-card:hover .file-action-container {
+  .tikz-app .file-img-container:hover + .file-action-container,
+  .tikz-app .file-action-container:hover,
+  .tikz-app .file-card:hover .file-action-container {
     display: block;
     opacity: 1;
     pointer-events: auto;
@@ -108,7 +108,7 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
 }
 
 /* Mobile/Touch: Chỉ hiện khi card có class active */
-.file-card.active .file-action-container {
+.tikz-app .file-card.active .file-action-container {
   display: block !important;
   opacity: 1 !important;
   pointer-events: auto !important;
@@ -116,7 +116,7 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
 }
 
 /* Mobile: Hiện nút toggle ... */
-.action-toggle-btn {
+.tikz-app .action-toggle-btn {
   display: none;
   position: absolute;
   top: 10px;
@@ -133,18 +133,18 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
 }
 
 @media (hover: none), (pointer: coarse) {
-  .action-toggle-btn {
+  .tikz-app .action-toggle-btn {
     display: block;
   }
   /* Vô hiệu hóa hover trên mobile */
-  .file-img-container:hover + .file-action-container {
+  .tikz-app .file-img-container:hover + .file-action-container {
     display: none !important;
     opacity: 0 !important;
     pointer-events: none !important;
   }
 }
 
-.file-action-list {
+.tikz-app .file-action-list {
   list-style: none;
   padding: 0;
   margin: 0;
@@ -155,14 +155,14 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
   width: auto;
 }
 
-.file-action-item {
+.tikz-app .file-action-item {
   display: flex;
   justify-content: flex-start;
   width: 100%;
 }
 
 /* Button Styling */
-.Btn {
+.tikz-app .Btn {
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -183,7 +183,7 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
 }
 
 /* Icon container */
-.sign {
+.tikz-app .sign {
   width: 45px;
   height: 45px;
   transition: all 0.3s ease;
@@ -196,22 +196,22 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
   position: relative;
 }
 
-.sign svg {
+.tikz-app .sign svg {
   width: 18px;
   height: 18px;
 }
 
-.sign svg path {
+.tikz-app .sign svg path {
   fill: white;
 }
 
-.logoIcon {
+.tikz-app .logoIcon {
   color: white;
   font-size: 16px;
 }
 
 /* Text label */
-.text {
+.tikz-app .text {
   position: absolute;
   left: 20px;
   top: 50%;
@@ -229,13 +229,13 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
 }
 
 /* Desktop hover effect */
-.Btn:hover {
+.tikz-app .Btn:hover {
   width: 140px;
   border-radius: 20px;
   background-position: right;
 }
 
-.Btn:hover .text {
+.tikz-app .Btn:hover .text {
   opacity: 1;
   width: auto;
   max-width: 85px;
@@ -245,18 +245,18 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
 
 /* Mobile button states */
 @media (hover: none), (pointer: coarse) {
-  .file-card.active .file-action-container .Btn.individual-active,
-  .file-card.active .file-action-container .Btn.ready-to-execute,
-  .file-card.active .file-action-container .Btn.mobile-hover {
+  .tikz-app .file-card.active .file-action-container .Btn.individual-active,
+  .tikz-app .file-card.active .file-action-container .Btn.ready-to-execute,
+  .tikz-app .file-card.active .file-action-container .Btn.mobile-hover {
     background: linear-gradient(-50deg, rgb(39, 107, 255), rgb(112, 186, 255), rgb(39, 107, 255)) !important;
     width: 120px !important;
     transition: width 0.3s cubic-bezier(0.4,0,0.2,1);
     border-radius: 20px !important;
   }
 
-  .file-card.active .file-action-container .Btn.individual-active .text,
-  .file-card.active .file-action-container .Btn.ready-to-execute .text,
-  .file-card.active .file-action-container .Btn.mobile-hover .text {
+  .tikz-app .file-card.active .file-action-container .Btn.individual-active .text,
+  .tikz-app .file-card.active .file-action-container .Btn.ready-to-execute .text,
+  .tikz-app .file-card.active .file-action-container .Btn.mobile-hover .text {
     opacity: 1 !important;
     width: auto !important;
     max-width: 85px !important;
@@ -264,13 +264,13 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
   }
 
-  .file-card.active .file-action-container .Btn:not(.individual-active):not(.ready-to-execute):not(.mobile-hover) {
+  .tikz-app .file-card.active .file-action-container .Btn:not(.individual-active, .ready-to-execute, .mobile-hover) {
     background: linear-gradient(-50deg, rgb(39, 107, 255), rgb(112, 186, 255), rgb(39, 107, 255)) !important;
     max-width: 10px !important;
     border-radius: 18px !important;
   }
 
-  .file-card.active .file-action-container .Btn .text {
+  .tikz-app .file-card.active .file-action-container .Btn .text {
     opacity: 0.5 !important;
     width: auto !important;
     max-width: 120px !important;
@@ -280,37 +280,37 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
 }
 
 /* File Info Styling */
-.file-info {
+.tikz-app .file-info {
     padding: 12px;
     background: #f8f9fa;
     border-radius: 10px;
-    margin-top: 0px;
+    margin-top: 0;
     font-size: 13px;
     color: #555;
 }
 
-.file-meta {
+.tikz-app .file-meta {
     margin-bottom: 6px;
     font-weight: 400;
 }
 
-.file-meta .label {
+.tikz-app .file-meta .label {
     font-weight: 500;
     color: #333;
 }
 
-.file-creator {
+.tikz-app .file-creator {
     margin-top: 8px;
     font-size: 13px;
     font-weight: 400;
 }
 
 /* Like Button Styles */
-input[id^="heart-"] {
+.tikz-app input[id^="heart-"] {
     display: none;
 }
 
-.like-button {
+.tikz-app .like-button {
     position: relative;
     cursor: pointer;
     display: flex;
@@ -325,11 +325,11 @@ input[id^="heart-"] {
     padding: 0 8px;
 }
 
-.like-button input[type="checkbox"] {
+.tikz-app .like-button input[type="checkbox"] {
     display: none;
 }
 
-.like {
+.tikz-app .like {
     display: flex;
     cursor: pointer;
     align-items: center;
@@ -337,21 +337,21 @@ input[id^="heart-"] {
     flex: 1;
 }
 
-.like-icon {
+.tikz-app .like-icon {
     fill: #808080;
     height: 16px;
     width: 16px;
     transition: fill 0.2s ease;
 }
 
-.like-text {
+.tikz-app .like-text {
     color: #e0e0e0;
     font-size: 12px;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
     font-weight: 500;
 }
 
-.like-count {
+.tikz-app .like-count {
     color: #808080;
     font-size: 12px;
     font-weight: 500;
@@ -359,28 +359,28 @@ input[id^="heart-"] {
     transition: all 0.3s ease;
 }
 
-.like-count.two {
+.tikz-app .like-count.two {
     position: absolute;
     right: 8px;
     transform: translateY(20px);
     opacity: 0;
 }
 
-.like-count.one {
+.tikz-app .like-count.one {
     position: relative;
 }
 
-input[id^="heart-"]:checked ~ .like .like-icon {
+.tikz-app input[id^="heart-"]:checked ~ .like .like-icon {
     fill: #ff4757;
     animation: heartBeat 0.3s ease;
 }
 
-input[id^="heart-"]:checked ~ .like-count.one {
+.tikz-app input[id^="heart-"]:checked ~ .like-count.one {
     transform: translateY(-20px);
     opacity: 0;
 }
 
-input[id^="heart-"]:checked ~ .like-count.two {
+.tikz-app input[id^="heart-"]:checked ~ .like-count.two {
     transform: translateY(0);
     opacity: 1;
     color: #ff4757;
@@ -398,7 +398,7 @@ input[id^="heart-"]:checked ~ .like-count.two {
     }
 }
 
-.like-button-wrapper {
+.tikz-app .like-button-wrapper {
     position: relative;
     display: flex;
     justify-content: flex-end;
@@ -408,17 +408,16 @@ input[id^="heart-"]:checked ~ .like-count.two {
 }
 
 /* TikZ Code Section Styles */
-.tikz-code-block {
+.tikz-app .tikz-code-block {
     background-color: #f8f9fa;
     border: 1px solid #dee2e6;
     border-radius: 5px;
     padding: 10px;
     width: 100%;
-    box-sizing: border-box;
     display: none; /* Hidden by default, JavaScript will show when needed */
 }
 
-.tikz-code-header {
+.tikz-app .tikz-code-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -430,14 +429,45 @@ input[id^="heart-"]:checked ~ .like-count.two {
     color: #333;
 }
 
-.code-block {
-    background-color: #f8f9fa;
-    border: 1px solid #dee2e6;
-    border-radius: 3px;
-    padding: 10px;
+/* Copy button styling for TikZ Code Section - Synchronized with index.css */
+.tikz-app .tikz-code-header .copy-btn {
+    background: linear-gradient(90deg, #1976d2 0%, #2196f3 100%);
+    color: #fff;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
 }
 
-.tikz-cm {
+.tikz-app .tikz-code-header .copy-btn:hover {
+    background: linear-gradient(90deg, #1565c0 0%, #42a5f5 100%);
+    color: #fff;
+    box-shadow: 0 3px 12px rgba(25, 118, 210, 0.15);
+    transform: translateY(-1px) scale(1.02);
+    outline: none;
+    text-decoration: none;
+}
+
+.tikz-app .tikz-code-block .code-block {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 5px;
+    padding: 0;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    overflow: auto;
+    max-height: 400px;
+    position: relative;
+    width: 100%;
+}
+
+.tikz-app .tikz-cm {
     width: 100%;
     min-height: 100px;
     font-family: 'Courier New', monospace;
@@ -448,75 +478,53 @@ input[id^="heart-"]:checked ~ .like-count.two {
     resize: vertical;
 }
 
-.copy-btn {
-    background-color: #6c757d;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 3px;
-    font-size: 11px;
-    cursor: pointer;
-}
-
-.copy-btn:hover {
-    background-color: #5a6268;
-}
 
 /* CodeMirror styles cho TikZ code block */
-.tikz-code-block .CodeMirror {
+.tikz-app .tikz-code-block .CodeMirror {
     max-height: 300px;
-    overflow-y: auto;
-    overflow-x: auto;
+    overflow: auto;
     border: 1px solid #ddd;
     border-radius: 4px;
     margin-top: 5px;
     width: 100%;
 }
 
-.tikz-code-block {
-    width: 100%;
-}
-
-.tikz-code-block .code-block {
-    width: 100%;
-}
-
-.tikz-code-block .tikz-cm {
+.tikz-app .tikz-code-block .tikz-cm {
     display: none;
 }
 
-.CodeMirror-placeholder {
+.tikz-app .CodeMirror-placeholder {
     color: #bbb !important;
     font-style: italic;
 }
 
 /* Fix gutter/line number width for CodeMirror */
-.CodeMirror-gutter, .CodeMirror-gutters, .CodeMirror-linenumbers {
-    width: 2.5em !important;
-    min-width: 2.5em !important;
+.tikz-app .CodeMirror-gutter, .CodeMirror-gutters, .CodeMirror-linenumbers {
+    width: 2.5em;
+    min-width: 2.5em;
 }
 
-.CodeMirror-linenumber, .CodeMirror-gutter-elt {
-    min-width: 2em !important;
-    width: 2em !important;
-    text-align: right !important;
-    padding-right: 0.5em !important;
-    box-sizing: content-box !important;
+.tikz-app .CodeMirror-linenumber, .CodeMirror-gutter-elt {
+    min-width: 2em;
+    width: 2em;
+    text-align: right;
+    padding-right: 0.5em;
+    box-sizing: content-box;
 }
 
 /* Tùy chỉnh scrollbar cho CodeMirror */
-.tikz-code-block .CodeMirror-scrollbar-filler {
+.tikz-app .tikz-code-block .CodeMirror-scrollbar-filler {
     background-color: #f0f0f0;
 }
 
-.tikz-code-block .CodeMirror-simplescroll-horizontal div,
-.tikz-code-block .CodeMirror-simplescroll-vertical div {
+.tikz-app .tikz-code-block .CodeMirror-simplescroll-horizontal div,
+.tikz-app .tikz-code-block .CodeMirror-simplescroll-vertical div {
     background-color: #c1c1c1;
     border-radius: 10px;
 }
 
 /* No Files State */
-.no-files {
+.tikz-app .no-files {
     text-align: center;
     padding: 40px 20px;
     background: #f8f9fa;
@@ -525,19 +533,19 @@ input[id^="heart-"]:checked ~ .like-count.two {
     margin: 20px 0;
 }
 
-.no-files-icon {
+.tikz-app .no-files-icon {
     font-size: 48px;
     margin-bottom: 16px;
     opacity: 0.6;
 }
 
-.no-files h4 {
+.tikz-app .no-files h4 {
     color: #6c757d;
     margin-bottom: 8px;
     font-weight: 600;
 }
 
-.no-files p {
+.tikz-app .no-files p {
     color: #868e96;
     margin: 0;
     font-size: 14px;
@@ -545,27 +553,34 @@ input[id^="heart-"]:checked ~ .like-count.two {
 
 /* Mobile responsiveness */
 @media (max-width: 768px) {
-  .files-section-container {
+  .tikz-app .files-section-container {
       padding: 20px 0;
       margin-top: 30px;
   }
-  .files-section {
+  .tikz-app .files-section {
       margin-top: 20px;
       padding: 15px;
   }
-  .files-grid {
+  .tikz-app .files-grid {
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 12px;
   }
-  .file-card {
+  .tikz-app .file-card {
       width: 100%;
       min-width: 0;
   }
-  .file-actions {
+  
+  /* Copy button mobile optimization */
+  .tikz-app .tikz-code-header .copy-btn {
+      padding: 6px 12px;
+      font-size: 13px;
+      border-radius: 5px;
+  }
+  .tikz-app .file-actions {
       flex-direction: column;
       gap: 8px;
   }
-  .file-actions a, .file-actions button {
+  .tikz-app .file-actions a, .file-actions button {
       padding: 8px 12px;
       font-size: 12px;
       min-height: 36px;
@@ -573,29 +588,29 @@ input[id^="heart-"]:checked ~ .like-count.two {
 }
 
 @media (max-width: 600px) {
-  .files-grid {
+  .tikz-app .files-grid {
       grid-template-columns: 1fr;
       gap: 15px;
   }
-  .file-card {
+  .tikz-app .file-card {
       width: 100%;
       min-width: 0;
   }
 }
 
 @media (max-width: 480px) {
-  .files-section-container {
+  .tikz-app .files-section-container {
       padding: 15px 0;
       margin-top: 25px;
   }
-  .files-section {
+  .tikz-app .files-section {
       margin-top: 15px;
       padding: 10px;
   }
-  .files-grid {
+  .tikz-app .files-grid {
       gap: 10px;
   }
-  .file-card {
+  .tikz-app .file-card {
       width: 100%;
       min-width: 0;
   }

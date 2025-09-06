@@ -1,40 +1,86 @@
 /* Profile Verification Page Styles */
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #fafafa;
+
+/* TikZ App Scoped Container */
+.tikz-app {
+    width: 100%;
+    min-height: 100vh;
 }
 
-.container {
-  background: white;
-  padding: 32px;
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
-  max-width: 1200px;
-  margin: 0 auto;
+/* Body and Container */
+html, body {
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fafafa;
 }
 
-.header {
-  text-align: center;
+/* Box-sizing scoped to our page layout only (avoid overriding Bootstrap) */
+.tikz-app .page-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.tikz-app .page-container *,
+.tikz-app .page-container *::before,
+.tikz-app .page-container *::after {
+    box-sizing: inherit;
+}
+
+.tikz-app button, 
+.tikz-app input, 
+.tikz-app select, 
+.tikz-app textarea {
+    font-family: inherit;
+}
+
+/* Preserve monospace fonts for code editors */
+.tikz-app .CodeMirror, 
+.tikz-app .CodeMirror * {
+    font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Cascadia Code', 'Inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace !important;
+    font-feature-settings: "liga" 1, "calt" 1;
+    font-variant-ligatures: contextual;
+}
+
+/* Preserve monospace for any code-related elements */
+.tikz-app pre, 
+.tikz-app code, 
+.tikz-app .code, 
+.tikz-app .tikz-code, 
+.tikz-app textarea[name="code"] {
+    font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Cascadia Code', 'Inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace !important;
+    font-feature-settings: "liga" 1, "calt" 1;
+    font-variant-ligatures: contextual;
+}
+
+/* Verification Container */
+.tikz-app .verification-container {
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(8px);
+    padding: 40px 0;
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+}
+
+.tikz-app .verification-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.tikz-app .verification-header h1 {
+    color: #1976d2;
+    margin-bottom: 10px;
+}
+
+.tikz-app .verification-header p {
+    color: #666;
+    font-size: 16px;
+}
+
+.tikz-app .verification-section {
   margin-bottom: 40px;
 }
 
-.header h1 {
-  color: #1976d2;
-  margin-bottom: 10px;
-}
-
-.header p {
-  color: #666;
-  font-size: 16px;
-}
-
-.verification-section {
-  margin-bottom: 40px;
-}
-
-.terms-section {
+.tikz-app .terms-section {
   background: #f8f9fa;
   padding: 32px;
   border-radius: 16px;
@@ -42,34 +88,34 @@ body {
   border-left: 4px solid #1976d2;
 }
 
-.terms-section h3 {
+.tikz-app .terms-section h3 {
   color: #1976d2;
   margin-bottom: 20px;
   font-size: 1.5rem;
 }
 
-.terms-section h4 {
+.tikz-app .terms-section h4 {
   color: #333;
   margin-top: 25px;
   margin-bottom: 10px;
   font-size: 1.2rem;
 }
 
-.terms-section p, .terms-section li {
+.tikz-app .terms-section p, .tikz-app .terms-section li {
   color: #555;
   line-height: 1.6;
   margin-bottom: 10px;
 }
 
-.terms-section ul {
+.tikz-app .terms-section ul {
   padding-left: 20px;
 }
 
-.terms-section li {
+.tikz-app .terms-section li {
   margin-bottom: 8px;
 }
 
-.verification-form {
+.tikz-app .verification-form {
   background: #fff;
   padding: 32px;
   border-radius: 16px;
@@ -77,17 +123,17 @@ body {
   margin-top: 30px;
 }
 
-.verification-form h3 {
+.tikz-app .verification-form h3 {
   color: #1976d2;
   margin-bottom: 15px;
   text-align: center;
 }
 
-.info-group {
+.tikz-app .info-group {
   margin-bottom: 25px;
 }
 
-.info-group label {
+.tikz-app .info-group label {
   display: block;
   font-weight: bold;
   color: #333;
@@ -95,26 +141,25 @@ body {
   font-size: 14px;
 }
 
-.info-group input {
+.tikz-app .info-group input {
   width: 100%;
   padding: 12px;
   border: 2px solid #ddd;
   border-radius: 6px;
   font-size: 16px;
-  box-sizing: border-box;
 }
 
-.info-group input:focus {
+.tikz-app .info-group input:focus {
   outline: none;
   border-color: #1976d2;
 }
 
-.actions {
+.tikz-app .actions {
   text-align: center;
   margin-top: 30px;
 }
 
-.btn {
+.tikz-app .btn {
   padding: 12px 32px;
   border: none;
   border-radius: 8px;
@@ -123,31 +168,37 @@ body {
   cursor: pointer;
   transition: all 0.3s;
   margin: 0 10px;
+  text-decoration: none;
+  display: inline-block;
 }
 
-.btn-primary {
+.tikz-app .btn-primary {
   background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
   color: white;
 }
 
-.btn-primary:hover {
+.tikz-app .btn-primary:hover {
   background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+  color: white;
+  text-decoration: none;
 }
 
-.btn-secondary {
+.tikz-app .btn-secondary {
   background: #6c757d;
   color: white;
 }
 
-.btn-secondary:hover {
+.tikz-app .btn-secondary:hover {
   background: #5a6268;
+  color: white;
+  text-decoration: none;
 }
 
-.flash-messages {
+.tikz-app .flash-messages {
   margin-bottom: 20px;
 }
 
-.flash {
+.tikz-app .flash {
   padding: 12px 20px;
   border-radius: 6px;
   margin-bottom: 10px;
@@ -155,25 +206,25 @@ body {
   transition: opacity 0.3s ease;
 }
 
-.flash-success {
+.tikz-app .flash-success {
   background: #d4edda;
   color: #155724;
   border: 1px solid #c3e6cb;
 }
 
-.flash-error {
+.tikz-app .flash-error {
   background: #f8d7da;
   color: #721c24;
   border: 1px solid #f5c6cb;
 }
 
-.flash-info {
+.tikz-app .flash-info {
   background: #d1ecf1;
   color: #0c5460;
   border: 1px solid #bee5eb;
 }
 
-.warning-box {
+.tikz-app .warning-box {
   background: #fff3cd;
   border: 1px solid #ffeaa7;
   color: #856404;
@@ -182,43 +233,43 @@ body {
   margin-bottom: 20px;
 }
 
-.warning-box h4 {
+.tikz-app .warning-box h4 {
   color: #856404;
   margin-bottom: 10px;
 }
 
-.verification-code-input {
+.tikz-app .verification-code-input {
   font-family: 'Courier New', monospace;
   font-size: 18px;
   text-align: center;
   letter-spacing: 2px;
 }
 
-.verification-note {
+.tikz-app .verification-note {
   color: #666;
   font-size: 12px;
   margin-bottom: 20px;
   text-align: center;
 }
 
-.verification-form-hidden {
+.tikz-app .verification-form-hidden {
   display: none;
 }
 
-.verification-note-small {
+.tikz-app .verification-note-small {
   color: #888;
   font-size: 13px;
 }
 
-.verification-warning-text {
+.tikz-app .verification-warning-text {
   margin: 0;
 }
 
-.agreement-section-hidden {
+.tikz-app .agreement-section-hidden {
   display: none;
 }
 
-.verification-warning {
+.tikz-app .verification-warning {
   background: #f8d7da;
   border: 1px solid #f5c6cb;
   color: #721c24;
@@ -228,41 +279,51 @@ body {
   font-size: 14px;
 }
 
-.verification-warning.high {
+.tikz-app .verification-warning.high {
   background: #f8d7da;
   border: 1px solid #f5c6cb;
   color: #721c24;
 }
 
-.verification-warning.medium {
+.tikz-app .verification-warning.medium {
   background: #fff3cd;
   border: 1px solid #ffeaa7;
   color: #856404;
 }
 
+/* Footer */
+.tikz-app .site-footer {
+    text-align: center;
+    color: #888;
+    font-size: 14px;
+    margin-top: 40px;
+}
+
 @media (max-width: 768px) {
-  .container {
+  .tikz-app .verification-container {
+    padding: 20px 0;
+  }
+  
+  .tikz-app .terms-section {
     padding: 20px;
   }
   
-  .terms-section {
-    padding: 20px;
-  }
-  
-  .verification-form {
+  .tikz-app .verification-form {
     padding: 20px;
   }
 }
 
 @media (max-width: 600px) {
-  .container {
-    padding: 4vw;
+  .tikz-app .verification-container {
+    padding: 15px 0;
   }
   
-  .btn, .btn-primary, .btn-secondary {
+  .tikz-app .btn, .tikz-app .btn-primary, .tikz-app .btn-secondary {
     width: 100%;
     font-size: 17px;
     margin: 8px 0;
     padding: 14px 0;
+    display: block;
+    text-align: center;
   }
 }

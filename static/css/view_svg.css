@@ -1,43 +1,76 @@
 /* View SVG Page Styles */
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #fafafa;
-  transition: all 0.3s ease;
+
+/* TikZ App Scoped Container */
+.tikz-app {
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* Body and Container */
+html, body {
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fafafa;
+}
+
+/* Box-sizing scoped to our page layout only (avoid overriding Bootstrap) */
+.tikz-app .page-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.tikz-app .page-container *,
+.tikz-app .page-container *::before,
+.tikz-app .page-container *::after {
+    box-sizing: inherit;
+}
+
+.tikz-app button, 
+.tikz-app input, 
+.tikz-app select, 
+.tikz-app textarea {
+    font-family: inherit;
 }
 
 /* Preserve monospace fonts for code editors */
-.CodeMirror, .CodeMirror * {
+.tikz-app .CodeMirror, 
+.tikz-app .CodeMirror * {
     font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Cascadia Code', 'Inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace !important;
     font-feature-settings: "liga" 1, "calt" 1;
     font-variant-ligatures: contextual;
 }
 
 /* Preserve monospace for any code-related elements */
-pre, code, .code, .tikz-code, textarea[name="code"] {
+.tikz-app pre, 
+.tikz-app code, 
+.tikz-app .code, 
+.tikz-app .tikz-code, 
+.tikz-app textarea[name="code"] {
     font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Cascadia Code', 'Inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace !important;
     font-feature-settings: "liga" 1, "calt" 1;
     font-variant-ligatures: contextual;
 }
 
-.container {
-  max-width: 1200px;
-  margin: 30px auto;
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
-  padding: 32px;
+/* View SVG Section Container */
+.tikz-app .page-container {
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(8px);
+    padding: 40px 0;
+    margin-bottom: 0;
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+    overflow-x: hidden;
 }
 
-h2 {
-  text-align: center;
-  color: #1976d2;
-  margin-bottom: 24px;
+.tikz-app h2 {
+    text-align: center;
+    color: #1976d2;
+    margin-bottom: 24px;
 }
 
 /* Google Login Button Styles (from index.html) */
-.google-login-btn {
+.tikz-app .google-login-btn {
   max-width: 320px;
   display: flex;
   padding: 8px 16px;
@@ -59,12 +92,12 @@ h2 {
   margin: 0 auto;
 }
 
-.google-login-btn svg {
+.tikz-app .google-login-btn svg {
   height: 24px;
   flex-shrink: 0;
 }
 
-.google-login-btn:hover {
+.tikz-app .google-login-btn:hover {
   transform: scale(1.02);
   background-color: #1565c0;
   color: white;
@@ -72,7 +105,7 @@ h2 {
 
 /* Google login button responsive */
 @media (max-width: 600px) {
-  .google-login-btn {
+  .tikz-app .google-login-btn {
     max-width: 280px;
     padding: 8px 16px;
     font-size: 0.875rem;
@@ -80,27 +113,26 @@ h2 {
     margin: 0 auto;
   }
   
-  .google-login-btn svg {
+  .tikz-app .google-login-btn svg {
     height: 20px;
   }
 }
 
 /* View Mode Row Layout */
-#view-mode-row {
+.tikz-app #view-mode-row {
   display: flex;
   gap: 32px;
   margin-bottom: 24px;
   flex-wrap: wrap;
 }
 
-.view-col {
+.tikz-app .view-col {
   flex: 1 1 300px;
   min-width: 280px;
-  box-sizing: border-box;
 }
 
 /* SVG Preview Block */
-#view-svg-preview {
+.tikz-app #view-svg-preview {
   background: #fff;
   border: 1.5px solid #eee;
   border-radius: 8px;
@@ -111,10 +143,9 @@ h2 {
   min-height: 320px;
   height: 400px;
   width: 100%;
-  box-sizing: border-box;
 }
 
-#view-svg-preview img {
+.tikz-app #view-svg-preview img {
   width: 100%;
   height: 100%;
   object-fit: contain;
@@ -125,7 +156,7 @@ h2 {
 }
 
 /* Action Buttons below SVG */
-#view-svg-actions {
+.tikz-app #view-svg-actions {
   margin-top: 16px;
   display: flex;
   gap: 12px;
@@ -133,7 +164,7 @@ h2 {
   flex-wrap: wrap;
 }
 
-#view-svg-actions .view-action-btn {
+.tikz-app #view-svg-actions .view-action-btn {
   background: #ffc107;
   color: #212529;
   padding: 12px 20px;
@@ -151,22 +182,22 @@ h2 {
   transition: all 0.2s;
 }
 
-#view-svg-actions .view-action-btn:hover {
+.tikz-app #view-svg-actions .view-action-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(255,193,7,0.3);
 }
 
-#view-svg-actions .view-download-btn {
+.tikz-app #view-svg-actions .view-download-btn {
   background: #17a2b8;
   color: white;
 }
 
-#view-svg-actions .view-download-btn:hover {
+.tikz-app #view-svg-actions .view-download-btn:hover {
   box-shadow: 0 4px 12px rgba(23,162,184,0.3);
 }
 
 /* Back to Edit Button */
-#view-back-to-edit-btn {
+.tikz-app #view-back-to-edit-btn {
   background: linear-gradient(90deg, #28a745 0%, #218838 100%);
   color: white;
   padding: 12px 20px;
@@ -183,19 +214,19 @@ h2 {
   gap: 8px;
 }
 
-#view-back-to-edit-btn:hover {
+.tikz-app #view-back-to-edit-btn:hover {
   box-shadow: 0 4px 12px rgba(40,167,69,0.3);
   transform: translateY(-2px);
 }
 
 /* Modal Styles shared with index login modal */
-#login-modal {
+.tikz-app #login-modal {
   display: none;
 }
 /* Login modal styles are imported from login_modal.css */
 /* No local definitions needed for .login-modal-box */
 
-.btn-danger {
+.tikz-app .btn-danger {
   display: inline-block;
   background: #d32f2f;
   color: white;
@@ -205,7 +236,7 @@ h2 {
   font-weight: bold;
 }
 
-.btn-secondary {
+.tikz-app .btn-secondary {
   background: #eee;
   color: #333;
   padding: 10px 28px;
@@ -214,12 +245,12 @@ h2 {
   font-weight: bold;
 }
 
-.btn-secondary-lg {
+.tikz-app .btn-secondary-lg {
   padding: 12px 24px;
 }
 
 /* Footer */
-.page-footer {
+.tikz-app .site-footer {
   text-align: center;
   color: #888;
   font-size: 0.875rem;
@@ -227,28 +258,28 @@ h2 {
 }
 
 /* Actions section */
-.actions-header {
+.tikz-app .actions-header {
   margin-bottom: 20px;
 }
 
-.actions-title {
+.tikz-app .actions-title {
   color: #333;
   margin-bottom: 15px;
 }
 
-.actions-list {
+.tikz-app .actions-list {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
 /* Spacing utility for cancel buttons */
-.btn-cancel {
+.tikz-app .btn-cancel {
   margin-left: 18px;
 }
 
 /* Small info text */
-.small-info {
+.tikz-app .small-info {
   margin-top: 8px;
   font-size: 0.75rem;
   color: #666;
@@ -257,7 +288,7 @@ h2 {
 }
 
 /* Export Section */
-.export-section {
+.tikz-app .export-section {
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.08);
@@ -265,13 +296,13 @@ h2 {
   margin-top: 24px;
 }
 
-.export-section h4 {
+.tikz-app .export-section h4 {
   color: #333;
   text-align: center;
   margin-bottom: 16px;
 }
 
-#view-export-form {
+.tikz-app #view-export-form {
   display: grid;
   grid-template-columns: 1fr;
   gap: 16px;
@@ -279,27 +310,26 @@ h2 {
   margin-bottom: 16px;
 }
 
-#view-export-form .export-pair {
+.tikz-app #view-export-form .export-pair {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-#view-export-form .export-label {
+.tikz-app #view-export-form .export-label {
   font-weight: 500;
   color: #555;
   min-width: 80px;
   flex-shrink: 0;
 }
 
-.export-input {
+.tikz-app .export-input {
   padding: 8px;
   border: 1px solid #ddd;
   border-radius: 5px;
-  box-sizing: border-box;
 }
 
-.export-select {
+.tikz-app .export-select {
   width: 100%;
   min-width: 120px;
   max-width: 180px;
@@ -311,18 +341,18 @@ h2 {
   background: #f8f9fa;
 }
 
-.export-number {
+.tikz-app .export-number {
   width: 100px;
 }
 
-#view-export-form .export-btn-group {
+.tikz-app #view-export-form .export-btn-group {
   grid-column: 1 / -1;
   display: flex;
   justify-content: center;
   margin-top: 16px;
 }
 
-#view-export-form .export-btn {
+.tikz-app #view-export-form .export-btn {
   background: linear-gradient(90deg, #1976d2 0%, #1565c0 100%);
   color: white;
   padding: 12px 20px;
@@ -339,24 +369,24 @@ h2 {
   gap: 8px;
 }
 
-#view-export-form .export-btn:hover {
+.tikz-app #view-export-form .export-btn:hover {
   box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
   transform: translateY(-2px);
 }
 
-#view-export-msg {
+.tikz-app #view-export-msg {
   text-align: center;
   color: #388e3c;
   font-weight: bold;
   margin-top: 8px;
 }
 
-#view-export-msg.error {
+.tikz-app #view-export-msg.error {
   color: #d32f2f;
 }
 
 /* Export Download Link Style */
-.export-download-link {
+.tikz-app .export-download-link {
   display: inline-block;
   background: linear-gradient(90deg, #17a2b8 0%, #138496 100%);
   color: white;
@@ -372,7 +402,7 @@ h2 {
   margin-top: 8px;
 }
 
-.export-download-link:hover {
+.tikz-app .export-download-link:hover {
   background: linear-gradient(90deg, #138496 0%, #117a8b 100%);
   box-shadow: 0 4px 12px rgba(23,162,184,0.3);
   transform: translateY(-2px);
@@ -382,86 +412,85 @@ h2 {
 
 /* Responsive Adjustments */
 @media (max-width: 600px) {
-  #view-mode-row {
+  .tikz-app #view-mode-row {
     flex-direction: column;
     gap: 24px;
   }
 
-  #view-export-form {
+  .tikz-app #view-export-form {
     grid-template-columns: 1fr;
     gap: 16px;
   }
 
-  #view-export-form .export-pair {
+  .tikz-app #view-export-form .export-pair {
     flex-direction: column;
     align-items: stretch;
     text-align: left;
   }
 
-  #view-svg-actions {
+  .tikz-app #view-svg-actions {
     flex-direction: column;
     gap: 10px;
   }
 
-  #view-svg-actions .view-action-btn,
-  #view-export-form .export-btn {
+  .tikz-app #view-svg-actions .view-action-btn,
+  .tikz-app #view-export-form .export-btn {
     width: 100%;
     max-width: 100%;
-    box-sizing: border-box;
   }
 
-  #view-back-to-edit-btn {
+  .tikz-app #view-back-to-edit-btn {
     width: 100%;
   }
 }
 
 /* Tablet Layout (601px - 1040px) */
 @media (min-width: 601px) and (max-width: 1040px) {
-  #view-mode-row {
+  .tikz-app #view-mode-row {
     display: flex;
     flex-wrap: nowrap;
     gap: 24px;
   }
 
-  .view-col:first-child {
+  .tikz-app .view-col:first-child {
     flex: 1 1 auto;
     min-width: 300px;
   }
 
-  .view-col:last-child {
+  .tikz-app .view-col:last-child {
     flex: 0 0 330px;
     max-width: 330px;
   }
   
   /* Tablet: Form export 1 cột với các cặp inline */
-  #view-export-form {
+  .tikz-app #view-export-form {
     grid-template-columns: 1fr;
     gap: 12px;
   }
 
-  #view-export-form .export-pair {
+  .tikz-app #view-export-form .export-pair {
     display: flex;
     align-items: center;
     gap: 8px;
     flex-direction: row;
   }
 
-  #view-export-form .export-label {
+  .tikz-app #view-export-form .export-label {
     min-width: 70px;
     flex-shrink: 0;
   }
 
-  #view-export-form .export-select {
+  .tikz-app #view-export-form .export-select {
     flex: 1;
     min-width: 120px;
   }
 
-  #view-export-form .export-number {
+  .tikz-app #view-export-form .export-number {
     flex: 1;
     min-width: 80px;
   }
 
-  #view-export-form .export-btn-group {
+  .tikz-app #view-export-form .export-btn-group {
     grid-column: 1 / -1;
     justify-content: center;
     margin-top: 16px;

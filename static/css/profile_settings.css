@@ -1,55 +1,84 @@
 /* Profile Settings CSS */
 
 /* Body styling */
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #fafafa;
+html, body {
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fafafa;
+}
+
+.tikz-app button, .tikz-app input, .tikz-app select, .tikz-app textarea {
+  font-family: inherit;
 }
 
 /* Preserve monospace fonts for code editors */
-.CodeMirror, .CodeMirror * {
+.tikz-app .CodeMirror, .tikz-app .CodeMirror * {
   font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Cascadia Code', 'Inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace !important;
   font-feature-settings: "liga" 1, "calt" 1;
   font-variant-ligatures: contextual;
 }
 
 /* Preserve monospace for any code-related elements */
-pre, code, .code, .tikz-code, textarea[name="code"] {
+.tikz-app pre, .tikz-app code, .tikz-app .code, .tikz-app .tikz-code, .tikz-app textarea[name="code"] {
   font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Cascadia Code', 'Inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace !important;
   font-feature-settings: "liga" 1, "calt" 1;
   font-variant-ligatures: contextual;
 }
 
-/* Container styling */
-.container {
+/* TikZ App Scoped Container */
+.tikz-app {
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* Box-sizing scoped to our page layout only (avoid overriding Bootstrap) */
+/* This is handled by shared CSS (index.css) */
+
+/* Profile content container styling */
+.tikz-app .profile-content-container {
   background: white;
   padding: 32px;
   border-radius: 16px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
+  overflow-x: hidden;
+}
+
+/* Responsive container adjustments */
+@media (max-width: 768px) {
+  .tikz-app .profile-content-container {
+    padding: 24px 10px;
+    overflow-x: visible;
+  }
+}
+
+@media (max-width: 600px) {
+  .tikz-app .profile-content-container {
+    padding: 20px 10px;
+    overflow-x: visible;
+  }
 }
 
 /* Header styling */
-.header {
+.tikz-app .header {
   text-align: center;
   margin-bottom: 40px;
 }
 
-.header h1 {
+.tikz-app .header h1 {
   color: #1976d2;
   margin-bottom: 10px;
 }
 
-.header p {
+.tikz-app .header p {
   color: #666;
   font-size: 16px;
 }
 
 /* Profile section layout */
-.profile-section {
+.tikz-app .profile-section {
   display: grid;
   grid-template-columns: 1fr 2fr;
   gap: 40px;
@@ -57,18 +86,18 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
 }
 
 /* Avatar section */
-.avatar-section {
+.tikz-app .avatar-section {
   text-align: center;
 }
 
-.avatar-container {
+.tikz-app .avatar-container {
   position: relative;
   display: inline-block;
   margin-bottom: 20px;
 }
 
-.avatar,
-.avatar-placeholder {
+.tikz-app .avatar,
+.tikz-app .avatar-placeholder {
   width: 150px;
   height: 150px;
   border-radius: 50%;
@@ -77,7 +106,7 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-.avatar-placeholder {
+.tikz-app .avatar-placeholder {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
   align-items: center;
@@ -87,15 +116,15 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
   font-weight: bold;
 }
 
-.avatar-upload {
+.tikz-app .avatar-upload {
   margin-top: 15px;
 }
 
-.avatar-upload input[type="file"] {
+.tikz-app .avatar-upload input[type="file"] {
   display: none;
 }
 
-.avatar-upload label {
+.tikz-app .avatar-upload label {
   background: #1976d2;
   color: white;
   padding: 10px 20px;
@@ -105,22 +134,22 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
   transition: background 0.3s;
 }
 
-.avatar-upload label:hover {
+.tikz-app .avatar-upload label:hover {
   background: #1565c0;
 }
 
 /* Info section */
-.info-section {
+.tikz-app .info-section {
   padding: 20px;
   background: #f8f9fa;
   border-radius: 8px;
 }
 
-.info-group {
+.tikz-app .info-group {
   margin-bottom: 25px;
 }
 
-.info-group label {
+.tikz-app .info-group label {
   display: block;
   font-weight: bold;
   color: #333;
@@ -129,22 +158,21 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
 }
 
 .info-group input,
-.info-group textarea {
+.tikz-app .info-group textarea {
   width: 100%;
   padding: 12px;
   border: 2px solid #ddd;
   border-radius: 6px;
   font-size: 16px;
-  box-sizing: border-box;
 }
 
 .info-group input:focus,
-.info-group textarea:focus {
+.tikz-app .info-group textarea:focus {
   outline: none;
   border-color: #1976d2;
 }
 
-.info-group .readonly {
+.tikz-app .info-group .readonly {
   background: #f5f5f5;
   color: #666;
   cursor: not-allowed;
@@ -152,16 +180,16 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
 }
 
 /* Actions */
-.actions {
+.tikz-app .actions {
   text-align: center;
   margin-top: 30px;
 }
 
-#save-button-section {
+.tikz-app #save-button-section {
   transition: opacity 0.3s ease;
 }
 
-.btn {
+.tikz-app .btn {
   padding: 12px 32px;
   border: none;
   border-radius: 8px;
@@ -172,30 +200,30 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
   margin: 0 10px;
 }
 
-.btn-primary {
+.tikz-app .btn-primary {
   background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
   color: white;
 }
 
-.btn-primary:hover {
+.tikz-app .btn-primary:hover {
   background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
 }
 
-.btn-secondary {
+.tikz-app .btn-secondary {
   background: #6c757d;
   color: white;
 }
 
-.btn-secondary:hover {
+.tikz-app .btn-secondary:hover {
   background: #5a6268;
 }
 
 /* Flash messages */
-.flash-messages {
+.tikz-app .flash-messages {
   margin-bottom: 20px;
 }
 
-.flash {
+.tikz-app .flash {
   padding: 12px 20px;
   border-radius: 6px;
   margin-bottom: 10px;
@@ -203,64 +231,64 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
   transition: opacity 0.3s ease;
 }
 
-.flash-success {
+.tikz-app .flash-success {
   background: #d4edda;
   color: #155724;
   border: 1px solid #c3e6cb;
 }
 
-.flash-error {
+.tikz-app .flash-error {
   background: #f8d7da;
   color: #721c24;
   border: 1px solid #f5c6cb;
 }
 
 /* Utility classes for inline styles */
-.text-small {
+.tikz-app .text-small {
   font-size: 12px;
   color: #666;
   margin-top: 10px;
 }
 
-.text-success {
+.tikz-app .text-success {
   color: green;
   font-size: 13px;
 }
 
-.text-warning {
+.tikz-app .text-warning {
   color: orange;
   font-size: 13px;
 }
 
-.text-muted {
+.tikz-app .text-muted {
   color: #666;
   font-size: 12px;
 }
 
-.text-muted-block {
+.tikz-app .text-muted-block {
   color: #666;
   font-size: 12px;
   display: block;
   margin-top: 5px;
 }
 
-.verification-icon {
+.tikz-app .verification-icon {
   width: 16px;
   height: 16px;
   vertical-align: middle;
   margin-left: 5px;
 }
 
-.verification-button {
+.tikz-app .verification-button {
   font-size: 14px;
   padding: 8px 16px;
 }
 
-.verification-button-container {
+.tikz-app .verification-button-container {
   margin-top: 10px;
 }
 
-.verification-success {
+.tikz-app .verification-success {
   background: #d4edda;
   border: 1px solid #c3e6cb;
   color: #155724;
@@ -269,7 +297,7 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
   margin-top: 10px;
 }
 
-.verification-section {
+.tikz-app .verification-section {
   margin-top: 30px;
   padding: 20px;
   background: #f8f9fa;
@@ -278,64 +306,64 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
   display: none;
 }
 
-.verification-section.show {
+.tikz-app .verification-section.show {
   display: block;
 }
 
-.verification-title {
+.tikz-app .verification-title {
   color: #1976d2;
   margin-bottom: 15px;
   text-align: center;
 }
 
-.verification-text {
+.tikz-app .verification-text {
   color: #666;
   margin-bottom: 20px;
 }
 
-.verification-note {
+.tikz-app .verification-note {
   color: #888;
   font-size: 13px;
 }
 
-.verification-link {
+.tikz-app .verification-link {
   color: #1976d2;
 }
 
-.verification-alert {
+.tikz-app .verification-alert {
   padding: 10px;
   border-radius: 6px;
   margin-bottom: 15px;
 }
 
-.verification-alert-warning {
+.tikz-app .verification-alert-warning {
   background: #fff3cd;
   border: 1px solid #ffeaa7;
 }
 
-.verification-alert-danger {
+.tikz-app .verification-alert-danger {
   background: #f8d7da;
   border: 1px solid #f5c6cb;
 }
 
-.verification-alert-text-warning {
+.tikz-app .verification-alert-text-warning {
   color: #856404;
   margin: 0;
   font-size: 14px;
 }
 
-.verification-alert-text-danger {
+.tikz-app .verification-alert-text-danger {
   color: #721c24;
   margin: 0;
   font-size: 14px;
 }
 
-.verification-alert-hint {
+.tikz-app .verification-alert-hint {
   margin: 5px 0 0 0;
   font-size: 12px;
 }
 
-.verification-code-input {
+.tikz-app .verification-code-input {
   font-family: 'Courier New', monospace;
   font-size: 18px;
   text-align: center;
@@ -343,7 +371,7 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
 }
 
 /* Avatar cropper modal */
-.avatar-cropper-modal {
+.tikz-app .avatar-cropper-modal {
   display: none;
   position: fixed;
   top: 0;
@@ -356,11 +384,11 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
   justify-content: center;
 }
 
-.avatar-cropper-modal.show {
+.tikz-app .avatar-cropper-modal.show {
   display: flex;
 }
 
-.cropper-modal-content {
+.tikz-app .cropper-modal-content {
   background: white;
   padding: 32px 24px;
   border-radius: 14px;
@@ -370,17 +398,17 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
   position: relative;
 }
 
-.cropper-modal-title {
+.tikz-app .cropper-modal-title {
   margin-bottom: 18px;
 }
 
-.cropper-preview-container {
+.tikz-app .cropper-preview-container {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.cropper-preview {
+.tikz-app .cropper-preview {
   width: 220px;
   height: 220px;
   border-radius: 50%;
@@ -391,41 +419,34 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
   justify-content: center;
 }
 
-.cropper-image {
+.tikz-app .cropper-image {
   max-width: 100%;
   min-width: 100%;
   min-height: 100%;
   display: block;
 }
 
-.cropper-actions {
+.tikz-app .cropper-actions {
   margin-top: 18px;
 }
 
 /* Responsive design */
 @media (max-width: 768px) {
-  .profile-section {
+.tikz-app .profile-section {
     grid-template-columns: 1fr;
     gap: 20px;
-  }
-
-  .container {
-    padding: 24px;
   }
 }
 
 @media (max-width: 600px) {
-  .container {
-    padding: 20px;
-  }
 
-  .avatar, .avatar-placeholder {
+.tikz-app .avatar, .tikz-app .avatar-placeholder {
     width: 80px;
     height: 80px;
     font-size: 32px;
   }
 
-  .btn, .btn-primary, .btn-secondary {
+.tikz-app .btn, .tikz-app .btn-primary, .tikz-app .btn-secondary {
     width: 100%;
     font-size: 17px;
     margin: 8px 0;

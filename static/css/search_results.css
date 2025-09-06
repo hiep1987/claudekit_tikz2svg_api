@@ -1,36 +1,80 @@
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+/* Search Results Page Styles */
+
+/* TikZ App Scoped Container */
+.tikz-app {
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* Body and Container */
+html, body {
+    margin: 0 auto;
+    padding: 20px;
     background-color: #fafafa;
 }
 
+/* Box-sizing scoped to our page layout only (avoid overriding Bootstrap) */
+.tikz-app .page-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.tikz-app .page-container *,
+.tikz-app .page-container *::before,
+.tikz-app .page-container *::after {
+    box-sizing: inherit;
+}
+
+.tikz-app button, 
+.tikz-app input, 
+.tikz-app select, 
+.tikz-app textarea {
+    font-family: inherit;
+}
+
 /* Preserve monospace fonts for code editors */
-.CodeMirror, .CodeMirror * {
+.tikz-app .CodeMirror, 
+.tikz-app .CodeMirror * {
     font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Cascadia Code', 'Inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace !important;
     font-feature-settings: "liga" 1, "calt" 1;
     font-variant-ligatures: contextual;
 }
 
 /* Preserve monospace for any code-related elements */
-pre, code, .code, .tikz-code, textarea[name="code"] {
+.tikz-app pre, 
+.tikz-app code, 
+.tikz-app .code, 
+.tikz-app .tikz-code, 
+.tikz-app textarea[name="code"] {
     font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Cascadia Code', 'Inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace !important;
     font-feature-settings: "liga" 1, "calt" 1;
     font-variant-ligatures: contextual;
 }
 
-.container {
-    background: white;
-    padding: 32px;
-    border-radius: 16px;
+/* Search Header Container */
+.tikz-app .search-header-container {
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(8px);
+    padding: 20px 0;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border: none;
+    border-radius: 1rem;
     box-shadow: 0 8px 32px rgba(0,0,0,0.08);
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    box-sizing: border-box;
-    overflow-x: hidden;
+}
+
+/* Files Section Container */
+.tikz-app .files-section-container {
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(8px);
+    padding: 40px 0;
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
 }
 
 /* Files Grid */
-.files-grid {
+.tikz-app .files-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 20px;
@@ -41,23 +85,23 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
 
 /* Mobile responsiveness align with index */
 @media (max-width: 768px) {
-  .files-section {
+  .tikz-app .files-section {
       margin-top: 20px;
       padding: 20px;
   }
-  .files-grid {
+  .tikz-app .files-grid {
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 12px;
   }
-  .file-card {
+  .tikz-app .file-card {
       width: 100%;
       min-width: 0;
   }
-  .file-actions {
+  .tikz-app .file-actions {
       flex-direction: column;
       gap: 8px;
   }
-  .file-actions a, .file-actions button {
+  .tikz-app .file-actions a, .tikz-app .file-actions button {
       padding: 8px 12px;
       font-size: 12px;
       min-height: 36px;
@@ -65,32 +109,32 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
 }
 
 @media (max-width: 600px) {
-  .files-grid {
+  .tikz-app .files-grid {
       grid-template-columns: 1fr;
       gap: 15px;
   }
-  .file-card {
+  .tikz-app .file-card {
       width: 100%;
       min-width: 0;
   }
 }
 
 @media (max-width: 480px) {
-  .files-section {
+  .tikz-app .files-section {
       margin-top: 15px;
       padding: 16px;
   }
-  .files-grid {
+  .tikz-app .files-grid {
       gap: 10px;
   }
-  .file-card {
+  .tikz-app .file-card {
       width: 100%;
       min-width: 0;
   }
 }
 
 /* No Files */
-.no-files {
+.tikz-app .no-files {
     text-align: center;
     color: #666;
     padding: 40px 20px;
@@ -99,14 +143,40 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
     border: 2px dashed #ddd;
 }
 
-.no-files-icon {
+.tikz-app .no-files-icon {
     font-size: 48px;
     margin-bottom: 16px;
     opacity: 0.5;
 }
 
+.tikz-app .no-files h4 {
+    color: #6c757d;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.tikz-app .no-files p {
+    color: #868e96;
+    margin: 0;
+    font-size: 14px;
+}
+
+.tikz-app .no-files .back-link {
+    margin-top: 10px;
+    font-size: 0.9rem;
+}
+
+.tikz-app .no-files .back-link a {
+    color: #1976d2;
+    text-decoration: none;
+}
+
+.tikz-app .no-files .back-link a:hover {
+    text-decoration: underline;
+}
+
 /* Search Results Header */
-.search-results-header {
+.tikz-app .search-results-header {
     text-align: center;
     margin-bottom: 30px;
     padding: 20px;
@@ -115,17 +185,23 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
     border-radius: 16px;
 }
 
-.search-results-header h1 {
+.tikz-app .search-results-header h1 {
     font-size: 2rem;
     margin-bottom: 10px;
 }
 
-.search-results-header .search-query {
+.tikz-app .search-results-header .search-query {
     font-size: 1.2rem;
     opacity: 0.9;
 }
 
-.back-to-home {
+.tikz-app .search-results-header .results-count {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.tikz-app .back-to-home {
     display: inline-block;
     margin-top: 15px;
     padding: 10px 20px;
@@ -136,7 +212,16 @@ pre, code, .code, .tikz-code, textarea[name="code"] {
     transition: background 0.3s;
 }
 
-.back-to-home:hover {
+.tikz-app .back-to-home:hover {
     background: rgba(255, 255, 255, 0.3);
     color: white;
+    text-decoration: none;
+}
+
+/* Footer */
+.tikz-app .site-footer {
+    text-align: center;
+    color: #888;
+    font-size: 14px;
+    margin-top: 40px;
 }

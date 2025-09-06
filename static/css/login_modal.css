@@ -1,5 +1,5 @@
 /* Shared Login Modal Styles */
-#login-modal {
+.tikz-app #login-modal {
   display: none;
   position: fixed;
   top: 0;
@@ -12,7 +12,7 @@
   justify-content: center;
 }
 
-.login-modal-box {
+.tikz-app .login-modal-box {
   background: white;
   padding: 32px 40px;
   border-radius: 12px;
@@ -21,22 +21,22 @@
   text-align: center;
 }
 
-#login-modal h3 { margin-bottom: 24px; }
-#login-modal p { margin-bottom: 16px; color: #666; }
-#login-modal ul {
+.tikz-app #login-modal h3 { margin-bottom: 24px; }
+.tikz-app #login-modal p { margin-bottom: 16px; color: #666; }
+.tikz-app #login-modal ul {
   margin-bottom: 24px;
   color: #666;
   text-align: left;
   display: inline-block;
 }
 
-#login-modal .login-note {
+.tikz-app #login-modal .login-note {
   margin-bottom: 24px;
   color: #1976d2;
   font-weight: 500;
 }
 
-.login-modal-actions {
+.tikz-app .login-modal-actions {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -44,9 +44,9 @@
   flex-wrap: wrap;
 }
 
-#modal-login-btn { margin: 0; }
+.tikz-app #modal-login-btn { margin: 0; }
 
-.btn-cancel {
+.tikz-app .btn-cancel {
   background: #eee;
   color: #333;
   padding: 12px 24px;

@@ -58,6 +58,7 @@ function initializeFileCardActions() {
 function initializeFileCardTouchEvents() {
     // Detect touch environment
     const isTouch = document.documentElement.classList.contains('is-touch');
+    console.log('🔍 Touch detection:', isTouch);
     if (!isTouch) return;
 
     document.addEventListener('click', function(e) {
@@ -85,6 +86,7 @@ function initializeFileCardTouchEvents() {
         if (currentTapCount === 0) {
             e.preventDefault();
             e.stopPropagation();
+            console.log('📱 Mobile tap 1 on button:', btn.dataset.action);
             // reset other buttons
             card.querySelectorAll('.Btn').forEach(otherBtn => {
                 if (otherBtn !== btn) {
@@ -106,6 +108,7 @@ function initializeFileCardTouchEvents() {
         if (currentTapCount === 1) {
             // Execute based on data-action attribute
             const action = btn.dataset.action;
+            console.log('📱 Mobile tap 2 executing:', action);
             
             if (!action) {
                 // Fallback for buttons without data-action
@@ -144,6 +147,18 @@ function initializeFileCardTouchEvents() {
                 case 'download-image':
                     const downloadFilename = btn.getAttribute('data-filename');
                     if (downloadFilename) window.location.href = `/view_svg/${downloadFilename}`;
+                    btn.dataset.tapCount = '0';
+                    btn.classList.remove('individual-active', 'ready-to-execute');
+                    break;
+                    
+                case 'delete-file':
+                    console.log('🗑️ Mobile delete executing...');
+                    const fileId = btn.getAttribute('data-file-id');
+                    console.log('🔍 File ID:', fileId);
+                    if (fileId && confirm('Bạn có chắc muốn xóa file này? Hành động này không thể hoàn tác!')) {
+                        console.log('✅ User confirmed, calling deleteFile()');
+                        deleteFile(fileId, btn);
+                    }
                     btn.dataset.tapCount = '0';
                     btn.classList.remove('individual-active', 'ready-to-execute');
                     break;

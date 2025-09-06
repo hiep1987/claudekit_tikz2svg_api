@@ -2420,6 +2420,47 @@ def profile_followed_posts(user_id):
         if not user:
             return "User not found", 404
 
+        # Fetch followed posts data for server-side rendering
+        followed_posts = []
+        if is_owner:  # Only fetch for owner
+            cursor.execute("""
+                SELECT 
+                    s.id, 
+                    s.filename, 
+                    s.tikz_code, 
+                    s.created_at,
+                    u.id as creator_id,
+                    u.username as creator_username,
+                    COUNT(sl.id) as like_count,
+                    CASE WHEN user_like.id IS NOT NULL THEN 1 ELSE 0 END as is_liked_by_current_user
+                FROM svg_image s
+                JOIN user u ON s.user_id = u.id
+                JOIN user_follow uf ON u.id = uf.followee_id
+                LEFT JOIN svg_like sl ON s.id = sl.svg_image_id
+                LEFT JOIN svg_like user_like ON s.id = user_like.svg_image_id AND user_like.user_id = %s
+                WHERE uf.follower_id = %s
+                GROUP BY s.id, s.filename, s.tikz_code, s.created_at, u.id, u.username, user_like.id
+                ORDER BY s.created_at DESC
+                LIMIT 50
+            """, (current_user.id, current_user.id))
+            
+            for row in cursor.fetchall():
+                followed_posts.append({
+                    'id': row['id'],
+                    'filename': row['filename'],
+                    'tikz_code': row['tikz_code'],
+                    'url': url_for('static', filename=row['filename']),
+                    'creator_id': row['creator_id'],
+                    'creator_username': row['creator_username'],
+                    'created_time_vn': format_time_vn(row['created_at']) if 'format_time_vn' in globals() else str(row['created_at']),
+                    'created_time': str(row['created_at']),
+                    'like_count': row['like_count'] or 0,
+                    'is_liked_by_current_user': bool(row['is_liked_by_current_user'])
+                })
+
+        cursor.close()
+        conn.close()
+        
         return render_template("profile_followed_posts.html",
             username=user["username"],
             avatar=user["avatar"],
@@ -2427,6 +2468,7 @@ def profile_followed_posts(user_id):
             user_email=user["email"],
             user_id=user_id,
             is_owner=is_owner,
+            followed_posts=followed_posts,
             current_user_email=current_user.email if current_user.is_authenticated else None,
             current_username=current_user.username if current_user.is_authenticated else None,
             current_avatar=current_user.avatar if current_user.is_authenticated else None

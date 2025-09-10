@@ -43,10 +43,9 @@
     <div class="search-container">
         <h3 class="search-title">Tìm kiếm ảnh SVG</h3>
         <div class="group">
-            <svg viewBox="0 0 24 24" aria-hidden="true" class="icon">
-                <g>
-                    <path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5-7.5-7.5 3.365-7.5 7.5z"></path>
-                </g>
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" class="icon">
+                <path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+                      d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607z"/>
             </svg>
             <input class="input" type="search" placeholder="Tìm kiếm..." id="main-search-input" />
             <div id="search-suggestions" class="search-suggestions"></div>
@@ -56,13 +55,13 @@
 
 <!-- Block 2: Input-Preview Section -->
 <div class="input-preview-section page-container">
-    <h2>Chuyển đổi TikZ sang SVG/PNG/JPEG</h2>
+    <h2 class="index-title">Chuyển đổi TikZ sang SVG/PNG/JPEG</h2>
 
     <div class="table-scroll-x">
       <div class="table-content">
         <div class="col">
           <form id="tikz-form" method="post" onsubmit="console.log('Form submit event'); return submitTikzCodeAjax(event)">
-            <textarea name="code" id="code" rows="12" placeholder="Nhập code TikZ tại đây...">{{ tikz_code|default('') }}</textarea>
+            <textarea name="code" id="code" class="tikz-code-textarea" rows="12" placeholder="Nhập code TikZ tại đây...">{{ tikz_code|default('') }}</textarea>
             <div class="d-flex justify-content-end align-items-center gap-2" id="compile-save-row">
               <button type="submit" id="compile-btn" class="compile-save-row-btn" {% if not logged_in %}title="Bạn cần đăng nhập Google để sử dụng"{% endif %}>Biên dịch</button>
               <button

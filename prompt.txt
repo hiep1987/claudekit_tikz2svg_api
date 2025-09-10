@@ -88,3 +88,239 @@
 
   /* Glass Morphism */
   --glass-bg-light, --glass-blur-medium, --glass-shadow
+
+
+  **********************
+  Dựa trên những gì chúng ta đã thực hiện trong phiên này, đây là câu lệnh 
+  prompt tối ưu để bắt đầu phiên làm việc mới:
+
+  🎯 PROMPT TEMPLATE PHIÊN MỚI:
+
+  Tiếp tục phát triển dự án tikz2svg_api theo CSS Foundation System 
+  methodology đã thiết lập.
+
+  **CONTEXT:**
+  - Dự án: TikZ to SVG converter với Flask + MySQL + CSS Foundation System
+  - Migration Status: 6/10 files completed (index.css, profile_*.css done)
+  - Methodology: backup → remove conflicts → add scoping → replace variables →
+   test
+
+  **FOUNDATION SYSTEM:**
+  - Variables: static/css/foundation/master-variables.css
+  - Base: static/css/foundation/global-base.css  
+  - Scoping: .tikz-app prefix required
+  - Glass morphism: --glass-bg-*, --text-on-glass, accessibility ≥4.5:1
+
+  **NEXT PRIORITIES:**
+  1. file_card.css (core component used across pages)
+  2. navigation.css (global navigation)
+  3. search_results.css
+  4. view_svg.css
+
+  **TASK:** [Your specific request here]
+
+  **METHODOLOGY RULES:**
+  ✅ Use TodoWrite tool để track progress
+  ✅ Backup trước khi edit: .backup_migration
+  ✅ Remove duplicate html/body/:root rules
+  ✅ Convert hardcoded → var(--variable-name)
+  ✅ Test conflicts: grep -rn ":root\|html.*{\|body.*{" static/css/
+  ✅ Document changes trong migration comments
+
+  📝 PROMPT EXAMPLES CỤ THỂ:
+
+  1. Tiếp Tục Migration:
+
+  Tiếp tục CSS Foundation migration cho dự án tikz2svg_api. 
+  Migrate file_card.css theo methodology đã thiết lập.
+
+  2. Fix Issues:
+
+  Fix CSS conflicts trong tikz2svg_api sử dụng Foundation System methodology.
+  Kiểm tra và resolve duplicate rules.
+
+  3. Component Enhancement:
+
+  Cải thiện navigation component trong tikz2svg_api sử dụng foundation 
+  variables.
+  Maintain glass morphism design và accessibility standards.
+
+  4. New Feature:
+
+  Thêm [feature name] cho tikz2svg_api theo CSS Foundation System.
+  Ensure consistency với migration methodology đã thiết lập.
+
+  ⚡ QUICK START VARIANTS:
+
+  Ngắn Gọn:
+
+  Tiếp tục tikz2svg_api CSS Foundation migration - [specific task]
+
+  Chi Tiết:
+
+  tikz2svg_api: Continue CSS Foundation System work
+  Context: 6/10 files migrated, next priority file_card.css
+  Task: [your specific request]
+  Method: Foundation variables + .tikz-app scoping + TodoWrite tracking
+
+  🎯 RECOMMENDED STARTER:
+
+  Tiếp tục phát triển tikz2svg_api theo CSS Foundation methodology.
+  Migration progress: 6/10 files done, cần làm tiếp file_card.css.
+  Task: [điền task cụ thể ở đây]
+  Use TodoWrite để track progress.
+
+Dựa trên CSS Foundation System và architecture đã thiết lập, đây là prompt 
+  templates để phát triển trang mới tuân thủ chuẩn dự án:
+
+  🎯 PROMPT TEMPLATES CHO TRANG MỚI:
+
+  📄 1. TEMPLATE CHÍNH - TRANG MỚI:
+
+  Tạo trang mới [PAGE_NAME] cho dự án tikz2svg_api tuân thủ architecture đã
+  thiết lập.
+
+  **FOUNDATION REQUIREMENTS:**
+  ✅ Template inheritance: {% extends "base.html" %}
+  ✅ CSS Foundation System: sử dụng master-variables.css
+  ✅ Scoping: tất cả CSS với .tikz-app prefix
+  ✅ Glass morphism: --glass-bg-*, --text-header-glass
+  ✅ Responsive: foundation breakpoints
+  ✅ Accessibility: contrast ≥ 4.5:1
+
+  **FILE STRUCTURE:**
+  - Template: templates/[page_name].html
+  - CSS: static/css/[page_name].css  
+  - JS: static/js/[page_name].js (nếu cần)
+  - Route: thêm vào app.py
+
+  **DESIGN SYSTEM:**
+  - Colors: var(--primary-color), var(--text-on-glass)
+  - Spacing: var(--spacing-*) (8px base)
+  - Typography: var(--font-size-*), var(--font-weight-*)
+  - Components: page-container, glass morphism containers
+
+  **FUNCTIONALITY:** [Mô tả chức năng trang]
+
+  Use TodoWrite để track development progress.
+
+  🎨 2. TEMPLATE CHO UI/UX ENHANCEMENT:
+
+  Thiết kế giao diện [PAGE_NAME] cho tikz2svg_api với modern UI/UX.
+
+  **DESIGN STANDARDS:**
+  ✅ Glass morphism design language
+  ✅ Consistent với existing pages (index, profile)
+  ✅ Mobile-first responsive approach
+  ✅ Vietnamese language support
+  ✅ CodeMirror/Quill.js integration nếu cần
+
+  **COMPONENT REUSE:**
+  - Navigation: include_navbar = true
+  - File cards: include_file_card = true  
+  - Modals: include_login_modal = true
+  - Form elements: foundation form styles
+
+  **ACCESSIBILITY:**
+  - WCAG AA compliance
+  - Keyboard navigation
+  - Screen reader support
+  - High contrast ratios
+
+  **TASK:** [Chi tiết yêu cầu UI]
+
+  ⚙️ 3. TEMPLATE CHO BACKEND INTEGRATION:
+
+  Implement backend functionality cho trang [PAGE_NAME] trong tikz2svg_api.
+
+  **FLASK REQUIREMENTS:**
+  ✅ RESTful route conventions
+  ✅ Database: parameterized queries
+  ✅ Authentication: Google OAuth + Flask-Login
+  ✅ Error handling: try-catch với logging
+  ✅ Rate limiting: custom implementation
+
+  **INTEGRATION POINTS:**
+  - Database: MySQL models và queries
+  - Email: Flask-Mail với Zoho SMTP nếu cần
+  - File processing: TikZ pipeline nếu liên quan
+  - Static files: unique naming conventions
+
+  **SECURITY:**
+  - Input validation & sanitization
+  - CSRF protection
+  - Environment variables từ .env
+  - No hardcoded credentials
+
+  **FUNCTIONALITY:** [Mô tả backend logic]
+
+  🔧 4. TEMPLATE CHO FULL-STACK FEATURE:
+
+  Phát triển tính năng [FEATURE_NAME] cho tikz2svg_api - full-stack
+  implementation.
+
+  **ARCHITECTURE COMPLIANCE:**
+  ✅ Frontend: Jinja2 + CSS Foundation + Vanilla JS
+  ✅ Backend: Flask + MySQL + proper error handling
+  ✅ Design: Glass morphism + accessibility standards
+  ✅ Performance: Optimized queries + caching
+
+  **IMPLEMENTATION SCOPE:**
+  1. Database schema changes (nếu cần)
+  2. Flask routes + business logic
+  3. Frontend templates + CSS Foundation
+  4. JavaScript functionality (ES6+)
+  5. Testing strategy
+
+  **INTEGRATION:**
+  - TikZ processing pipeline
+  - User authentication system
+  - File management system
+  - Email notifications (nếu cần)
+
+  **QUALITY GATES:**
+  - Visual regression testing
+  - Accessibility compliance
+  - Mobile responsiveness
+  - Performance benchmarks
+
+  **FEATURE DESCRIPTION:** [Chi tiết tính năng]
+
+  📋 SPECIFIC USE CASES:
+
+  Trang Mới Đơn Giản:
+
+  Tạo trang About cho tikz2svg_api với CSS Foundation System.
+  Static content, glass morphism design, responsive layout.
+
+  Trang Có Database:
+
+  Tạo trang User Dashboard cho tikz2svg_api.
+  Display user statistics, file management, glass morphism UI.
+  Backend: MySQL queries, authentication required.
+
+  Trang Có Form:
+
+  Tạo trang Contact/Feedback cho tikz2svg_api.
+  Form submission, email integration, validation, Foundation CSS.
+
+  Admin/Management Page:
+
+  Tạo Admin Panel cho tikz2svg_api.
+  User management, system stats, authentication check.
+  Restricted access, advanced UI components.
+
+  🎯 RECOMMENDED STARTER:
+
+  Phát triển [PAGE/FEATURE NAME] cho tikz2svg_api tuân thủ architecture.
+
+  Foundation System: CSS variables + .tikz-app scoping
+  Template: {% extends "base.html" %} inheritance  
+  Design: Glass morphism + accessibility ≥ 4.5:1
+  Backend: Flask + MySQL + proper error handling
+
+  Chức năng: [mô tả chi tiết]
+  Use TodoWrite tracking + document changes.
+
+  📌 Thay [PAGE/FEATURE NAME] và [mô tả chi tiết] để bắt đầu development trang
+   mới! 🚀

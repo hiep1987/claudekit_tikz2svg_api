@@ -63,7 +63,7 @@ html, body {
     overflow-x: hidden;
 }
 
-.tikz-app h2 {
+.tikz-app .view-svg-title {
     text-align: center;
     color: #1976d2;
     margin-bottom: 24px;

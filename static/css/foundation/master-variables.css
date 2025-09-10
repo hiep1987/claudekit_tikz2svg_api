@@ -16,12 +16,20 @@
   --danger-dark: #b91c1c;
   --danger-light: #ef4444;
   --danger-bg: rgba(211, 47, 47, 0.1);
+  --danger-bg-light: rgba(211, 47, 47, 0.05);
+  --danger-border: #fecaca;
   
   /* Success Palette */
   --success-color: #4caf50;
   --success-dark: #2e7d32;
   --success-light: #66bb6a;
   --success-bg: rgba(76, 175, 80, 0.1);
+  
+  /* Info Palette */
+  --info-color: #3b82f6;
+  --info-dark: #1d4ed8;
+  --info-darker: #1e40af;
+  --info-bg: rgba(59, 130, 246, 0.1);
   
   /* Warning Palette */
   --warning-color: #f59e0b;
@@ -37,6 +45,7 @@
   --text-lighter: #cccccc;
   --text-white: #ffffff;
   --text-black: #000000;
+  --text-dark: #1a1a1a;
   
   /* Enhanced Contrast Text for Glass Morphism */
   --text-on-glass: #2d3436;          /* High contrast on glass backgrounds */
@@ -192,12 +201,42 @@
   --z-tooltip: 1070;
   --z-highest: 9999;
   
+  /* ===== MODAL SYSTEM ===== */
+  --modal-overlay: rgba(0, 0, 0, 0.5);
+  
+  /* ===== SCROLLBAR SYSTEM ===== */
+  --scrollbar-thumb: #888888;
+  --scrollbar-thumb-hover: #666666;
+  --scrollbar-track: #f1f1f1;
+  --scrollbar-width: 8px;
+  
   /* ===== BREAKPOINTS (for JS usage) ===== */
   --breakpoint-sm: 640px;
   --breakpoint-md: 768px;
   --breakpoint-lg: 1024px;
   --breakpoint-xl: 1280px;
   --breakpoint-2xl: 1536px;
+  
+  /* ===== FORM INPUT SYSTEM ===== */
+  --input-bg: #f8f9fa;                    /* Enhanced contrast - subtle off-white */
+  --input-text: var(--text-primary);       /* #333333 - high contrast (8.6:1 ratio) */
+  --input-placeholder: #4a5568;           /* Enhanced contrast - darker gray */
+  --input-border: #e2e8f0;                /* Subtle border for definition */
+  --input-border-focus: var(--primary-color);
+  --input-focus-bg: #ffffff;              /* Crisp white on focus */
+  --input-focus-shadow: 0 0 0 3px rgba(25, 118, 210, 0.15);
+  
+  /* ===== ICON SYSTEM ===== */
+  --input-icon-size: 20px;                /* 20px - optimal visibility */
+  --input-icon-default: #52525b;          /* Gray-600 - visible but subtle (6.3:1 ratio) */
+  --input-icon-hover: #374151;            /* Gray-700 - more prominent (8.9:1 ratio) */
+  --input-icon-focus: var(--primary-color); /* Brand blue - active state (5.1:1 ratio) */
+  
+  /* Icon Sizes */
+  --icon-sm: 16px;                        /* Small icons */
+  --icon-md: 20px;                        /* Medium icons (default) */
+  --icon-lg: 24px;                        /* Large icons */
+  --icon-xl: 32px;                        /* Extra large icons */
   
   /* ===== MOBILE RESPONSIVE ADJUSTMENTS ===== */
   --container-padding-mobile-sm: var(--spacing-8) 0;

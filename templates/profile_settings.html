@@ -1,56 +1,75 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Cài đặt và quản lý hồ sơ người dùng TikZ to SVG">
-    <meta name="keywords" content="TikZ, SVG, profile settings, user settings">
-    <meta name="author" content="TikZ to SVG">
-    <meta name="robots" content="index, follow">
-    <meta property="og:title" content="Cài đặt hồ sơ - TikZ to SVG">
-    <meta property="og:description" content="Cài đặt và quản lý hồ sơ người dùng TikZ to SVG">
-    <meta property="og:type" content="website">
-    <meta property="og:locale" content="vi_VN">
-    <title>Cài đặt hồ sơ - TikZ to SVG</title>
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
-    <link rel="icon" type="image/png" sizes="48x48" href="{{ url_for('static', filename='favicon-48x48.png') }}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
-    <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='android-chrome-192x192.png') }}">
-    <link rel="icon" type="image/png" sizes="512x512" href="{{ url_for('static', filename='android-chrome-512x512.png') }}">
-    <link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='favicon-32x32.png') }}">
-    
-    <!-- Navigation CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/navigation.css', v='1.0') }}">
-    
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
-    
-    <!-- Programming Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Fira+Code:wght@400;500;600&family=Source+Code+Pro:wght@400;500;600&family=Inconsolata:wght@400;500;600&display=swap" rel="stylesheet">
-    
-    <!-- Cropper.js CSS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
-    
-    <!-- Quill Editor CSS -->
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-    
-    <!-- Bio Editor Custom CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bio-editor.css', v='1.0') }}">
-    
-    <!-- Profile Settings Custom CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/profile_settings.css', v='1.0') }}">
+{% extends "base.html" %}
 
-</head>
-<body>
-    <!-- TikZ App Container Scope -->
-    <div class="tikz-app">
-    
-    {% include 'partials/_navbar.html' %}
+{# Configuration flags #}
+{% set include_highlight_js = false %}
+{% set include_codemirror = false %}
+{% set include_file_card = false %}
+{% set include_navigation = true %}
+{% set include_login_modal = true %}
+{% set include_navbar = true %}
+
+{# Page Title #}
+{% block title %}Cài đặt hồ sơ - TikZ to SVG{% endblock %}
+
+{# Custom Meta Tags #}
+{% block meta %}
+<meta name="description" content="Cài đặt và quản lý hồ sơ người dùng TikZ to SVG">
+<meta name="keywords" content="TikZ, SVG, profile settings, user settings">
+<meta name="author" content="TikZ to SVG">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="Cài đặt hồ sơ - TikZ to SVG">
+<meta property="og:description" content="Cài đặt và quản lý hồ sơ người dùng TikZ to SVG">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="vi_VN">
+{% endblock %}
+
+{# External Libraries CSS #}
+{% block extra_css %}
+<!-- Cropper.js CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+
+<!-- Quill Editor CSS -->
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+
+<!-- Bio Editor Custom CSS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bio-editor.css', v='1.0') }}">
+
+<!-- Profile Settings Custom CSS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile_settings.css', v='1.0') }}">
+
+<!-- Verification Enhancement Styles -->
+<style>
+.resend-verification-container {
+    margin: 15px 0;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #007bff;
+}
+
+#resend-verification-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+#countdown-text {
+    font-weight: bold;
+    color: #dc3545;
+}
+
+.verification-info-highlight {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.verification-expired {
+    color: #dc3545;
+    font-weight: bold;
+}
+</style>
+{% endblock %}
+
+{% block content %}
 
     <div class="page-container">
         <div class="profile-content-container">
@@ -156,15 +175,36 @@
 
                 <div class="actions" id="save-button-section">
                     <button type="submit" class="btn btn-primary">💾 Lưu thay đổi</button>
+                    
+                    <!-- UX: Status message when verification form is hidden -->
+                    {% if has_pending_verification and not show_verification_form %}
+                    <div class="alert alert-info mt-3">
+                        <strong>🔐 Xác thực đã hoàn tất!</strong><br>
+                        <small>Bạn có thể tiếp tục thay đổi profile mà không cần nhập mã xác thực. 
+                        Mã hiện tại còn {{ 5 - usage_count }} lượt sử dụng.</small>
+                    </div>
+                    {% endif %}
                 </div>
                 
                 <!-- Form xác thực -->
-                <div id="verification-section" class="verification-section{% if has_pending_verification %} show{% endif %}">
+                <div id="verification-section" class="verification-section{% if show_verification_form %} show{% endif %}">
                     <h3 class="verification-title">🔐 Xác thực thay đổi</h3>
                     <p class="verification-text">
                         Chúng tôi đã gửi mã xác thực đến email của bạn. Vui lòng nhập mã để hoàn tất thay đổi.
-                        <br><small class="verification-note">💡 <strong>Lưu ý:</strong> Email có thể nằm trong thư mục Spam/Junk. Nếu không nhận được email, vui lòng liên hệ <a href="mailto:support@tikz2svg.com" class="verification-link">support@tikz2svg.com</a> để được hỗ trợ.</small>
+                        <br><small class="verification-note">💡 <strong>Lưu ý:</strong> Email có thể nằm trong thư mục Spam/Junk.</small>
                     </p>
+                    
+                    <!-- Resend Verification Button with Countdown -->
+                    <div class="resend-verification-container">
+                        <button type="button" id="resend-verification-btn" class="btn btn-outline-secondary" disabled>
+                            <span id="resend-text">📧 Gửi lại mã xác thực</span>
+                            <span id="countdown-text"> (60s)</span>
+                        </button>
+                            <small class="text-muted d-block mt-1">
+                                <span id="verification-info">Mã hiện tại có hiệu lực trong 10 phút và được sử dụng tối đa 5 lần.</span>
+                                <br><span id="resend-attempts-info" class="text-warning">Còn lại <span id="remaining-resend-attempts">3</span> lần gửi lại mã.</span>
+                            </small>
+                    </div>
                     
                     {% if verification_attempts > 0 %}
                     <div class="verification-alert {% if verification_attempts >= 4 %}verification-alert-danger{% else %}verification-alert-warning{% endif %}">
@@ -190,7 +230,9 @@
                                autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]*" enterkeyhint="done"
                                autocapitalize="off" autocorrect="off" spellcheck="false"
                                class="verification-code-input">
-                        <small class="text-muted">Mã có hiệu lực trong 24 giờ</small>
+                        <small class="text-muted">
+                            <span id="code-usage-info">Mã có hiệu lực trong 10 phút, còn lại <span id="remaining-uses">5</span> lần sử dụng</span>
+                        </small>
                     </div>
                     
                     <div class="actions">
@@ -220,20 +262,285 @@
         </div>
       </div>
     </div>
+{% endblock %}
 
-    </div> <!-- End .tikz-app -->
+{# External Libraries JavaScript #}
+{% block extra_js %}
+<!-- Navigation JavaScript -->
+<script src="{{ url_for('static', filename='js/navigation.js', v='1.0') }}"></script>
 
-    <!-- Navigation JavaScript -->
-    <script src="{{ url_for('static', filename='js/navigation.js', v='1.0') }}"></script>
+<!-- Cropper.js JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+<!-- Quill Editor JavaScript -->
+<script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+
+<!-- Profile Settings JavaScript -->
+<script src="{{ url_for('static', filename='js/profile_settings.js', v='1.0') }}"></script>
+
+<!-- Verification Enhancement JavaScript -->
+<script>
+// Verification Enhancement Logic
+class VerificationEnhancer {
+        constructor() {
+            this.countdownTimer = null;
+            this.countdownSeconds = 60;
+            this.maxUses = 5;
+            this.remainingUses = 5;
+            this.codeValidMinutes = 10;
+            this.codeIssuedTime = null;
+            this.maxResendAttempts = 3;
+            this.resendAttempts = 0;
+            
+            this.initializeElements();
+            this.startCountdown();
+            this.bindEvents();
+        }
     
-    <!-- JavaScript cho header -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    initializeElements() {
+        this.resendBtn = document.getElementById('resend-verification-btn');
+        this.countdownText = document.getElementById('countdown-text');
+        this.resendText = document.getElementById('resend-text');
+        this.remainingUsesSpan = document.getElementById('remaining-uses');
+        this.verificationInfo = document.getElementById('verification-info');
+        this.codeUsageInfo = document.getElementById('code-usage-info');
+        this.remainingResendAttemptsSpan = document.getElementById('remaining-resend-attempts');
+        
+        // Set initial values
+        if (this.remainingUsesSpan) {
+            this.remainingUsesSpan.textContent = this.remainingUses;
+        }
+        
+        // Initialize remaining resend attempts display
+        if (this.remainingResendAttemptsSpan) {
+            this.remainingResendAttemptsSpan.textContent = this.maxResendAttempts - this.resendAttempts;
+        }
+        
+        // Mark code issued time (simulate from server)
+        this.codeIssuedTime = new Date();
+    }
     
-    <!-- Quill Editor -->
-    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
-    <script src="{{ url_for('static', filename='js/profile_settings.js', v='1.0') }}"></script>
+    startCountdown() {
+        if (!this.resendBtn || !this.countdownText) return;
+        
+        this.resendBtn.disabled = true;
+        this.countdownTimer = setInterval(() => {
+            this.countdownSeconds--;
+            this.countdownText.textContent = ` (${this.countdownSeconds}s)`;
+            
+            if (this.countdownSeconds <= 0) {
+                this.enableResendButton();
+            }
+        }, 1000);
+    }
+    
+    enableResendButton() {
+        if (this.countdownTimer) {
+            clearInterval(this.countdownTimer);
+            this.countdownTimer = null;
+        }
+        
+        if (this.resendBtn && this.countdownText) {
+            this.resendBtn.disabled = false;
+            this.countdownText.textContent = '';
+            this.resendBtn.classList.remove('btn-outline-secondary');
+            this.resendBtn.classList.add('btn-outline-primary');
+        }
+    }
+    
+    bindEvents() {
+        if (this.resendBtn) {
+            this.resendBtn.addEventListener('click', () => {
+                this.handleResendClick();
+            });
+        }
+        
+        // Monitor form submissions to track usage
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                const verificationSection = document.getElementById('verification-section');
+                if (verificationSection && verificationSection.classList.contains('show')) {
+                    this.handleVerificationSubmit();
+                }
+            });
+        }
+    }
+    
+    async handleResendClick() {
+        if (this.resendBtn.disabled) return;
+        
+        // Security check: Limit resend attempts
+        if (this.resendAttempts >= this.maxResendAttempts) {
+            this.hideVerificationForm();
+            return;
+        }
+        
+        // Increment attempt counter
+        this.resendAttempts++;
+        
+        // Show loading state
+        const originalText = this.resendText.textContent;
+        this.resendText.textContent = '⏳ Đang gửi...';
+        this.resendBtn.disabled = true;
+        
+        try {
+            // Get user ID from URL
+            const userIdMatch = window.location.pathname.match(/\/profile\/(\d+)\/settings/);
+            const userId = userIdMatch ? userIdMatch[1] : null;
+            
+            if (!userId) {
+                throw new Error('Không tìm thấy user ID');
+            }
+            
+            // Make AJAX call to backend
+            const response = await fetch(`/profile/${userId}/resend-verification`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Reset countdown and usage
+                this.countdownSeconds = 60;
+                this.remainingUses = data.remaining_uses || this.maxUses;
+                this.codeIssuedTime = new Date();
+                
+                // Update UI
+                if (this.remainingUsesSpan) {
+                    this.remainingUsesSpan.textContent = this.remainingUses;
+                }
+                
+                // Show success message
+                this.showMessage(data.message, 'success');
+                
+                // Reset button text back to original
+                this.resendText.textContent = '📧 Gửi lại mã xác thực';
+                
+                // Update remaining resend attempts display
+                if (this.remainingResendAttemptsSpan) {
+                    const remaining = this.maxResendAttempts - this.resendAttempts;
+                    this.remainingResendAttemptsSpan.textContent = remaining;
+                    
+                    // Change color if getting low
+                    const resendAttemptsInfo = document.getElementById('resend-attempts-info');
+                    if (remaining <= 1 && resendAttemptsInfo) {
+                        resendAttemptsInfo.className = 'text-danger';
+                    }
+                }
+                
+                // Restart countdown
+                this.startCountdown();
+                
+                console.log('✅ Verification code resent successfully');
+            } else {
+                throw new Error(data.message || 'Lỗi không xác định');
+            }
+            
+        } catch (error) {
+            console.error('❌ Error resending verification:', error);
+            this.showMessage(`❌ Lỗi: ${error.message}`, 'danger');
+            
+            // Restore button state on error
+            this.resendText.textContent = '📧 Gửi lại mã xác thực';
+            this.resendBtn.disabled = false;
+            this.resendBtn.classList.remove('btn-outline-secondary');
+            this.resendBtn.classList.add('btn-outline-primary');
+        }
+    }
+    
+    handleVerificationSubmit() {
+        if (this.remainingUses > 0) {
+            this.remainingUses--;
+            if (this.remainingUsesSpan) {
+                this.remainingUsesSpan.textContent = this.remainingUses;
+            }
+            
+            if (this.remainingUses === 0) {
+                this.showMessage('⚠️ Mã xác thực đã hết lượt sử dụng. Vui lòng gửi lại mã mới.', 'warning');
+            }
+        }
+    }
+    
+    showMessage(message, type) {
+        // Create temporary message
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        messageDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        // Insert before verification section
+        const verificationSection = document.getElementById('verification-section');
+        if (verificationSection && verificationSection.parentNode) {
+            verificationSection.parentNode.insertBefore(messageDiv, verificationSection);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.remove();
+                }
+            }, 5000);
+        }
+    }
+    
+    checkCodeExpiry() {
+        if (!this.codeIssuedTime) return;
+        
+        const now = new Date();
+        const elapsed = (now - this.codeIssuedTime) / (1000 * 60); // minutes
+        
+        if (elapsed >= this.codeValidMinutes) {
+            if (this.codeUsageInfo) {
+                this.codeUsageInfo.innerHTML = '<span class="verification-expired">⚠️ Mã xác thực đã hết hạn. Vui lòng gửi lại mã mới.</span>';
+            }
+            return true;
+        }
+        
+        return false;
+    }
+    
+    hideVerificationForm() {
+        // Hide the entire verification section
+        const verificationSection = document.getElementById('verification-section');
+        if (verificationSection) {
+            verificationSection.style.display = 'none';
+        }
+        
+        // Show security warning message
+        this.showMessage(
+            `🔒 <strong>Bảo mật:</strong> Bạn đã vượt quá giới hạn ${this.maxResendAttempts} lần gửi lại mã xác thực. 
+            Form xác thực đã được đóng để bảo vệ tài khoản. Vui lòng tải lại trang để thử lại.`, 
+            'warning'
+        );
+        
+        // Clear any running timers
+        if (this.countdownTimer) {
+            clearInterval(this.countdownTimer);
+            this.countdownTimer = null;
+        }
+        
+        console.log(`🔒 Security: Verification form hidden after ${this.resendAttempts} resend attempts`);
+    }
+}
 
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html> 
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById('verification-section')) {
+        window.verificationEnhancer = new VerificationEnhancer();
+        
+        // Check expiry every minute
+        setInterval(() => {
+            if (window.verificationEnhancer) {
+                window.verificationEnhancer.checkCodeExpiry();
+            }
+        }, 60000);
+    }
+});
+</script>
+{% endblock %} 

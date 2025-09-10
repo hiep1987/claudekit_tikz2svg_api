@@ -1,8 +1,36 @@
 /* ===== PROFILE FOLLOWED POSTS CSS ===== */
-/* Migrated to use CSS Foundation System - Variables from master-variables.css */
-/* Load Order: After master-variables.css and global-base.css */
+/* Page-specific styles for profile followed posts page */
 
-/* All base styles now handled by global-base.css - no duplicates */
+/* Body styling */
+html, body {
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fafafa;
+}
+
+.tikz-app button, .tikz-app input, .tikz-app select, .tikz-app textarea {
+  font-family: inherit;
+}
+
+/* Preserve monospace fonts for code editors */
+.tikz-app .CodeMirror, .tikz-app .CodeMirror * {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Cascadia Code', 'Inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace !important;
+  font-feature-settings: "liga" 1, "calt" 1;
+  font-variant-ligatures: contextual;
+}
+
+/* Preserve monospace for any code-related elements */
+.tikz-app pre, .tikz-app code, .tikz-app .code, .tikz-app .tikz-code, .tikz-app textarea[name="code"] {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Cascadia Code', 'Inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace !important;
+  font-feature-settings: "liga" 1, "calt" 1;
+  font-variant-ligatures: contextual;
+}
+
+/* TikZ App Scoped Container */
+.tikz-app {
+    width: 100%;
+    min-height: 100vh;
+}
 
 /* Navigation styles are handled by navigation.css */
 
@@ -29,7 +57,7 @@
 
 .tikz-app input[id^="followed-heart-"]:checked ~ .like .like-icon {
     fill: #ff4757;
-    animation: heartBeat var(--transition-normal) ease;
+    animation: heartBeat 0.3s ease;
 }
 
 .tikz-app input[id^="followed-heart-"]:checked ~ .like-count.one {
@@ -48,9 +76,9 @@
     position: relative;
     display: flex;
     justify-content: flex-end;
-    margin-top: var(--spacing-3);
-    z-index: var(--z-raised);
-    border-radius: var(--radius-md);
+    margin-top: 8px;
+    z-index: 100;
+    border-radius: 10px;
 }
 
 /* Like button components and heartBeat animation are handled by file_card.css */
@@ -58,16 +86,16 @@
 /* No Followed Posts */
 .tikz-app .no-followed-posts {
     text-align: center;
-    color: var(--text-muted);
-    padding: var(--spacing-20) var(--spacing-10);
-    background: var(--bg-secondary);
-    border-radius: var(--radius-lg);
-    border: 2px dashed var(--border-color);
+    color: #666;
+    padding: 40px 20px;
+    background: #f9f9f9;
+    border-radius: 16px;
+    border: 2px dashed #ddd;
 }
 
 .tikz-app .no-followed-posts-icon {
-    font-size: var(--font-size-4xl);
-    margin-bottom: var(--spacing-8);
+    font-size: 48px;
+    margin-bottom: 16px;
     opacity: 0.5;
 }
 
@@ -83,16 +111,16 @@
 /* Loading spinner styles */
 .tikz-app .loading-spinner {
     text-align: center;
-    padding: var(--spacing-10);
+    padding: 20px;
 }
 
 .tikz-app .loading-spinner > div {
     display: inline-block;
     width: 20px;
     height: 20px;
-    border: 3px solid var(--bg-secondary);
-    border-top: 3px solid var(--primary-color);
-    border-radius: var(--radius-full);
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #1976d2;
+    border-radius: 50%;
     animation: spin 1s linear infinite;
 }
 
@@ -102,14 +130,14 @@
 }
 
 .tikz-app .loading-spinner p {
-    margin-top: var(--spacing-4);
-    color: var(--text-muted);
+    margin-top: 10px;
+    color: #666;
 }
 
 /* Section title styles */
 .tikz-app .followed-posts-section h3 {
-    color: var(--primary-color);
-    margin-bottom: var(--spacing-12);
+    color: #1976d2;
+    margin-bottom: 24px;
 }
 
 /* Logout modal styles */
@@ -121,40 +149,40 @@
     width: 100vw;
     height: 100vh;
     background: rgba(0,0,0,0.3);
-    z-index: var(--z-modal);
+    z-index: 9999;
     align-items: center;
     justify-content: center;
 }
 
 .tikz-app #logout-modal .modal-content {
-    background: var(--bg-primary);
-    padding: var(--spacing-16) var(--spacing-20);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-lg);
+    background: white;
+    padding: 32px 40px;
+    border-radius: 12px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.15);
     min-width: 320px;
     text-align: center;
 }
 
 .tikz-app #logout-modal h3 {
-    margin-bottom: var(--spacing-12);
+    margin-bottom: 24px;
 }
 
 .tikz-app #logout-modal .logout-btn {
     display: inline-block;
-    background: var(--danger-color);
-    color: var(--text-white);
-    padding: var(--spacing-4) var(--spacing-12);
-    border-radius: var(--radius-sm);
+    background: #d32f2f;
+    color: white;
+    padding: 10px 28px;
+    border-radius: 6px;
     text-decoration: none;
-    font-weight: var(--font-weight-bold);
+    font-weight: bold;
 }
 
 .tikz-app #logout-modal .cancel-btn {
-    margin-left: var(--spacing-8);
-    background: var(--bg-muted);
-    color: var(--text-primary);
-    padding: var(--spacing-4) var(--spacing-12);
-    border-radius: var(--radius-sm);
+    margin-left: 18px;
+    background: #eee;
+    color: #333;
+    padding: 10px 28px;
+    border-radius: 6px;
     border: none;
-    font-weight: var(--font-weight-bold);
+    font-weight: bold;
 }

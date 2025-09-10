@@ -1,0 +1,90 @@
+🎯 Câu Lệnh Prompt Cho Phiên Làm Việc Kế Tiếp
+
+  📋 Prompt Template:
+
+  Tiếp tục CSS Architecture Foundation migration cho dự án tikz2svg_api. 
+  Áp dụng methodology đã thiết lập:
+
+  **MIGRATION RULES:**
+  1. **Foundation First**: Luôn sử dụng variables từ master-variables.css
+  2. **Conflict Resolution**: Loại bỏ duplicate html/body/:root rules
+  3. **Scoping**: Thêm .tikz-app prefix cho tất cả selectors
+  4. **Variable Conversion**: Thay hardcoded values → var(--variable-name)
+  5. **Backup Safety**: Tạo .backup_migration trước khi edit
+  6. **Responsive Consistency**: Maintain breakpoints với foundation variables
+
+  **NEXT PRIORITIES:**
+  - file_card.css (core component)
+  - navigation.css (global navigation)
+  - search_results.css
+  - view_svg.css
+
+  **OUTPUT REQUIREMENT:**
+  - Use TodoWrite tool để track progress
+  - Document changes trong migration comments
+  - Verify no conflicts: grep -rn ":root\|html.*{\|body.*{" static/css/
+
+  🔍 Các Prompt Cụ Thể:
+
+  1. Tiếp Tục File Migration:
+
+  Thực hiện CSS Foundation migration cho file [FILE_NAME].css theo methodology
+   đã thiết lập. 
+  Tuân thủ: backup → remove conflicts → add scoping → replace variables → 
+  test.
+
+  2. Troubleshooting Migration:
+
+  Kiểm tra và fix CSS conflicts trong dự án tikz2svg_api. 
+  Tìm duplicate rules và convert về foundation system theo quy tắc đã thiết 
+  lập.
+
+  3. Component Enhancement:
+
+  Cải thiện [COMPONENT_NAME] trong tikz2svg_api sử dụng foundation variables.
+  Maintain glass morphism design và accessibility standards đã thiết lập.
+
+  4. Responsive Optimization:
+
+  Tối ưu responsive design cho [PAGE_NAME] sử dụng foundation breakpoint 
+  system. 
+  Ensure consistency với migration methodology.
+
+  🎯 Key Context References:
+
+  Foundation Files:
+
+  - static/css/foundation/master-variables.css
+  - static/css/foundation/global-base.css
+  - templates/base.html (load order)
+
+  Migration Status Tracking:
+
+  - CSS_ARCHITECTURE_MIGRATION_STATUS.md
+  - CSS_FOUNDATION_MIGRATION_SUMMARY.md
+
+  Verified Migration Examples:
+
+  - profile_svg_files.css ✅
+  - profile_settings.css ✅
+  - index.css ✅
+
+  ⚡ Quick Start Commands:
+
+  # Check remaining conflicts
+  grep -rn ":root\|html.*{\|body.*{" static/css/ | grep -v foundation
+
+  # Next priority files
+  ls static/css/file_card.css static/css/navigation.css
+  static/css/search_results.css
+
+  🎨 Design System Variables:
+
+  /* Colors */
+  --primary-color, --text-on-glass, --glass-bg-strong
+
+  /* Spacing */
+  --spacing-4, --spacing-8, --spacing-16
+
+  /* Glass Morphism */
+  --glass-bg-light, --glass-blur-medium, --glass-shadow

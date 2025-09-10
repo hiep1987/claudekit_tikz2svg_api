@@ -46,6 +46,16 @@
     <!-- Programming Fonts (cố định cho tất cả trang) -->
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Fira+Code:wght@400;500;600&family=Source+Code+Pro:wght@400;500;600&family=Inconsolata:wght@400;500;600&display=swap" rel="stylesheet">
     
+    <!-- CSS FOUNDATION SYSTEM - Load Order Critical -->
+    <!-- 1. Master Variables - MUST BE FIRST -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/foundation/master-variables.css', v='2.0') }}">
+    
+    <!-- 2. Global Base Styles - MUST BE SECOND -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/foundation/global-base.css', v='2.0') }}">
+    
+    <!-- 3. Legacy Variables (for backward compatibility) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/shared_variables.css', v='1.0') }}">
+    
     <!-- Common CSS Files -->
     {% if include_file_card %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/file_card.css', v='1.1') }}">
@@ -88,6 +98,24 @@
     {% endif %}
     
     </div>
+    
+    <!-- Core JavaScript Libraries (có điều kiện) -->
+    {% if include_highlight_js %}
+    <!-- Highlight.js JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/latex.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
+    {% endif %}
+    
+    {% if include_codemirror %}
+    <!-- CodeMirror JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/stex/stex.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/display/placeholder.min.js"></script>
+    {% endif %}
+    
+    <!-- Bootstrap JavaScript (cố định cho tất cả trang) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <!-- Page-specific JavaScript -->
     {% block extra_js %}{% endblock %}

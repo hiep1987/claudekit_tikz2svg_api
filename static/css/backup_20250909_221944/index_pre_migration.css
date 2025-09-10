@@ -1,82 +1,113 @@
 /* Index Page Specific Styles */
-/* Migrated to use CSS Foundation System - Variables from master-variables.css */
-/* Load Order: After master-variables.css and global-base.css */
 
-/* All base styles now handled by global-base.css - no duplicates */
+/* TikZ App Scoped Container */
+.tikz-app {
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* Body and Container */
+html, body {
+    margin: 0 auto;
+    padding: 5px;
+    background-color: #fafafa;
+}
+
+/* Box-sizing scoped to our page layout only (avoid overriding Bootstrap) */
+.tikz-app .page-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.tikz-app .page-container *,
+.tikz-app .page-container *::before,
+.tikz-app .page-container *::after {
+    box-sizing: inherit;
+}
+
+.tikz-app button, 
+.tikz-app input, 
+.tikz-app select, 
+.tikz-app textarea {
+    font-family: inherit;
+}
+
+/* Preserve monospace fonts for code editors */
+.tikz-app .CodeMirror, 
+.tikz-app .CodeMirror * {
+    font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Cascadia Code', 'Inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace !important;
+    font-feature-settings: "liga" 1, "calt" 1;
+    font-variant-ligatures: contextual;
+}
+
+/* Preserve monospace for any code-related elements */
+.tikz-app pre, 
+.tikz-app code, 
+.tikz-app .code, 
+.tikz-app .tikz-code, 
+.tikz-app textarea[name="code"] {
+    font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Cascadia Code', 'Inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace !important;
+    font-feature-settings: "liga" 1, "calt" 1;
+    font-variant-ligatures: contextual;
+}
 
 
 /* Block: Files Section */
 .tikz-app .files-section-container.page-container {
-    margin-top: var(--spacing-20);
-    background-color: var(--container-bg-secondary);
-    backdrop-filter: var(--container-bg-blur);
-    padding: var(--spacing-20) 0;
+    margin-top: 40px;
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(8px);
+    padding: 40px 0;
     border: none;
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg);
+    border-radius: 1rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
 }
 
 /* Index top spacing container */
 .tikz-app .index-top-container {
-    margin-top: var(--spacing-10);
-    margin-bottom: var(--spacing-10);
+    margin-top: 20px;
+    margin-bottom: 20px;
     overflow: visible;
 }
 
-/* Block: Input-Preview Section - Enhanced Glass Morphism with Better Contrast */
+/* Block: Input-Preview Section
+   Note: other visual properties for this block are handled by responsive rules
+   and container utilities. Keep only box-shadow here to avoid overrides. */
 .tikz-app .input-preview-section.page-container {
-    box-shadow: var(--glass-shadow);
-    position: relative;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
 }
 
-/* Form Elements - Enhanced for Glass Morphism */
+/* Form Elements */
 .tikz-app h2 {
-    color: var(--text-header-glass);
+    color: #333;
     text-align: center;
-    margin-bottom: var(--spacing-16);
-    font-weight: var(--font-weight-bold);
-    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
-    position: relative;
-    z-index: 1;
-    font-size: var(--font-size-2xl);
-    letter-spacing: -0.025em;
-}
-
-/* Enhanced form elements for better contrast on glass */
-.tikz-app .input-preview-section label:not(.like) {
-    color: var(--text-on-glass);
-    font-weight: var(--font-weight-semibold);
-}
-
-.tikz-app .input-preview-section .form-group {
-    position: relative;
-    z-index: 1;
+    margin-bottom: 30px;
 }
 
 .tikz-app .form-group {
-    margin-bottom: var(--spacing-10);
+    margin-bottom: 20px;
 }
 
 .tikz-app label:not(.like) {
     display: block;
-    margin-bottom: var(--spacing-2);
-    font-weight: var(--font-weight-bold);
-    color: var(--text-secondary);
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
 }
 
 .tikz-app textarea {
     width: 100%;
-    padding: var(--spacing-6);
-    border: 2px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    font-family: var(--font-family-mono);
-    font-size: var(--font-size-sm);
+    padding: 15px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
     resize: vertical;
 }
 
 .tikz-app textarea:focus {
     outline: none;
-    border-color: var(--primary-color);
+    border-color: #007bff;
 }
 
 /* Main Action Buttons */
@@ -84,21 +115,21 @@
 .tikz-app .compile-save-row-btn,
 .tikz-app .export-btn,
 .tikz-app .copy-btn {
-    background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-light) 100%);
-    color: var(--text-white);
-    padding: var(--spacing-6) var(--spacing-12);
+    background: linear-gradient(90deg, #1976d2 0%, #2196f3 100%);
+    color: #fff;
+    padding: 12px 28px;
     border: none;
-    border-radius: var(--radius-md);
+    border-radius: 8px;
     cursor: pointer;
-    font-size: var(--font-size-base);
-    font-weight: var(--font-weight-semibold);
+    font-size: 16px;
+    font-weight: 600;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--spacing-3);
+    gap: 8px;
     text-decoration: none;
-    box-shadow: var(--shadow-sm);
-    transition: background var(--transition-normal), box-shadow var(--transition-fast), transform var(--transition-fast);
+    box-shadow: 0 2px 8px rgba(25, 118, 210, 0.1);
+    transition: background 0.3s, box-shadow 0.2s, transform 0.15s;
     width: auto;
     height: auto;
 }
@@ -107,9 +138,9 @@
 .tikz-app .compile-save-row-btn:hover,
 .tikz-app .export-btn:hover,
 .tikz-app .copy-btn:hover {
-    background: linear-gradient(90deg, var(--primary-dark) 0%, var(--primary-color) 100%);
-    color: var(--text-white);
-    box-shadow: var(--shadow-md);
+    background: linear-gradient(90deg, #1565c0 0%, #42a5f5 100%);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(25, 118, 210, 0.18);
     transform: translateY(-2px) scale(1.03);
     outline: none;
     text-decoration: none;
@@ -117,26 +148,26 @@
 
 /* Result Section */
 .tikz-app .result-section {
-    margin-top: var(--spacing-16);
-    padding: var(--spacing-10);
-    background-color: var(--bg-tertiary);
-    border-radius: var(--radius-sm);
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
 }
 
 .tikz-app .svg-preview {
     text-align: center;
-    margin-bottom: var(--spacing-10);
+    margin-bottom: 20px;
 }
 
 .tikz-app .svg-preview img {
     max-width: 100%;
-    border: 2px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    box-shadow: var(--shadow-sm);
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .tikz-app .code-section {
-    margin-top: var(--spacing-2);
+    margin-top: 4px;
     text-align: center;
 }
 
@@ -144,21 +175,21 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--spacing-4);
+    margin-bottom: 10px;
 }
 
 .tikz-app .code-title {
-    font-weight: var(--font-weight-bold);
-    color: var(--text-primary);
+    font-weight: bold;
+    color: #333;
 }
 
 .tikz-app #svgCode.code-block {
-    background-color: var(--bg-secondary);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-sm);
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 5px;
     padding: 0;
-    font-family: var(--font-family-mono);
-    font-size: var(--font-size-xs);
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
     overflow: auto;
     max-height: 400px;
     position: relative;
@@ -166,7 +197,7 @@
 
 .tikz-app #svgCode.code-block pre {
     margin: 0;
-    padding: var(--spacing-8);
+    padding: 15px;
     background: transparent;
 }
 
@@ -178,65 +209,65 @@
 /* Download and Copy Links */
 .tikz-app .download-link {
     display: inline-block;
-    background-color: var(--info-color);
-    color: var(--text-white);
-    padding: var(--spacing-4) var(--spacing-10);
+    background-color: #17a2b8;
+    color: white;
+    padding: 10px 20px;
     text-decoration: none;
-    border-radius: var(--radius-sm);
-    margin-top: var(--spacing-4);
+    border-radius: 5px;
+    margin-top: 10px;
 }
 
 .tikz-app .download-link:hover {
-    background-color: var(--info-dark);
+    background-color: #138496;
 }
 
 .tikz-app .copy-link-btn {
     display: inline-block;
-    background-color: var(--warning-color);
-    color: var(--text-dark);
-    padding: var(--spacing-4) var(--spacing-10);
+    background-color: #ffc107;
+    color: #212529;
+    padding: 10px 20px;
     text-decoration: none;
-    border-radius: var(--radius-sm);
-    margin-top: var(--spacing-4);
+    border-radius: 5px;
+    margin-top: 10px;
     border: none;
     cursor: pointer;
-    font-size: var(--font-size-sm);
+    font-size: 14px;
     font-family: inherit;
 }
 
 .tikz-app .copy-link-btn:hover {
-    background-color: var(--warning-dark);
+    background-color: #e0a800;
 }
 
 /* Error Styling */
 .tikz-app .error {
-    color: var(--danger-color);
-    background-color: var(--danger-bg);
-    border: 1px solid var(--danger-border);
-    padding: var(--spacing-8);
-    border-radius: var(--radius-sm);
+    color: #dc3545;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 15px;
+    border-radius: 5px;
 }
 
 /* Export Section */
 .tikz-app .export-section {
-    margin-top: var(--spacing-10);
-    padding: var(--spacing-10);
-    background-color: var(--bg-secondary);
-    border-radius: var(--radius-sm);
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
 }
 
 .tikz-app .export-section h4 {
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-4);
+    color: #333;
+    margin-bottom: 10px;
     text-align: center;
 }
 
 .tikz-app .export-form {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-10) var(--spacing-16);
+    gap: 20px 32px;
     align-items: start;
-    margin-bottom: var(--spacing-4);
+    margin-bottom: 10px;
 }
 
 @media (min-width: 1000px) {
@@ -248,14 +279,14 @@
 .tikz-app .export-pair {
     display: flex;
     align-items: center;
-    gap: var(--spacing-3);
+    gap: 8px;
 }
 
 .tikz-app .export-form .export-btn-group {
     grid-column: 1/-1;
     display: flex;
     justify-content: center;
-    margin-top: var(--spacing-3);
+    margin-top: 8px;
 }
 
 .tikz-app .export-form .export-btn {
@@ -263,9 +294,9 @@
 }
 
 .tikz-app .export-input {
-    padding: var(--spacing-3);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
 }
 
 .tikz-app .export-select {
@@ -273,11 +304,11 @@
     min-width: 120px;
     max-width: 180px;
     height: 40px;
-    padding: var(--spacing-3) var(--spacing-6);
-    font-size: var(--font-size-base);
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border-color);
-    background: var(--bg-tertiary);
+    padding: 8px 12px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    background: #f8f9fa;
     vertical-align: middle;
 }
 
@@ -286,9 +317,9 @@
 }
 
 .tikz-app .export-msg {
-    margin-top: var(--spacing-2);
-    color: var(--success-color);
-    font-weight: var(--font-weight-bold);
+    margin-top: 5px;
+    color: #388e3c;
+    font-weight: bold;
     text-align: center;
     width: 100%;
     display: flex;
@@ -298,12 +329,12 @@
 /* Input Preview Layout */
 .tikz-app #input-preview-row, .tikz-app #view-mode-row {
     display: flex;
-    gap: var(--spacing-16);
-    margin-bottom: var(--spacing-12);
+    gap: 32px;
+    margin-bottom: 24px;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
-    scrollbar-color: var(--border-light) transparent;
+    scrollbar-color: #ccc transparent;
 }
 
 .tikz-app #tikz-form {
@@ -320,22 +351,22 @@
 }
 
 .tikz-app #input-preview-row::-webkit-scrollbar-track, .tikz-app #view-mode-row::-webkit-scrollbar-track {
-    background: var(--bg-secondary);
-    border-radius: var(--radius-sm);
+    background: #f1f1f1;
+    border-radius: 4px;
 }
 
 .tikz-app #input-preview-row::-webkit-scrollbar-thumb, .tikz-app #view-mode-row::-webkit-scrollbar-thumb {
-    background: var(--border-light);
-    border-radius: var(--radius-sm);
+    background: #c1c1c1;
+    border-radius: 4px;
 }
 
 .tikz-app #input-preview-row::-webkit-scrollbar-thumb:hover, .tikz-app #view-mode-row::-webkit-scrollbar-thumb:hover {
-    background: var(--text-light);
+    background: #a8a8a8;
 }
 
 .tikz-app #input-preview-row, .tikz-app #view-mode-row {
     scrollbar-width: thin;
-    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+    scrollbar-color: #c1c1c1 #f1f1f1;
 }
 
 .tikz-app #input-preview-row .input-col, .tikz-app #input-preview-row .preview-col, .tikz-app #view-mode-row .view-col {
@@ -348,9 +379,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #ffffff;  /* Pure white background for optimal SVG contrast */
-    border: 1.5px solid var(--border-light);
-    border-radius: var(--radius-md);
+    background: #fff;
+    border: 1.5px solid #eee;
+    border-radius: 8px;
     min-height: 320px;
     min-width: 200px;
     padding: 16px;
@@ -387,9 +418,9 @@
     overflow-x: auto;
     width: 100%;
     -webkit-overflow-scrolling: touch;
-    border: 1px solid var(--success-color);
-    border-radius: var(--radius-md);
-    background: var(--bg-primary);
+    border: 1px solid #3e9f06;
+    border-radius: 6px;
+    background: #fff;
 }
 
 @media (min-width: 1200px) {
@@ -412,7 +443,7 @@
     min-height: 450px;
     max-height: 450px;
     padding: 16px;
-    border-right: 1px solid var(--border-light);
+    border-right: 1px solid #eee;
     overflow: auto;
 }
 
@@ -447,7 +478,6 @@
     align-items: center;
     justify-content: center;
     padding: 0;
-    background: #ffffff;  /* Pure white background for SVG container */
 }
 
 .tikz-app .table-scroll-x .table-content .col:last-child img {
@@ -470,55 +500,35 @@
     border-right: none;
 }
 
-/* Section Containers - Enhanced Glass Morphism */
+/* Section Containers */
 .tikz-app .input-preview-section.page-container.container {
-    background: var(--glass-bg-strong);
-    backdrop-filter: var(--glass-blur-medium);
-    -webkit-backdrop-filter: var(--glass-blur-medium);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-xl);
-    padding: var(--spacing-20) 0;
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(8px);
+    padding: 40px 0;
     margin-bottom: 0;
+    border: none;
+    border-radius: 1rem;
     overflow-x: hidden;
-    /* Enhanced shadow for depth */
-    box-shadow: var(--glass-shadow), 
-                0 1px 3px rgba(0, 0, 0, 0.1);
-    /* Subtle border for definition */
-    position: relative;
 }
 
-/* Add subtle background pattern for texture */
-.tikz-app .input-preview-section.page-container.container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, 
-                rgba(255, 255, 255, 0.1) 0%, 
-                transparent 50%, 
-                rgba(255, 255, 255, 0.1) 100%);
-    border-radius: inherit;
-    pointer-events: none;
-}
+
 
 /* Preview Placeholder */
 .tikz-app .preview-placeholder {
     text-align: center;
-    color: var(--text-muted);
+    color: #999;
     font-style: italic;
 }
 
 .tikz-app .preview-placeholder p {
     margin: 0;
-    font-size: var(--font-size-base);
+    font-size: 16px;
 }
 
 /* Search Styles */
 .tikz-app .group {
     display: flex;
-    line-height: var(--line-height-relaxed);
+    line-height: 28px;
     align-items: center;
     position: relative;
     max-width: 400px;
@@ -528,41 +538,41 @@
 .tikz-app .input {
     width: 100%;
     height: 40px;
-    line-height: var(--line-height-relaxed);
-    padding: 0 var(--spacing-4);
-    padding-left: var(--spacing-12);
+    line-height: 28px;
+    padding: 0 1rem;
+    padding-left: 2.5rem;
     border: 2px solid transparent;
-    border-radius: var(--radius-md);
+    border-radius: 8px;
     outline: none;
-    background-color: var(--input-bg);
-    color: var(--input-text);
-    transition: var(--transition-normal);
+    background-color: #f3f3f4;
+    color: #0d0c22;
+    transition: 0.3s ease;
 }
 
 .tikz-app .input::placeholder {
-    color: var(--input-placeholder);
+    color: #9e9ea7;
 }
 
 .tikz-app .input:focus,
 .tikz-app .input:hover {
     outline: none;
-    border-color: var(--input-border-focus);
-    background-color: var(--bg-primary);
-    box-shadow: var(--input-focus-shadow);
+    border-color: rgba(0, 48, 73, 0.4);
+    background-color: #fff;
+    box-shadow: 0 0 0 4px rgb(0 48 73 / 10%);
 }
 
 .tikz-app .icon {
     position: absolute;
-    left: var(--spacing-4);
-    fill: var(--input-placeholder);
-    width: var(--spacing-4);
-    height: var(--spacing-4);
+    left: 1rem;
+    fill: #9e9ea7;
+    width: 1rem;
+    height: 1rem;
 }
 
 .tikz-app .search-title {
-    color: var(--primary-color);
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-semibold);
+    color: #1976d2;
+    font-size: 1.5rem;
+    font-weight: 600;
     margin: 0;
     white-space: nowrap;
 }
@@ -572,7 +582,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: var(--spacing-10);
+    gap: 20px;
 }
 
 .tikz-app .search-suggestions {
@@ -580,26 +590,26 @@
     top: 100%;
     left: 0;
     right: 0;
-    background: var(--bg-primary);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-lg);
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     max-height: 200px;
     overflow-y: auto;
-    z-index: var(--z-dropdown);
-    margin-top: var(--spacing-1);
+    z-index: 9999;
+    margin-top: 4px;
     display: none;
 }
 
 .tikz-app .search-suggestion-item {
-    padding: var(--spacing-4) var(--spacing-8);
+    padding: 10px 15px;
     cursor: pointer;
-    border-bottom: 1px solid var(--border-light);
-    transition: background-color var(--transition-fast);
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s;
 }
 
 .tikz-app .search-suggestion-item:hover {
-    background-color: var(--bg-secondary);
+    background-color: #f8f9fa;
 }
 
 .tikz-app .search-suggestion-item:last-child {
@@ -610,51 +620,51 @@
 .tikz-app .google-login-btn {
     max-width: 320px;
     display: flex;
-    padding: var(--spacing-3) var(--spacing-8);
-    font-size: var(--font-size-sm);
-    line-height: var(--line-height-tight);
-    font-weight: var(--font-weight-bold);
+    padding: 8px 16px;
+    font-size: 14px;
+    line-height: 1.25rem;
+    font-weight: 700;
     text-align: center;
     text-transform: uppercase;
     align-items: center;
     justify-content: center;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-color);
-    gap: var(--spacing-4);
-    color: var(--text-muted);
-    background-color: var(--bg-primary);
+    border-radius: 6px;
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    gap: 0.75rem;
+    color: rgb(65, 63, 63);
+    background-color: #fff;
     cursor: pointer;
-    transition: all var(--transition-normal);
+    transition: all .6s ease;
     min-height: 40px;
 }
 
 .tikz-app .google-login-btn svg {
-    height: var(--icon-md);
+    height: 24px;
     flex-shrink: 0;
 }
 
 .tikz-app .google-login-btn:hover {
     transform: scale(1.02);
-    background-color: var(--primary-color);
-    color: var(--text-white);
+    background-color: #1565c0;
+    color: white;
 }
 
 .tikz-app .google-login-content {
     display: flex;
     align-items: center;
-    gap: var(--spacing-6);
-    font-weight: var(--font-weight-medium);
-    font-size: var(--font-size-sm);
+    gap: 12px;
+    font-weight: 500;
+    font-size: 14px;
 }
 
 .tikz-app #logout-btn {
-    background: var(--danger-color);
-    color: var(--text-white);
-    padding: var(--spacing-3) var(--spacing-8);
-    border-radius: var(--radius-md);
+    background: #d32f2f;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
     text-decoration: none;
-    font-weight: var(--font-weight-bold);
-    font-size: var(--font-size-sm);
+    font-weight: bold;
+    font-size: 14px;
 }
 
 /* Responsive Design */
@@ -677,23 +687,11 @@
 
 @media (max-width: 768px) {
     .tikz-app .input-preview-section {
-        padding: var(--spacing-10) 0;
-    }
-    
-    .tikz-app .input-preview-section.page-container.container {
-        /* Stronger background for mobile - better contrast */
-        background: var(--glass-bg-light);
-        backdrop-filter: var(--glass-blur-light);
-        -webkit-backdrop-filter: var(--glass-blur-light);
-        padding: var(--spacing-16) 0;
-        border-width: 2px;
-        /* Enhanced shadow for mobile */
-        box-shadow: var(--glass-shadow), 
-                    0 2px 8px rgba(0, 0, 0, 0.15);
+        padding: 20px 0;
     }
     
     .tikz-app .files-section-container.page-container {
-        margin-top: var(--spacing-16);
+        margin-top: 30px;
     }
     
     .tikz-app .group {
@@ -727,12 +725,8 @@
     
     .tikz-app .input-preview-section.page-container.container {
         overflow-x: visible;
-        padding-left: var(--spacing-4);
-        padding-right: var(--spacing-4);
-        /* Enhanced mobile glass morphism */
-        background: var(--glass-bg-light);
-        backdrop-filter: var(--glass-blur-light);
-        -webkit-backdrop-filter: var(--glass-blur-light);
+        padding-left: 10px;
+        padding-right: 10px;
     }
     
 .tikz-app #input-preview-row .input-col, .tikz-app #input-preview-row .preview-col, .tikz-app #view-mode-row .view-col {
@@ -746,7 +740,6 @@
     }
     
 .tikz-app #input-preview-row .preview-col, .tikz-app #view-svg-preview {
-        background: #ffffff;  /* Ensure white background on mobile */
         padding: 12px;
         min-height: 280px;
     }
@@ -781,32 +774,25 @@
 
 @media (max-width: 480px) {
     .tikz-app .input-preview-section {
-        padding: var(--spacing-8) 0;
+        padding: 15px 0;
     }
     
     .tikz-app .files-section-container.page-container.container {
-        margin-top: var(--spacing-12);
+        margin-top: 25px;
     }
     
     .tikz-app .input-preview-section.page-container.container {
-        padding: var(--spacing-10);
-        /* Maximum contrast for smallest screens */
-        background: var(--glass-bg-light);
-        backdrop-filter: var(--glass-blur-light);
-        -webkit-backdrop-filter: var(--glass-blur-light);
-        border-width: 2px;
-        box-shadow: var(--glass-shadow), 
-                    0 4px 12px rgba(0, 0, 0, 0.2);
+        padding: 20px;
     }
     
 .tikz-app #input-preview-row, .tikz-app #view-mode-row {
         gap: 12px;
         min-width: calc(100vw - 30px);
         padding-bottom: 8px;
-        border: 2px solid var(--success-color);
+        border: 2px solid #3e9f06;
         border-radius: 8px;
         padding: 12px;
-        background: var(--bg-primary);
+        background: #fff;
         box-shadow: 0 2px 8px rgba(62, 159, 6, 0.2);
     }
     
@@ -816,7 +802,6 @@
     }
     
 .tikz-app #input-preview-row .preview-col, .tikz-app #view-svg-preview {
-        background: #ffffff;  /* Ensure white background on smallest screens */
         padding: 8px;
         min-height: 250px;
     }
@@ -846,7 +831,7 @@
 }
 
 .tikz-app .CodeMirror-placeholder {
-    color: var(--text-muted);
+    color: #bbb;
     font-style: italic;
 }
 
@@ -866,25 +851,25 @@
 /* Highlight.js Line Numbers */
 .tikz-app .hljs-ln-numbers {
     text-align: right;
-    color: var(--text-muted);
-    border-right: 1px solid var(--border-color);
+    color: #999;
+    border-right: 1px solid #ddd;
     vertical-align: top;
-    padding-right: var(--spacing-3);
+    padding-right: 8px;
     min-width: 25px;
 }
 
 .tikz-app .hljs-ln-code {
-    padding-left: var(--spacing-3);
+    padding-left: 8px;
 }
 
 /* Mobile Scroll Hint */
 .tikz-app #mobile-scroll-hint {
-    margin-top: var(--spacing-6);
-    color: var(--text-muted);
-    font-size: var(--font-size-sm);
+    margin-top: 12px;
+    color: #777;
+    font-size: 0.9em;
     text-align: center;
     display: none;
-    transition: opacity var(--transition-normal);
+    transition: opacity 0.3s ease;
 }
 
 /* Utility */
@@ -900,43 +885,43 @@
 
 /* Error detail controls */
 .tikz-app #show-log-btn {
-    margin-top: var(--spacing-4);
-    background: var(--danger-dark);
-    color: var(--text-white);
+    margin-top: 10px;
+    background: #b71c1c;
+    color: white;
     border: none;
-    border-radius: var(--radius-sm);
-    padding: var(--spacing-2) var(--spacing-8);
+    border-radius: 4px;
+    padding: 6px 16px;
     cursor: pointer;
 }
 
 .tikz-app #full-log {
     display: none;
-    background: var(--danger-bg-light);
-    color: var(--danger-color);
-    border: 1px solid var(--danger-border);
-    border-radius: var(--radius-sm);
-    padding: var(--spacing-6);
-    margin-top: var(--spacing-4);
+    background: #fff0f0;
+    color: #b71c1c;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+    padding: 12px;
+    margin-top: 10px;
     max-height: 400px;
     overflow: auto;
 }
 
 /* Result tools section spacing */
 .tikz-app #result-tools-section {
-    margin-top: var(--spacing-8);
+    margin-top: 16px;
 }
 
 /* Export message */
 .tikz-app #export-msg {
-    margin-top: var(--spacing-2);
-    color: var(--success-color);
+    margin-top: 5px;
+    color: #388e3c;
     text-align: center;
 }
 
 /* SVG code container */
 .tikz-app #svg-code-container {
     display: none;
-    margin-top: var(--spacing-6);
+    margin-top: 12px;
 }
 
 
@@ -944,9 +929,9 @@
 /* Footer */
 .tikz-app .site-footer {
     text-align: center;
-    color: var(--text-muted);
-    font-size: var(--font-size-sm);
-    margin-top: var(--spacing-20);
+    color: #888;
+    font-size: 14px;
+    margin-top: 40px;
 }
 
 /* Login modal overlay */
@@ -957,61 +942,61 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: var(--modal-overlay);
-    z-index: var(--z-modal);
+    background: rgba(0,0,0,0.3);
+    z-index: 9999;
     align-items: center;
     justify-content: center;
 }
 
 /* Login modal content box */
 .tikz-app .login-modal-box {
-    background: var(--bg-primary);
-    padding: var(--spacing-16) var(--spacing-20);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-xl);
+    background: white;
+    padding: 32px 40px;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
     min-width: 320px;
     text-align: center;
 }
 
 /* Login modal text spacings */
-.tikz-app #login-modal h3 { margin-bottom: var(--spacing-12); }
-.tikz-app #login-modal p { margin-bottom: var(--spacing-8); color: var(--text-secondary); }
+.tikz-app #login-modal h3 { margin-bottom: 24px; }
+.tikz-app #login-modal p { margin-bottom: 16px; color: #666; }
 .tikz-app #login-modal ul {
-    margin-bottom: var(--spacing-12);
-    color: var(--text-secondary);
+    margin-bottom: 24px;
+    color: #666;
     text-align: left;
     display: inline-block;
 }
 
 .tikz-app #login-modal .login-note {
-    margin-bottom: var(--spacing-12);
-    color: var(--primary-color);
-    font-weight: var(--font-weight-medium);
+    margin-bottom: 24px;
+    color: #1976d2;
+    font-weight: 500;
 }
 
 .tikz-app .login-modal-actions {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: var(--spacing-6);
+    gap: 12px;
     flex-wrap: wrap;
 }
 
 .tikz-app #modal-login-btn { margin: 0; }
 
 .tikz-app .btn-cancel {
-    background: var(--bg-muted);
-    color: var(--text-primary);
-    padding: var(--spacing-6) var(--spacing-12);
-    border-radius: var(--radius-md);
+    background: #eee;
+    color: #333;
+    padding: 12px 24px;
+    border-radius: 6px;
     border: none;
-    font-weight: var(--font-weight-bold);
+    font-weight: bold;
     margin: 0;
 }
 
 /* Keyword suggestions dropdown in modal */
 .tikz-app #keywordSuggestions {
-    z-index: var(--z-modal);
+    z-index: 9999;
     max-height: 200px;
     overflow-y: auto;
     display: none;
@@ -1020,25 +1005,25 @@
 /* Export Download Link */
 .tikz-app .export-download-link {
     display: inline-block;
-    background: linear-gradient(90deg, var(--info-color) 0%, var(--info-dark) 100%);
-    color: var(--text-white);
-    padding: var(--spacing-6) var(--spacing-10);
+    background: linear-gradient(90deg, #17a2b8 0%, #138496 100%);
+    color: white;
+    padding: 12px 20px;
     border: none;
-    border-radius: var(--radius-md);
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-semibold);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
     text-decoration: none;
     cursor: pointer;
-    transition: all var(--transition-fast);
-    box-shadow: var(--shadow-md);
-    margin-top: var(--spacing-3);
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(23,162,184,0.2);
+    margin-top: 8px;
 }
 
 .tikz-app .export-download-link:hover {
-    background: linear-gradient(90deg, var(--info-dark) 0%, var(--info-darker) 100%);
-    box-shadow: var(--shadow-lg);
+    background: linear-gradient(90deg, #138496 0%, #117a8b 100%);
+    box-shadow: 0 4px 12px rgba(23,162,184,0.3);
     transform: translateY(-2px);
-    color: var(--text-white);
+    color: white;
     text-decoration: none;
 }
 
@@ -1053,19 +1038,19 @@
 
 /* View Mode Specific Styles */
 .tikz-app #view-tikz-code {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-sm);
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 5px;
     padding: 0;
-    font-family: var(--font-family-mono);
-    font-size: var(--font-size-xs);
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
     overflow-x: auto;
     position: relative;
 }
 
 .tikz-app #view-tikz-code pre {
     margin: 0;
-    padding: var(--spacing-8);
+    padding: 15px;
     background: transparent;
 }
 
@@ -1077,8 +1062,8 @@
 .tikz-app #view-export-form {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-6);
-    margin-bottom: var(--spacing-8);
+    gap: 12px;
+    margin-bottom: 16px;
 }
 
 .tikz-app #view-export-form .export-btn-group {
@@ -1100,8 +1085,8 @@
 }
 
 .tikz-app #view-svg-actions .view-action-btn {
-    background: var(--warning-color);
-    color: var(--text-dark);
+    background: #ffc107;
+    color: #212529;
     padding: 10px 20px;
     border: none;
     border-radius: 8px;
@@ -1123,7 +1108,7 @@
 }
 
 .tikz-app #view-svg-actions .view-download-btn {
-    background: var(--info-color);
+    background: #17a2b8;
     color: white;
 }
 
@@ -1142,7 +1127,7 @@
     max-width: 100%;
     max-height: 200px;
     object-fit: contain;
-    border: 1px solid var(--border-color);
+    border: 1px solid #ddd;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
@@ -1168,7 +1153,7 @@
 .tikz-app #view-export-form .export-label {
         text-align: right;
         font-weight: 600;
-        color: var(--text-primary);
+        color: #333;
         min-width: 80px;
         flex-shrink: 0;
     }

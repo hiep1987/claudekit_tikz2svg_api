@@ -2115,6 +2115,68 @@ def profile_user(user_id):
 
 # ✅ Thêm 3 routes mới cho các trang profile đã tách
 
+@app.route('/profile/<int:user_id>/resend-verification', methods=['POST'])
+@login_required
+def resend_verification_code(user_id):
+    """API endpoint để gửi lại mã xác thực profile settings"""
+    current_user_id = current_user.id if current_user.is_authenticated else None
+    is_owner = (user_id == current_user_id)
+    
+    # Chỉ owner mới có thể resend verification code
+    if not is_owner:
+        return jsonify({'success': False, 'message': 'Không có quyền truy cập.'}), 403
+    
+    try:
+        # Generate new verification code
+        verification_code = str(random.randint(100000, 999999))
+        
+        # Set expiry time (10 minutes from now)
+        expires_at = datetime.now() + timedelta(minutes=10)
+        
+        # Update database with new code
+        conn = mysql.connector.connect(
+            host=os.environ.get('DB_HOST', 'localhost'),
+            user=os.environ.get('DB_USER', 'hiep1987'),
+            password=os.environ.get('DB_PASSWORD', ''),
+            database=os.environ.get('DB_NAME', 'tikz2svg')
+        )
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            UPDATE user 
+            SET profile_verification_code = %s,
+                profile_verification_expires_at = %s,
+                profile_verification_attempts = 0
+            WHERE id = %s
+        """, (verification_code, expires_at, user_id))
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        # Send verification email
+        email_service = get_email_service()
+        if not email_service:
+            return jsonify({'success': False, 'message': 'Email service không khả dụng.'}), 500
+            
+        email_sent = email_service.send_profile_settings_verification_email(current_user.email, current_user.username, verification_code)
+        
+        if email_sent:
+            return jsonify({
+                'success': True, 
+                'message': 'Đã gửi mã xác thực mới đến email của bạn!',
+                'expires_at': expires_at.isoformat(),
+                'remaining_uses': 5
+            })
+        else:
+            return jsonify({'success': False, 'message': 'Lỗi khi gửi email. Vui lòng thử lại.'}), 500
+            
+    except Exception as e:
+        import traceback
+        print(f"❌ Error resending verification: {e}")
+        print(f"❌ Full traceback: {traceback.format_exc()}")
+        return jsonify({'success': False, 'message': f'Debug: {str(e)}'}), 500
+
 @app.route('/profile/<int:user_id>/settings', methods=['GET', 'POST'])
 def profile_settings(user_id):
     """Trang cài đặt profile - chỉ owner mới có thể truy cập"""
@@ -2145,7 +2207,8 @@ def profile_settings(user_id):
                         profile_verification_code = NULL,
                         profile_verification_expires_at = NULL,
                         pending_profile_changes = NULL,
-                        profile_verification_attempts = 0
+                        profile_verification_attempts = 0,
+                        profile_verification_usage_count = 0
                     WHERE id = %s
                 """, (user_id,))
                 conn.commit()
@@ -2188,9 +2251,50 @@ def profile_settings(user_id):
             
             # Nếu có thay đổi, gửi email xác thực
             if changes_summary:
-                # Tạo mã xác thực
-                verification_code = generate_verification_code(6)
-                expires_at = datetime.now() + timedelta(hours=24)
+                # Kiểm tra xem đã có mã xác thực chưa hết hạn và chưa hết lượt sử dụng chưa
+                try:
+                    cursor.execute("""
+                        SELECT profile_verification_code, profile_verification_expires_at, 
+                               profile_verification_usage_count
+                        FROM user WHERE id = %s
+                    """, (user_id,))
+                except Exception as e:
+                    # Fallback nếu chưa có field usage_count
+                    print(f"⚠️  DEBUG: Field profile_verification_usage_count chưa tồn tại: {e}", flush=True)
+                    cursor.execute("""
+                        SELECT profile_verification_code, profile_verification_expires_at
+                        FROM user WHERE id = %s
+                    """, (user_id,))
+                existing_verification = cursor.fetchone()
+                
+                verification_code = None
+                expires_at = None
+                usage_count = 0
+                
+                # Kiểm tra có thể tái sử dụng mã hiện tại không
+                if (existing_verification and 
+                    existing_verification['profile_verification_code'] and
+                    existing_verification['profile_verification_expires_at'] and
+                    datetime.now() < existing_verification['profile_verification_expires_at'] and
+                    (existing_verification.get('profile_verification_usage_count', 0) or 0) < 5):
+                    
+                    # Tái sử dụng mã hiện tại
+                    verification_code = existing_verification['profile_verification_code']
+                    expires_at = existing_verification['profile_verification_expires_at']
+                    usage_count = existing_verification.get('profile_verification_usage_count', 0) or 0
+                    print(f"🔄 DEBUG: Reusing existing code {verification_code}, usage: {usage_count}/5", flush=True)
+                    
+                    # UX Improvement: Nếu đã từng nhập mã thành công (usage_count > 0)
+                    # thì tự động áp dụng thay đổi và tăng usage_count
+                    if usage_count > 0:
+                        print(f"🚀 DEBUG: Auto-applying changes without form (usage: {usage_count}/5)", flush=True)
+                        return handle_auto_profile_update(user_id, new_username, new_bio, avatar_cropped_data, usage_count, cursor, conn)
+                else:
+                    # Tạo mã xác thực mới
+                    verification_code = generate_verification_code(6)
+                    expires_at = datetime.now() + timedelta(minutes=10)  # 10 phút thay vì 24 giờ
+                    usage_count = 0
+                    print(f"🆕 DEBUG: Generated new code {verification_code}", flush=True)
                 
                 # Lưu thay đổi tạm thời và mã xác thực
                 pending_changes = {
@@ -2200,14 +2304,27 @@ def profile_settings(user_id):
                     'avatar_cropped_data': avatar_cropped_data
                 }
                 
-                cursor.execute("""
-                    UPDATE user SET 
-                        profile_verification_code = %s,
-                        profile_verification_expires_at = %s,
-                        pending_profile_changes = %s,
-                        profile_verification_attempts = 0
-                    WHERE id = %s
-                """, (verification_code, expires_at, json.dumps(pending_changes), user_id))
+                try:
+                    cursor.execute("""
+                        UPDATE user SET 
+                            profile_verification_code = %s,
+                            profile_verification_expires_at = %s,
+                            pending_profile_changes = %s,
+                            profile_verification_attempts = 0,
+                            profile_verification_usage_count = %s
+                        WHERE id = %s
+                    """, (verification_code, expires_at, json.dumps(pending_changes), usage_count, user_id))
+                except Exception as e:
+                    # Fallback nếu chưa có field usage_count
+                    print(f"⚠️  DEBUG: Fallback UPDATE without usage_count field: {e}", flush=True)
+                    cursor.execute("""
+                        UPDATE user SET 
+                            profile_verification_code = %s,
+                            profile_verification_expires_at = %s,
+                            pending_profile_changes = %s,
+                            profile_verification_attempts = 0
+                        WHERE id = %s
+                    """, (verification_code, expires_at, json.dumps(pending_changes), user_id))
                 
                 conn.commit()
                 
@@ -2245,6 +2362,7 @@ def profile_settings(user_id):
             SELECT id, username, avatar, bio, email, 
                    profile_verification_code, profile_verification_expires_at,
                    pending_profile_changes, profile_verification_attempts,
+                   profile_verification_usage_count,
                    identity_verified
             FROM user WHERE id = %s
         """, (user_id,))
@@ -2258,6 +2376,16 @@ def profile_settings(user_id):
             user['profile_verification_expires_at'] is not None and
             datetime.now() < user['profile_verification_expires_at']
         )
+        
+        # UX Improvement: Chỉ hiện form xác thực khi:
+        # 1. Có pending verification VÀ
+        # 2. (Chưa từng nhập mã thành công HOẶC đã hết lượt sử dụng >= 5)
+        raw_usage_count = user.get('profile_verification_usage_count')
+        usage_count = raw_usage_count or 0
+        show_verification_form = has_pending_verification and (usage_count == 0 or usage_count >= 5)
+        
+        # Debug logging (can be removed in production)
+        print(f"🔍 DEBUG: show_verification_form={show_verification_form}, usage_count={usage_count}", flush=True)
 
         return render_template("profile_settings.html",
             username=user["username"],
@@ -2272,7 +2400,9 @@ def profile_settings(user_id):
             current_username=current_user.username if current_user.is_authenticated else None,
             current_avatar=current_user.avatar if current_user.is_authenticated else None,
             has_pending_verification=has_pending_verification,
-            verification_attempts=user.get('profile_verification_attempts', 0)
+            show_verification_form=show_verification_form,
+            verification_attempts=user.get('profile_verification_attempts', 0),
+            usage_count=usage_count
         )
     except Exception as e:
         print(f"❌ General error in profile_settings: {e}", flush=True)
@@ -3527,6 +3657,117 @@ def generate_verification_code(length=6):
     """Tạo mã xác thực ngẫu nhiên"""
     return ''.join(random.choices(string.digits, k=length))
 
+def handle_auto_profile_update(user_id, new_username, new_bio, avatar_cropped_data, current_usage_count, cursor, conn):
+    """
+    Tự động áp dụng thay đổi profile khi user đã từng nhập mã thành công
+    Không cần hiện form xác thực, chỉ tăng usage_count
+    """
+    try:
+        # Tăng usage count
+        new_usage_count = current_usage_count + 1
+        
+        # Cập nhật profile trực tiếp
+        cursor.execute("UPDATE user SET username = %s, bio = %s WHERE id = %s", 
+                      (new_username, new_bio, user_id))
+        
+        # Xử lý avatar nếu có
+        if avatar_cropped_data and avatar_cropped_data.startswith('data:image'):
+            try:
+                # Extract image data
+                header, b64_data = avatar_cropped_data.split(',', 1)
+                image_format = header.split('/')[1].split(';')[0]  # Extract format (jpeg, png, etc.)
+                
+                # Validate format
+                allowed_formats = ['jpeg', 'jpg', 'png', 'gif', 'webp']
+                if image_format.lower() not in allowed_formats:
+                    flash("❌ Định dạng ảnh không được hỗ trợ.", "error")
+                    return redirect(url_for('profile_settings', user_id=user_id))
+                
+                ext = 'jpg' if image_format.lower() == 'jpeg' else image_format.lower()
+                
+                # Get current avatar to delete old file
+                cursor.execute("SELECT avatar FROM user WHERE id = %s", (user_id,))
+                current_avatar = cursor.fetchone()
+                if current_avatar and current_avatar['avatar']:
+                    old_path = os.path.join(app.config['UPLOAD_FOLDER'], 'avatars', current_avatar['avatar'])
+                    if os.path.exists(old_path):
+                        try:
+                            os.remove(old_path)
+                        except Exception as e:
+                            print(f"[WARN] Không thể xóa avatar cũ: {e}", flush=True)
+                
+                # Tạo tên file random
+                unique_id = uuid.uuid4().hex
+                filename = f"avatar_{unique_id}.{ext}"
+                save_path = os.path.join(app.config['UPLOAD_FOLDER'], 'avatars', filename)
+                
+                # Decode và lưu
+                with open(save_path, 'wb') as f:
+                    f.write(base64.b64decode(b64_data))
+                
+                # Update DB
+                cursor.execute("UPDATE user SET avatar = %s WHERE id = %s", (filename, user_id))
+            except Exception as e:
+                print(f"[WARN] Error saving cropped avatar: {e}", flush=True)
+                flash("Có lỗi khi lưu ảnh đại diện đã cắt.", "error")
+        
+        # Cập nhật usage count
+        if new_usage_count >= 5:
+            # Đã hết lượt sử dụng - xóa thông tin xác thực
+            try:
+                cursor.execute("""
+                    UPDATE user SET 
+                        profile_verification_code = NULL,
+                        profile_verification_expires_at = NULL,
+                        pending_profile_changes = NULL,
+                        profile_verification_attempts = 0,
+                        profile_verification_usage_count = 0
+                    WHERE id = %s
+                """, (user_id,))
+                flash("✅ Hồ sơ đã được cập nhật thành công! Mã xác thực đã hết lượt sử dụng.", "success")
+            except Exception as e:
+                print(f"⚠️  DEBUG: Fallback final cleanup: {e}", flush=True)
+                cursor.execute("""
+                    UPDATE user SET 
+                        profile_verification_code = NULL,
+                        profile_verification_expires_at = NULL,
+                        pending_profile_changes = NULL,
+                        profile_verification_attempts = 0
+                    WHERE id = %s
+                """, (user_id,))
+                flash("✅ Hồ sơ đã được cập nhật thành công!", "success")
+        else:
+            # Còn lượt sử dụng - tăng usage count và xóa pending changes
+            try:
+                cursor.execute("""
+                    UPDATE user SET 
+                        profile_verification_usage_count = %s,
+                        pending_profile_changes = NULL
+                    WHERE id = %s
+                """, (new_usage_count, user_id))
+                remaining_uses = 5 - new_usage_count
+                flash(f"✅ Hồ sơ đã được cập nhật thành công! Mã xác thực còn {remaining_uses} lượt sử dụng.", "success")
+            except Exception as e:
+                print(f"⚠️  DEBUG: Fallback usage count update: {e}", flush=True)
+                # Fallback: xóa luôn như cũ
+                cursor.execute("""
+                    UPDATE user SET 
+                        profile_verification_code = NULL,
+                        profile_verification_expires_at = NULL,
+                        pending_profile_changes = NULL,
+                        profile_verification_attempts = 0
+                    WHERE id = %s
+                """, (user_id,))
+                flash("✅ Hồ sơ đã được cập nhật thành công!", "success")
+        
+        conn.commit()
+        return redirect(url_for('profile_settings', user_id=user_id))
+        
+    except Exception as e:
+        print(f"❌ Error in handle_auto_profile_update: {e}", flush=True)
+        flash("Có lỗi xảy ra khi cập nhật hồ sơ.", "error")
+        return redirect(url_for('profile_settings', user_id=user_id))
+
 def get_profile_changes_summary(old_data, new_data, has_avatar_change=False):
     """Tạo tóm tắt thay đổi profile"""
     changes = []
@@ -3556,11 +3797,21 @@ def handle_profile_verification(user_id, verification_code, cursor, conn):
     """Xử lý xác thực thay đổi profile"""
     try:
         # Kiểm tra mã xác thực
-        cursor.execute("""
-            SELECT profile_verification_code, profile_verification_expires_at, 
-                   pending_profile_changes, profile_verification_attempts
-            FROM user WHERE id = %s
-        """, (user_id,))
+        try:
+            cursor.execute("""
+                SELECT profile_verification_code, profile_verification_expires_at, 
+                       pending_profile_changes, profile_verification_attempts,
+                       profile_verification_usage_count
+                FROM user WHERE id = %s
+            """, (user_id,))
+        except Exception as e:
+            # Fallback nếu chưa có field usage_count
+            print(f"⚠️  DEBUG: Field profile_verification_usage_count chưa tồn tại: {e}", flush=True)
+            cursor.execute("""
+                SELECT profile_verification_code, profile_verification_expires_at, 
+                       pending_profile_changes, profile_verification_attempts
+                FROM user WHERE id = %s
+            """, (user_id,))
         
         result = cursor.fetchone()
         if not result:
@@ -3571,6 +3822,34 @@ def handle_profile_verification(user_id, verification_code, cursor, conn):
         expires_at = result['profile_verification_expires_at']
         pending_changes = json.loads(result['pending_profile_changes']) if result['pending_profile_changes'] else {}
         attempts = result['profile_verification_attempts']
+        usage_count = result.get('profile_verification_usage_count', 0) or 0
+        
+        # Kiểm tra đã hết lượt sử dụng chưa (chỉ khi có field usage_count)
+        if 'profile_verification_usage_count' in result and usage_count >= 5:
+            # Xóa thông tin xác thực khi hết lượt
+            try:
+                cursor.execute("""
+                    UPDATE user SET 
+                        profile_verification_code = NULL,
+                        profile_verification_expires_at = NULL,
+                        pending_profile_changes = NULL,
+                        profile_verification_attempts = 0,
+                        profile_verification_usage_count = 0
+                    WHERE id = %s
+                """, (user_id,))
+            except Exception as e:
+                print(f"⚠️  DEBUG: Fallback cleanup without usage_count: {e}", flush=True)
+                cursor.execute("""
+                    UPDATE user SET 
+                        profile_verification_code = NULL,
+                        profile_verification_expires_at = NULL,
+                        pending_profile_changes = NULL,
+                        profile_verification_attempts = 0
+                    WHERE id = %s
+                """, (user_id,))
+            conn.commit()
+            flash("Mã xác thực đã hết lượt sử dụng (5 lần). Vui lòng thực hiện thay đổi lại để nhận mã mới.", "error")
+            return redirect(url_for('profile_settings', user_id=user_id))
         
         # Kiểm tra thời gian hết hạn
         if expires_at and datetime.now() > expires_at:
@@ -3580,7 +3859,8 @@ def handle_profile_verification(user_id, verification_code, cursor, conn):
                     profile_verification_code = NULL,
                     profile_verification_expires_at = NULL,
                     pending_profile_changes = NULL,
-                    profile_verification_attempts = 0
+                    profile_verification_attempts = 0,
+                    profile_verification_usage_count = 0
                 WHERE id = %s
             """, (user_id,))
             conn.commit()
@@ -3595,7 +3875,8 @@ def handle_profile_verification(user_id, verification_code, cursor, conn):
                     profile_verification_code = NULL,
                     profile_verification_expires_at = NULL,
                     pending_profile_changes = NULL,
-                    profile_verification_attempts = 0
+                    profile_verification_attempts = 0,
+                    profile_verification_usage_count = 0
                 WHERE id = %s
             """, (user_id,))
             conn.commit()
@@ -3660,18 +3941,70 @@ def handle_profile_verification(user_id, verification_code, cursor, conn):
                 print(f"[WARN] Error saving cropped avatar: {e}", flush=True)
                 flash("Có lỗi khi lưu ảnh đại diện đã cắt.", "error")
         
-        # Xóa thông tin xác thực
-        cursor.execute("""
-            UPDATE user SET 
-                profile_verification_code = NULL,
-                profile_verification_expires_at = NULL,
-                pending_profile_changes = NULL,
-                profile_verification_attempts = 0
-            WHERE id = %s
-        """, (user_id,))
+        # Tăng usage count thay vì xóa mã (chỉ khi có field usage_count)
+        if 'profile_verification_usage_count' in result:
+            new_usage_count = usage_count + 1
+            
+            if new_usage_count >= 5:
+                # Đã hết lượt sử dụng - xóa thông tin xác thực
+                try:
+                    cursor.execute("""
+                        UPDATE user SET 
+                            profile_verification_code = NULL,
+                            profile_verification_expires_at = NULL,
+                            pending_profile_changes = NULL,
+                            profile_verification_attempts = 0,
+                            profile_verification_usage_count = 0
+                        WHERE id = %s
+                    """, (user_id,))
+                except Exception as e:
+                    print(f"⚠️  DEBUG: Fallback final cleanup: {e}", flush=True)
+                    cursor.execute("""
+                        UPDATE user SET 
+                            profile_verification_code = NULL,
+                            profile_verification_expires_at = NULL,
+                            pending_profile_changes = NULL,
+                            profile_verification_attempts = 0
+                        WHERE id = %s
+                    """, (user_id,))
+                flash("✅ Xác thực thành công! Hồ sơ đã được cập nhật. Mã xác thực đã hết lượt sử dụng.", "success")
+            else:
+                # Còn lượt sử dụng - chỉ tăng usage count
+                try:
+                    cursor.execute("""
+                        UPDATE user SET 
+                            pending_profile_changes = NULL,
+                            profile_verification_attempts = 0,
+                            profile_verification_usage_count = %s
+                        WHERE id = %s
+                    """, (new_usage_count, user_id,))
+                    remaining_uses = 5 - new_usage_count
+                    flash(f"✅ Xác thực thành công! Hồ sơ đã được cập nhật. Mã còn {remaining_uses} lượt sử dụng.", "success")
+                except Exception as e:
+                    print(f"⚠️  DEBUG: Fallback usage count update: {e}", flush=True)
+                    # Fallback: xóa luôn như cũ
+                    cursor.execute("""
+                        UPDATE user SET 
+                            profile_verification_code = NULL,
+                            profile_verification_expires_at = NULL,
+                            pending_profile_changes = NULL,
+                            profile_verification_attempts = 0
+                        WHERE id = %s
+                    """, (user_id,))
+                    flash("✅ Xác thực thành công! Hồ sơ đã được cập nhật.", "success")
+        else:
+            # Fallback: hoạt động như cũ khi chưa có field usage_count
+            cursor.execute("""
+                UPDATE user SET 
+                    profile_verification_code = NULL,
+                    profile_verification_expires_at = NULL,
+                    pending_profile_changes = NULL,
+                    profile_verification_attempts = 0
+                WHERE id = %s
+            """, (user_id,))
+            flash("✅ Xác thực thành công! Hồ sơ đã được cập nhật.", "success")
         
         conn.commit()
-        flash("✅ Xác thực thành công! Hồ sơ đã được cập nhật.", "success")
         return redirect(url_for('profile_settings', user_id=user_id))
         
     except Exception as e:

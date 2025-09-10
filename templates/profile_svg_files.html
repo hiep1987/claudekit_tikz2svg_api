@@ -1,74 +1,54 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Quản lý và xem các file SVG đã tạo từ TikZ code">
-    <meta name="keywords" content="TikZ, SVG, LaTeX, vector graphics, profile">
-    <meta name="author" content="TikZ to SVG">
-    <meta name="robots" content="index, follow">
-    <meta property="og:title" content="File SVG của tôi - TikZ to SVG">
-    <meta property="og:description" content="Quản lý và xem các file SVG đã tạo từ TikZ code">
-    <meta property="og:type" content="website">
-    <meta property="og:locale" content="vi_VN">
-    <title>File SVG của tôi - TikZ to SVG</title>
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
-    <link rel="icon" type="image/png" sizes="48x48" href="{{ url_for('static', filename='favicon-48x48.png') }}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
-    <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='android-chrome-192x192.png') }}">
-    <link rel="icon" type="image/png" sizes="512x512" href="{{ url_for('static', filename='android-chrome-512x512.png') }}">
-    <link rel="shortcut icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    
-    <!-- Global state (JSON to satisfy linter) -->
-    <script>
-        // ATTEMPT TO MATCH search_results.html EXACTLY
-        var isLoggedIn = {{ 'true' if current_user.is_authenticated else 'false' }};
-        
-        // Initialize window.appState for file_card.js compatibility (EXACTLY like search_results.html)
-        window.appState = {
-            loggedIn: isLoggedIn,
-            userEmail: {% if current_user_email %}'{{ current_user_email }}'{% else %}null{% endif %}
-        };
-        
-        // Debug comparison with search_results.html
-        console.log('🔬 EXACT COPY of search_results.html approach:');
-        console.log('isLoggedIn variable:', isLoggedIn);
-        console.log('window.appState:', window.appState);
-    </script>
-    
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
-    
-    <!-- Programming Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Fira+Code:wght@400;500;600&family=Source+Code+Pro:wght@400;500;600&family=Inconsolata:wght@400;500;600&display=swap" rel="stylesheet">
-    
-    <!-- File Card CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/file_card.css', v='1.1') }}">
-    
-    <!-- Navigation CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/navigation.css', v='1.0') }}">
-    
-    <!-- Login Modal CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/login_modal.css', v='1.0') }}">
-    
-    <!-- Page-specific CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/profile_svg_files.css', v='1.0') }}">
-    
-    <!-- CodeMirror CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material.min.css">
+{% extends "base.html" %}
 
-</head>
-<body>
-    <!-- TikZ App Container Scope -->
-    <div class="tikz-app">
-    
-    {% include 'partials/_navbar.html' %}
+{# Configuration flags #}
+{% set include_highlight_js = false %}
+{% set include_codemirror = true %}
+{% set include_file_card = true %}
+{% set include_navigation = true %}
+{% set include_login_modal = true %}
+{% set include_navbar = true %}
 
+{# Page Title #}
+{% block title %}File SVG của tôi - TikZ to SVG{% endblock %}
+
+{# Custom Meta Tags #}
+{% block meta %}
+<meta name="description" content="Quản lý và xem các file SVG đã tạo từ TikZ code">
+<meta name="keywords" content="TikZ, SVG, LaTeX, vector graphics, profile">
+<meta name="author" content="TikZ to SVG">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="File SVG của tôi - TikZ to SVG">
+<meta property="og:description" content="Quản lý và xem các file SVG đã tạo từ TikZ code">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="vi_VN">
+{% endblock %}
+
+{# JavaScript variables in head #}
+{% block head_js %}
+<script>
+    // ATTEMPT TO MATCH search_results.html EXACTLY
+    var isLoggedIn = {{ 'true' if current_user.is_authenticated else 'false' }};
+    
+    // Initialize window.appState for file_card.js compatibility (EXACTLY like search_results.html)
+    window.appState = {
+        loggedIn: isLoggedIn,
+        userEmail: {% if current_user_email %}'{{ current_user_email }}'{% else %}null{% endif %}
+    };
+    
+    // Debug comparison with search_results.html
+    console.log('🔬 EXACT COPY of search_results.html approach:');
+    console.log('isLoggedIn variable:', isLoggedIn);
+    console.log('window.appState:', window.appState);
+</script>
+{% endblock %}
+
+{# Page-specific CSS #}
+{% block extra_css %}
+<!-- Profile SVG Files CSS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile_svg_files.css', v='1.0') }}">
+{% endblock %}
+
+{% block content %}
     <div class="page-container">
         <div class="profile-svg-content-container">
         <!-- Public Profile Header -->
@@ -167,22 +147,18 @@
     </div>
     {% endif %}
 
-    </div> <!-- End .tikz-app -->
+    </div> <!-- End .page-container -->
+{% endblock %}
 
-    <!-- CodeMirror libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/stex/stex.min.js"></script>
-    
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- Navigation JavaScript - Shared component -->
-    <script src="{{ url_for('static', filename='js/navigation.js', v='1.0') }}"></script>
-    
-    <!-- File Card JavaScript - Shared component -->
-    <script src="{{ url_for('static', filename='js/file_card.js', v='1.2') }}"></script>
-    
-    <!-- Debug and Initialization Script -->
+{# Page-specific JavaScript #}
+{% block extra_js %}
+<!-- Navigation JavaScript - Shared component -->
+<script src="{{ url_for('static', filename='js/navigation.js', v='1.0') }}"></script>
+
+<!-- File Card JavaScript - Shared component -->
+<script src="{{ url_for('static', filename='js/file_card.js', v='1.2') }}"></script>
+
+<!-- Debug and Initialization Script -->
     <script>
         // Debug ALL template variables and context
         console.log('🔍 DEEP DEBUG Profile SVG Files:');
@@ -300,6 +276,4 @@
             }, 600);
         });
     </script>
-
-</body>
-</html> 
+{% endblock %} 

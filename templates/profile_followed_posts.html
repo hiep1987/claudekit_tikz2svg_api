@@ -1,63 +1,39 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bài đăng theo dõi - TikZ to SVG</title>
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
-    <link rel="icon" type="image/png" sizes="48x48" href="{{ url_for('static', filename='favicon-48x48.png') }}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
-    <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='android-chrome-192x192.png') }}">
-    <link rel="icon" type="image/png" sizes="512x512" href="{{ url_for('static', filename='android-chrome-512x512.png') }}">
-    <link rel="shortcut icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    
-    <!-- Global state (JSON to satisfy linter) -->
-    <script>
-        // MATCH search_results.html EXACTLY to fix Like Button
-        var isLoggedIn = {{ 'true' if current_user.is_authenticated else 'false' }};
-        
-        // Initialize window.appState for file_card.js compatibility (EXACTLY like search_results.html)
-        window.appState = {
-            loggedIn: isLoggedIn,
-            userEmail: {% if current_user_email %}'{{ current_user_email }}'{% else %}null{% endif %}
-        };
-        
-        // Debug log
-        console.log('🔬 Profile Followed Posts - appState:', window.appState);
-    </script>
-    
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
-    
-    <!-- Programming Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Fira+Code:wght@400;500;600&family=Source+Code+Pro:wght@400;500;600&family=Inconsolata:wght@400;500;600&display=swap" rel="stylesheet">
-    
-    <!-- File Card CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/file_card.css', v='1.1') }}">
-    
-    <!-- Navigation CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/navigation.css', v='1.0') }}">
-    
-    <!-- Login Modal CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/login_modal.css', v='1.0') }}">
-    
-    <!-- Page-specific CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/profile_followed_posts.css', v='1.0') }}">
-    
-    <!-- CodeMirror CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material.min.css">
+{% extends "base.html" %}
 
-</head>
-<body>
-    <!-- TikZ App Container Scope -->
-    <div class="tikz-app">
+{# Configuration flags #}
+{% set include_highlight_js = true %}
+{% set include_codemirror = true %}
+{% set include_file_card = true %}
+{% set include_navigation = true %}
+{% set include_login_modal = true %}
+{% set include_navbar = true %}
+
+{# Page Title #}
+{% block title %}Bài đăng theo dõi - TikZ to SVG{% endblock %}
+
+{# Global JavaScript Variables #}
+{% block head_js %}
+<script>
+    // MATCH search_results.html EXACTLY to fix Like Button
+    var isLoggedIn = {{ 'true' if current_user.is_authenticated else 'false' }};
     
-    {% include 'partials/_navbar.html' %}
+    // Initialize window.appState for file_card.js compatibility (EXACTLY like search_results.html)
+    window.appState = {
+        loggedIn: isLoggedIn,
+        userEmail: {% if current_user_email %}'{{ current_user_email }}'{% else %}null{% endif %}
+    };
+    
+    // Debug log
+    console.log('🔬 Profile Followed Posts - appState:', window.appState);
+</script>
+{% endblock %}
+
+{# Page-specific CSS #}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile_followed_posts.css', v='1.0') }}">
+{% endblock %}
+
+{% block content %}
 
     <div class="page-container">
         <div class="profile-content-container">
@@ -83,11 +59,7 @@
         </div>
     </div>
 
-    <!-- Login Modal (shared component) -->
-    {% include 'partials/_login_modal.html' %}
-
     <!-- Modal đăng xuất chỉ render nếu đã login -->
-    
     {% if user_email %}
     <div id="logout-modal">
       <div class="modal-content">
@@ -97,21 +69,13 @@
       </div>
     </div>
     {% endif %}
-    
-    </div> <!-- End .tikz-app -->
-    
-    <!-- ===== JAVASCRIPT LIBRARIES - Loaded at end of body for optimal performance ===== -->
-    
-    <!-- CodeMirror JavaScript libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/stex/stex.min.js"></script>
-    
-    <!-- Bootstrap JavaScript -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- Navigation JavaScript - Shared component -->
-    <script src="{{ url_for('static', filename='js/navigation.js') }}"></script>
-    
-    <!-- File Card JavaScript - Shared component -->
-    <script src="{{ url_for('static', filename='js/file_card.js', v='1.2') }}"></script>
-</html> 
+{% endblock %}
+
+{# Page-specific JavaScript #}
+{% block extra_js %}
+<!-- Navigation JavaScript - Shared component -->
+<script src="{{ url_for('static', filename='js/navigation.js') }}"></script>
+
+<!-- File Card JavaScript - Shared component -->
+<script src="{{ url_for('static', filename='js/file_card.js', v='1.2') }}"></script>
+{% endblock %} 

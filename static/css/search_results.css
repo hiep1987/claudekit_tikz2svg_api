@@ -51,16 +51,15 @@ html, body {
     font-variant-ligatures: contextual;
 }
 
-/* Search Header Container */
+/* Search Header Container - Using Shared Variables */
 .tikz-app .search-header-container {
-    background-color: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(8px);
-    padding: 20px 0;
-    margin-top: 20px;
-    margin-bottom: 20px;
+    background: var(--container-bg-secondary);
+    backdrop-filter: var(--container-bg-blur);
+    padding: var(--container-padding-sm);
+    margin: var(--container-margin-sm);
     border: none;
-    border-radius: 1rem;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+    border-radius: var(--container-radius-lg);
+    box-shadow: var(--container-shadow-medium);
 }
 
 /* Files Section Container */

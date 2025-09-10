@@ -1,220 +1,173 @@
 /* Profile Verification Page Styles */
+/* Migrated to use CSS Foundation System - Variables from master-variables.css */
+/* Load Order: After master-variables.css and global-base.css */
 
-/* TikZ App Scoped Container */
-.tikz-app {
-    width: 100%;
-    min-height: 100vh;
-}
+/* All base styles now handled by global-base.css - no duplicates */
 
-/* Body and Container */
-html, body {
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #fafafa;
-}
-
-/* Box-sizing scoped to our page layout only (avoid overriding Bootstrap) */
-.tikz-app .page-container {
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-.tikz-app .page-container *,
-.tikz-app .page-container *::before,
-.tikz-app .page-container *::after {
-    box-sizing: inherit;
-}
-
-.tikz-app button, 
-.tikz-app input, 
-.tikz-app select, 
-.tikz-app textarea {
-    font-family: inherit;
-}
-
-/* Preserve monospace fonts for code editors */
-.tikz-app .CodeMirror, 
-.tikz-app .CodeMirror * {
-    font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Cascadia Code', 'Inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace !important;
-    font-feature-settings: "liga" 1, "calt" 1;
-    font-variant-ligatures: contextual;
-}
-
-/* Preserve monospace for any code-related elements */
-.tikz-app pre, 
-.tikz-app code, 
-.tikz-app .code, 
-.tikz-app .tikz-code, 
-.tikz-app textarea[name="code"] {
-    font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Cascadia Code', 'Inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace !important;
-    font-feature-settings: "liga" 1, "calt" 1;
-    font-variant-ligatures: contextual;
-}
-
-/* Verification Container */
+/* Verification Container - Using Shared Variables */
 .tikz-app .verification-container {
-    background-color: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(8px);
-    padding: 40px 0;
+    background: var(--container-bg-secondary);
+    backdrop-filter: var(--container-bg-blur);
+    padding: var(--container-padding-lg);
     border: none;
-    border-radius: 1rem;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+    border-radius: var(--container-radius-lg);
+    box-shadow: var(--container-shadow-medium);
 }
 
 .tikz-app .verification-header {
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: var(--spacing-20);
 }
 
 .tikz-app .verification-header h1 {
-    color: #1976d2;
-    margin-bottom: 10px;
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-4);
 }
 
 .tikz-app .verification-header p {
-    color: #666;
-    font-size: 16px;
+    color: var(--text-muted);
+    font-size: var(--font-size-base);
 }
 
 .tikz-app .verification-section {
-  margin-bottom: 40px;
+  margin-bottom: var(--spacing-20);
 }
 
 .tikz-app .terms-section {
-  background: #f8f9fa;
-  padding: 32px;
-  border-radius: 16px;
-  margin-bottom: 30px;
-  border-left: 4px solid #1976d2;
+  background: var(--bg-tertiary);
+  padding: var(--spacing-16);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-16);
+  border-left: 4px solid var(--primary-color);
 }
 
 .tikz-app .terms-section h3 {
-  color: #1976d2;
-  margin-bottom: 20px;
-  font-size: 1.5rem;
+  color: var(--primary-color);
+  margin-bottom: var(--spacing-10);
+  font-size: var(--font-size-2xl);
 }
 
 .tikz-app .terms-section h4 {
-  color: #333;
-  margin-top: 25px;
-  margin-bottom: 10px;
-  font-size: 1.2rem;
+  color: var(--text-primary);
+  margin-top: var(--spacing-12);
+  margin-bottom: var(--spacing-4);
+  font-size: var(--font-size-xl);
 }
 
 .tikz-app .terms-section p, .tikz-app .terms-section li {
-  color: #555;
-  line-height: 1.6;
-  margin-bottom: 10px;
+  color: var(--text-secondary);
+  line-height: var(--line-height-relaxed);
+  margin-bottom: var(--spacing-4);
 }
 
 .tikz-app .terms-section ul {
-  padding-left: 20px;
+  padding-left: var(--spacing-10);
 }
 
 .tikz-app .terms-section li {
-  margin-bottom: 8px;
+  margin-bottom: var(--spacing-3);
 }
 
 .tikz-app .verification-form {
-  background: #fff;
-  padding: 32px;
-  border-radius: 16px;
-  border: 2px solid #e9ecef;
-  margin-top: 30px;
+  background: var(--bg-primary);
+  padding: var(--spacing-16);
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--border-light);
+  margin-top: var(--spacing-16);
 }
 
 .tikz-app .verification-form h3 {
-  color: #1976d2;
-  margin-bottom: 15px;
+  color: var(--primary-color);
+  margin-bottom: var(--spacing-6);
   text-align: center;
 }
 
 .tikz-app .info-group {
-  margin-bottom: 25px;
+  margin-bottom: var(--spacing-12);
 }
 
 .tikz-app .info-group label {
   display: block;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 8px;
-  font-size: 14px;
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-3);
+  font-size: var(--font-size-sm);
 }
 
 .tikz-app .info-group input {
   width: 100%;
-  padding: 12px;
-  border: 2px solid #ddd;
-  border-radius: 6px;
-  font-size: 16px;
+  padding: var(--spacing-6);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
 }
 
 .tikz-app .info-group input:focus {
   outline: none;
-  border-color: #1976d2;
+  border-color: var(--primary-color);
 }
 
 .tikz-app .actions {
   text-align: center;
-  margin-top: 30px;
+  margin-top: var(--spacing-16);
 }
 
 .tikz-app .btn {
-  padding: 12px 32px;
+  padding: var(--spacing-6) var(--spacing-16);
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: bold;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-bold);
   cursor: pointer;
-  transition: all 0.3s;
-  margin: 0 10px;
+  transition: all var(--transition-normal);
+  margin: 0 var(--spacing-4);
   text-decoration: none;
   display: inline-block;
 }
 
 .tikz-app .btn-primary {
-  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
-  color: white;
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  color: var(--text-white);
 }
 
 .tikz-app .btn-primary:hover {
-  background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
-  color: white;
+  background: linear-gradient(135deg, var(--primary-dark) 0%, #0d47a1 100%);
+  color: var(--text-white);
   text-decoration: none;
 }
 
 .tikz-app .btn-secondary {
   background: #6c757d;
-  color: white;
+  color: var(--text-white);
 }
 
 .tikz-app .btn-secondary:hover {
   background: #5a6268;
-  color: white;
+  color: var(--text-white);
   text-decoration: none;
 }
 
 .tikz-app .flash-messages {
-  margin-bottom: 20px;
+  margin-bottom: var(--spacing-10);
 }
 
 .tikz-app .flash {
-  padding: 12px 20px;
-  border-radius: 6px;
-  margin-bottom: 10px;
-  font-weight: bold;
-  transition: opacity 0.3s ease;
+  padding: var(--spacing-6) var(--spacing-10);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--spacing-4);
+  font-weight: var(--font-weight-bold);
+  transition: opacity var(--transition-normal);
 }
 
 .tikz-app .flash-success {
-  background: #d4edda;
-  color: #155724;
+  background: var(--success-bg);
+  color: var(--success-dark);
   border: 1px solid #c3e6cb;
 }
 
 .tikz-app .flash-error {
-  background: #f8d7da;
-  color: #721c24;
+  background: var(--danger-bg);
+  color: var(--danger-dark);
   border: 1px solid #f5c6cb;
 }
 
@@ -225,30 +178,30 @@ html, body {
 }
 
 .tikz-app .warning-box {
-  background: #fff3cd;
+  background: var(--warning-bg);
   border: 1px solid #ffeaa7;
   color: #856404;
-  padding: 15px;
-  border-radius: 6px;
-  margin-bottom: 20px;
+  padding: var(--spacing-6);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--spacing-10);
 }
 
 .tikz-app .warning-box h4 {
   color: #856404;
-  margin-bottom: 10px;
+  margin-bottom: var(--spacing-4);
 }
 
 .tikz-app .verification-code-input {
-  font-family: 'Courier New', monospace;
-  font-size: 18px;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-lg);
   text-align: center;
   letter-spacing: 2px;
 }
 
 .tikz-app .verification-note {
-  color: #666;
-  font-size: 12px;
-  margin-bottom: 20px;
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+  margin-bottom: var(--spacing-10);
   text-align: center;
 }
 
@@ -258,7 +211,7 @@ html, body {
 
 .tikz-app .verification-note-small {
   color: #888;
-  font-size: 13px;
+  font-size: var(--font-size-sm);
 }
 
 .tikz-app .verification-warning-text {
@@ -270,23 +223,23 @@ html, body {
 }
 
 .tikz-app .verification-warning {
-  background: #f8d7da;
+  background: var(--danger-bg);
   border: 1px solid #f5c6cb;
-  color: #721c24;
-  padding: 10px;
-  border-radius: 6px;
-  margin-bottom: 15px;
-  font-size: 14px;
+  color: var(--danger-dark);
+  padding: var(--spacing-4);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--spacing-6);
+  font-size: var(--font-size-sm);
 }
 
 .tikz-app .verification-warning.high {
-  background: #f8d7da;
+  background: var(--danger-bg);
   border: 1px solid #f5c6cb;
-  color: #721c24;
+  color: var(--danger-dark);
 }
 
 .tikz-app .verification-warning.medium {
-  background: #fff3cd;
+  background: var(--warning-bg);
   border: 1px solid #ffeaa7;
   color: #856404;
 }
@@ -295,34 +248,34 @@ html, body {
 .tikz-app .site-footer {
     text-align: center;
     color: #888;
-    font-size: 14px;
-    margin-top: 40px;
+    font-size: var(--font-size-sm);
+    margin-top: var(--spacing-20);
 }
 
 @media (max-width: 768px) {
   .tikz-app .verification-container {
-    padding: 20px 0;
+    padding: var(--container-padding-mobile-md) 0;
   }
   
   .tikz-app .terms-section {
-    padding: 20px;
+    padding: var(--spacing-10);
   }
   
   .tikz-app .verification-form {
-    padding: 20px;
+    padding: var(--spacing-10);
   }
 }
 
 @media (max-width: 600px) {
   .tikz-app .verification-container {
-    padding: 15px 0;
+    padding: var(--spacing-6) 0;
   }
   
   .tikz-app .btn, .tikz-app .btn-primary, .tikz-app .btn-secondary {
     width: 100%;
-    font-size: 17px;
-    margin: 8px 0;
-    padding: 14px 0;
+    font-size: var(--font-size-lg);
+    margin: var(--spacing-3) 0;
+    padding: var(--spacing-6) 0;
     display: block;
     text-align: center;
   }

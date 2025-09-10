@@ -132,10 +132,19 @@
         },
         placeholder: 'Viết gì đó về bản thân...'
       });
+      // Sync content on text changes
       quill.on('text-change', function () {
         const bioHidden = document.getElementById('bio-hidden');
         if (bioHidden) bioHidden.value = quill.root.innerHTML;
       });
+      
+      // FIX: Sync initial content immediately after initialization
+      const bioHidden = document.getElementById('bio-hidden');
+      if (bioHidden) {
+        bioHidden.value = quill.root.innerHTML;
+        console.log('🔄 Initial Quill content synced:', bioHidden.value.substring(0, 50) + '...');
+      }
+      
       console.log('✅ Quill initialized for bio editor');
     }
 
@@ -184,6 +193,18 @@
 
     const cancelBtn = document.getElementById('cancel-verification-btn');
     if (cancelBtn) cancelBtn.addEventListener('click', handleCancelVerification);
+
+    // FIX: Sync Quill content before form submission
+    const form = document.querySelector('form');
+    if (form && quill) {
+      form.addEventListener('submit', function(e) {
+        const bioHidden = document.getElementById('bio-hidden');
+        if (bioHidden && quill) {
+          bioHidden.value = quill.root.innerHTML;
+          console.log('🔄 Synced Quill content before submit:', bioHidden.value.substring(0, 100) + '...');
+        }
+      });
+    }
   });
 })();
 

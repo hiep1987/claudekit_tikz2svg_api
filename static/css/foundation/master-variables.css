@@ -1,0 +1,219 @@
+/* ===== MASTER CSS VARIABLES - COMPLETE DESIGN SYSTEM ===== */
+/* This file defines ALL variables used across the application */
+/* Import order: 1st - Must be loaded before all other CSS */
+
+:root {
+  /* ===== COLOR SYSTEM ===== */
+  
+  /* Primary Palette */
+  --primary-color: #1976d2;
+  --primary-dark: #0d47a1;
+  --primary-light: #42a5f5;
+  --primary-bg: rgba(25, 118, 210, 0.1);
+  
+  /* Danger/Error Palette */
+  --danger-color: #d32f2f;
+  --danger-dark: #b91c1c;
+  --danger-light: #ef4444;
+  --danger-bg: rgba(211, 47, 47, 0.1);
+  
+  /* Success Palette */
+  --success-color: #4caf50;
+  --success-dark: #2e7d32;
+  --success-light: #66bb6a;
+  --success-bg: rgba(76, 175, 80, 0.1);
+  
+  /* Warning Palette */
+  --warning-color: #f59e0b;
+  --warning-dark: #d97706;
+  --warning-light: #fbbf24;
+  --warning-bg: rgba(245, 158, 11, 0.1);
+  
+  /* Neutral Palette */
+  --text-primary: #333333;
+  --text-secondary: #555555;
+  --text-muted: #666666;
+  --text-light: #999999;
+  --text-lighter: #cccccc;
+  --text-white: #ffffff;
+  --text-black: #000000;
+  
+  /* Enhanced Contrast Text for Glass Morphism */
+  --text-on-glass: #2d3436;          /* High contrast on glass backgrounds */
+  --text-header-glass: #1e3a8a;      /* Deep blue for headers on glass */
+  --text-accent-glass: #1976d2;      /* Accent text on glass backgrounds */
+  
+  /* Background Palette */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f5;
+  --bg-tertiary: #f8f9fa;
+  --bg-muted: #eeeeee;
+  --bg-dark: #2d2d2d;
+  
+  /* Border Palette */
+  --border-color: #dddddd;
+  --border-light: #e9ecef;
+  --border-muted: #f1f3f4;
+  
+  /* ===== SPACING SYSTEM (8px base) ===== */
+  --spacing-0: 0;
+  --spacing-1: 0.125rem;  /* 2px */
+  --spacing-2: 0.25rem;   /* 4px */
+  --spacing-3: 0.375rem;  /* 6px */
+  --spacing-4: 0.5rem;    /* 8px */
+  --spacing-5: 0.625rem;  /* 10px */
+  --spacing-6: 0.75rem;   /* 12px */
+  --spacing-8: 1rem;      /* 16px */
+  --spacing-10: 1.25rem;  /* 20px */
+  --spacing-12: 1.5rem;   /* 24px */
+  --spacing-16: 2rem;     /* 32px */
+  --spacing-20: 2.5rem;   /* 40px */
+  --spacing-24: 3rem;     /* 48px */
+  --spacing-32: 4rem;     /* 64px */
+  
+  /* Legacy Support - Map to new system */
+  --spacing-xs: var(--spacing-2);   /* 4px */
+  --spacing-sm: var(--spacing-4);   /* 8px */
+  --spacing-md: var(--spacing-8);   /* 16px */
+  --spacing-lg: var(--spacing-12);  /* 24px */
+  --spacing-xl: var(--spacing-16);  /* 32px */
+  --spacing-2xl: var(--spacing-24); /* 48px */
+  
+  /* ===== CONTAINER SYSTEM ===== */
+  
+  /* Container Widths */
+  --container-max-width: 1200px;
+  --container-max-width-sm: 640px;
+  --container-max-width-md: 768px;
+  --container-max-width-lg: 1024px;
+  --container-max-width-xl: 1280px;
+  
+  /* Container Backgrounds */
+  --container-bg-primary: var(--bg-primary);
+  --container-bg-secondary: rgba(255, 255, 255, 0.8);
+  --container-bg-tertiary: var(--bg-tertiary);
+  --container-bg-blur: blur(8px);
+  
+  /* Glass Morphism - Enhanced Contrast */
+  --glass-bg-light: rgba(255, 255, 255, 0.95);
+  --glass-bg-medium: rgba(255, 255, 255, 0.88);
+  --glass-bg-strong: rgba(248, 249, 250, 0.92);
+  --glass-border: rgba(255, 255, 255, 0.3);
+  --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+  --glass-blur-light: blur(10px);
+  --glass-blur-medium: blur(12px);
+  
+  /* Container Padding */
+  --container-padding-sm: var(--spacing-10) 0;      /* 20px vertical */
+  --container-padding-md: var(--spacing-16);        /* 32px all sides */
+  --container-padding-lg: var(--spacing-20) 0;      /* 40px vertical */
+  --container-padding-xl: var(--spacing-24);        /* 48px all sides */
+  
+  /* Container Margins */
+  --container-margin-sm: var(--spacing-10) 0;
+  --container-margin-md: var(--spacing-16) 0;
+  --container-margin-lg: var(--spacing-20) 0;
+  --container-margin-xl: var(--spacing-24) 0;
+  
+  /* ===== BORDER RADIUS SYSTEM ===== */
+  --radius-none: 0;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-full: 50%;
+  
+  /* Legacy Support */
+  --container-radius-sm: var(--radius-md);
+  --container-radius-md: var(--radius-lg);
+  --container-radius-lg: var(--radius-lg);
+  
+  /* ===== SHADOW SYSTEM ===== */
+  --shadow-none: none;
+  --shadow-sm: 0 2px 6px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.12);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.16);
+  --shadow-xl: 0 12px 48px rgba(0,0,0,0.20);
+  --shadow-2xl: 0 20px 80px rgba(0,0,0,0.24);
+  
+  /* Legacy Support */
+  --container-shadow-light: var(--shadow-sm);
+  --container-shadow-medium: var(--shadow-lg);
+  --container-shadow-strong: var(--shadow-xl);
+  
+  /* ===== TRANSITION SYSTEM ===== */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s ease;
+  --transition-slow: 0.35s ease;
+  --transition-bounce: 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  
+  /* ===== TYPOGRAPHY SYSTEM ===== */
+  
+  /* Font Families */
+  --font-family-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  --font-family-mono: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Cascadia Code', 'Inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace;
+  
+  /* Font Sizes */
+  --font-size-xs: 0.75rem;   /* 12px */
+  --font-size-sm: 0.875rem;  /* 14px */
+  --font-size-base: 1rem;    /* 16px */
+  --font-size-lg: 1.125rem;  /* 18px */
+  --font-size-xl: 1.25rem;   /* 20px */
+  --font-size-2xl: 1.5rem;   /* 24px */
+  --font-size-3xl: 1.875rem; /* 30px */
+  --font-size-4xl: 2.25rem;  /* 36px */
+  
+  /* Font Weights */
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  
+  /* Line Heights */
+  --line-height-tight: 1.25;
+  --line-height-snug: 1.375;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.625;
+  --line-height-loose: 2;
+  
+  /* ===== Z-INDEX SYSTEM ===== */
+  --z-negative: -1;
+  --z-base: 0;
+  --z-raised: 10;
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+  --z-highest: 9999;
+  
+  /* ===== BREAKPOINTS (for JS usage) ===== */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+  
+  /* ===== MOBILE RESPONSIVE ADJUSTMENTS ===== */
+  --container-padding-mobile-sm: var(--spacing-8) 0;
+  --container-padding-mobile-md: var(--spacing-12);
+  --container-padding-mobile-lg: var(--spacing-10) 0;
+}
+
+/* ===== DARK MODE SUPPORT (Future) ===== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text-primary: #e5e5e5;
+    --text-secondary: #b5b5b5;
+    --text-muted: #a5a5a5;
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #2a2a2a;
+    --bg-tertiary: #3a3a3a;
+    --border-color: #444444;
+  }
+}

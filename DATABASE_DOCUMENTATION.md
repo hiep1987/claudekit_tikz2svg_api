@@ -22,9 +22,23 @@ CREATE TABLE `user` (
   `rank` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `score` int DEFAULT '0',
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `profile_verification_code` varchar(10) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `profile_verification_expires_at` datetime DEFAULT NULL,
+  `pending_profile_changes` json DEFAULT NULL,
+  `profile_verification_attempts` int DEFAULT '0',
+  `identity_verified` tinyint(1) DEFAULT '0',
+  `identity_verification_code` varchar(6) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `identity_verification_expires_at` datetime DEFAULT NULL,
+  `identity_verification_attempts` int DEFAULT '0',
+  `profile_verification_usage_count` int DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`),
-  UNIQUE KEY `google_id` (`google_id`)
+  UNIQUE KEY `google_id` (`google_id`),
+  KEY `idx_profile_verification_code` (`profile_verification_code`),
+  KEY `idx_profile_verification_expires` (`profile_verification_expires_at`),
+  KEY `idx_identity_verified` (`identity_verified`),
+  KEY `idx_identity_verification_code` (`identity_verification_code`),
+  KEY `idx_profile_verification_usage` (`profile_verification_usage_count`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
 
@@ -52,6 +66,24 @@ CREATE TABLE `user` (
 Chúng được thêm bằng script `identity_verification_setup.sql` và có index:
 - `idx_identity_verified` trên `identity_verified`
 - `idx_identity_verification_code` trên `identity_verification_code`
+
+#### (Mới) Trường xác thực profile settings
+- `profile_verification_code` (VARCHAR(10)): Mã xác thực thay đổi profile (6-10 ký tự)
+- `profile_verification_expires_at` (DATETIME): Thời gian hết hạn mã xác thực profile
+- `pending_profile_changes` (JSON): Lưu thay đổi profile đang chờ xác thực
+- `profile_verification_attempts` (INT): Số lần thử xác thực sai (tối đa 5)
+- `profile_verification_usage_count` (INT): Số lần mã xác thực đã được sử dụng thành công (tối đa 5 lần)
+
+Chúng được thêm bằng script `profile_settings_verification.sql` và `add_usage_count_field.sql` với các index:
+- `idx_profile_verification_code` trên `profile_verification_code`
+- `idx_profile_verification_expires` trên `profile_verification_expires_at`
+- `idx_profile_verification_usage` trên `profile_verification_usage_count`
+
+**Code Usage Limit Logic:**
+- Một mã xác thực có thể được sử dụng tối đa **5 lần** trong vòng **10 phút**
+- Field `profile_verification_usage_count` track số lần đã sử dụng thành công
+- Khi `usage_count >= 5` hoặc hết hạn 10 phút, hệ thống tạo mã mới
+- Logic này được implement trong `app.py` với fallback compatibility cho database cũ
 
 ### 2. Bảng `svg_image` - Lưu trữ hình ảnh SVG
 
@@ -550,6 +582,68 @@ SELECT
 FROM user
 WHERE email_verified = 0
 ORDER BY created_at DESC
+
+-- Profile Verification System Queries
+-- Lấy thống kê usage count của verification codes
+SELECT 
+    profile_verification_usage_count,
+    COUNT(*) as user_count,
+    AVG(TIMESTAMPDIFF(MINUTE, 
+        DATE_SUB(profile_verification_expires_at, INTERVAL 10 MINUTE), 
+        NOW()
+    )) as avg_minutes_since_issued
+FROM user 
+WHERE profile_verification_code IS NOT NULL 
+    AND profile_verification_expires_at IS NOT NULL
+GROUP BY profile_verification_usage_count
+ORDER BY profile_verification_usage_count
+
+-- Lấy verification codes sắp hết hạn (< 2 phút)
+SELECT 
+    id,
+    username,
+    email,
+    profile_verification_code,
+    profile_verification_usage_count,
+    TIMESTAMPDIFF(SECOND, NOW(), profile_verification_expires_at) as seconds_until_expiry
+FROM user 
+WHERE profile_verification_code IS NOT NULL 
+    AND profile_verification_expires_at > NOW()
+    AND profile_verification_expires_at < DATE_ADD(NOW(), INTERVAL 2 MINUTE)
+ORDER BY profile_verification_expires_at ASC
+
+-- Lấy verification codes đã hết lượt sử dụng
+SELECT 
+    id,
+    username,
+    email,
+    profile_verification_code,
+    profile_verification_usage_count,
+    profile_verification_expires_at
+FROM user 
+WHERE profile_verification_usage_count >= 5
+    AND profile_verification_code IS NOT NULL
+ORDER BY profile_verification_expires_at DESC
+
+-- Debug: Kiểm tra code reuse logic
+SELECT 
+    id,
+    username,
+    profile_verification_code,
+    profile_verification_usage_count,
+    TIMESTAMPDIFF(MINUTE, 
+        DATE_SUB(profile_verification_expires_at, INTERVAL 10 MINUTE), 
+        NOW()
+    ) as minutes_since_issued,
+    TIMESTAMPDIFF(MINUTE, NOW(), profile_verification_expires_at) as minutes_until_expiry,
+    CASE 
+        WHEN profile_verification_usage_count >= 5 THEN 'EXCEEDED_USAGE_LIMIT'
+        WHEN profile_verification_expires_at < NOW() THEN 'EXPIRED'
+        WHEN profile_verification_code IS NULL THEN 'NO_CODE'
+        ELSE 'REUSABLE'
+    END as code_status
+FROM user 
+WHERE id = ? -- Replace with specific user ID
 ```
 
 ## Backup và Restore
@@ -590,4 +684,12 @@ mysql -u hiep1987 -p tikz2svg < tikz2svg_database_backup.sql
 
 ---
 
-*Tài liệu này được cập nhật lần cuối: Tháng 8 năm 2025*
+*Tài liệu này được cập nhật lần cuối: Tháng 1 năm 2025*
+
+## Changelog
+
+### Tháng 1 2025
+- ✅ **Thêm Code Usage Limit System**: Field `profile_verification_usage_count` để track số lần sử dụng mã xác thực
+- ✅ **Cập nhật schema bảng `user`**: Bao gồm tất cả fields verification hiện tại
+- ✅ **Thêm debug queries**: Queries để monitor và troubleshoot verification system
+- ✅ **Backward compatibility**: Hỗ trợ database cũ không có field `profile_verification_usage_count`

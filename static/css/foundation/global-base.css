@@ -1,0 +1,255 @@
+/* ===== GLOBAL BASE STYLES - TIKZ APP FOUNDATION ===== */
+/* This file defines base styles that apply to the entire application */
+/* Import order: 2nd - After master-variables.css, before components */
+
+/* ===== TIKZ APP CONTAINER - GLOBAL SCOPE ===== */
+.tikz-app {
+  /* Typography Foundation */
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--text-primary);
+  
+  /* Layout Foundation */
+  width: 100%;
+  min-height: 100vh;
+  
+  /* Box Model Foundation */
+  box-sizing: border-box;
+}
+
+/* Ensure all elements inherit box-sizing */
+.tikz-app *,
+.tikz-app *::before,
+.tikz-app *::after {
+  box-sizing: inherit;
+}
+
+/* ===== GLOBAL HTML/BODY RESET ===== */
+/* ONLY ONE SOURCE OF TRUTH - No more duplicates! */
+html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  background-color: #fafafa;
+  
+  /* Prevent horizontal scroll */
+  overflow-x: hidden;
+  
+  /* Better text rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ===== PAGE LAYOUT SYSTEM ===== */
+
+/* Master Page Container - Used by ALL pages */
+.tikz-app .page-container {
+  width: 100%;
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: var(--container-padding-md);
+}
+
+/* Content Containers - For specific content areas */
+.tikz-app .content-container {
+  background: var(--container-bg-primary);
+  border-radius: var(--container-radius-md);
+  box-shadow: var(--container-shadow-medium);
+  padding: var(--container-padding-md);
+  margin: var(--container-margin-md);
+}
+
+.tikz-app .content-container-secondary {
+  background: var(--container-bg-secondary);
+  backdrop-filter: var(--container-bg-blur);
+  border-radius: var(--container-radius-md);
+  box-shadow: var(--container-shadow-light);
+  padding: var(--container-padding-md);
+}
+
+/* ===== TYPOGRAPHY HIERARCHY ===== */
+
+.tikz-app h1 {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  margin: 0 0 var(--spacing-16) 0;
+  color: var(--text-primary);
+}
+
+.tikz-app h2 {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  margin: 0 0 var(--spacing-12) 0;
+  color: var(--text-primary);
+}
+
+.tikz-app h3 {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-snug);
+  margin: 0 0 var(--spacing-8) 0;
+  color: var(--text-primary);
+}
+
+.tikz-app h4 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-snug);
+  margin: 0 0 var(--spacing-6) 0;
+  color: var(--text-primary);
+}
+
+.tikz-app p {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
+  margin: 0 0 var(--spacing-8) 0;
+  color: var(--text-primary);
+}
+
+.tikz-app small {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+/* ===== FORM FOUNDATION ===== */
+
+.tikz-app button,
+.tikz-app input,
+.tikz-app select,
+.tikz-app textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.tikz-app input,
+.tikz-app select,
+.tikz-app textarea {
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-6) var(--spacing-8);
+  transition: border-color var(--transition-normal);
+}
+
+.tikz-app input:focus,
+.tikz-app select:focus,
+.tikz-app textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px var(--primary-bg);
+}
+
+/* ===== CODE FOUNDATION ===== */
+
+.tikz-app pre,
+.tikz-app code,
+.tikz-app .code,
+.tikz-app .tikz-code,
+.tikz-app textarea[name="code"] {
+  font-family: var(--font-family-mono);
+  font-feature-settings: "liga" 1, "calt" 1;
+  font-variant-ligatures: contextual;
+}
+
+/* CodeMirror Global Styles */
+.tikz-app .CodeMirror,
+.tikz-app .CodeMirror * {
+  font-family: var(--font-family-mono) !important;
+  font-feature-settings: "liga" 1, "calt" 1;
+  font-variant-ligatures: contextual;
+}
+
+.tikz-app .CodeMirror {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  touch-action: manipulation;
+}
+
+/* ===== UTILITY CLASSES ===== */
+
+/* Spacing Utilities */
+.tikz-app .mt-0 { margin-top: 0; }
+.tikz-app .mt-1 { margin-top: var(--spacing-1); }
+.tikz-app .mt-2 { margin-top: var(--spacing-2); }
+.tikz-app .mt-4 { margin-top: var(--spacing-4); }
+.tikz-app .mt-8 { margin-top: var(--spacing-8); }
+.tikz-app .mt-16 { margin-top: var(--spacing-16); }
+
+.tikz-app .mb-0 { margin-bottom: 0; }
+.tikz-app .mb-1 { margin-bottom: var(--spacing-1); }
+.tikz-app .mb-2 { margin-bottom: var(--spacing-2); }
+.tikz-app .mb-4 { margin-bottom: var(--spacing-4); }
+.tikz-app .mb-8 { margin-bottom: var(--spacing-8); }
+.tikz-app .mb-16 { margin-bottom: var(--spacing-16); }
+
+/* Text Utilities */
+.tikz-app .text-center { text-align: center; }
+.tikz-app .text-left { text-align: left; }
+.tikz-app .text-right { text-align: right; }
+
+.tikz-app .text-primary { color: var(--text-primary); }
+.tikz-app .text-secondary { color: var(--text-secondary); }
+.tikz-app .text-muted { color: var(--text-muted); }
+
+/* Display Utilities */
+.tikz-app .hidden { display: none; }
+.tikz-app .block { display: block; }
+.tikz-app .inline-block { display: inline-block; }
+.tikz-app .flex { display: flex; }
+.tikz-app .inline-flex { display: inline-flex; }
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Mobile First Approach */
+@media (max-width: 768px) {
+  .tikz-app .page-container {
+    padding: var(--container-padding-mobile-md);
+  }
+  
+  .tikz-app h1 {
+    font-size: var(--font-size-3xl);
+  }
+  
+  .tikz-app h2 {
+    font-size: var(--font-size-2xl);
+  }
+  
+  .tikz-app h3 {
+    font-size: var(--font-size-xl);
+  }
+}
+
+@media (max-width: 480px) {
+  .tikz-app .page-container {
+    padding: var(--spacing-8);
+  }
+  
+  .tikz-app .content-container {
+    padding: var(--spacing-12);
+    margin: var(--spacing-8) 0;
+  }
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+  .tikz-app {
+    color: black;
+    background: white;
+  }
+  
+  .tikz-app .page-container {
+    max-width: none;
+    padding: 0;
+  }
+}

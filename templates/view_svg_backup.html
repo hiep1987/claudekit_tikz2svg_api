@@ -1,23 +1,28 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xem SVG - {{ display_name }}</title>
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
-    <link rel="icon" type="image/png" sizes="48x48" href="{{ url_for('static', filename='favicon-48x48.png') }}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
-    <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='android-chrome-192x192.png') }}">
-    <link rel="icon" type="image/png" sizes="512x512" href="{{ url_for('static', filename='android-chrome-512x512.png') }}">
-    <link rel="shortcut icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <meta property="og:title" content="TikZ to SVG - {{ display_name }}" />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="{{ request.host_url.rstrip('/') ~ png_url }}" />
-    <meta property="og:url" content="{{ request.host_url.rstrip('/') ~ url_for('view_svg', filename=filename) }}" />
-    <meta property="og:description" content="Xem và chia sẻ hình TikZ SVG trực tuyến." />
+{% extends "base.html" %}
+
+{# Configuration flags #}
+{% set include_highlight_js = true %}
+{% set include_codemirror = true %}
+{% set include_file_card = true %}
+{% set include_navigation = true %}
+{% set include_login_modal = true %}
+{% set include_navbar = true %}
+
+{# Page Title #}
+{% block title %}Xem SVG - {{ display_name %}{% endblock %}
+{# Custom Meta Tags #}
+{% block meta %}
+<meta name="description" content="Xem và chia sẻ hình TikZ SVG trực tuyến - {{ display_name }}">
+<meta name="keywords" content="TikZ, SVG, LaTeX, vector graphics, view, share">
+<meta name="author" content="TikZ to SVG">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="TikZ to SVG - {{ display_name }}" />
+<meta property="og:type" content="website" />
+<meta property="og:image" content="{{ request.host_url.rstrip('/') ~ png_url }}" />
+<meta property="og:url" content="{{ request.host_url.rstrip('/') ~ url_for('view_svg', filename=filename) }}" />
+<meta property="og:description" content="Xem và chia sẻ hình TikZ SVG trực tuyến." />
+<meta property="og:locale" content="vi_VN">
+{% endblock %}
     <!-- Highlight.js CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
     <!-- CodeMirror CSS -->

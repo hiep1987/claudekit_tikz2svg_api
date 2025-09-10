@@ -1,8 +1,38 @@
 /* Profile Settings CSS */
-/* Migrated to use CSS Foundation System - Variables from master-variables.css */
-/* Load Order: After master-variables.css and global-base.css */
 
-/* All base styles now handled by global-base.css - no duplicates */
+/* Body styling */
+html, body {
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fafafa;
+}
+
+.tikz-app button, .tikz-app input, .tikz-app select, .tikz-app textarea {
+  font-family: inherit;
+}
+
+/* Preserve monospace fonts for code editors */
+.tikz-app .CodeMirror, .tikz-app .CodeMirror * {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Cascadia Code', 'Inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace !important;
+  font-feature-settings: "liga" 1, "calt" 1;
+  font-variant-ligatures: contextual;
+}
+
+/* Preserve monospace for any code-related elements */
+.tikz-app pre, .tikz-app code, .tikz-app .code, .tikz-app .tikz-code, .tikz-app textarea[name="code"] {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Cascadia Code', 'Inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace !important;
+  font-feature-settings: "liga" 1, "calt" 1;
+  font-variant-ligatures: contextual;
+}
+
+/* TikZ App Scoped Container */
+.tikz-app {
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* Box-sizing scoped to our page layout only (avoid overriding Bootstrap) */
+/* This is handled by shared CSS (index.css) */
 
 /* Profile content container styling - Using Shared Variables */
 .tikz-app .profile-content-container {
@@ -26,7 +56,7 @@
 
 @media (max-width: 600px) {
   .tikz-app .profile-content-container {
-    padding: var(--spacing-10) var(--spacing-4);
+    padding: 20px 10px;
     overflow-x: visible;
   }
 }
@@ -34,25 +64,25 @@
 /* Header styling */
 .tikz-app .header {
   text-align: center;
-  margin-bottom: var(--spacing-20);
+  margin-bottom: 40px;
 }
 
 .tikz-app .header h1 {
-  color: var(--primary-color);
-  margin-bottom: var(--spacing-4);
+  color: #1976d2;
+  margin-bottom: 10px;
 }
 
 .tikz-app .header p {
-  color: var(--text-muted);
-  font-size: var(--font-size-base);
+  color: #666;
+  font-size: 16px;
 }
 
 /* Profile section layout */
 .tikz-app .profile-section {
   display: grid;
   grid-template-columns: 1fr 2fr;
-  gap: var(--spacing-20);
-  margin-bottom: var(--spacing-20);
+  gap: 40px;
+  margin-bottom: 40px;
 }
 
 /* Avatar section */
@@ -63,17 +93,17 @@
 .tikz-app .avatar-container {
   position: relative;
   display: inline-block;
-  margin-bottom: var(--spacing-10);
+  margin-bottom: 20px;
 }
 
 .tikz-app .avatar,
 .tikz-app .avatar-placeholder {
   width: 150px;
   height: 150px;
-  border-radius: var(--radius-full);
+  border-radius: 50%;
   object-fit: cover;
   border: 4px solid #e0e0e0;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 .tikz-app .avatar-placeholder {
@@ -81,13 +111,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-white);
-  font-size: var(--font-size-4xl);
-  font-weight: var(--font-weight-bold);
+  color: white;
+  font-size: 48px;
+  font-weight: bold;
 }
 
 .tikz-app .avatar-upload {
-  margin-top: var(--spacing-6);
+  margin-top: 15px;
 }
 
 .tikz-app .avatar-upload input[type="file"] {
@@ -95,93 +125,93 @@
 }
 
 .tikz-app .avatar-upload label {
-  background: var(--primary-color);
-  color: var(--text-white);
-  padding: var(--spacing-4) var(--spacing-10);
-  border-radius: var(--radius-sm);
+  background: #1976d2;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: var(--font-size-sm);
-  transition: background var(--transition-normal);
+  font-size: 14px;
+  transition: background 0.3s;
 }
 
 .tikz-app .avatar-upload label:hover {
-  background: var(--primary-dark);
+  background: #1565c0;
 }
 
 /* Info section */
 .tikz-app .info-section {
-  padding: var(--spacing-10);
-  background: var(--bg-tertiary);
-  border-radius: var(--radius-md);
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
 }
 
 .tikz-app .info-group {
-  margin-bottom: var(--spacing-12);
+  margin-bottom: 25px;
 }
 
 .tikz-app .info-group label {
   display: block;
-  font-weight: var(--font-weight-bold);
-  color: var(--text-primary);
-  margin-bottom: var(--spacing-3);
-  font-size: var(--font-size-sm);
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 8px;
+  font-size: 14px;
 }
 
-.tikz-app .info-group input,
+.info-group input,
 .tikz-app .info-group textarea {
   width: 100%;
-  padding: var(--spacing-6);
-  border: 2px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  font-size: var(--font-size-base);
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 16px;
 }
 
-.tikz-app .info-group input:focus,
+.info-group input:focus,
 .tikz-app .info-group textarea:focus {
   outline: none;
-  border-color: var(--primary-color);
+  border-color: #1976d2;
 }
 
 .tikz-app .info-group .readonly {
-  background: var(--bg-secondary);
-  color: var(--text-muted);
+  background: #f5f5f5;
+  color: #666;
   cursor: not-allowed;
-  border-color: var(--border-color);
+  border-color: #ddd;
 }
 
 /* Actions */
 .tikz-app .actions {
   text-align: center;
-  margin-top: var(--spacing-16);
+  margin-top: 30px;
 }
 
 .tikz-app #save-button-section {
-  transition: opacity var(--transition-normal);
+  transition: opacity 0.3s ease;
 }
 
 .tikz-app .btn {
-  padding: var(--spacing-6) var(--spacing-16);
+  padding: 12px 32px;
   border: none;
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-bold);
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
   cursor: pointer;
-  transition: all var(--transition-normal);
-  margin: 0 var(--spacing-4);
+  transition: all 0.3s;
+  margin: 0 10px;
 }
 
 .tikz-app .btn-primary {
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-  color: var(--text-white);
+  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+  color: white;
 }
 
 .tikz-app .btn-primary:hover {
-  background: linear-gradient(135deg, var(--primary-dark) 0%, #0d47a1 100%);
+  background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
 }
 
 .tikz-app .btn-secondary {
   background: #6c757d;
-  color: var(--text-white);
+  color: white;
 }
 
 .tikz-app .btn-secondary:hover {
@@ -190,89 +220,89 @@
 
 /* Flash messages */
 .tikz-app .flash-messages {
-  margin-bottom: var(--spacing-10);
+  margin-bottom: 20px;
 }
 
 .tikz-app .flash {
-  padding: var(--spacing-6) var(--spacing-10);
-  border-radius: var(--radius-sm);
-  margin-bottom: var(--spacing-4);
-  font-weight: var(--font-weight-bold);
-  transition: opacity var(--transition-normal);
+  padding: 12px 20px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  font-weight: bold;
+  transition: opacity 0.3s ease;
 }
 
 .tikz-app .flash-success {
-  background: var(--success-bg);
-  color: var(--success-dark);
+  background: #d4edda;
+  color: #155724;
   border: 1px solid #c3e6cb;
 }
 
 .tikz-app .flash-error {
-  background: var(--danger-bg);
-  color: var(--danger-dark);
+  background: #f8d7da;
+  color: #721c24;
   border: 1px solid #f5c6cb;
 }
 
 /* Utility classes for inline styles */
 .tikz-app .text-small {
-  font-size: var(--font-size-xs);
-  color: var(--text-muted);
-  margin-top: var(--spacing-4);
+  font-size: 12px;
+  color: #666;
+  margin-top: 10px;
 }
 
 .tikz-app .text-success {
-  color: var(--success-color);
-  font-size: var(--font-size-sm);
+  color: green;
+  font-size: 13px;
 }
 
 .tikz-app .text-warning {
-  color: var(--warning-color);
-  font-size: var(--font-size-sm);
+  color: orange;
+  font-size: 13px;
 }
 
 .tikz-app .text-muted {
-  color: var(--text-muted);
-  font-size: var(--font-size-xs);
+  color: #666;
+  font-size: 12px;
 }
 
 .tikz-app .text-muted-block {
-  color: var(--text-muted);
-  font-size: var(--font-size-xs);
+  color: #666;
+  font-size: 12px;
   display: block;
-  margin-top: var(--spacing-2);
+  margin-top: 5px;
 }
 
 .tikz-app .verification-icon {
   width: 16px;
   height: 16px;
   vertical-align: middle;
-  margin-left: var(--spacing-2);
+  margin-left: 5px;
 }
 
 .tikz-app .verification-button {
-  font-size: var(--font-size-sm);
-  padding: var(--spacing-3) var(--spacing-8);
+  font-size: 14px;
+  padding: 8px 16px;
 }
 
 .tikz-app .verification-button-container {
-  margin-top: var(--spacing-4);
+  margin-top: 10px;
 }
 
 .tikz-app .verification-success {
-  background: var(--success-bg);
+  background: #d4edda;
   border: 1px solid #c3e6cb;
-  color: var(--success-dark);
-  padding: var(--spacing-4);
-  border-radius: var(--radius-sm);
-  margin-top: var(--spacing-4);
+  color: #155724;
+  padding: 10px;
+  border-radius: 6px;
+  margin-top: 10px;
 }
 
 .tikz-app .verification-section {
-  margin-top: var(--spacing-16);
-  padding: var(--spacing-10);
-  background: var(--bg-tertiary);
-  border-radius: var(--radius-md);
-  border: 2px solid var(--border-light);
+  margin-top: 30px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 2px solid #e9ecef;
   display: none;
 }
 
@@ -281,61 +311,61 @@
 }
 
 .tikz-app .verification-title {
-  color: var(--primary-color);
-  margin-bottom: var(--spacing-6);
+  color: #1976d2;
+  margin-bottom: 15px;
   text-align: center;
 }
 
 .tikz-app .verification-text {
-  color: var(--text-muted);
-  margin-bottom: var(--spacing-10);
+  color: #666;
+  margin-bottom: 20px;
 }
 
 .tikz-app .verification-note {
   color: #888;
-  font-size: var(--font-size-sm);
+  font-size: 13px;
 }
 
 .tikz-app .verification-link {
-  color: var(--primary-color);
+  color: #1976d2;
 }
 
 .tikz-app .verification-alert {
-  padding: var(--spacing-4);
-  border-radius: var(--radius-sm);
-  margin-bottom: var(--spacing-6);
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 15px;
 }
 
 .tikz-app .verification-alert-warning {
-  background: var(--warning-bg);
+  background: #fff3cd;
   border: 1px solid #ffeaa7;
 }
 
 .tikz-app .verification-alert-danger {
-  background: var(--danger-bg);
+  background: #f8d7da;
   border: 1px solid #f5c6cb;
 }
 
 .tikz-app .verification-alert-text-warning {
   color: #856404;
   margin: 0;
-  font-size: var(--font-size-sm);
+  font-size: 14px;
 }
 
 .tikz-app .verification-alert-text-danger {
-  color: var(--danger-dark);
+  color: #721c24;
   margin: 0;
-  font-size: var(--font-size-sm);
+  font-size: 14px;
 }
 
 .tikz-app .verification-alert-hint {
-  margin: var(--spacing-2) 0 0 0;
-  font-size: var(--font-size-xs);
+  margin: 5px 0 0 0;
+  font-size: 12px;
 }
 
 .tikz-app .verification-code-input {
-  font-family: var(--font-family-mono);
-  font-size: var(--font-size-lg);
+  font-family: 'Courier New', monospace;
+  font-size: 18px;
   text-align: center;
   letter-spacing: 2px;
 }
@@ -349,7 +379,7 @@
   width: 100vw;
   height: 100vh;
   background: rgba(0,0,0,0.4);
-  z-index: var(--z-modal);
+  z-index: 10000;
   align-items: center;
   justify-content: center;
 }
@@ -359,17 +389,17 @@
 }
 
 .tikz-app .cropper-modal-content {
-  background: var(--bg-primary);
-  padding: var(--spacing-16) var(--spacing-12);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
+  background: white;
+  padding: 32px 24px;
+  border-radius: 14px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.18);
   min-width: 320px;
   text-align: center;
   position: relative;
 }
 
 .tikz-app .cropper-modal-title {
-  margin-bottom: var(--spacing-8);
+  margin-bottom: 18px;
 }
 
 .tikz-app .cropper-preview-container {
@@ -397,14 +427,14 @@
 }
 
 .tikz-app .cropper-actions {
-  margin-top: var(--spacing-8);
+  margin-top: 18px;
 }
 
 /* Responsive design */
 @media (max-width: 768px) {
 .tikz-app .profile-section {
     grid-template-columns: 1fr;
-    gap: var(--spacing-10);
+    gap: 20px;
   }
 }
 
@@ -413,13 +443,13 @@
 .tikz-app .avatar, .tikz-app .avatar-placeholder {
     width: 80px;
     height: 80px;
-    font-size: var(--font-size-2xl);
+    font-size: 32px;
   }
 
 .tikz-app .btn, .tikz-app .btn-primary, .tikz-app .btn-secondary {
     width: 100%;
-    font-size: var(--font-size-lg);
-    margin: var(--spacing-3) 0;
-    padding: var(--spacing-6) 0;
+    font-size: 17px;
+    margin: 8px 0;
+    padding: 14px 0;
   }
 }

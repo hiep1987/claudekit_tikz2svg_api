@@ -67,6 +67,25 @@ echo "✅ Backup completed: $BACKUP_DIR"
 
 ### 🎯 **Phase 2: Step-by-Step Migration**
 
+#### **⚠️ PRE-MIGRATION VARIABLE AUDIT (MANDATORY)**
+
+**Before migrating any template, run variable audit:**
+```bash
+# 1. Extract all template variables
+grep -n "{% if [a-zA-Z_]" templates/target_template.html
+grep -n "{{ [a-zA-Z_]" templates/target_template.html
+
+# 2. Check Flask route context  
+grep -A 20 "def route_name" app.py | grep "render_template"
+
+# 3. Identify undefined variables and apply safe checking
+```
+
+**🚨 CRITICAL:** 
+- All `{% if variable %}` MUST become `{% if variable is defined and variable %}`
+- Base template MUST have complete JavaScript libraries section
+- Templates using file_card.js MUST set `include_codemirror = true`
+
 #### **Step 2.1: search_results.html** 🟢
 ```bash
 # Backup specific file
@@ -412,6 +431,116 @@ for i in {1..24}; do
 done
 ```
 
+### 🚨 **CRITICAL LESSONS LEARNED**
+
+#### **Step 2.2: Undefined Variable Error**
+
+**❌ PROBLEM DISCOVERED:**
+```html
+<!-- Problematic code in original template -->
+{% if is_owner %}
+window.isOwner = true;
+{% endif %}
+```
+
+**🎯 ROOT CAUSE:**
+- Flask route `profile_verification()` không pass variable `is_owner`
+- Original template: Jinja2 silent fail → template renders
+- Base template: Strict checking → immediate crash
+- **Migration exposes hidden bugs in original code**
+
+**✅ SOLUTION APPLIED:**
+```html
+<!-- Safe version with defensive checking -->
+{% if is_owner is defined and is_owner %}
+window.isOwner = true;
+{% endif %}
+```
+
+#### **🔧 MANDATORY SAFE PRACTICES (Updated)**
+
+**1. Variable Safety Checks**
+```html
+<!-- ❌ NEVER do this -->
+{% if variable_name %}
+
+<!-- ✅ ALWAYS do this -->
+{% if variable_name is defined and variable_name %}
+```
+
+**2. Incremental Migration Strategy (PROVEN EFFECTIVE)**
+- Step 1: Basic extends test
+- Step 2A: Add meta + title + JS variables
+- Step 2B: Add CSS blocks
+- Step 2C: Add main content
+- Step 2D: Add JavaScript files
+- **Each step tested independently before proceeding**
+
+**3. Debug Strategy for Template Failures**
+- Immediate rollback to working version
+- Create minimal test template
+- Add components incrementally
+- Isolate problematic blocks
+- Apply safe variable checking
+
+#### **Step 2.3: Base Template JavaScript Libraries Missing**
+
+**❌ PROBLEM DISCOVERED:**
+- Base template chỉ có CSS loading section
+- JavaScript libraries section hoàn toàn thiếu
+- Migrated templates expect JavaScript libraries được load từ base template
+
+**🎯 ROOT CAUSE:**
+```html
+<!-- base.html - THIẾU JavaScript section -->
+{% if include_codemirror %}
+<!-- CodeMirror CSS -->
+<link rel="stylesheet" href="...codemirror.min.css">
+{% endif %}
+
+<!-- ❌ MISSING: JavaScript libraries loading -->
+```
+
+**✅ SOLUTION APPLIED:**
+```html
+<!-- Added to base.html before closing </body> -->
+{% if include_highlight_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/latex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
+{% endif %}
+
+{% if include_codemirror %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/stex/stex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/display/placeholder.min.js"></script>
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+```
+
+#### **🎯 UPDATED RISK MITIGATION**
+
+**1. Template Variable Audit (MANDATORY before migration):**
+```bash
+# Check all variables used in template
+grep -n "{% if [a-zA-Z_]" templates/target_template.html
+
+# Cross-reference with Flask route context
+grep -A 20 "def route_name" app.py | grep "render_template"
+
+# Flag undefined variables for safe checking
+```
+
+**2. Base Template Completeness Check (MANDATORY):**
+```bash
+# Verify base template has complete JavaScript section
+grep -A 10 "include_codemirror" templates/base.html
+grep -A 10 "include_highlight_js" templates/base.html
+
+# Ensure JavaScript libraries match CSS libraries
+```
+
 ### 🏆 **Success Declaration Criteria**
 
 Migration is considered successful when:
@@ -421,6 +550,8 @@ Migration is considered successful when:
 3. **✅ Zero critical bugs** reported in 48 hours post-migration
 4. **✅ User acceptance** - No user complaints about missing features
 5. **✅ Developer productivity** - Easier template maintenance achieved
+6. **✅ Hidden bugs discovered and fixed** during migration process
+7. **✅ Base template infrastructure** - Complete CSS + JavaScript libraries loading
 
 ### 📈 **Post-Migration Optimization**
 

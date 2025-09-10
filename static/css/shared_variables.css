@@ -1,0 +1,161 @@
+/* ===== SHARED CSS VARIABLES FOR CONSISTENT STYLING ===== */
+:root {
+  /* ===== CONTAINER STYLING VARIABLES ===== */
+  
+  /* Container Backgrounds */
+  --container-bg-primary: #ffffff;
+  --container-bg-secondary: rgba(255, 255, 255, 0.8);
+  --container-bg-blur: blur(8px);
+  
+  /* Container Padding */
+  --container-padding-sm: 20px 0;      /* Vertical only - for headers */
+  --container-padding-md: 32px;        /* All sides - for content */
+  --container-padding-lg: 40px 0;      /* Vertical only - for sections */
+  
+  /* Container Margins */
+  --container-margin-sm: 20px 0;
+  --container-margin-md: 32px 0;
+  --container-margin-lg: 40px 0;
+  
+  /* Container Border Radius */
+  --container-radius-sm: 12px;
+  --container-radius-md: 16px;
+  --container-radius-lg: 1rem;         /* 16px - for legacy compatibility */
+  
+  /* Container Shadows */
+  --container-shadow-light: 0 4px 12px rgba(0,0,0,0.05);
+  --container-shadow-medium: 0 8px 32px rgba(0,0,0,0.08);
+  --container-shadow-strong: 0 12px 48px rgba(0,0,0,0.12);
+  
+  /* Container Max Width */
+  --container-max-width: 1200px;
+  
+  /* ===== MOBILE RESPONSIVE PADDING ===== */
+  --container-padding-mobile-sm: 15px 0;
+  --container-padding-mobile-md: 24px;
+  --container-padding-mobile-lg: 20px 0;
+  
+  /* ===== STANDARDIZED CONTAINER CLASSES ===== */
+  /* Use these for consistent styling across all templates */
+}
+
+/* ===== STANDARD CONTAINER STYLES ===== */
+.tikz-app .page-container {
+  width: 100%;
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+/* Content Container - For main content areas */
+.tikz-app .content-container {
+  background: var(--container-bg-primary);
+  padding: var(--container-padding-md);
+  border-radius: var(--container-radius-md);
+  box-shadow: var(--container-shadow-medium);
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+}
+
+/* Header Container - For page headers */
+.tikz-app .header-container {
+  background: var(--container-bg-secondary);
+  backdrop-filter: var(--container-bg-blur);
+  padding: var(--container-padding-sm);
+  margin: var(--container-margin-sm);
+  border-radius: var(--container-radius-lg);
+  box-shadow: var(--container-shadow-medium);
+}
+
+/* Section Container - For content sections */
+.tikz-app .section-container {
+  background: var(--container-bg-secondary);
+  backdrop-filter: var(--container-bg-blur);
+  padding: var(--container-padding-lg);
+  border-radius: var(--container-radius-lg);
+  box-shadow: var(--container-shadow-medium);
+}
+
+/* ===== MOBILE RESPONSIVE ADJUSTMENTS ===== */
+@media (max-width: 768px) {
+  .tikz-app .content-container {
+    padding: var(--container-padding-mobile-md);
+  }
+  
+  .tikz-app .header-container {
+    padding: var(--container-padding-mobile-sm);
+    margin: 15px 0;
+  }
+  
+  .tikz-app .section-container {
+    padding: var(--container-padding-mobile-lg);
+  }
+}
+
+@media (max-width: 600px) {
+  .tikz-app .content-container {
+    padding: 20px 10px;
+  }
+  
+  .tikz-app .header-container {
+    padding: var(--container-padding-mobile-sm);
+    margin: 10px 0;
+  }
+  
+  .tikz-app .section-container {
+    padding: var(--container-padding-mobile-sm);
+  }
+}
+
+/* ===== LEGACY COMPATIBILITY CLASSES ===== */
+/* These maintain existing functionality while providing path to standardization */
+
+.tikz-app .search-header-container {
+  background: var(--container-bg-secondary);
+  backdrop-filter: var(--container-bg-blur);
+  padding: var(--container-padding-sm);
+  margin: var(--container-margin-sm);
+  border-radius: var(--container-radius-lg);
+  box-shadow: var(--container-shadow-medium);
+}
+
+.tikz-app .verification-container {
+  background: var(--container-bg-secondary);
+  backdrop-filter: var(--container-bg-blur);
+  padding: var(--container-padding-lg);
+  border-radius: var(--container-radius-lg);
+  box-shadow: var(--container-shadow-medium);
+}
+
+.tikz-app .profile-content-container,
+.tikz-app .profile-svg-content-container {
+  background: var(--container-bg-primary);
+  padding: var(--container-padding-md);
+  border-radius: var(--container-radius-md);
+  box-shadow: var(--container-shadow-medium);
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+}
+
+/* Mobile adjustments for legacy containers */
+@media (max-width: 768px) {
+  .tikz-app .verification-container {
+    padding: var(--container-padding-mobile-lg);
+  }
+  
+  .tikz-app .profile-content-container,
+  .tikz-app .profile-svg-content-container {
+    padding: var(--container-padding-mobile-md);
+  }
+}
+
+@media (max-width: 600px) {
+  .tikz-app .verification-container {
+    padding: var(--container-padding-mobile-sm);
+  }
+  
+  .tikz-app .profile-content-container,
+  .tikz-app .profile-svg-content-container {
+    padding: 20px 10px;
+  }
+}

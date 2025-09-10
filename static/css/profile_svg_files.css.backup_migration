@@ -1,6 +1,101 @@
 /* ===== PROFILE SVG FILES PAGE CSS ===== */
-/* Migrated to use CSS Foundation System - Variables from master-variables.css */
-/* Load Order: After master-variables.css and global-base.css */
+/* Production-ready CSS with consistent structure */
+
+/* ===== 1. CSS VARIABLES ===== */
+:root {
+  /* Colors */
+  --primary-color: #1976d2;
+  --primary-dark: #0d47a1;
+  --danger-color: #d32f2f;
+  --danger-dark: #b91c1c;
+  --success-color: #4caf50;
+  --warning-color: #f59e0b;
+  /* Danger palette */
+  --danger-400: #ef4444;
+  --danger-600: #dc2626;
+  --text-primary: #333;
+  --text-secondary: #555;
+  --text-muted: #666;
+  --text-light: #999;
+  --text-lighter: #e0e0e0;
+  --neutral-gray: #808080;
+  --white: #ffffff;
+  --black: #000000;
+  --link-dark: #003366;
+  --surface-muted: #eeeeee;
+  --blue-700: #1565c0;
+  --neutral-900: #2d2d2d;
+  --heart-accent: #ff4757;
+  --placeholder-text: #bbbbbb;
+  --danger-border: #fecaca;
+  --danger-50: #fef2f2;
+  --danger-100: #fee2e2;
+  /* Gray & brand ramps for gradients */
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-500: #6b7280;
+  --indigo-400: #667eea;
+  --purple-600: #764ba2;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f5;
+  --bg-tertiary: #f8f9fa;
+  --surface-50: #f8fafc;
+  --border-color: #ddd;
+  --border-light: #e9ecef;
+  /* Additional semantic colors */
+  --secondary-dark: #6c757d;
+  --disabled-color: #9e9e9e;
+  --bg-muted-hover: #e0e0e0;
+  
+  /* Gradients */
+  --gradient-primary: linear-gradient(-50deg, rgb(39, 107, 255), rgb(112, 186, 255), rgb(39, 107, 255));
+  --gradient-danger: linear-gradient(135deg, var(--danger-400) 0%, var(--danger-600) 100%);
+  --gradient-secondary: linear-gradient(135deg, var(--gray-500) 0%, var(--gray-600) 100%);
+  --gradient-profile: linear-gradient(135deg, var(--indigo-400) 0%, var(--purple-600) 100%);
+  
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  /* Extended spacing for legacy values */
+  --spacing-lg-plus: 1.75rem; /* 28px */
+  --spacing-25px: 1.5625rem; /* 25px */
+  --spacing-5px: 0.3125rem; /* 5px */
+  --spacing-2px: 0.125rem; /* 2px */
+  --spacing-10px: 0.625rem; /* 10px */
+  --spacing-12px: 0.75rem; /* 12px */
+  --spacing-14px: 0.875rem; /* 14px */
+  
+  /* Border Radius */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 16px;
+  --radius-full: 50%;
+  
+  /* Shadows */
+  --shadow-sm: 0 2px 6px rgba(0,0,0,0.08);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.12);
+  --shadow-lg: 0 4px 20px rgba(0,0,0,0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+  
+  /* Z-index */
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+}
 
 /* ===== 2. ANIMATIONS ===== */
 @keyframes overlayFadeIn {
@@ -37,15 +132,71 @@
   100% { transform: scale(1); }
 }
 
-/* ===== 3. COMPONENT STYLES ===== */
-/* All base styles now handled by global-base.css - no duplicates */
+/* ===== 3. BASE STYLES ===== */
+/* TikZ App Scoped Container */
+.tikz-app {
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* Body and Container - Scoped to tikz-app */
+.tikz-app {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+html, body {
+    margin: 0 auto;
+    padding: var(--spacing-xl);
+    background-color: #fafafa;
+}
+
+/* Box-sizing scoped to our page layout only (avoid overriding Bootstrap) */
+.tikz-app .page-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+.tikz-app .page-container *,
+.tikz-app .page-container *::before,
+.tikz-app .page-container *::after {
+    box-sizing: inherit;
+}
+
+.tikz-app button, 
+.tikz-app input, 
+.tikz-app select, 
+.tikz-app textarea {
+    font-family: inherit;
+}
+
+/* Preserve monospace fonts for code editors */
+.tikz-app .CodeMirror, 
+.tikz-app .CodeMirror * {
+    font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Cascadia Code', 'Inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace !important;
+    font-feature-settings: "liga" 1, "calt" 1;
+    font-variant-ligatures: contextual;
+}
+
+/* Preserve monospace for any code-related elements */
+.tikz-app pre, 
+.tikz-app code, 
+.tikz-app .code, 
+.tikz-app .tikz-code, 
+.tikz-app textarea[name="code"] {
+    font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Cascadia Code', 'Inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace !important;
+    font-feature-settings: "liga" 1, "calt" 1;
+    font-variant-ligatures: contextual;
+}
 
 .tikz-app .profile-svg-content-container {
-  background: var(--container-bg-primary);
-  padding: var(--container-padding-md);
-  border-radius: var(--container-radius-md);
-  box-shadow: var(--container-shadow-medium);
-  max-width: var(--container-max-width);
+  background: var(--bg-primary);
+  padding: 32px;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -55,25 +206,25 @@
 /* ===== 5. COMPONENT STYLES ===== */
 
 /* ===== Profile Header Components ===== */
-.tikz-app .public-profile-header {
+.public-profile-header {
   text-align: center;
-  margin-bottom: var(--spacing-24);
-  padding: var(--spacing-8);
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  margin-bottom: var(--spacing-2xl);
+  padding: var(--spacing-md);
+  background: var(--gradient-profile);
   border-radius: var(--radius-md);
-  color: var(--text-white);
+  color: white;
   box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
 }
 
-.tikz-app .profile-info {
-  margin-bottom: var(--spacing-4);
+.profile-info {
+  margin-bottom: var(--spacing-sm);
   display: flex;
   align-items: center;
-  gap: var(--spacing-12);
+  gap: var(--spacing-lg);
   flex-wrap: wrap;
 }
 
-.tikz-app .profile-avatar {
+.profile-avatar {
   width: 56px;
   height: 56px;
   border-radius: var(--radius-full);
@@ -82,7 +233,7 @@
   flex-shrink: 0;
 }
 
-.tikz-app .profile-avatar-placeholder {
+.profile-avatar-placeholder {
   width: 56px;
   height: 56px;
   border-radius: var(--radius-full);
@@ -90,69 +241,69 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
+  font-size: 24px;
+  font-weight: bold;
   border: 4px solid rgba(255,255,255,0.3);
   flex-shrink: 0;
 }
 
-.tikz-app .profile-name {
+.profile-name {
   margin: 0;
-  font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-bold);
+  font-size: 28px;
+  font-weight: bold;
 }
 
-.tikz-app .profile-stats {
+.profile-stats {
   display: flex;
   align-items: center;
-  gap: var(--spacing-8);
-  font-size: var(--font-size-base);
+  gap: var(--spacing-md);
+  font-size: 16px;
 }
 
-.tikz-app .profile-stats .separator {
+.profile-stats .separator {
   color: rgba(255,255,255,0.7);
 }
 
-.tikz-app .profile-bio {
-  margin-bottom: var(--spacing-4);
+.profile-bio {
+  margin-bottom: var(--spacing-sm);
   font-style: italic;
-  font-size: var(--font-size-base);
+  font-size: 16px;
   opacity: 0.9;
 }
 
-.tikz-app .profile-email {
-  margin-bottom: var(--spacing-4);
-  font-size: var(--font-size-sm);
+.profile-email {
+  margin-bottom: var(--spacing-sm);
+  font-size: 14px;
   opacity: 0.8;
 }
 
-.tikz-app .profile-actions {
-  margin-top: var(--spacing-16);
+.profile-actions {
+  margin-top: var(--spacing-xl);
 }
 
-.tikz-app .follow-btn {
+.follow-btn {
   background: var(--primary-color);
-  color: var(--text-white);
+  color: white;
   border: none;
-  padding: var(--spacing-8) var(--spacing-16);
+  padding: var(--spacing-md) var(--spacing-xl);
   border-radius: var(--radius-sm);
-  font-weight: var(--font-weight-bold);
+  font-weight: bold;
   cursor: pointer;
   transition: background var(--transition-normal);
 }
 
-.tikz-app .follow-btn:focus {
-  outline: 2px solid var(--text-white);
+.follow-btn:focus {
+  outline: 2px solid var(--white);
   outline-offset: 2px;
   box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.3);
 }
 
-.tikz-app .follow-btn.btn-secondary {
-  background: #6c757d;
+.follow-btn.btn-secondary {
+  background: var(--secondary-dark);
 }
 
-.tikz-app .follow-btn:disabled {
-   background: #9e9e9e;
+ .follow-btn:disabled {
+   background: var(--disabled-color);
    opacity: 0.8;
    cursor: not-allowed;
  }
@@ -175,94 +326,94 @@
    transition: all 0.3s ease;
  }
 
-.tikz-app .verification-notice {
+.verification-notice {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-4);
+  gap: var(--spacing-sm);
   text-align: center;
 }
 
-.tikz-app .verification-badge {
-  color: var(--text-white);
+.verification-badge {
+  color: var(--white);
   background: var(--warning-color);
-  padding: var(--spacing-4) var(--spacing-8);
+  padding: var(--spacing-sm) var(--spacing-md);
   border-radius: var(--radius-sm);
   display: inline-block;
 }
 
-.tikz-app .verification-badge a {
-  color: #003366;
-  font-weight: var(--font-weight-bold);
+.verification-badge a {
+  color: var(--link-dark);
+  font-weight: 700;
   text-decoration: none;
 }
 
 /* Profile Lists */
-.tikz-app .profile-links {
+.profile-links {
   margin: 0;
   padding-left: 0;
   list-style: none;
 }
 
-.tikz-app .profile-links li {
+.profile-links li {
   position: relative;
-  padding-left: var(--spacing-20);
-  margin-bottom: var(--spacing-2);
+  padding-left: var(--spacing-lg-plus);
+  margin-bottom: var(--spacing-xs);
 }
 
-.tikz-app .profile-links li::before {
+.profile-links li::before {
   content: "•";
   position: absolute;
   left: 0;
-  color: var(--text-white);
-  font-weight: var(--font-weight-bold);
-  font-size: var(--font-size-base);
+  color: var(--white);
+  font-weight: 700;
+  font-size: 16px;
 }
 
 /* Bio container */
-.tikz-app .bio-container {
+.bio-container {
   text-align: left;
   display: inline-block;
   width: auto;
   max-width: 100%;
 }
 
-.tikz-app .bio-container ul,
-.tikz-app .bio-container ol {
+.bio-container ul,
+.bio-container ol {
   margin: 0;
   padding-left: 0;
   list-style: none;
   text-align: left;
 }
 
-.tikz-app .bio-container li {
+.bio-container li {
   position: relative;
-  padding-left: var(--spacing-20);
-  margin-bottom: var(--spacing-2);
+  padding-left: var(--spacing-25px);
+  margin-bottom: var(--spacing-xs);
   text-align: left;
 }
 
-.tikz-app .bio-container ul li::before {
+.bio-container ul li::before {
   content: "•";
   position: absolute;
-  left: var(--spacing-2);
-  color: var(--text-white);
-  font-weight: var(--font-weight-bold);
-  font-size: var(--font-size-base);
+  left: var(--spacing-5px);
+  color: var(--white);
+  font-weight: 700;
+  font-size: 16px;
 }
 
-.tikz-app .bio-container ol li::before {
+.bio-container ol li::before {
   content: counter(list-counter) ". ";
   position: absolute;
-  left: var(--spacing-2);
-  color: var(--text-white);
-  font-weight: var(--font-weight-bold);
-  font-size: var(--font-size-base);
+  left: var(--spacing-5px);
+  color: var(--white);
+  font-weight: 700;
+  font-size: 16px;
   counter-increment: list-counter;
 }
 
-.tikz-app .bio-container ol {
+.bio-container ol {
   counter-reset: list-counter;
 }
 
@@ -278,7 +429,7 @@
 /* Button styles are handled by file_card.css - no duplicates needed */
 
 /* ===== Modal Components ===== */
-.tikz-app .modal-overlay {
+.modal-overlay {
   display: none;
   position: fixed;
   top: 0;
@@ -293,35 +444,35 @@
   animation: overlayFadeIn var(--transition-normal) cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.tikz-app .modal-content {
-  background: var(--container-bg-primary);
-  padding: var(--spacing-24) var(--spacing-24);
+.modal-content {
+  background: var(--bg-primary);
+  padding: var(--spacing-2xl) var(--spacing-2xl);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
   min-width: 320px;
   text-align: center;
 }
 
-.tikz-app .modal-content h3 {
-  margin-bottom: var(--spacing-16);
+.modal-content h3 {
+  margin-bottom: var(--spacing-xl);
 }
 
-.tikz-app .modal-content p {
-  margin-bottom: var(--spacing-12);
+.modal-content p {
+  margin-bottom: var(--spacing-lg);
   color: var(--text-secondary);
 }
 
-.tikz-app .modal-content ul {
-  margin-bottom: var(--spacing-16);
+.modal-content ul {
+  margin-bottom: var(--spacing-xl);
   color: var(--text-secondary);
   text-align: left;
   display: inline-block;
 }
 
-.tikz-app .modal-content .login-note {
-  margin-bottom: var(--spacing-16);
+.modal-content .login-note {
+  margin-bottom: var(--spacing-xl);
   color: var(--primary-dark);
-  font-weight: var(--font-weight-semibold);
+  font-weight: 600;
 }
 
 .modal-content .google-login-btn {
@@ -564,38 +715,38 @@
  /* Like Button and Copy Button styles are handled by file_card.css - no duplicates needed */
 
 /* ===== Section Headers ===== */
-.tikz-app .svg-files-section h3 {
+.svg-files-section h3 {
   color: var(--primary-dark);
-  margin-bottom: var(--spacing-16);
+  margin-bottom: var(--spacing-xl);
 }
 
 /* ===== TikZ Code Block ===== */
-.tikz-app .tikz-code-block {
+.tikz-code-block {
   display: none;
-  margin-top: var(--spacing-8);
+  margin-top: var(--spacing-md);
 }
 
 /* ===== Empty State ===== */
-.tikz-app .empty-state {
+.empty-state {
   color: var(--text-secondary);
-  margin-top: var(--spacing-12);
+  margin-top: var(--spacing-lg);
 }
 
 /* ===== CodeMirror Components ===== */
-.tikz-app .CodeMirror-placeholder {
-  color: #bbbbbb;
+.CodeMirror-placeholder {
+  color: var(--placeholder-text);
   font-style: italic;
 }
 
-.tikz-app .CodeMirror-gutter,
-.tikz-app .CodeMirror-gutters,
-.tikz-app .CodeMirror-linenumbers {
+.CodeMirror-gutter,
+.CodeMirror-gutters,
+.CodeMirror-linenumbers {
   width: 2.5em;
   min-width: 2.5em;
 }
 
-.tikz-app .CodeMirror-linenumber,
-.tikz-app .CodeMirror-gutter-elt {
+.CodeMirror-linenumber,
+.CodeMirror-gutter-elt {
   min-width: 2em;
   width: 2em;
   text-align: right;
@@ -615,29 +766,29 @@
 /* Responsive Design for Delete Modal */
 @media (max-width: 768px) {
   .tikz-app .profile-svg-content-container {
-    padding: var(--container-padding-mobile-md);
+    padding: var(--spacing-xl);
   }
   
-  .tikz-app .delete-modal .modal-content {
+  .delete-modal .modal-content {
     min-width: 320px;
     max-width: 90vw;
-    padding: var(--spacing-24) var(--spacing-16);
-    margin: var(--spacing-16);
+    padding: var(--spacing-2xl) var(--spacing-xl);
+    margin: var(--spacing-xl);
   }
   
-  .tikz-app .delete-modal .modal-content h3 {
-    font-size: var(--font-size-xl);
+  .delete-modal .modal-content h3 {
+    font-size: 20px;
   }
   
-  .tikz-app .delete-modal .modal-content .btn-container {
-    gap: var(--spacing-8);
+  .delete-modal .modal-content .btn-container {
+    gap: var(--spacing-md);
     flex-direction: column;
     width: 100%;
   }
   
-  .tikz-app .delete-modal .modal-content .btn {
-    padding: var(--spacing-8) var(--spacing-16);
-    font-size: var(--font-size-sm);
+  .delete-modal .modal-content .btn {
+    padding: var(--spacing-md) var(--spacing-xl);
+    font-size: 14px;
     min-width: 100%;
     width: 100%;
   }
@@ -646,9 +797,7 @@
 /* Touch Device Detection */
 @media (hover: none) and (pointer: coarse) {
   /* Only disable text selection for interactive elements that need it */
-  .tikz-app .Btn, 
-  .tikz-app .action-toggle-btn, 
-  .tikz-app .file-img-container {
+  .Btn, .action-toggle-btn, .file-img-container {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -658,11 +807,7 @@
   }
   
   /* Allow text selection for readable content */
-  .tikz-app .file-info, 
-  .tikz-app .file-creator, 
-  .tikz-app .profile-bio, 
-  .tikz-app .tikz-code-block, 
-  .tikz-app .modal-content {
+  .file-info, .file-creator, .profile-bio, .tikz-code-block, .modal-content {
     -webkit-user-select: text;
     -khtml-user-select: text;
     -moz-user-select: text;

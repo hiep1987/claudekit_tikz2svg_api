@@ -2,16 +2,11 @@
 
 /* Global font stack moved to page-level styles to avoid overrides */
 
-/* Preserve monospace fonts for code editors */
-.tikz-app .CodeMirror, .CodeMirror * {
-  font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Cascadia Code', 'Inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace !important;
-  font-feature-settings: "liga" 1, "calt" 1;
-  font-variant-ligatures: contextual;
-}
+/* CodeMirror styles now centralized in foundation/global-base.css */
 
 /* Preserve monospace for any code-related elements */
 .tikz-app pre, .tikz-app code, .tikz-app .code, .tikz-app .tikz-code, .tikz-app textarea[name="code"] {
-  font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Cascadia Code', 'Inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace !important;
+  font-family: var(--font-family-mono);
   font-feature-settings: "liga" 1, "calt" 1;
   font-variant-ligatures: contextual;
 }
@@ -251,9 +246,8 @@
 }
 
 .tikz-app #scrollable-menu-list {
-    list-style: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
+    /* Bootstrap utilities handle list styling: list-unstyled p-0 m-0 */
+    /* No overrides needed - clean Bootstrap integration */
 }
 
 .tikz-app #scrollable-menu-list .menu-item {
@@ -261,9 +255,8 @@
 }
 
 .tikz-app #main-menu {
-    list-style: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
+    /* Bootstrap utilities handle list styling: list-unstyled p-0 m-0 */
+    /* No overrides needed - clean Bootstrap integration */
 }
 
 /* Hamburger button styling */
@@ -294,10 +287,10 @@
     color: #2563eb;
 }
 
-/* Ensure hamburger is visible on mobile */
-@media (max-width: 919px) {
+/* Ensure hamburger is visible on mobile - Aligned with Tailwind md breakpoint */
+@media (max-width: 767px) {
 .tikz-app #menu-toggle {
-        display: flex !important;
+        display: flex; /* No !important needed - clean breakpoint alignment */
     }
 }
 

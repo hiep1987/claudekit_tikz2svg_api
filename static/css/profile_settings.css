@@ -6,7 +6,7 @@
 
 /* Profile content container styling - Using Shared Variables */
 .tikz-app .profile-content-container {
-  background: var(--container-bg-primary);
+  background-color: var(--container-bg-secondary);
   padding: var(--container-padding-md);
   border-radius: var(--container-radius-md);
   box-shadow: var(--container-shadow-medium);
@@ -43,7 +43,7 @@
 }
 
 .tikz-app .header p {
-  color: var(--text-muted);
+  color: var(--text-on-glass);
   font-size: var(--font-size-base);
 }
 
@@ -111,7 +111,7 @@
 /* Info section */
 .tikz-app .info-section {
   padding: var(--spacing-10);
-  background: var(--bg-tertiary);
+  background-color: var(--container-bg-secondary);
   border-radius: var(--radius-md);
 }
 
@@ -122,7 +122,7 @@
 .tikz-app .info-group label {
   display: block;
   font-weight: var(--font-weight-bold);
-  color: var(--text-primary);
+  color: var(--text-on-glass);
   margin-bottom: var(--spacing-3);
   font-size: var(--font-size-sm);
 }
@@ -131,7 +131,7 @@
 .tikz-app .info-group textarea {
   width: 100%;
   padding: var(--spacing-6);
-  border: 2px solid var(--border-color);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   font-size: var(--font-size-base);
 }
@@ -143,8 +143,8 @@
 }
 
 .tikz-app .info-group .readonly {
-  background: var(--bg-secondary);
-  color: var(--text-muted);
+  background-color: var(--container-bg-secondary);
+  color: var(--text-on-glass);
   cursor: not-allowed;
   border-color: var(--border-color);
 }

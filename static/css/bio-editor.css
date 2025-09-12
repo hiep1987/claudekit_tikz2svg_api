@@ -3,13 +3,14 @@
 .tikz-app #bio-editor.ql-container.ql-snow {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border: 1px solid #764ba2;
-  border-radius: 8px;
+  border-radius: 0 0 8px 8px;
   min-height: 120px;
 }
 
 /* Editor content */
 .tikz-app #bio-editor .ql-editor {
   color: white;
+  border-radius: 0 0 8px 8px;
 }
 
 /* List markers */

@@ -1,5 +1,7 @@
 /* Profile Verification Page Styles */
+ 
 /* Migrated to use CSS Foundation System - Variables from master-variables.css */
+ 
 /* Load Order: After master-variables.css and global-base.css */
 
 /* All base styles now handled by global-base.css - no duplicates */
@@ -25,7 +27,7 @@
 }
 
 .tikz-app .verification-header p {
-    color: var(--text-muted);
+    color: var(--text-on-glass);
     font-size: var(--font-size-base);
 }
 
@@ -34,7 +36,7 @@
 }
 
 .tikz-app .terms-section {
-  background: var(--bg-tertiary);
+  background: var(--container-bg-secondary);
   padding: var(--spacing-16);
   border-radius: var(--radius-lg);
   margin-bottom: var(--spacing-16);
@@ -48,14 +50,14 @@
 }
 
 .tikz-app .terms-section h4 {
-  color: var(--text-primary);
+  color: var(--text-on-glass);
   margin-top: var(--spacing-12);
   margin-bottom: var(--spacing-4);
   font-size: var(--font-size-xl);
 }
 
 .tikz-app .terms-section p, .tikz-app .terms-section li {
-  color: var(--text-secondary);
+  color: var(--text-on-glass);
   line-height: var(--line-height-relaxed);
   margin-bottom: var(--spacing-4);
 }
@@ -69,7 +71,7 @@
 }
 
 .tikz-app .verification-form {
-  background: var(--bg-primary);
+  background: var(--container-bg-secondary);
   padding: var(--spacing-16);
   border-radius: var(--radius-lg);
   border: 2px solid var(--border-light);
@@ -89,7 +91,7 @@
 .tikz-app .info-group label {
   display: block;
   font-weight: var(--font-weight-bold);
-  color: var(--text-primary);
+  color: var(--text-on-glass);
   margin-bottom: var(--spacing-3);
   font-size: var(--font-size-sm);
 }
@@ -180,14 +182,15 @@
 .tikz-app .warning-box {
   background: var(--warning-bg);
   border: 1px solid #ffeaa7;
-  color: #856404;
+  color: var(--warning-dark);
   padding: var(--spacing-6);
   border-radius: var(--radius-sm);
   margin-bottom: var(--spacing-10);
 }
 
-.tikz-app .warning-box h4 {
-  color: #856404;
+.tikz-app .warning-box h4,
+.tikz-app .warning-box p {
+  color: var(--warning-dark);
   margin-bottom: var(--spacing-4);
 }
 
@@ -199,7 +202,7 @@
 }
 
 .tikz-app .verification-note {
-  color: var(--text-muted);
+  color: var(--text-on-glass);
   font-size: var(--font-size-xs);
   margin-bottom: var(--spacing-10);
   text-align: center;
@@ -210,7 +213,7 @@
 }
 
 .tikz-app .verification-note-small {
-  color: #888;
+  color: var(--text-on-glass);
   font-size: var(--font-size-sm);
 }
 
@@ -252,7 +255,7 @@
     margin-top: var(--spacing-20);
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .tikz-app .verification-container {
     padding: var(--container-padding-mobile-md) 0;
   }
@@ -266,7 +269,7 @@
   }
 }
 
-@media (max-width: 600px) {
+@media (width <= 600px) {
   .tikz-app .verification-container {
     padding: var(--spacing-6) 0;
   }

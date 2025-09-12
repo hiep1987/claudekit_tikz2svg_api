@@ -126,10 +126,13 @@ body {
   color: var(--text-primary);
 }
 
-.tikz-app small {
+.tikz-app small,
+.tikz-app .small {
   font-size: var(--font-size-sm);
-  color: var(--text-muted);
+  color: var(--text-on-glass);
 }
+
+/* Note: Basic small/small selectors above should handle all cases */
 
 /* ===== FORM FOUNDATION ===== */
 

@@ -1,5 +1,7 @@
 /* Profile Settings CSS */
+
 /* Migrated to use CSS Foundation System - Variables from master-variables.css */
+
 /* Load Order: After master-variables.css and global-base.css */
 
 /* All base styles now handled by global-base.css - no duplicates */
@@ -17,14 +19,14 @@
 }
 
 /* Responsive container adjustments - Using Shared Variables */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .tikz-app .profile-content-container {
     padding: var(--container-padding-mobile-md) 10px;
     overflow-x: visible;
   }
 }
 
-@media (max-width: 600px) {
+@media (width <= 600px) {
   .tikz-app .profile-content-container {
     padding: var(--spacing-10) var(--spacing-4);
     overflow-x: visible;
@@ -34,7 +36,7 @@
 /* Header styling */
 .tikz-app .header {
   text-align: center;
-  margin-bottom: var(--spacing-20);
+  margin-bottom: 0;
 }
 
 .tikz-app .header h1 {
@@ -52,7 +54,7 @@
   display: grid;
   grid-template-columns: 1fr 2fr;
   gap: var(--spacing-20);
-  margin-bottom: var(--spacing-20);
+  margin-bottom: 0;
 }
 
 /* Avatar section */
@@ -94,6 +96,14 @@
   display: none;
 }
 
+.tikz-app .info-group label {
+  display: block;
+  font-weight: var(--font-weight-bold);
+  color: var(--text-on-glass);
+  margin-bottom: var(--spacing-3);
+  font-size: var(--font-size-sm);
+}
+
 .tikz-app .avatar-upload label {
   background: var(--primary-color);
   color: var(--text-white);
@@ -110,21 +120,13 @@
 
 /* Info section */
 .tikz-app .info-section {
-  padding: var(--spacing-10);
+  padding: 0;
   background-color: var(--container-bg-secondary);
   border-radius: var(--radius-md);
 }
 
 .tikz-app .info-group {
   margin-bottom: var(--spacing-12);
-}
-
-.tikz-app .info-group label {
-  display: block;
-  font-weight: var(--font-weight-bold);
-  color: var(--text-on-glass);
-  margin-bottom: var(--spacing-3);
-  font-size: var(--font-size-sm);
 }
 
 .tikz-app .info-group input,
@@ -152,7 +154,7 @@
 /* Actions */
 .tikz-app .actions {
   text-align: center;
-  margin-top: var(--spacing-16);
+  margin-top: 0;
 }
 
 .tikz-app #save-button-section {
@@ -231,12 +233,12 @@
 }
 
 .tikz-app .text-muted {
-  color: var(--text-muted);
+  color: var(--text-on-glass);
   font-size: var(--font-size-xs);
 }
 
 .tikz-app .text-muted-block {
-  color: var(--text-muted);
+  color: var(--text-on-glass);
   font-size: var(--font-size-xs);
   display: block;
   margin-top: var(--spacing-2);
@@ -270,7 +272,7 @@
 .tikz-app .verification-section {
   margin-top: var(--spacing-16);
   padding: var(--spacing-10);
-  background: var(--bg-tertiary);
+  background: var(--container-bg-secondary);
   border-radius: var(--radius-md);
   border: 2px solid var(--border-light);
   display: none;
@@ -287,12 +289,12 @@
 }
 
 .tikz-app .verification-text {
-  color: var(--text-muted);
+  color: var(--text-on-glass);
   margin-bottom: var(--spacing-10);
 }
 
 .tikz-app .verification-note {
-  color: #888;
+  color: var(--text-on-glass);
   font-size: var(--font-size-sm);
 }
 
@@ -348,7 +350,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0,0,0,0.4);
+  background: rgb(0 0 0 / 40%);
   z-index: var(--z-modal);
   align-items: center;
   justify-content: center;
@@ -401,15 +403,14 @@
 }
 
 /* Responsive design */
-@media (max-width: 768px) {
+@media (width <= 768px) {
 .tikz-app .profile-section {
     grid-template-columns: 1fr;
     gap: var(--spacing-10);
   }
 }
 
-@media (max-width: 600px) {
-
+@media (width <= 600px) {
 .tikz-app .avatar, .tikz-app .avatar-placeholder {
     width: 80px;
     height: 80px;

@@ -74,7 +74,7 @@
     }
 
     function copySvgCode() {
-        const codeBlock = document.getElementById('svgCode');
+        const codeBlock = document.getElementById('svg-code');
         const copyBtn = document.getElementById('copy-svg-code-btn');
         if (codeBlock && copyBtn) {
             const code = codeBlock.textContent;
@@ -575,7 +575,7 @@
     function initKeywordModal() {
         const confirmBtn = document.getElementById('confirmKeywordBtn');
         const keywordsInput = document.getElementById('keywordsInput');
-        const suggestionsBox = document.getElementById('keywordSuggestions');
+        const suggestionsBox = document.getElementById('keyword-suggestions');
 
         let typingTimeout = null;
 
@@ -599,7 +599,7 @@
 
                 // Reset modal
                 const keywordsInput = document.getElementById('keywordsInput');
-                const suggestionsBox = document.getElementById('keywordSuggestions');
+                const suggestionsBox = document.getElementById('keyword-suggestions');
                 if (keywordsInput) keywordsInput.value = "";
                 if (suggestionsBox) {
                     suggestionsBox.innerHTML = '';

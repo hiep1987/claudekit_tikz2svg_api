@@ -986,13 +986,7 @@
 
 
 
-/* Footer */
-.tikz-app .site-footer {
-    text-align: center;
-    color: var(--text-muted);
-    font-size: var(--font-size-sm);
-    margin-top: var(--spacing-20);
-}
+/* Footer styling now handled by foundation/global-base.css */
 
 /* Login modal overlay */
 .tikz-app #login-modal {

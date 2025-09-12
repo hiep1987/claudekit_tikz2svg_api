@@ -34,7 +34,6 @@
 .tikz-app .view-svg-container {
     background: var(--glass-bg-strong);
     backdrop-filter: var(--glass-blur-medium);
-    -webkit-backdrop-filter: var(--glass-blur-medium);
     padding: var(--spacing-12);
     margin-bottom: var(--spacing-8);
     border-radius: var(--radius-xl);
@@ -83,9 +82,9 @@
   align-items: center;
   justify-content: center;
   border-radius: 6px;
-  border: 1px solid rgba(0, 0, 0, 0.25);
+  border: 1px solid rgb(0 0 0 / 25%);
   gap: 0.75rem;
-  color: rgb(65, 63, 63);
+  color: rgb(65 63 63);
   background-color: #fff;
   cursor: pointer;
   transition: all .6s ease;
@@ -105,7 +104,7 @@
 }
 
 /* Google login button responsive */
-@media (max-width: 600px) {
+@media (width <= 600px) {
   .tikz-app .google-login-btn {
     max-width: 280px;
     padding: 8px 16px;
@@ -218,7 +217,7 @@
 
 .tikz-app #view-svg-actions .view-action-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255,193,7,0.3);
+  box-shadow: 0 4px 12px rgb(255 193 7 / 30%);
 }
 
 .tikz-app #view-svg-actions .view-download-btn {
@@ -227,7 +226,7 @@
 }
 
 .tikz-app #view-svg-actions .view-download-btn:hover {
-  box-shadow: 0 4px 12px rgba(23,162,184,0.3);
+  box-shadow: 0 4px 12px rgb(23 162 184 / 30%);
 }
 
 /* Back to Edit Button */
@@ -249,7 +248,7 @@
 }
 
 .tikz-app #view-back-to-edit-btn:hover {
-  box-shadow: 0 4px 12px rgba(40,167,69,0.3);
+  box-shadow: 0 4px 12px rgb(40 167 69 / 30%);
   transform: translateY(-2px);
 }
 
@@ -257,7 +256,9 @@
 .tikz-app #login-modal {
   display: none;
 }
+
 /* Login modal styles are imported from login_modal.css */
+
 /* No local definitions needed for .login-modal-box */
 
 .tikz-app .btn-danger {
@@ -283,13 +284,7 @@
   padding: 12px 24px;
 }
 
-/* Footer */
-.tikz-app .site-footer {
-  text-align: center;
-  color: #888;
-  font-size: 0.875rem;
-  margin-top: 40px;
-}
+/* Footer styling now handled by foundation/global-base.css */
 
 /* Actions section */
 .tikz-app .actions-header {
@@ -325,7 +320,7 @@
 .tikz-app .export-section {
   background: #fff;
   border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+  box-shadow: 0 8px 32px rgb(0 0 0 / 8%);
   padding: 24px;
   margin-top: 24px;
 }
@@ -404,7 +399,7 @@
 }
 
 .tikz-app #view-export-form .export-btn:hover {
-  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+  box-shadow: 0 4px 12px rgb(25 118 210 / 30%);
   transform: translateY(-2px);
 }
 
@@ -432,20 +427,20 @@
   text-decoration: none;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 2px 8px rgba(23,162,184,0.2);
+  box-shadow: 0 2px 8px rgb(23 162 184 / 20%);
   margin-top: 8px;
 }
 
 .tikz-app .export-download-link:hover {
   background: linear-gradient(90deg, #138496 0%, #117a8b 100%);
-  box-shadow: 0 4px 12px rgba(23,162,184,0.3);
+  box-shadow: 0 4px 12px rgb(23 162 184 / 30%);
   transform: translateY(-2px);
   color: white;
   text-decoration: none;
 }
 
 /* Mobile & Tablet Responsive Adjustments */
-@media (max-width: 900px) {
+@media (width <= 900px) {
   .tikz-app #view-mode-row {
     flex-direction: column;
     gap: 24px;
@@ -490,7 +485,7 @@
 }
 
 /* Tablet Layout (901px - 1200px) */
-@media (min-width: 901px) and (max-width: 1200px) {
+@media (width >= 901px) and (width <= 1200px) {
   .tikz-app #view-mode-row {
     display: flex;
     flex-wrap: nowrap;

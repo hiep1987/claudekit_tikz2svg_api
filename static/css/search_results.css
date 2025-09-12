@@ -151,10 +151,4 @@
     text-decoration: none;
 }
 
-/* Footer */
-.tikz-app .site-footer {
-    text-align: center;
-    color: #888;
-    font-size: 14px;
-    margin-top: 40px;
-}
+/* Footer styling now handled by foundation/global-base.css */

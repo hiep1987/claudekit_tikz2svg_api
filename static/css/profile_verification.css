@@ -247,13 +247,7 @@
   color: #856404;
 }
 
-/* Footer */
-.tikz-app .site-footer {
-    text-align: center;
-    color: #888;
-    font-size: var(--font-size-sm);
-    margin-top: var(--spacing-20);
-}
+/* Footer styling now handled by foundation/global-base.css */
 
 @media (width <= 768px) {
   .tikz-app .verification-container {

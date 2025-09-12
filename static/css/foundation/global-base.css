@@ -355,3 +355,14 @@ body {
     display: none;
   }
 }
+
+/* ========================================
+   FOOTER COMPONENT - Foundation Styling
+   ======================================== */
+
+.tikz-app .site-footer {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: var(--font-size-sm);
+    margin-top: var(--spacing-20);
+}

@@ -49,89 +49,85 @@
 {% endblock %}
 
 {% block content %}
-    <div class="page-container">
-        <div class="profile-svg-content-container">
-        <!-- Public Profile Header -->
-        <div class="public-profile-header">
-            <div class="profile-info">
-                {% if avatar %}
-                    <img src="{{ url_for('static', filename='avatars/' ~ avatar) }}" alt="Avatar" class="profile-avatar">
-                {% else %}
-                    <div class="profile-avatar-placeholder">
-                        {{ user_email[0].upper() if user_email else 'U' }}
-                    </div>
-                {% endif %}
-                
-                <h2 class="profile-name">{{ username or user_email.split('@')[0] }}</h2>
-                
-                <div class="profile-stats">
-                    <span class="separator">|</span>
-                    <span>👥 {{ follower_count }} followers</span>
-                </div>
-            </div>
-            
-            {% if bio %}
-                <div class="bio-container profile-bio">
-                    {{ bio | safe }}
+    <!-- Public Profile Header -->
+    <div class="public-profile-header">
+        <div class="profile-info">
+            {% if avatar %}
+                <img src="{{ url_for('static', filename='avatars/' ~ avatar) }}" alt="Avatar" class="profile-avatar">
+            {% else %}
+                <div class="profile-avatar-placeholder">
+                    {{ user_email[0].upper() if user_email else 'U' }}
                 </div>
             {% endif %}
             
-            <div class="profile-email">
-                <strong>Email liên hệ:</strong> {{ user_email }}
-            </div>
+            <h2 class="profile-name">{{ username or user_email.split('@')[0] }}</h2>
             
-            {% if current_user.is_authenticated and not is_owner %}
-                <div class="profile-actions">
-                    {% if is_followed %}
-                        <button type="button" class="btn btn-secondary follow-btn" data-user-id="{{ user_id }}">
-                            👥 Bỏ theo dõi
+            <div class="profile-stats">
+                <span class="separator">|</span>
+                <span>👥 {{ follower_count }} followers</span>
+            </div>
+        </div>
+        
+        {% if bio %}
+            <div class="bio-container profile-bio">
+                {{ bio | safe }}
+            </div>
+        {% endif %}
+        
+        <div class="profile-email">
+            <strong>Email liên hệ:</strong> {{ user_email }}
+        </div>
+        
+        {% if current_user.is_authenticated and not is_owner %}
+            <div class="profile-actions">
+                {% if is_followed %}
+                    <button type="button" class="btn btn-secondary follow-btn" data-user-id="{{ user_id }}">
+                        👥 Bỏ theo dõi
+                    </button>
+                {% else %}
+                    {% if current_identity_verified %}
+                        <button type="button" class="btn btn-primary follow-btn" data-user-id="{{ user_id }}">
+                            👥 Theo dõi
                         </button>
                     {% else %}
-                        {% if current_identity_verified %}
-                            <button type="button" class="btn btn-primary follow-btn" data-user-id="{{ user_id }}">
-                                👥 Theo dõi
+                        <div class="verification-notice">
+                            <button type="button" class="btn btn-secondary follow-btn" disabled>
+                                👥 Theo dõi (cần xác thực)
                             </button>
-                        {% else %}
-                            <div class="verification-notice">
-                                <button type="button" class="btn btn-secondary follow-btn" disabled>
-                                    👥 Theo dõi (cần xác thực)
-                                </button>
-                                <small class="verification-badge">
-                                    🔐 Vui lòng <a href="{{ url_for('profile_verification') }}">xác thực danh tính</a> để sử dụng tính năng theo dõi
-                                </small>
-                            </div>
-                        {% endif %}
+                            <small class="verification-badge">
+                                🔐 Vui lòng <a href="{{ url_for('profile_verification') }}">xác thực danh tính</a> để sử dụng tính năng theo dõi
+                            </small>
+                        </div>
                     {% endif %}
-                </div>
-            {% endif %}
-        </div>
-
-        <section class="svg-files-section">
-            <h3>
-                {% if is_owner %}
-                    📂 Các file SVG bạn đã tạo
-                {% else %}
-                    📂 Danh sách các file SVG đã tạo
                 {% endif %}
-            </h3>
-            {% if svg_files %}
-            <!-- Set logged_in variable for file_card.html compatibility -->
-            {% set logged_in = current_user.is_authenticated %}
-            <div class="files-grid">
-                {% for file in svg_files %}
-                    {% include 'partials/_file_card.html' %}
-                {% endfor %}
             </div>
-            {% else %}
-            <div class="no-files">
-                <div class="no-files-icon">📂</div>
-                <h4>Chưa có file SVG nào</h4>
-                <p>Hãy thử chuyển đổi một code TikZ để tạo file SVG đầu tiên!</p>
-            </div>
-            {% endif %}
-        </section>
-        </div>
+        {% endif %}
     </div>
+
+    <section class="svg-files-section">
+        <h3>
+            {% if is_owner %}
+                📂 Các file SVG bạn đã tạo
+            {% else %}
+                📂 Danh sách các file SVG đã tạo
+            {% endif %}
+        </h3>
+        {% if svg_files %}
+        <!-- Set logged_in variable for file_card.html compatibility -->
+        {% set logged_in = current_user.is_authenticated %}
+        <div class="files-grid">
+            {% for file in svg_files %}
+                {% include 'partials/_file_card.html' %}
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-files">
+            <div class="no-files-icon">📂</div>
+            <h4>Chưa có file SVG nào</h4>
+            <p>Hãy thử chuyển đổi một code TikZ để tạo file SVG đầu tiên!</p>
+        </div>
+        {% endif %}
+    </section>
 
     <!-- Login Modal (shared component) -->
     {% include 'partials/_login_modal.html' %}
@@ -147,7 +143,6 @@
     </div>
     {% endif %}
 
-    </div> <!-- End .page-container -->
 {% endblock %}
 
 {# Page-specific JavaScript #}

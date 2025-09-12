@@ -82,8 +82,7 @@
   box-shadow: var(--container-shadow-medium);
 }
 
-.tikz-app .profile-content-container,
-.tikz-app .profile-svg-content-container {
+.tikz-app .profile-content-container {
   background: var(--container-bg-primary);
   padding: var(--container-padding-md);
   border-radius: var(--container-radius-md);
@@ -98,8 +97,7 @@
     padding: var(--container-padding-mobile-lg);
   }
   
-  .tikz-app .profile-content-container,
-  .tikz-app .profile-svg-content-container {
+  .tikz-app .profile-content-container {
     padding: var(--container-padding-mobile-md);
   }
 }
@@ -109,8 +107,7 @@
     padding: var(--container-padding-mobile-sm);
   }
   
-  .tikz-app .profile-content-container,
-  .tikz-app .profile-svg-content-container {
+  .tikz-app .profile-content-container {
     padding: var(--spacing-20) var(--spacing-2); /* 20px 10px using Foundation spacing */
   }
 }

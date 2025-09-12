@@ -1,51 +1,12 @@
 /* ===== SHARED CSS VARIABLES FOR CONSISTENT STYLING ===== */
-:root {
-  /* ===== CONTAINER STYLING VARIABLES ===== */
-  
-  /* Container Backgrounds */
-  --container-bg-primary: #ffffff;
-  --container-bg-secondary: rgba(255, 255, 255, 0.8);
-  --container-bg-blur: blur(8px);
-  
-  /* Container Padding */
-  --container-padding-sm: 20px 0;      /* Vertical only - for headers */
-  --container-padding-md: 32px;        /* All sides - for content */
-  --container-padding-lg: 40px 0;      /* Vertical only - for sections */
-  
-  /* Container Margins */
-  --container-margin-sm: 20px 0;
-  --container-margin-md: 32px 0;
-  --container-margin-lg: 40px 0;
-  
-  /* Container Border Radius */
-  --container-radius-sm: 12px;
-  --container-radius-md: 16px;
-  --container-radius-lg: 1rem;         /* 16px - for legacy compatibility */
-  
-  /* Container Shadows */
-  --container-shadow-light: 0 4px 12px rgba(0,0,0,0.05);
-  --container-shadow-medium: 0 8px 32px rgba(0,0,0,0.08);
-  --container-shadow-strong: 0 12px 48px rgba(0,0,0,0.12);
-  
-  /* Container Max Width */
-  --container-max-width: 1200px;
-  
-  /* ===== MOBILE RESPONSIVE PADDING ===== */
-  --container-padding-mobile-sm: 15px 0;
-  --container-padding-mobile-md: 24px;
-  --container-padding-mobile-lg: 20px 0;
-  
-  /* ===== STANDARDIZED CONTAINER CLASSES ===== */
-  /* Use these for consistent styling across all templates */
-}
+
+/* LEGACY FILE - Container variables now defined in foundation/master-variables.css */
+
+/* This file now only contains container class definitions for backward compatibility */
 
 /* ===== STANDARD CONTAINER STYLES ===== */
-.tikz-app .page-container {
-  width: 100%;
-  max-width: var(--container-max-width);
-  margin: 0 auto;
-  box-sizing: border-box;
-}
+
+/* Foundation system handles .page-container - removed duplicate to avoid conflicts */
 
 /* Content Container - For main content areas */
 .tikz-app .content-container {
@@ -77,7 +38,7 @@
 }
 
 /* ===== MOBILE RESPONSIVE ADJUSTMENTS ===== */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .tikz-app .content-container {
     padding: var(--container-padding-mobile-md);
   }
@@ -92,14 +53,14 @@
   }
 }
 
-@media (max-width: 600px) {
+@media (width <= 600px) {
   .tikz-app .content-container {
-    padding: 20px 10px;
+    padding: var(--spacing-20) var(--spacing-2); /* 20px 10px using Foundation spacing */
   }
   
   .tikz-app .header-container {
     padding: var(--container-padding-mobile-sm);
-    margin: 10px 0;
+    margin: var(--spacing-10) 0; /* 10px 0 using Foundation spacing */
   }
   
   .tikz-app .section-container {
@@ -108,16 +69,10 @@
 }
 
 /* ===== LEGACY COMPATIBILITY CLASSES ===== */
+
 /* These maintain existing functionality while providing path to standardization */
 
-.tikz-app .search-header-container {
-  background: var(--container-bg-secondary);
-  backdrop-filter: var(--container-bg-blur);
-  padding: var(--container-padding-sm);
-  margin: var(--container-margin-sm);
-  border-radius: var(--container-radius-lg);
-  box-shadow: var(--container-shadow-medium);
-}
+/* .search-header-container moved to search_results.css - avoid duplication */
 
 .tikz-app .verification-container {
   background: var(--container-bg-secondary);
@@ -138,7 +93,7 @@
 }
 
 /* Mobile adjustments for legacy containers */
-@media (max-width: 768px) {
+@media (width <= 768px) {
   .tikz-app .verification-container {
     padding: var(--container-padding-mobile-lg);
   }
@@ -149,13 +104,13 @@
   }
 }
 
-@media (max-width: 600px) {
+@media (width <= 600px) {
   .tikz-app .verification-container {
     padding: var(--container-padding-mobile-sm);
   }
   
   .tikz-app .profile-content-container,
   .tikz-app .profile-svg-content-container {
-    padding: 20px 10px;
+    padding: var(--spacing-20) var(--spacing-2); /* 20px 10px using Foundation spacing */
   }
 }

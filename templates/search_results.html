@@ -11,6 +11,9 @@
 {# Page Title #}
 {% block title %}Kết quả tìm kiếm - TikZ to SVG{% endblock %}
 
+{# Body attributes for authentication #}
+{% block body_attrs %} data-is-logged-in="{% if user_email %}true{% else %}false{% endif %}" data-set-next-url="{{ url_for('set_next_url') }}"{% endblock %}
+
 {# Page-specific CSS #}
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/search_results.css', v='1.0') }}">
@@ -19,21 +22,19 @@
 {# Page Content #}
 {% block content %}
 <!-- Search Results Header -->
-<div class="page-container search-header-container">
-    <div class="search-results-header">
-        <h1>🔍 Kết quả tìm kiếm</h1>
-        <div class="search-query">Từ khóa: "{{ search_query }}"</div>
-        <div class="results-count">
-            Tìm thấy {{ results_count }} kết quả
-        </div>
-        <a href="/" class="back-to-home">
-            <i class="fas fa-arrow-left"></i> Về trang chủ
-        </a>
+<div class="search-results-header">
+    <h1>🔍 Kết quả tìm kiếm</h1>
+    <div class="search-query">Từ khóa: "{{ search_query }}"</div>
+    <div class="results-count">
+        Tìm thấy {{ results_count }} kết quả
     </div>
+    <a href="/" class="back-to-home">
+        <i class="fas fa-arrow-left"></i> Về trang chủ
+    </a>
 </div>
 
 <!-- Search Results Section -->
-<div class="files-section-container page-container files-section" data-is-owner="{{ 'true' if logged_in else 'false' }}">
+<div class="files-section-container page-container files-section" data-is-owner="{{ 'true' if user_email else 'false' }}">
     <div id="search-results-container" class="files-grid">
         {% if search_results %}
             {% for file in search_results %}
@@ -55,24 +56,11 @@
 
 {# Page-specific JavaScript #}
 {% block extra_js %}
-<!-- External JavaScript Libraries -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/latex.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/stex/stex.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/display/placeholder.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-<!-- Application JavaScript -->
-<script src="{{ url_for('static', filename='js/navigation.js', v='1.0') }}"></script>
+<!-- Page-specific JavaScript only - libraries loaded in base.html -->
 <script>
-    // Set login status from server
-    var isLoggedIn = {% if logged_in %}true{% else %}false{% endif %};
-    
     // Initialize window.appState for file_card.js compatibility
     window.appState = {
-        loggedIn: isLoggedIn,
+        loggedIn: {% if user_email %}true{% else %}false{% endif %},
         userEmail: {% if user_email %}'{{ user_email }}'{% else %}null{% endif %}
     };
 </script>

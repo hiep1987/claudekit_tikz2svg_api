@@ -6,24 +6,10 @@
     min-height: 100vh;
 }
 
-/* Body and Container */
-html, body {
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #fafafa;
-}
+/* Foundation system handles global styles - removed conflicting html/body rules */
 
-/* Box-sizing scoped to our page layout only (avoid overriding Bootstrap) */
-.tikz-app .page-container {
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-.tikz-app .page-container *,
-.tikz-app .page-container *::before,
-.tikz-app .page-container *::after {
-    box-sizing: inherit;
-}
+/* Foundation system handles .page-container - removed conflicting duplicate */
+
 
 .tikz-app button, 
 .tikz-app input, 
@@ -32,13 +18,7 @@ html, body {
     font-family: inherit;
 }
 
-/* Preserve monospace fonts for code editors */
-.tikz-app .CodeMirror, 
-.tikz-app .CodeMirror * {
-    font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Cascadia Code', 'Inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace !important;
-    font-feature-settings: "liga" 1, "calt" 1;
-    font-variant-ligatures: contextual;
-}
+/* CodeMirror styles now centralized in foundation/global-base.css */
 
 /* Preserve monospace for any code-related elements */
 .tikz-app pre, 
@@ -46,17 +26,25 @@ html, body {
 .tikz-app .code, 
 .tikz-app .tikz-code, 
 .tikz-app textarea[name="code"] {
-    font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', 'Cascadia Code', 'Inconsolata', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace !important;
+    font-family: var(--font-family-mono);
     font-feature-settings: "liga" 1, "calt" 1;
     font-variant-ligatures: contextual;
 }
 
-/* Search Header Container - Using Shared Variables */
-.tikz-app .search-header-container {
-    background: var(--container-bg-secondary);
-    backdrop-filter: var(--container-bg-blur);
+/* Search Results Header - Simplified structure with design system */
+.tikz-app .search-results-header {
+    /* Container behavior */
+    width: 100%;
+    max-width: var(--container-max-width);
+    margin: 0 auto 40px;
+    
+    /* Layout */
+    text-align: center;
     padding: var(--container-padding-sm);
-    margin: var(--container-margin-sm);
+    
+    /* Visual design - Gradient background for proper contrast */
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
     border: none;
     border-radius: var(--container-radius-lg);
     box-shadow: var(--container-shadow-medium);
@@ -64,12 +52,12 @@ html, body {
 
 /* Files Section Container */
 .tikz-app .files-section-container {
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: rgb(255 255 255 / 80%);
     backdrop-filter: blur(8px);
-    padding: 40px 0;
+    padding: 20px 0;
     border: none;
     border-radius: 1rem;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+    box-shadow: 0 8px 32px rgb(0 0 0 / 8%);
 }
 
 /* Files Grid */
@@ -83,54 +71,8 @@ html, body {
 }
 
 /* Mobile responsiveness align with index */
-@media (max-width: 768px) {
-  .tikz-app .files-section {
-      margin-top: 20px;
-      padding: 20px;
-  }
-  .tikz-app .files-grid {
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 12px;
-  }
-  .tikz-app .file-card {
-      width: 100%;
-      min-width: 0;
-  }
-  .tikz-app .file-actions {
-      flex-direction: column;
-      gap: 8px;
-  }
-  .tikz-app .file-actions a, .tikz-app .file-actions button {
-      padding: 8px 12px;
-      font-size: 12px;
-      min-height: 36px;
-  }
-}
 
-@media (max-width: 600px) {
-  .tikz-app .files-grid {
-      grid-template-columns: 1fr;
-      gap: 15px;
-  }
-  .tikz-app .file-card {
-      width: 100%;
-      min-width: 0;
-  }
-}
-
-@media (max-width: 480px) {
-  .tikz-app .files-section {
-      margin-top: 15px;
-      padding: 16px;
-  }
-  .tikz-app .files-grid {
-      gap: 10px;
-  }
-  .tikz-app .file-card {
-      width: 100%;
-      min-width: 0;
-  }
-}
+/* File-card responsive styles now centralized in file_card.css */
 
 /* No Files */
 .tikz-app .no-files {
@@ -174,15 +116,7 @@ html, body {
     text-decoration: underline;
 }
 
-/* Search Results Header */
-.tikz-app .search-results-header {
-    text-align: center;
-    margin-bottom: 30px;
-    padding: 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border-radius: 16px;
-}
+/* Duplicate removed - merged into main .search-results-header above */
 
 .tikz-app .search-results-header h1 {
     font-size: 2rem;
@@ -204,7 +138,7 @@ html, body {
     display: inline-block;
     margin-top: 15px;
     padding: 10px 20px;
-    background: rgba(255, 255, 255, 0.2);
+    background: rgb(255 255 255 / 20%);
     color: white;
     text-decoration: none;
     border-radius: 8px;
@@ -212,7 +146,7 @@ html, body {
 }
 
 .tikz-app .back-to-home:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgb(255 255 255 / 30%);
     color: white;
     text-decoration: none;
 }

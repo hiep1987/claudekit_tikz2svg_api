@@ -12,7 +12,7 @@
 
     <!-- Menu - Desktop -->
     <div class="hidden md:flex flex-grow mx-4 justify-center">
-        <ul id="main-menu" class="list-unstyled p-0 m-0 d-flex align-items-center gap-3 font-medium text-gray-700">
+        <ul id="main-menu" class="flex items-center gap-6 font-medium text-gray-700">
             <li class="menu-item relative px-2 py-1 cursor-pointer transition hover:text-blue-600">
                 <a href="/" class="block text-base" style="line-height: 1;">Trang chủ</a>
                 <div class="menu-underline"></div>
@@ -56,7 +56,7 @@
                         {% endif %}
                     </span>
                 </div>
-                <button id="logout-btn" class="hidden md:block bg-gradient-to-r from-red-400 to-red-600 text-white px-3 py-1.5 rounded-xl shadow hover:scale-105 transition font-semibold text-xs border-0">Đăng xuất</button>
+                <a href="/logout" class="hidden md:block bg-gradient-to-r from-red-400 to-red-600 text-white px-3 py-1.5 rounded-xl shadow hover:scale-105 transition font-semibold text-xs" style="text-decoration: none;">Đăng xuất</a>
             </div>
         {% else %}
             <button class="hidden md:block bg-gradient-to-r from-blue-400 to-yellow-400 text-white px-3 py-1.5 rounded-xl shadow hover:scale-105 transition font-semibold text-sm" onclick="window.location.href='/login/google'">Đăng nhập</button>
@@ -70,7 +70,7 @@
 
 <!-- Scrollable Menu - Mobile -->
 <div id="scrollable-menu" class="md:hidden container mb-8">
-    <ul id="scrollable-menu-list" class="list-unstyled p-0 m-0 d-flex align-items-center gap-3 font-medium text-gray-700 px-3">
+    <ul id="scrollable-menu-list" class="flex items-center gap-6 font-medium text-gray-700 px-3">
         <li class="menu-item relative px-2 py-1 cursor-pointer transition hover:text-blue-600">
             <a href="/" class="block text-base" style="line-height: 1;">Trang chủ</a>
             <div class="menu-underline"></div>
@@ -104,7 +104,7 @@
         <a href="/profile/{{ current_user.id }}/settings" class="py-2 px-3 rounded-lg text-gray-700 font-medium hover:bg-blue-100 transition">Hồ sơ</a>
         <a href="/profile/{{ current_user.id }}/svg-files" class="py-2 px-3 rounded-lg text-gray-700 font-medium hover:bg-blue-100 transition">File SVG</a>
         <a href="/profile/{{ current_user.id }}/followed-posts" class="py-2 px-3 rounded-lg text-gray-700 font-medium hover:bg-blue-100 transition">Bài đăng</a>
-        <button id="mobile-logout-btn" class="logout-btn bg-gradient-to-r from-red-400 to-red-600 text-white px-4 py-2 rounded-xl shadow font-semibold mt-2 text-center border-0 w-full">Đăng xuất</button>
+        <a href="/logout" class="logout-btn bg-gradient-to-r from-red-400 to-red-600 text-white px-4 py-2 rounded-xl shadow font-semibold mt-2 text-center" style="text-decoration: none;">Đăng xuất</a>
         {% else %}
         <button class="login-btn bg-gradient-to-r from-blue-600 to-blue-800 text-white px-4 py-2 rounded-xl shadow-lg font-semibold mt-8 hover:from-blue-700 hover:to-blue-900 transition-all duration-200" onclick="window.location.href='/login/google'">Đăng nhập</button>
         {% endif %}

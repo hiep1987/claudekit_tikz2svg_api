@@ -9,7 +9,7 @@
     "lint:css:report": "stylelint \"static/css/**/*.css\" --formatter json > stylelint-report.json"
   },
   "devDependencies": {
-    "stylelint": "^16.23.1",
+    "stylelint": "^16.24.0",
     "stylelint-config-standard": "^36.0.1"
   },
   "repository": {

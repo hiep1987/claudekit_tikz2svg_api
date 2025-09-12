@@ -1,5 +1,7 @@
 /* Index Page Specific Styles */
+
 /* Migrated to use CSS Foundation System - Variables from master-variables.css */
+
 /* Load Order: After master-variables.css and global-base.css */
 
 /* All base styles now handled by global-base.css - no duplicates */
@@ -35,24 +37,14 @@
     text-align: center;
     margin-bottom: var(--spacing-16);
     font-weight: var(--font-weight-bold);
-    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+    text-shadow: 0 1px 2px rgb(255 255 255 / 80%);
     position: relative;
     z-index: 1;
     font-size: var(--font-size-2xl);
     letter-spacing: -0.025em;
 }
 
-/* Enhanced form elements for better contrast on glass */
-.tikz-app .input-preview-section label:not(.like) {
-    color: var(--text-on-glass);
-    font-weight: var(--font-weight-semibold);
-}
-
-.tikz-app .input-preview-section .form-group {
-    position: relative;
-    z-index: 1;
-}
-
+/* Base form styles */
 .tikz-app .form-group {
     margin-bottom: var(--spacing-10);
 }
@@ -64,8 +56,20 @@
     color: var(--text-secondary);
 }
 
+/* Enhanced form elements for better contrast on glass */
+.tikz-app .input-preview-section .form-group {
+    position: relative;
+    z-index: 1;
+}
+
+.tikz-app .input-preview-section label:not(.like) {
+    color: var(--text-on-glass);
+    font-weight: var(--font-weight-semibold);
+}
+
 .tikz-app .tikz-code-textarea {
     width: 100%;
+
     /* Preserve foundation padding and border-radius, only add specific styling */
     font-family: var(--font-family-mono);
     font-size: var(--font-size-sm);
@@ -83,7 +87,6 @@
     border: none;
     border-radius: var(--radius-md);
     cursor: pointer;
-    font-size: var(--font-size-base);
     font-weight: var(--font-weight-semibold);
     display: inline-flex;
     align-items: center;
@@ -145,7 +148,7 @@
     color: var(--text-primary);
 }
 
-.tikz-app #svgCode.code-block {
+.tikz-app #svg-code.code-block {
     background-color: var(--bg-secondary);
     border: 1px solid var(--border-light);
     border-radius: var(--radius-sm);
@@ -157,13 +160,24 @@
     position: relative;
 }
 
-.tikz-app #svgCode.code-block pre {
+.tikz-app #view-tikz-code pre {
     margin: 0;
     padding: var(--spacing-8);
     background: transparent;
 }
 
-.tikz-app #svgCode.code-block code {
+.tikz-app #svg-code.code-block pre {
+    margin: 0;
+    padding: var(--spacing-8);
+    background: transparent;
+}
+
+.tikz-app #view-tikz-code code {
+    background: transparent;
+    padding: 0;
+}
+
+.tikz-app #svg-code.code-block code {
     background: transparent;
     padding: 0;
 }
@@ -232,7 +246,7 @@
     margin-bottom: var(--spacing-4);
 }
 
-@media (min-width: 1000px) {
+@media (width >= 1000px) {
     .tikz-app .export-form {
         grid-template-columns: 1fr 1fr 1fr 1fr;
     }
@@ -242,6 +256,14 @@
     display: flex;
     align-items: center;
     gap: var(--spacing-3);
+}
+
+.tikz-app .export-btn-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
 }
 
 .tikz-app .export-form .export-btn-group {
@@ -267,7 +289,6 @@
     max-width: 180px;
     height: 40px;
     padding: var(--spacing-3) var(--spacing-6);
-    font-size: var(--font-size-base);
     border-radius: var(--radius-sm);
     border: 1px solid var(--border-color);
     background: var(--bg-tertiary);
@@ -296,7 +317,7 @@
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
-    scrollbar-color: var(--border-light) transparent;
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
 
 .tikz-app #tikz-form {
@@ -323,17 +344,11 @@
 }
 
 .tikz-app #input-preview-row::-webkit-scrollbar-thumb:hover, .tikz-app #view-mode-row::-webkit-scrollbar-thumb:hover {
-    background: var(--text-light);
-}
-
-.tikz-app #input-preview-row, .tikz-app #view-mode-row {
-    scrollbar-width: thin;
-    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+    background: var(--scrollbar-thumb-hover);
 }
 
 .tikz-app #input-preview-row .input-col, .tikz-app #input-preview-row .preview-col, .tikz-app #view-mode-row .view-col {
     flex: 1;
-    min-width: 0;
     min-width: 300px;
 }
 
@@ -341,7 +356,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #ffffff;  /* Pure white background for optimal SVG contrast */
+    background: #fff;  /* Pure white background for optimal SVG contrast */
     border: 1.5px solid var(--border-light);
     border-radius: var(--radius-md);
     min-height: 320px;
@@ -352,7 +367,14 @@
     width: 100%;
 }
 
-.tikz-app #input-preview-row .preview-col img, .tikz-app #view-svg-preview img {
+.tikz-app .table-scroll-x .table-content .col:last-child img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.tikz-app #view-svg-preview img {
     max-width: 100%;
     max-height: 100%;
     min-height: 200px;
@@ -361,6 +383,18 @@
     margin: 0 auto;
     object-fit: contain;
 }
+
+.tikz-app #input-preview-row .preview-col img {
+    max-width: 100%;
+    max-height: 100%;
+    min-height: 200px;
+    min-width: 200px;
+    display: block;
+    margin: 0 auto;
+    object-fit: contain;
+}
+
+/* CodeMirror Enhancements - touch action added to global base styles */
 
 /* CodeMirror Specific Styles */
 .tikz-app #view-mode-row .CodeMirror {
@@ -385,7 +419,15 @@
     background: var(--bg-primary);
 }
 
-@media (min-width: 1200px) {
+/* Fix responsive gap for 960-1200px range */
+@media (width >= 960px) and (width <= 1199px) {
+    .tikz-app .table-scroll-x {
+        width: 900px;
+        margin: 0 auto;
+    }
+}
+
+@media (width >= 1200px) {
     .tikz-app .table-scroll-x {
         width: 900px;
         margin: 0 auto;
@@ -409,6 +451,10 @@
     overflow: auto;
 }
 
+.tikz-app .col:last-child {
+    border-right: none;
+}
+
 .tikz-app .table-scroll-x .table-content .col form#tikz-form {
     display: flex;
     flex-direction: column;
@@ -424,7 +470,7 @@
     height: auto;
     min-height: 0;
     max-height: none;
-    font-size: 13px;
+    font-size: var(--font-size-sm);
 }
 
 .tikz-app #compile-save-row {
@@ -440,14 +486,7 @@
     align-items: center;
     justify-content: center;
     padding: 0;
-    background: #ffffff;  /* Pure white background for SVG container */
-}
-
-.tikz-app .table-scroll-x .table-content .col:last-child img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    display: block;
+    background: #fff;  /* Pure white background for SVG container */
 }
 
 .tikz-app .table-scroll-x .table-content .col:last-child .preview-placeholder {
@@ -457,25 +496,27 @@
     justify-content: center;
     height: 100%;
     width: 100%;
-}
-
-.tikz-app .col:last-child {
-    border-right: none;
+    color: var(--text-placeholder-emphasis);  /* Very dark for maximum visibility */
+    font-style: normal;                      /* Remove italic for clarity */
+    font-weight: var(--font-weight-semibold); /* Stronger weight for emphasis */
+    font-size: var(--font-size-base);        /* Explicit size for consistency */
+    line-height: var(--line-height-relaxed); /* Better readability */
 }
 
 /* Section Containers - Enhanced Glass Morphism */
 .tikz-app .input-preview-section.page-container.container {
     background: var(--glass-bg-strong);
     backdrop-filter: var(--glass-blur-medium);
-    -webkit-backdrop-filter: var(--glass-blur-medium);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-xl);
     padding: var(--spacing-20) 0;
     margin-bottom: 0;
     overflow-x: hidden;
+
     /* Enhanced shadow for depth */
     box-shadow: var(--glass-shadow), 
-                0 1px 3px rgba(0, 0, 0, 0.1);
+                0 1px 3px rgb(0 0 0 / 10%);
+
     /* Subtle border for definition */
     position: relative;
 }
@@ -484,28 +525,21 @@
 .tikz-app .input-preview-section.page-container.container::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
     background: linear-gradient(135deg, 
-                rgba(255, 255, 255, 0.1) 0%, 
+                rgb(255 255 255 / 10%) 0%, 
                 transparent 50%, 
-                rgba(255, 255, 255, 0.1) 100%);
+                rgb(255 255 255 / 10%) 100%);
     border-radius: inherit;
     pointer-events: none;
 }
 
-/* Preview Placeholder */
-.tikz-app .preview-placeholder {
-    text-align: center;
-    color: var(--text-muted);
-    font-style: italic;
-}
-
-.tikz-app .preview-placeholder p {
+.tikz-app .table-scroll-x .table-content .col:last-child .preview-placeholder p {
     margin: 0;
-    font-size: var(--font-size-base);
+    color: inherit;                          /* Ensure paragraph inherits dark color */
+    font-weight: inherit;                    /* Inherit strong weight */
+    font-size: inherit;                      /* Inherit size from parent */
+    line-height: inherit;                    /* Inherit line spacing */
 }
 
 /* Search Styles */
@@ -530,8 +564,9 @@
     background-color: var(--input-bg);
     color: var(--input-text);
     transition: var(--transition-normal);
+
     /* Enhanced for better contrast and accessibility */
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: inset 0 1px 3px rgb(0 0 0 / 10%);
 }
 
 .tikz-app .input::placeholder {
@@ -543,13 +578,13 @@
     outline: none;
     border-color: var(--input-border-focus);
     background-color: var(--input-focus-bg);
-    box-shadow: var(--input-focus-shadow), inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--input-focus-shadow), inset 0 1px 3px rgb(0 0 0 / 10%);
 }
 
 .tikz-app .input:focus {
     background-color: var(--input-focus-bg);
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.15), inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 0 3px rgb(25 118 210 / 15%), inset 0 1px 3px rgb(0 0 0 / 10%);
 }
 
 .tikz-app .input:hover {
@@ -566,6 +601,7 @@
     stroke: var(--input-icon-default); /* Use stroke color instead of fill */
     width: var(--input-icon-size); /* 20px - consistent sizing */
     height: var(--input-icon-size); /* 20px - consistent sizing */
+
     /* Full visibility always - no accessibility issues */
     opacity: 1;
     transition: stroke var(--transition-normal), transform var(--transition-normal);
@@ -681,11 +717,11 @@
 }
 
 /* Responsive Design */
-@media (max-width: 1000px) {
+@media (width <= 1000px) {
     .tikz-app .compile-save-row-btn {
         width: 100%;
         min-width: 0;
-        font-size: 16px;
+        font-size: var(--font-size-base);
         padding: 14px 0;
         border-radius: 8px;
         margin-bottom: 10px;
@@ -698,7 +734,7 @@
     }
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
     .tikz-app .input-preview-section {
         padding: var(--spacing-10) 0;
     }
@@ -707,12 +743,15 @@
         /* Stronger background for mobile - better contrast */
         background: var(--glass-bg-light);
         backdrop-filter: var(--glass-blur-light);
-        -webkit-backdrop-filter: var(--glass-blur-light);
         padding: var(--spacing-16) 0;
         border-width: 2px;
+        overflow-x: visible;
+        padding-left: var(--spacing-4);
+        padding-right: var(--spacing-4);
+
         /* Enhanced shadow for mobile */
         box-shadow: var(--glass-shadow), 
-                    0 2px 8px rgba(0, 0, 0, 0.15);
+                    0 2px 8px rgb(0 0 0 / 15%);
     }
     
     .tikz-app .files-section-container.page-container {
@@ -724,7 +763,7 @@
     }
     
     .tikz-app .search-title {
-        font-size: 1.25rem;
+        font-size: var(--font-size-xl);
     }
     
     .tikz-app .search-container {
@@ -739,23 +778,12 @@
         max-width: none;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
-        padding-bottom: 10px;
-        padding: 16px;
+        padding: 16px 16px 10px;
     }
     
 .tikz-app #tikz-form { 
         padding: 0; 
         box-shadow: none; 
-    }
-    
-    .tikz-app .input-preview-section.page-container.container {
-        overflow-x: visible;
-        padding-left: var(--spacing-4);
-        padding-right: var(--spacing-4);
-        /* Enhanced mobile glass morphism */
-        background: var(--glass-bg-light);
-        backdrop-filter: var(--glass-blur-light);
-        -webkit-backdrop-filter: var(--glass-blur-light);
     }
     
 .tikz-app #input-preview-row .input-col, .tikz-app #input-preview-row .preview-col, .tikz-app #view-mode-row .view-col {
@@ -765,11 +793,11 @@
     }
     
 .tikz-app #input-preview-row .CodeMirror, .tikz-app #view-mode-row .CodeMirror {
-        font-size: 16px;
+        font-size: var(--font-size-base);
     }
     
 .tikz-app #input-preview-row .preview-col, .tikz-app #view-svg-preview {
-        background: #ffffff;  /* Ensure white background on mobile */
+        background: #fff;  /* Ensure white background on mobile */
         padding: 12px;
         min-height: 280px;
     }
@@ -779,14 +807,14 @@
     }
 }
 
-@media (max-width: 600px) {
+@media (width <= 600px) {
     .tikz-app .btn-action,
     .tikz-app .compile-save-row-btn,
     .tikz-app .export-btn,
     .tikz-app .copy-btn {
         width: 100%;
         min-width: 0;
-        font-size: 17px;
+        font-size: var(--font-size-lg);
         padding: 14px 0;
         border-radius: 8px;
         margin-bottom: 10px;
@@ -798,11 +826,11 @@
     }
     
     .tikz-app .search-title {
-        font-size: 1.1rem;
+        font-size: var(--font-size-lg);
     }
 }
 
-@media (max-width: 480px) {
+@media (width <= 480px) {
     .tikz-app .input-preview-section {
         padding: var(--spacing-8) 0;
     }
@@ -813,24 +841,23 @@
     
     .tikz-app .input-preview-section.page-container.container {
         padding: var(--spacing-10);
+
         /* Maximum contrast for smallest screens */
         background: var(--glass-bg-light);
         backdrop-filter: var(--glass-blur-light);
-        -webkit-backdrop-filter: var(--glass-blur-light);
         border-width: 2px;
         box-shadow: var(--glass-shadow), 
-                    0 4px 12px rgba(0, 0, 0, 0.2);
+                    0 4px 12px rgb(0 0 0 / 20%);
     }
     
 .tikz-app #input-preview-row, .tikz-app #view-mode-row {
         gap: 12px;
         min-width: calc(100vw - 30px);
-        padding-bottom: 8px;
         border: 2px solid var(--success-color);
         border-radius: 8px;
-        padding: 12px;
+        padding: 12px 12px 8px;
         background: var(--bg-primary);
-        box-shadow: 0 2px 8px rgba(62, 159, 6, 0.2);
+        box-shadow: 0 2px 8px rgb(62 159 6 / 20%);
     }
     
 .tikz-app #input-preview-row .input-col, .tikz-app #input-preview-row .preview-col, .tikz-app #view-mode-row .view-col {
@@ -839,33 +866,28 @@
     }
     
 .tikz-app #input-preview-row .preview-col, .tikz-app #view-svg-preview {
-        background: #ffffff;  /* Ensure white background on smallest screens */
+        background: #fff;  /* Ensure white background on smallest screens */
         padding: 8px;
         min-height: 250px;
     }
     
     .tikz-app .compile-save-row-btn {
         min-height: 44px;
-        font-size: 16px;
+        font-size: var(--font-size-base);
         padding: 12px 20px;
     }
     
     .tikz-app .btn-action, .export-btn, .copy-btn {
         min-height: 44px;
-        font-size: 16px;
+        font-size: var(--font-size-base);
         padding: 12px 20px;
     }
 }
 
-@media (max-width: 950px) {
+@media (width <= 950px) {
     .tikz-app .table-content {
         min-width: 100vw;
     }
-}
-
-/* CodeMirror Enhancements */
-.tikz-app .CodeMirror {
-    touch-action: manipulation;
 }
 
 .tikz-app .CodeMirror-placeholder {
@@ -998,7 +1020,12 @@
 
 /* Login modal text spacings */
 .tikz-app #login-modal h3 { margin-bottom: var(--spacing-12); }
-.tikz-app #login-modal p { margin-bottom: var(--spacing-8); color: var(--text-secondary); }
+
+.tikz-app #login-modal p { 
+    margin-bottom: var(--spacing-8); 
+    color: var(--text-secondary); 
+}
+
 .tikz-app #login-modal ul {
     margin-bottom: var(--spacing-12);
     color: var(--text-secondary);
@@ -1033,7 +1060,7 @@
 }
 
 /* Keyword suggestions dropdown in modal */
-.tikz-app #keywordSuggestions {
+.tikz-app #keyword-suggestions {
     z-index: var(--z-modal);
     max-height: 200px;
     overflow-y: auto;
@@ -1065,14 +1092,6 @@
     text-decoration: none;
 }
 
-.tikz-app .export-btn-group {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-}
-
 
 /* View Mode Specific Styles */
 .tikz-app #view-tikz-code {
@@ -1084,17 +1103,6 @@
     font-size: var(--font-size-xs);
     overflow-x: auto;
     position: relative;
-}
-
-.tikz-app #view-tikz-code pre {
-    margin: 0;
-    padding: var(--spacing-8);
-    background: transparent;
-}
-
-.tikz-app #view-tikz-code code {
-    background: transparent;
-    padding: 0;
 }
 
 .tikz-app #view-export-form {
@@ -1129,20 +1137,20 @@
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: var(--font-size-sm);
     font-weight: 600;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    box-shadow: 0 2px 8px rgba(255,193,7,0.2);
+    box-shadow: 0 2px 8px rgb(255 193 7 / 20%);
     transition: all 0.2s;
     text-decoration: none;
 }
 
 .tikz-app #view-svg-actions .view-action-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(255,193,7,0.3);
+    box-shadow: 0 4px 12px rgb(255 193 7 / 30%);
 }
 
 .tikz-app #view-svg-actions .view-download-btn {
@@ -1151,7 +1159,7 @@
 }
 
 .tikz-app #view-svg-actions .view-download-btn:hover {
-    box-shadow: 0 4px 12px rgba(23,162,184,0.3);
+    box-shadow: 0 4px 12px rgb(23 162 184 / 30%);
 }
 
 /* Modal Styles */
@@ -1167,11 +1175,11 @@
     object-fit: contain;
     border: 1px solid var(--border-color);
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
 }
 
 /* Responsive for view mode */
-@media (max-width: 1000px) {
+@media (width <= 1000px) {
 .tikz-app #view-export-form {
         grid-template-columns: 1fr;
         justify-items: center;
@@ -1205,20 +1213,20 @@
     }
 }
 
-@media (max-width: 800px) {
+@media (width <= 800px) {
 .tikz-app #view-svg-actions {
         flex-direction: column;
         gap: 8px;
     }
 }
 
-@media (max-width: 600px) {
+@media (width <= 600px) {
     .tikz-app .export-form {
         grid-template-columns: 1fr;
     }
 }
 
-@media (max-width: 900px) {
+@media (width <= 900px) {
     .tikz-app .export-select {
         min-width: 100px;
         max-width: 100%;

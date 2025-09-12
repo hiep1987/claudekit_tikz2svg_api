@@ -1,5 +1,7 @@
 /* ===== GLOBAL BASE STYLES - TIKZ APP FOUNDATION ===== */
+
 /* This file defines base styles that apply to the entire application */
+
 /* Import order: 2nd - After master-variables.css, before components */
 
 /* ===== TIKZ APP CONTAINER - GLOBAL SCOPE ===== */
@@ -14,18 +16,24 @@
   width: 100%;
   min-height: 100vh;
   
-  /* Box Model Foundation */
+  /* Box Model Foundation - Let Bootstrap handle globally */
   box-sizing: border-box;
 }
 
-/* Ensure all elements inherit box-sizing */
+/* Option 3: Let Bootstrap handle box-sizing globally - No override needed */
+
+/* 
 .tikz-app *,
 .tikz-app *::before,
 .tikz-app *::after {
-  box-sizing: inherit;
-}
+  box-sizing: border-box !important;
+} 
+*/
+
+/* Commented out - Bootstrap already handles this globally */
 
 /* ===== GLOBAL HTML/BODY RESET ===== */
+
 /* ONLY ONE SOURCE OF TRUTH - No more duplicates! */
 html {
   margin: 0;
@@ -35,8 +43,8 @@ html {
 }
 
 body {
-  margin: 0;
-  padding: 0;
+  margin: 0 auto;
+  padding: 20px;
   width: 100%;
   min-height: 100vh;
   background-color: #fafafa;
@@ -47,7 +55,7 @@ body {
   /* Better text rendering */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
+  text-rendering: optimizelegibility;
 }
 
 /* ===== PAGE LAYOUT SYSTEM ===== */
@@ -165,7 +173,7 @@ body {
 /* CodeMirror Global Styles */
 .tikz-app .CodeMirror,
 .tikz-app .CodeMirror * {
-  font-family: var(--font-family-mono) !important;
+  font-family: var(--font-family-mono) !important; /* Essential vendor override */
   font-feature-settings: "liga" 1, "calt" 1;
   font-variant-ligatures: contextual;
 }
@@ -212,7 +220,11 @@ body {
 /* ===== RESPONSIVE DESIGN ===== */
 
 /* Mobile First Approach */
-@media (max-width: 768px) {
+@media (width <= 768px) {
+  body {
+    padding: var(--spacing-8); /* Reduced padding for mobile */
+  }
+  
   .tikz-app .page-container {
     padding: var(--container-padding-mobile-md);
   }
@@ -230,7 +242,11 @@ body {
   }
 }
 
-@media (max-width: 480px) {
+@media (width <= 480px) {
+  body {
+    padding: var(--spacing-6); /* Even less padding for very small screens */
+  }
+  
   .tikz-app .page-container {
     padding: var(--spacing-8);
   }
@@ -239,6 +255,84 @@ body {
     padding: var(--spacing-12);
     margin: var(--spacing-8) 0;
   }
+}
+
+/* ===== MODAL FOUNDATION ===== */
+
+.tikz-app .modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: var(--modal-overlay);
+  backdrop-filter: blur(8px);
+  z-index: var(--z-modal-backdrop);
+  align-items: center;
+  justify-content: center;
+}
+
+.tikz-app .modal-content {
+  background: var(--container-bg-primary);
+  padding: var(--spacing-24);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  min-width: 320px;
+  text-align: center;
+}
+
+.tikz-app .modal-content h3 {
+  margin-bottom: var(--spacing-16);
+  color: var(--text-primary);
+}
+
+.tikz-app .modal-content p {
+  margin-bottom: var(--spacing-12);
+  color: var(--text-secondary);
+}
+
+.tikz-app .modal-actions {
+  display: flex;
+  gap: var(--spacing-8);
+  justify-content: center;
+  align-items: center;
+  margin-top: var(--spacing-16);
+}
+
+.tikz-app .modal-actions .btn-danger {
+  background: var(--danger-color);
+  color: white;
+  padding: var(--spacing-6) var(--spacing-12);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  font-weight: var(--font-weight-semibold);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.tikz-app .modal-actions .btn-danger:hover {
+  background: var(--danger-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.tikz-app .modal-actions .btn-secondary {
+  background: var(--bg-muted);
+  color: var(--text-primary);
+  padding: var(--spacing-6) var(--spacing-12);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.tikz-app .modal-actions .btn-secondary:hover {
+  background: var(--bg-secondary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
 
 /* ===== PRINT STYLES ===== */
@@ -251,5 +345,10 @@ body {
   .tikz-app .page-container {
     max-width: none;
     padding: 0;
+  }
+  
+  .tikz-app .modal-overlay,
+  .tikz-app .modal-overlay[style] {
+    display: none;
   }
 }

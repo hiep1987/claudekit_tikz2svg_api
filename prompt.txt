@@ -12,6 +12,7 @@
   4. **Variable Conversion**: Thay hardcoded values → var(--variable-name)
   5. **Backup Safety**: Tạo .backup_migration trước khi edit
   6. **Responsive Consistency**: Maintain breakpoints với foundation variables
+  7. **NO !important**: Tuyệt đối KHÔNG dùng !important, sử dụng higher specificity thay thế
 
   **NEXT PRIORITIES:**
   - file_card.css (core component)
@@ -19,10 +20,18 @@
   - search_results.css
   - view_svg.css
 
+  **CSS BEST PRACTICES:**
+  - ❌ NEVER use !important (except utilities like .hidden)
+  - ✅ Use higher specificity: .tikz-app #id .class element
+  - ✅ Bootstrap overrides: .tikz-app #container .component
+  - ✅ Scope all styles with .tikz-app prefix
+  - ✅ Use foundation variables for consistency
+  
   **OUTPUT REQUIREMENT:**
   - Use TodoWrite tool để track progress
   - Document changes trong migration comments
   - Verify no conflicts: grep -rn ":root\|html.*{\|body.*{" static/css/
+  - Check for !important usage: grep -rn "!important" static/css/
 
   🔍 Các Prompt Cụ Thể:
 
@@ -324,3 +333,67 @@ Dựa trên CSS Foundation System và architecture đã thiết lập, đây là
 
   📌 Thay [PAGE/FEATURE NAME] và [mô tả chi tiết] để bắt đầu development trang
    mới! 🚀
+
+🧹 PROMPT TEMPLATE CHO CLEAN !IMPORTANT:
+
+Clean up và tối ưu !important declarations trong dự án tikz2svg_api theo CSS Foundation methodology.
+
+**CLEAN !IMPORTANT STRATEGY:**
+✅ Audit: Tìm tất cả !important declarations
+✅ Categorize: Phân loại necessary vs removable  
+✅ Replace: Thay !important bằng higher specificity
+✅ Test: Đảm bảo UI không bị break
+✅ Document: Ghi lại changes và reasoning
+
+**ANALYSIS APPROACH:**
+1. **Critical !important**: Override vendor styles (CodeMirror, etc.) - GIỮ LẠI
+2. **Utility !important**: Helper classes (.hidden, .text-center) - GIỮ LẠI  
+3. **Conflict !important**: Fix CSS wars - REMOVE, thay bằng specificity
+4. **Legacy !important**: Outdated overrides - REMOVE hoàn toàn
+
+**REPLACEMENT METHODS:**
+- Conflict: `.tikz-app .specific-class` thay vì `!important`
+- Cascade: Đặt CSS ở vị trí sau trong load order
+- Scope: Tăng specificity với parent selectors
+- Variables: Sử dụng CSS custom properties
+
+**TESTING REQUIREMENTS:**
+- Visual regression: So sánh before/after screenshots
+- Component isolation: Test từng component riêng biệt  
+- Responsive: Test tất cả breakpoints
+- Browser compatibility: Chrome, Firefox, Safari
+
+**FILES TO AUDIT:**
+- static/css/index.css (primary focus)
+- static/css/foundation/global-base.css
+- static/css/file_card.css
+- static/css/navigation.css
+- static/css/*profile*.css
+- static/css/shared_variables.css
+
+**OUTPUT FORMAT:**
+```
+BEFORE: 34 !important declarations
+AFTER: X essential !important only
+
+REMOVED CATEGORIES:
+- Conflict overrides: X instances
+- Legacy overrides: X instances  
+- Redundant utilities: X instances
+
+KEPT CATEGORIES:
+- Vendor overrides: X instances (CodeMirror, etc.)
+- Critical utilities: X instances (.hidden, etc.)
+```
+
+**METHODOLOGY:**
+1. Backup: Tạo .backup_important trước khi edit
+2. Audit: `grep -rn "!important" static/css/`
+3. Categorize: Phân loại từng !important
+4. Replace: Thay bằng specificity cao hơn
+5. Test: Visual + functional testing
+6. Document: Ghi lại trong migration comments
+
+**TASK:** Clean up !important declarations để improve CSS architecture và maintainability.
+
+Use TodoWrite để track progress từng file.

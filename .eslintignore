@@ -1,0 +1,16 @@
+# Ignore template files with Jinja2 syntax
+templates/**/*.html
+
+# Ignore other non-JS files
+*.css
+*.sql
+*.md
+*.txt
+*.sh
+*.py
+*.tar.gz
+*.json
+node_modules/
+venv/
+__pycache__/
+*.pyc

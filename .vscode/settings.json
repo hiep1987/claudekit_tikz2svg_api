@@ -1,0 +1,15 @@
+{
+  "javascript.validate.enable": false,
+  "typescript.validate.enable": false,
+  "html.validate.scripts": false,
+  "files.associations": {
+    "*.html": "html"
+  },
+  "emmet.includeLanguages": {
+    "jinja-html": "html"
+  },
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/*.pyc": true
+  }
+}

@@ -35,29 +35,25 @@
 
 {% block content %}
 
-    <div class="page-container">
-        <div class="profile-content-container">
-        <!-- Section Bài đăng theo dõi -->
-        <section class="followed-posts-section" data-is-owner="{{ 'true' if is_owner else 'false' }}">
-            <h3>📰 Bài đăng từ người bạn theo dõi</h3>
-            <div id="followed-posts-container" class="files-grid">
-                {% if followed_posts %}
-                    <!-- Set logged_in variable for file_card.html compatibility -->
-                    {% set logged_in = current_user.is_authenticated %}
-                    {% for file in followed_posts %}
-                        {% include 'partials/_file_card.html' %}
-                    {% endfor %}
-                {% else %}
-                    <div class="no-files">
-                        <div class="no-files-icon">📰</div>
-                        <h4>Chưa có bài đăng nào</h4>
-                        <p>Hãy theo dõi một số người dùng để xem bài đăng của họ!</p>
-                    </div>
-                {% endif %}
-            </div>
-        </section>
+    <!-- Section Bài đăng theo dõi -->
+    <section class="followed-posts-section" data-is-owner="{{ 'true' if is_owner else 'false' }}">
+        <h3>📰 Bài đăng từ người bạn theo dõi</h3>
+        <div id="followed-posts-container" class="files-grid">
+            {% if followed_posts %}
+                <!-- Set logged_in variable for file_card.html compatibility -->
+                {% set logged_in = current_user.is_authenticated %}
+                {% for file in followed_posts %}
+                    {% include 'partials/_file_card.html' %}
+                {% endfor %}
+            {% else %}
+                <div class="no-files">
+                    <div class="no-files-icon">📰</div>
+                    <h4>Chưa có bài đăng nào</h4>
+                    <p>Hãy theo dõi một số người dùng để xem bài đăng của họ!</p>
+                </div>
+            {% endif %}
         </div>
-    </div>
+    </section>
 
     <!-- Modal đăng xuất chỉ render nếu đã login -->
     {% if user_email %}

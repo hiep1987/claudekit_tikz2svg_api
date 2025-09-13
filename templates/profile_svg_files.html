@@ -26,13 +26,15 @@
 {# JavaScript variables in head #}
 {% block head_js %}
 <script>
+    // @ts-nocheck
+    /* eslint-disable */
     // ATTEMPT TO MATCH search_results.html EXACTLY
-    var isLoggedIn = {{ 'true' if current_user.is_authenticated else 'false' }};
+    var isLoggedIn = {{ current_user.is_authenticated|tojson }};
     
     // Initialize window.appState for file_card.js compatibility (EXACTLY like search_results.html)
     window.appState = {
         loggedIn: isLoggedIn,
-        userEmail: {% if current_user_email %}'{{ current_user_email }}'{% else %}null{% endif %}
+        userEmail: {{ current_user_email|tojson if current_user_email else 'null' }}
     };
     
     // Debug comparison with search_results.html
@@ -165,8 +167,8 @@
         
         // Check file_card.html template context - THIS IS CRITICAL
         console.log('🚨 Template Context Debug:');
-        console.log('- current_user.is_authenticated:', {{ current_user.is_authenticated }});
-        console.log('- logged_in variable (for file_card):', {{ logged_in if logged_in is defined else 'UNDEFINED' }});
+        console.log('- current_user.is_authenticated:', {{ current_user.is_authenticated|tojson }});
+        console.log('- logged_in variable (for file_card):', {% if logged_in is defined %}{{ logged_in|tojson }}{% else %}'UNDEFINED'{% endif %});
         
         // Test like button elements with detailed analysis
         const likeInputs = document.querySelectorAll('input[id^="heart-"]');
@@ -270,5 +272,7 @@
                 console.log('🎯 Letting file_card.js handle like functionality...');
             }, 600);
         });
+    /* eslint-enable */
+    // @ts-check
     </script>
 {% endblock %} 

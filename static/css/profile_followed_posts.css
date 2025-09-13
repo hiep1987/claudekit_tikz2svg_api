@@ -1,5 +1,7 @@
 /* ===== PROFILE FOLLOWED POSTS CSS ===== */
+
 /* Migrated to use CSS Foundation System - Variables from master-variables.css */
+
 /* Load Order: After master-variables.css and global-base.css */
 
 /* All base styles now handled by global-base.css - no duplicates */
@@ -72,8 +74,12 @@
 }
 
 /* Mobile responsive adjustments - Using Shared Variables */
-@media (max-width: 768px) {
+@media (width <= 768px) {
     .tikz-app .page-container.container {
+        padding: var(--container-padding-mobile-md);
+    }
+    
+    .tikz-app .followed-posts-section {
         padding: var(--container-padding-mobile-md);
     }
 }
@@ -106,10 +112,19 @@
     color: var(--text-muted);
 }
 
-/* Section title styles */
+/* ===== Section Headers ===== */
+.tikz-app .followed-posts-section {
+    background: var(--container-bg-secondary);
+    padding: var(--container-padding-md);
+    border-radius: var(--container-radius-md);
+    box-shadow: var(--container-shadow-medium);
+    max-width: var(--container-max-width);
+    margin: 0;
+}
+
 .tikz-app .followed-posts-section h3 {
-    color: var(--primary-color);
-    margin-bottom: var(--spacing-12);
+    color: var(--primary-dark);
+    margin-bottom: var(--spacing-16);
 }
 
 /* Logout modal styles */
@@ -120,7 +135,7 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0,0,0,0.3);
+    background: rgb(0 0 0 / 30%);
     z-index: var(--z-modal);
     align-items: center;
     justify-content: center;

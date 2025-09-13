@@ -18,17 +18,29 @@
     box-shadow: var(--shadow-lg);
 }
 
-/* Index top spacing container */
-.tikz-app .index-top-container {
+/* Index top spacing container - now applied to search-container */
+.tikz-app .search-container.index-top-container {
     margin-top: var(--spacing-10);
     margin-bottom: var(--spacing-10);
     overflow: visible;
+    background-color: var(--container-bg-secondary);
+    backdrop-filter: var(--container-bg-blur);
+    padding: var(--spacing-20) 0;
+    border: none;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
 }
 
 /* Block: Input-Preview Section - Enhanced Glass Morphism with Better Contrast */
 .tikz-app .input-preview-section.page-container {
     box-shadow: var(--glass-shadow);
     position: relative;
+    margin-top: var(--spacing-20);
+    background-color: var(--container-bg-secondary);
+    backdrop-filter: var(--container-bg-blur);
+    padding: var(--spacing-20) 0;
+    border: none;
+    border-radius: var(--radius-lg);
 }
 
 /* Index Page Specific Elements - No Foundation Conflicts */

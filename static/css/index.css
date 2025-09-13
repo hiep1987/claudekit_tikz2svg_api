@@ -228,12 +228,12 @@
 .tikz-app .export-section {
     margin-top: var(--spacing-10);
     padding: var(--spacing-10);
-    background-color: var(--bg-secondary);
+    background-color: var(--container-bg-secondary);
     border-radius: var(--radius-sm);
 }
 
 .tikz-app .export-section h4 {
-    color: var(--text-primary);
+    color: var(--text-header-glass);
     margin-bottom: var(--spacing-4);
     text-align: center;
 }
@@ -291,7 +291,6 @@
     padding: var(--spacing-3) var(--spacing-6);
     border-radius: var(--radius-sm);
     border: 1px solid var(--border-color);
-    background: var(--bg-tertiary);
     vertical-align: middle;
 }
 
@@ -922,14 +921,103 @@
     padding-left: var(--spacing-3);
 }
 
-/* Mobile Scroll Hint */
+/* Mobile Scroll Hint - Enhanced UX */
 .tikz-app #mobile-scroll-hint {
     margin-top: var(--spacing-6);
-    color: var(--text-muted);
-    font-size: var(--font-size-sm);
-    text-align: center;
     display: none;
-    transition: opacity var(--transition-normal);
+    transition: opacity var(--transition-normal), transform var(--transition-normal);
+    background: var(--glass-bg-light);
+    backdrop-filter: var(--glass-blur-light);
+    border: 1px solid var(--primary-light);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-4) var(--spacing-6);
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    z-index: 10;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.tikz-app #mobile-scroll-hint .hint-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-3);
+    position: relative;
+}
+
+.tikz-app #mobile-scroll-hint .hint-icon {
+    font-size: var(--font-size-lg);
+    animation: bounce 2s infinite;
+}
+
+.tikz-app #mobile-scroll-hint .hint-text {
+    color: var(--primary-color);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    text-align: center;
+    flex: 1;
+}
+
+.tikz-app #mobile-scroll-hint .hint-dismiss {
+    position: absolute;
+    right: var(--spacing-2);
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    cursor: pointer;
+    padding: var(--spacing-1);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tikz-app #mobile-scroll-hint .hint-dismiss:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    transform: translateY(-50%) scale(1.1);
+}
+
+/* Mobile hint animation states */
+.tikz-app #mobile-scroll-hint.showing {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.tikz-app #mobile-scroll-hint.fading {
+    opacity: 0.6;
+    transform: translateY(-2px);
+}
+
+.tikz-app #mobile-scroll-hint.hidden {
+    display: none;
+    opacity: 0;
+    transform: translateY(-4px);
+}
+
+/* Bounce animation for hint icon */
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+
+    40% {
+        transform: translateY(-4px);
+    }
+
+    60% {
+        transform: translateY(-2px);
+    }
 }
 
 /* Utility */

@@ -90,10 +90,14 @@
         </div>
       </div>
     </div>
-    <!-- Thông báo hướng dẫn cho mobile -->
-    <p id="mobile-scroll-hint">
-      📱 Trên điện thoại, vuốt ngang để xem đủ 2 cột
-    </p>
+    <!-- Thông báo hướng dẫn cho mobile - Enhanced UX -->
+    <div id="mobile-scroll-hint" class="mobile-scroll-hint">
+      <div class="hint-content">
+        <span class="hint-icon">👆</span>
+        <span class="hint-text">Vuốt ngang để xem đủ 2 cột</span>
+        <button class="hint-dismiss" aria-label="Đóng thông báo">×</button>
+      </div>
+    </div>
 
     {# Thêm block này NGAY SAU form, TRƯỚC result-tools-section #}
     {% if error %}

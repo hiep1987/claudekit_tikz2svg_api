@@ -298,23 +298,7 @@
   animation: overlay-fade-in var(--transition-normal) cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.tikz-app .modal-content {
-  background: var(--container-bg-primary);
-  padding: var(--spacing-24) var(--spacing-24);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
-  min-width: 320px;
-  text-align: center;
-}
 
-.tikz-app .modal-content h3 {
-  margin-bottom: var(--spacing-16);
-}
-
-.tikz-app .modal-content p {
-  margin-bottom: var(--spacing-12);
-  color: var(--text-secondary);
-}
 
 .tikz-app .modal-content ul {
   margin-bottom: var(--spacing-16);
@@ -669,8 +653,7 @@
   .tikz-app .file-info, 
   .tikz-app .file-creator, 
   .tikz-app .profile-bio, 
-  .tikz-app .tikz-code-block, 
-  .tikz-app .modal-content {
+  .tikz-app .tikz-code-block {
     user-select: text;
   }
 } 

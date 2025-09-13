@@ -243,7 +243,19 @@
 
         // Hiển thị loading
         const compileBtn = document.getElementById('compile-btn');
-        const originalText = compileBtn.textContent;
+        
+        // FIX: Luôn sử dụng text gốc cố định thay vì text hiện tại
+        const originalText = 'Biên dịch'; // Text gốc cố định
+        const currentText = compileBtn.textContent;
+        
+        // Debug: Log original text
+        console.log('🔧 Original button text (fixed):', originalText);
+        console.log('🔧 Current button text:', currentText);
+        console.log('🔧 Button element:', compileBtn);
+        
+        // Lưu originalText vào global để debug
+        window.debugOriginalText = originalText;
+        
         compileBtn.textContent = 'Đang biên dịch...';
         compileBtn.disabled = true;
 
@@ -285,8 +297,16 @@
                     console.log('Full log:', fullLog ? 'Yes' : 'No');
                     displayCompileError(msg, fullLog);
                     // Reset button ngay khi có lỗi
-                    compileBtn.textContent = originalText;
-                    compileBtn.disabled = false;
+                    console.log('🔧 TIKZ ERROR: Resetting button to:', originalText);
+                    console.log('🔧 TIKZ ERROR: compileBtn exists:', !!compileBtn);
+                    console.log('🔧 TIKZ ERROR: originalText exists:', !!originalText);
+                    if (compileBtn && originalText) {
+                        compileBtn.textContent = originalText;
+                        compileBtn.disabled = false;
+                        console.log('🔧 TIKZ ERROR: Button reset completed');
+                    } else {
+                        console.log('🔧 TIKZ ERROR: Button reset FAILED - missing compileBtn or originalText');
+                    }
                     return;
                 }
 
@@ -338,6 +358,45 @@
 
                 // Khởi tạo lại CodeMirror cho textarea id="code"
                 ensureCodeMirror();
+                
+                // Reset nút biên dịch về trạng thái ban đầu khi thành công
+                console.log('🔧 SUCCESS: Resetting button to:', originalText);
+                console.log('🔧 SUCCESS: compileBtn exists:', !!compileBtn);
+                console.log('🔧 SUCCESS: originalText exists:', !!originalText);
+                
+                // Thử tìm lại nút compile sau AJAX (có thể DOM đã thay đổi)
+                const currentCompileBtn = document.getElementById('compile-btn');
+                console.log('🔧 SUCCESS: Current compileBtn after AJAX:', !!currentCompileBtn);
+                console.log('🔧 SUCCESS: Current compileBtn text:', currentCompileBtn?.textContent);
+                
+                if (compileBtn && originalText) {
+                    compileBtn.textContent = originalText;
+                    compileBtn.disabled = false;
+                    console.log('🔧 SUCCESS: Button reset completed with original compileBtn');
+                } else if (currentCompileBtn && originalText) {
+                    currentCompileBtn.textContent = originalText;
+                    currentCompileBtn.disabled = false;
+                    console.log('🔧 SUCCESS: Button reset completed with current compileBtn');
+                } else {
+                    console.log('🔧 SUCCESS: Button reset FAILED - missing compileBtn or originalText');
+                    // Fallback: thử reset sau một chút delay
+                    setTimeout(() => {
+                        const delayedCompileBtn = document.getElementById('compile-btn');
+                        if (delayedCompileBtn && originalText) {
+                            delayedCompileBtn.textContent = originalText;
+                            delayedCompileBtn.disabled = false;
+                            console.log('🔧 SUCCESS: Button reset completed with delayed approach');
+                        } else if (delayedCompileBtn && window.debugOriginalText) {
+                            delayedCompileBtn.textContent = window.debugOriginalText;
+                            delayedCompileBtn.disabled = false;
+                            console.log('🔧 SUCCESS: Button reset completed with delayed approach + global fallback');
+                        } else if (delayedCompileBtn) {
+                            delayedCompileBtn.textContent = 'Biên dịch';
+                            delayedCompileBtn.disabled = false;
+                            console.log('🔧 SUCCESS: Button reset completed with delayed approach + fixed text');
+                        }
+                    }, 100);
+                }
                 
                 // Debug: Kiểm tra nút save server có được gán event chưa
                 const saveServerBtn = document.getElementById('save-server-btn');
@@ -480,14 +539,55 @@
                 } catch (e) {
                     displayCompileError('Lỗi kết nối với server', '');
                 }
+                // Reset nút ngay khi có HTTP error
+                console.log('🔧 HTTP ERROR: Resetting button to:', originalText);
+                console.log('🔧 HTTP ERROR: compileBtn exists:', !!compileBtn);
+                console.log('🔧 HTTP ERROR: originalText exists:', !!originalText);
+                if (compileBtn && originalText) {
+                    compileBtn.textContent = originalText;
+                    compileBtn.disabled = false;
+                    console.log('🔧 HTTP ERROR: Button reset completed');
+                } else {
+                    console.log('🔧 HTTP ERROR: Button reset FAILED - missing compileBtn or originalText');
+                }
             }
         } catch (error) {
             console.error('AJAX Error:', error);
             displayCompileError('Có lỗi xảy ra khi biên dịch: ' + error.message, '');
+            // Reset nút ngay khi có exception
+            console.log('🔧 EXCEPTION: Resetting button to:', originalText);
+            console.log('🔧 EXCEPTION: compileBtn exists:', !!compileBtn);
+            console.log('🔧 EXCEPTION: originalText exists:', !!originalText);
+            if (compileBtn && originalText) {
+                compileBtn.textContent = originalText;
+                compileBtn.disabled = false;
+                console.log('🔧 EXCEPTION: Button reset completed');
+            } else {
+                console.log('🔧 EXCEPTION: Button reset FAILED - missing compileBtn or originalText');
+            }
         } finally {
-            // Khôi phục nút
-            compileBtn.textContent = originalText;
-            compileBtn.disabled = false;
+            // Khôi phục nút (backup reset) - với safety check
+            console.log('🔧 FINALLY: Resetting button to:', originalText);
+            console.log('🔧 FINALLY: compileBtn exists:', !!compileBtn);
+            console.log('🔧 FINALLY: originalText exists:', !!originalText);
+            console.log('🔧 FINALLY: Global debugOriginalText:', window.debugOriginalText);
+            if (compileBtn && originalText) {
+                compileBtn.textContent = originalText;
+                compileBtn.disabled = false;
+                console.log('🔧 FINALLY: Button reset completed');
+            } else {
+                console.log('🔧 FINALLY: Button reset FAILED - missing compileBtn or originalText');
+                // Fallback: thử dùng global debugOriginalText hoặc text cố định
+                if (compileBtn && window.debugOriginalText) {
+                    console.log('🔧 FINALLY: Trying fallback with global debugOriginalText');
+                    compileBtn.textContent = window.debugOriginalText;
+                    compileBtn.disabled = false;
+                } else if (compileBtn) {
+                    console.log('🔧 FINALLY: Trying fallback with fixed text');
+                    compileBtn.textContent = 'Biên dịch';
+                    compileBtn.disabled = false;
+                }
+            }
             console.log('AJAX submit completed'); // Debug
         }
         return false;
@@ -897,39 +997,141 @@
 
         // 5) Event listeners, polling, cleanup đã được xử lý trong file_card.js
 
-        // 6) Smooth scroll hint + touch scroll – run after full load to avoid early layout thrash
+        // 6) Enhanced mobile scroll hint + touch scroll UX
         function setupHorizontalScrollUX() {
             const mobileHint = document.getElementById('mobile-scroll-hint');
             const scrollHost = document.querySelector('.table-scroll-x');
+            let hintTimeout = null;
+            let fadeTimeout = null;
+            let hideTimeout = null;
+            let hasUserInteracted = false;
+            
             function showMobileScrollHint() {
                 if (!mobileHint || !scrollHost) return;
+                
+                // Clear any existing timeouts
+                if (hintTimeout) clearTimeout(hintTimeout);
+                if (fadeTimeout) clearTimeout(fadeTimeout);
+                if (hideTimeout) clearTimeout(hideTimeout);
+                
                 const isMobile = window.innerWidth <= 768;
                 const hasScroll = scrollHost.scrollWidth > scrollHost.clientWidth;
-                if (isMobile && hasScroll) {
+                
+                if (isMobile && hasScroll && !hasUserInteracted) {
+                    // Show hint with smooth animation
+                    mobileHint.className = 'showing';
                     mobileHint.style.display = 'block';
-                    setTimeout(() => { mobileHint.style.opacity = '0.7'; }, 3000);
-                    setTimeout(() => { mobileHint.style.display = 'none'; }, 8000);
+                    
+                    // Start fade after 5 seconds (increased from 3)
+                    fadeTimeout = setTimeout(() => {
+                        if (mobileHint.classList.contains('showing')) {
+                            mobileHint.className = 'fading';
+                        }
+                    }, 5000);
+                    
+                    // Hide after 12 seconds (increased from 8)
+                    hideTimeout = setTimeout(() => {
+                        if (mobileHint.classList.contains('fading')) {
+                            mobileHint.className = 'hidden';
+                            setTimeout(() => {
+                                mobileHint.style.display = 'none';
+                            }, 300);
+                        }
+                    }, 12000);
                 } else {
+                    mobileHint.className = 'hidden';
                     mobileHint.style.display = 'none';
                 }
             }
-            showMobileScrollHint();
-            window.addEventListener('resize', showMobileScrollHint);
+            
+            // Add click handler to dismiss hint
+            if (mobileHint) {
+                // Handle dismiss button click
+                const dismissBtn = mobileHint.querySelector('.hint-dismiss');
+                if (dismissBtn) {
+                    dismissBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        hasUserInteracted = true;
+                        mobileHint.className = 'hidden';
+                        setTimeout(() => {
+                            mobileHint.style.display = 'none';
+                        }, 300);
+                    });
+                }
+                
+                // Handle hint container click (alternative dismiss)
+                mobileHint.addEventListener('click', function(e) {
+                    // Only dismiss if not clicking the dismiss button
+                    if (!e.target.classList.contains('hint-dismiss')) {
+                        hasUserInteracted = true;
+                        this.className = 'hidden';
+                        setTimeout(() => {
+                            this.style.display = 'none';
+                        }, 300);
+                    }
+                });
+                
+                // Add hover effect for better UX
+                mobileHint.addEventListener('mouseenter', function() {
+                    if (this.classList.contains('showing') || this.classList.contains('fading')) {
+                        this.style.transform = 'translateY(-2px) scale(1.02)';
+                        this.style.boxShadow = 'var(--shadow-md)';
+                    }
+                });
+                
+                mobileHint.addEventListener('mouseleave', function() {
+                    if (this.classList.contains('showing') || this.classList.contains('fading')) {
+                        this.style.transform = 'translateY(0) scale(1)';
+                        this.style.boxShadow = 'var(--shadow-sm)';
+                    }
+                });
+            }
+            
+            // Track user scroll interaction
             if (scrollHost) {
                 let isScrolling = false, startX = 0, scrollLeft = 0;
+                
                 scrollHost.addEventListener('touchstart', function(e) {
                     isScrolling = true;
                     startX = e.touches[0].pageX - scrollHost.offsetLeft;
                     scrollLeft = scrollHost.scrollLeft;
+                    
+                    // Hide hint when user starts scrolling
+                    if (mobileHint && mobileHint.classList.contains('showing')) {
+                        hasUserInteracted = true;
+                        mobileHint.className = 'hidden';
+                        setTimeout(() => {
+                            mobileHint.style.display = 'none';
+                        }, 300);
+                    }
                 }, { passive: true });
+                
                 scrollHost.addEventListener('touchmove', function(e) {
                     if (!isScrolling) return;
                     const x = e.touches[0].pageX - scrollHost.offsetLeft;
                     const walk = (x - startX) * 2;
                     scrollHost.scrollLeft = scrollLeft - walk;
                 }, { passive: true });
-                scrollHost.addEventListener('touchend', function() { isScrolling = false; }, { passive: true });
+                
+                scrollHost.addEventListener('touchend', function() { 
+                    isScrolling = false; 
+                }, { passive: true });
+                
+                // Also hide hint on scroll wheel
+                scrollHost.addEventListener('wheel', function() {
+                    if (mobileHint && mobileHint.classList.contains('showing')) {
+                        hasUserInteracted = true;
+                        mobileHint.className = 'hidden';
+                        setTimeout(() => {
+                            mobileHint.style.display = 'none';
+                        }, 300);
+                    }
+                }, { passive: true });
             }
+            
+            // Initial show and resize handler
+            showMobileScrollHint();
+            window.addEventListener('resize', showMobileScrollHint);
         }
 
         // Defer heavy layout work until all stylesheets/fonts are loaded

@@ -57,15 +57,36 @@ function initializeMobileMenu() {
 
 // ===== LOGOUT FUNCTIONALITY =====
 
-// Initialize logout link handler
+// Initialize logout button handler
 function initializeLogoutHandler() {
+    // Handle desktop logout button
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.location.href = '/logout?next=/';
+        });
+        console.log('🔄 Desktop logout button handler initialized');
+    }
+    
+    // Handle mobile logout button
+    const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
+    if (mobileLogoutBtn) {
+        mobileLogoutBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.location.href = '/logout?next=/';
+        });
+        console.log('🔄 Mobile logout button handler initialized');
+    }
+    
+    // Handle legacy logout link (for backward compatibility)
     const logoutLink = document.getElementById('logout-link');
     if (logoutLink) {
         logoutLink.addEventListener('click', function(e) {
             e.preventDefault();
             window.location.href = '/logout?next=/';
         });
-        console.log('🔄 Logout handler initialized');
+        console.log('🔄 Legacy logout link handler initialized');
     }
 }
 

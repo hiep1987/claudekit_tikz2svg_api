@@ -1,4 +1,4 @@
-<nav class="container bg-white/80 backdrop-blur nv-shadow rounded-2xl p-3 flex items-center justify-between mb-8">
+<nav class="container bg-white/80 backdrop-blur nv-shadow rounded-2xl p-3 flex items-center justify-between mb-8 border border-white/20 hover:shadow-xl transition-all duration-300">
     <!-- Logo -->
     <div class="flex items-center gap-2 flex-shrink-0">
         <a href="/" class="flex items-center gap-2 hover:opacity-80 transition-opacity" style="text-decoration: none;">
@@ -56,10 +56,10 @@
                         {% endif %}
                     </span>
                 </div>
-                <button id="logout-btn" class="hidden md:block bg-gradient-to-r from-red-400 to-red-600 text-white px-3 py-1.5 rounded-xl shadow hover:scale-105 transition font-semibold text-xs border-0">Đăng xuất</button>
+                <button id="logout-btn" class="hidden md:block bg-gradient-to-r from-red-400 to-red-600 text-white px-3 py-1.5 rounded-xl shadow hover:scale-105 transition-all duration-200 font-semibold text-xs border-0 hover:from-red-500 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-opacity-50">Đăng xuất</button>
             </div>
         {% else %}
-            <button class="hidden md:block bg-gradient-to-r from-blue-400 to-yellow-400 text-white px-3 py-1.5 rounded-xl shadow hover:scale-105 transition font-semibold text-sm" onclick="window.location.href='/login/google'">Đăng nhập</button>
+            <button class="hidden md:block bg-gradient-to-r from-blue-400 to-yellow-400 text-white px-3 py-1.5 rounded-xl shadow hover:scale-105 transition-all duration-200 font-semibold text-sm border-0 hover:from-blue-500 hover:to-yellow-500 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50" onclick="window.location.href='/login/google'">Đăng nhập</button>
         {% endif %}
         <!-- Hamburger (mobile) -->
         <button id="menu-toggle" class="md:hidden p-1.5 rounded-lg hover:bg-blue-100 transition">
@@ -104,7 +104,7 @@
         <a href="/profile/{{ current_user.id }}/settings" class="py-2 px-3 rounded-lg text-gray-700 font-medium hover:bg-blue-100 transition">Hồ sơ</a>
         <a href="/profile/{{ current_user.id }}/svg-files" class="py-2 px-3 rounded-lg text-gray-700 font-medium hover:bg-blue-100 transition">File SVG</a>
         <a href="/profile/{{ current_user.id }}/followed-posts" class="py-2 px-3 rounded-lg text-gray-700 font-medium hover:bg-blue-100 transition">Bài đăng</a>
-        <button id="mobile-logout-btn" class="logout-btn bg-gradient-to-r from-red-400 to-red-600 text-white px-4 py-2 rounded-xl shadow font-semibold mt-2 text-center border-0 w-full">Đăng xuất</button>
+        <button id="mobile-logout-btn" class="logout-btn bg-gradient-to-r from-red-400 to-red-600 text-white px-4 py-2 rounded-xl shadow font-semibold mt-2 text-center border-0 w-full hover:from-red-500 hover:to-red-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-opacity-50">Đăng xuất</button>
         {% else %}
         <button class="login-btn bg-gradient-to-r from-blue-600 to-blue-800 text-white px-4 py-2 rounded-xl shadow-lg font-semibold mt-8 hover:from-blue-700 hover:to-blue-900 transition-all duration-200" onclick="window.location.href='/login/google'">Đăng nhập</button>
         {% endif %}

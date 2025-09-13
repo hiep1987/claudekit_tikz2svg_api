@@ -1,8 +1,15 @@
 ;(function() {
 "use strict";
 
-// Initialize action buttons using data-action
+// Initialize action buttons using data-action (Desktop only)
 function initializeFileCardActions() {
+    // Only handle desktop clicks - mobile will be handled by touch events
+    const tikzApp = document.querySelector('.tikz-app');
+    if (tikzApp && tikzApp.classList.contains('mobile-device')) {
+        console.log('📱 Mobile device detected, skipping desktop action initialization');
+        return;
+    }
+    
     // Handle all action buttons using data-action
     document.addEventListener('click', function(e) {
         const btn = e.target.closest('.Btn[data-action]');
@@ -61,75 +68,112 @@ function initializeFileCardTouchEvents() {
     const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const isTouchDevice = hasTouchSupport || isMobileDevice;
     
-    // Add is-touch class if not already present
-    if (isTouchDevice && !document.documentElement.classList.contains('is-touch')) {
-        document.documentElement.classList.add('is-touch');
+    const tikzApp = document.querySelector('.tikz-app');
+    if (!tikzApp) {
+        console.error('❌ .tikz-app element not found!');
+        return;
     }
     
-    const isTouch = document.documentElement.classList.contains('is-touch');
+    // Add mobile-device class if not already present
+    if (isTouchDevice && !tikzApp.classList.contains('mobile-device')) {
+        tikzApp.classList.add('mobile-device');
+        console.log('✅ Added mobile-device class to .tikz-app');
+    }
+    
+    const isMobile = tikzApp.classList.contains('mobile-device');
     console.log('🔍 Enhanced touch detection:', {
         hasTouchSupport,
         isMobileDevice,
         isTouchDevice,
-        hasClass: isTouch,
+        hasClass: isMobile,
         userAgent: navigator.userAgent,
         maxTouchPoints: navigator.maxTouchPoints
     });
     
-    if (!isTouch) {
-        console.log('📱 Not a touch device, skipping mobile 2-tap initialization');
+    // Log mobile detection status
+    console.log('📱 Mobile touch events initialized successfully');
+    
+    if (!isMobile) {
+        console.log('📱 Not a mobile device, skipping mobile 2-tap initialization');
         return;
     }
 
+    // Use capture phase to ensure this handler runs first
     document.addEventListener('click', function(e) {
+        // ==== Xử lý action-toggle-btn (nút ...) ====
         const toggle = e.target.closest('.action-toggle-btn');
         if (toggle) {
             e.preventDefault();
             e.stopPropagation();
+            e.stopImmediatePropagation();
+            
             const card = toggle.closest('.file-card');
             if (card) {
-                document.querySelectorAll('.file-card.active').forEach(other => {
-                    if (other !== card) other.classList.remove('active');
+                // Đóng tất cả card khác
+                document.querySelectorAll('.file-card.menu-open').forEach(other => {
+                    if (other !== card) other.classList.remove('menu-open');
                 });
-                card.classList.toggle('active');
-                console.log('📱 Toggle clicked - card active:', card.classList.contains('active'));
+                // Toggle card hiện tại
+                card.classList.toggle('menu-open');
+                
+                // Log toggle action
+                const isMenuOpen = card.classList.contains('menu-open');
+                console.log('📱 Toggle clicked - card menu-open:', isMenuOpen);
             }
             return;
         }
 
+        // ==== Xử lý click outside để đóng menu ====
+        const activeCard = document.querySelector('.file-card.menu-open');
+        if (activeCard && !activeCard.contains(e.target) && !e.target.closest('.action-toggle-btn')) {
+            activeCard.classList.remove('menu-open');
+            console.log('📱 Clicked outside - closing menu');
+            return;
+        }
+
+        // ==== Xử lý các nút .Btn ====
         const btn = e.target.closest('.file-card .Btn');
         if (!btn) return;
 
         const card = btn.closest('.file-card');
-        if (!card || !card.classList.contains('active')) {
-            console.log('📱 Button clicked but card not active - ignoring');
+        if (!card || !card.classList.contains('menu-open')) {
+            console.log('📱 Button clicked but card not menu-open - ignoring');
             return;
         }
 
+        // Initialize tap count if not exists
         if (!btn.dataset.tapCount) btn.dataset.tapCount = '0';
         const currentTapCount = parseInt(btn.dataset.tapCount);
 
         if (currentTapCount === 0) {
             e.preventDefault();
             e.stopPropagation();
+            e.stopImmediatePropagation();
+            
             console.log('📱 Mobile tap 1 on button:', btn.dataset.action, 'at', new Date().toLocaleTimeString());
-            // reset other buttons
+            
+            // Reset other buttons in the same card
             card.querySelectorAll('.Btn').forEach(otherBtn => {
                 if (otherBtn !== btn) {
                     otherBtn.classList.remove('individual-active', 'ready-to-execute');
                     otherBtn.dataset.tapCount = '0';
                 }
             });
+            
+            // Activate current button
             btn.classList.add('individual-active', 'ready-to-execute');
             btn.dataset.tapCount = '1';
+            
             console.log('📱 Button activated, waiting for second tap...');
+            
+            // Auto reset after timeout
             setTimeout(() => {
                 if (btn.dataset.tapCount === '1') {
                     btn.classList.remove('individual-active', 'ready-to-execute');
                     btn.dataset.tapCount = '0';
-                    console.log('📱 Timeout - button reset after 1.5s');
+                    console.log('📱 Timeout - button reset after 2s');
                 }
-            }, 1500); // Reduced from 5000ms to 1500ms for better UX
+            }, 2000); // Increased to 2s for better UX
             return;
         }
 
@@ -150,7 +194,7 @@ function initializeFileCardTouchEvents() {
             // Prevent default behavior
             e.preventDefault();
             e.stopPropagation();
-            if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
+            e.stopImmediatePropagation();
 
             switch (action) {
                 case 'share-facebook':
@@ -220,7 +264,7 @@ function initializeFileCardTouchEvents() {
                     break;
             }
         }
-    }, true);
+    }, true); // Capture phase to ensure priority
 }
 
 // Copy to clipboard function

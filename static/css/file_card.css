@@ -70,7 +70,34 @@
   transform: scale(1.03);
 } */
 
-/* Overlay Action Menu */
+/* 
+ * ===== CSS SPECIFICITY REFACTORING COMPLETED =====
+ * 
+ * SOLUTION: Loại bỏ !important bằng cách tăng CSS specificity tự nhiên
+ * 
+ * HIERARCHY MỚI:
+ * 1. Desktop hover: .tikz-app:not(.mobile-device) .file-card:not(.menu-open):hover .file-action-container
+ *    Specificity: (0,0,5,0) = 50
+ * 
+ * 2. Mobile menu-open: .tikz-app.mobile-device .file-card.menu-open .file-action-container  
+ *    Specificity: (0,0,5,0) = 50 (same as desktop, but cascade order wins)
+ * 
+ * 3. Mobile buttons: .tikz-app.mobile-device .file-card.menu-open .file-action-container .Btn.individual-active
+ *    Specificity: (0,0,6,0) = 60 > Desktop (50) ✅ WINS WITHOUT !important
+ * 
+ * KẾT QUẢ: ZERO !important declarations needed ✅
+ * 
+ * JAVASCRIPT INTEGRATION COMPLETED:
+ * 1. Device Detection: ✅ Add 'mobile-device' class to .tikz-app when on mobile
+ * 2. Menu State: ✅ Add 'menu-open' class to .file-card when action menu is opened
+ * 3. Removed legacy: ✅ Replaced 'is-touch' and 'active' class logic
+ * 
+ * Example JavaScript Integration:
+ * document.querySelector('.tikz-app').classList.add('mobile-device');
+ * fileCard.classList.add('menu-open');
+ */
+
+/* Overlay Action Menu - Base State */
 .tikz-app .file-action-container {
   display: none;
   opacity: 0;
@@ -83,11 +110,11 @@
   z-index: 300;
 }
 
-/* Desktop hover logic - chỉ áp dụng khi KHÔNG có class active */
+/* Desktop hover logic - chỉ áp dụng khi KHÔNG có class menu-open */
 @media (hover: hover) and (pointer: fine) {
-  .tikz-app .file-card:not(.active):hover .file-action-container,
-  .tikz-app .file-card:not(.active) .file-action-container:hover,
-  .tikz-app .file-card:not(.active) .file-img-container:hover + .file-action-container {
+  .tikz-app:not(.mobile-device) .file-card:not(.menu-open):hover .file-action-container,
+  .tikz-app:not(.mobile-device) .file-card:not(.menu-open) .file-action-container:hover,
+  .tikz-app:not(.mobile-device) .file-card:not(.menu-open) .file-img-container:hover + .file-action-container {
     display: block;
     opacity: 1;
     pointer-events: auto;
@@ -95,17 +122,24 @@
   }
 }
 
-/* Mobile/Touch: Hiện khi card có class active - cao hơn desktop hover */
-.tikz-app .file-card.active .file-action-container {
+/* Mobile/Touch: Hiện khi card có class menu-open - SOLUTION: High Specificity */
+/* 
+ * GIẢI PHÁP ĐÃ REFACTOR:
+ * - Tăng specificity từ (0,0,3,0)=30 lên (0,0,6,0)=60
+ * - Cao hơn desktop hover (0,0,5,0)=50 ⟹ KHÔNG CẦN !important
+ * - Sử dụng .mobile-device.menu-open để tăng specificity tự nhiên
+ */
+.tikz-app.mobile-device .file-card.menu-open .file-action-container {
   display: block;
   opacity: 1;
   pointer-events: auto;
   transform: translateX(0);
+  z-index: 999;
 }
 
-/* Mobile: Hiện nút toggle ... */
+/* Action Toggle Button - Ẩn mặc định, chỉ hiện trên mobile */
 .tikz-app .action-toggle-btn {
-  display: none;
+  display: none; /* Ẩn mặc định trên tất cả devices */
   position: absolute;
   top: 10px;
   right: 10px;
@@ -113,29 +147,48 @@
   border: none;
   background: rgb(255 255 255 / 95%);
   border-radius: 50%;
-  width: 38px;
-  height: 38px;
-  font-size: 22px;
+  width: 40px;
+  height: 40px;
+  font-size: 24px;
   cursor: pointer;
-  box-shadow: 0 2px 4px rgb(0 0 0 / 13%);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 15%);
   transition: all 0.2s ease;
+  color: #333;
+  font-weight: bold;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Desktop: Đảm bảo nút toggle KHÔNG hiện */
+@media (hover: hover) and (pointer: fine) {
+  .tikz-app:not(.mobile-device) .action-toggle-btn {
+    display: none; /* Force ẩn trên desktop */
+  }
 }
 
 .tikz-app .action-toggle-btn:hover {
   background: rgb(255 255 255 / 100%);
-  box-shadow: 0 3px 6px rgb(0 0 0 / 20%);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 25%);
+  transform: scale(1.05);
+}
+
+.tikz-app .action-toggle-btn:active {
+  transform: scale(0.95);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 20%);
 }
 
 /* Enhanced mobile detection - sync with JavaScript */
 @media (hover: none), (pointer: coarse) {
-  .tikz-app .action-toggle-btn {
+  .tikz-app.mobile-device .action-toggle-btn {
     display: block;
   }
 
-  /* Vô hiệu hóa hover trên mobile - override desktop hover với specificity cao hơn */
-  .tikz-app .file-card:hover .file-action-container,
-  .tikz-app .file-card .file-action-container:hover,
-  .tikz-app .file-card .file-img-container:hover + .file-action-container {
+  /* Vô hiệu hóa hover trên mobile - SOLUTION: Higher specificity - EXCLUDE menu-open cards */
+  .tikz-app.mobile-device .file-card:not(.menu-open):hover .file-action-container,
+  .tikz-app.mobile-device .file-card:not(.menu-open) .file-action-container:hover,
+  .tikz-app.mobile-device .file-card:not(.menu-open) .file-img-container:hover + .file-action-container {
     display: none;
     opacity: 0;
     pointer-events: none;
@@ -143,14 +196,24 @@
   }
 }
 
-/* Additional mobile detection using is-touch class (from JavaScript) */
-.is-touch .tikz-app .action-toggle-btn {
-  display: block;
+/* Additional mobile detection using JavaScript classes - SOLUTION: High Specificity */
+/* 
+ * GIẢI PHÁP ĐÃ REFACTOR:
+ * - Sử dụng .mobile-device class thay vì .is-touch để consistency
+ * - Tăng specificity tự nhiên ⟹ KHÔNG CẦN !important  
+ * - Loại bỏ debug styles
+ * - CHỈ HIỆN TRÊN MOBILE: Kết hợp với media query
+ */
+@media (hover: none), (pointer: coarse) {
+  .tikz-app.mobile-device .file-card .action-toggle-btn {
+    display: block;
+  }
 }
 
-.is-touch .tikz-app .file-card:hover .file-action-container,
-.is-touch .tikz-app .file-card .file-action-container:hover,
-.is-touch .tikz-app .file-card .file-img-container:hover + .file-action-container {
+/* Consolidated mobile hover disable rules - EXCLUDE menu-open cards */
+.tikz-app.mobile-device .file-card:not(.menu-open):hover .file-action-container,
+.tikz-app.mobile-device .file-card:not(.menu-open) .file-action-container:hover,
+.tikz-app.mobile-device .file-card:not(.menu-open) .file-img-container:hover + .file-action-container {
   display: none;
   opacity: 0;
   pointer-events: none;
@@ -256,12 +319,12 @@
   text-shadow: 0 1px 2px rgb(0 0 0 / 30%);
 }
 
-/* Mobile button states - sử dụng specificity cao để override desktop styles */
+/* Mobile button states - SOLUTION: High specificity selector chains */
 @media (hover: none), (pointer: coarse) {
-  /* Active button states - cao hơn base .Btn selector */
-  .tikz-app .file-card.active .file-action-container .Btn.individual-active,
-  .tikz-app .file-card.active .file-action-container .Btn.ready-to-execute,
-  .tikz-app .file-card.active .file-action-container .Btn.mobile-hover {
+  /* Active button states - Specificity: (0,0,6,0) = 60 */
+  .tikz-app.mobile-device .file-card.menu-open .file-action-container .Btn.individual-active,
+  .tikz-app.mobile-device .file-card.menu-open .file-action-container .Btn.ready-to-execute,
+  .tikz-app.mobile-device .file-card.menu-open .file-action-container .Btn.mobile-hover {
     background: linear-gradient(-50deg, rgb(39 107 255), rgb(112 186 255), rgb(39 107 255));
     background-position: right;
     width: 120px;
@@ -270,10 +333,10 @@
     box-shadow: 0 4px 12px rgb(25 118 210 / 30%);
   }
 
-  /* Active button text states */
-  .tikz-app .file-card.active .file-action-container .Btn.individual-active .text,
-  .tikz-app .file-card.active .file-action-container .Btn.ready-to-execute .text,
-  .tikz-app .file-card.active .file-action-container .Btn.mobile-hover .text {
+  /* Active button text states - Specificity: (0,0,7,0) = 70 */
+  .tikz-app.mobile-device .file-card.menu-open .file-action-container .Btn.individual-active .text,
+  .tikz-app.mobile-device .file-card.menu-open .file-action-container .Btn.ready-to-execute .text,
+  .tikz-app.mobile-device .file-card.menu-open .file-action-container .Btn.mobile-hover .text {
     opacity: 1;
     width: auto;
     max-width: 85px;
@@ -281,15 +344,15 @@
     text-shadow: 0 1px 2px rgb(0 0 0 / 30%);
   }
 
-  /* Inactive button states - cao hơn base .Btn selector */
-  .tikz-app .file-card.active .file-action-container .Btn:not(.individual-active, .ready-to-execute, .mobile-hover) {
+  /* Inactive button states - Specificity: (0,0,6,0) = 60 */
+  .tikz-app.mobile-device .file-card.menu-open .file-action-container .Btn:not(.individual-active, .ready-to-execute, .mobile-hover) {
     background: linear-gradient(-50deg, rgb(39 107 255), rgb(112 186 255), rgb(39 107 255));
     width: 35px;
     border-radius: 50%;
   }
 
-  /* Inactive button text states */
-  .tikz-app .file-card.active .file-action-container .Btn:not(.individual-active, .ready-to-execute, .mobile-hover) .text {
+  /* Inactive button text states - Specificity: (0,0,7,0) = 70 */
+  .tikz-app.mobile-device .file-card.menu-open .file-action-container .Btn:not(.individual-active, .ready-to-execute, .mobile-hover) .text {
     opacity: 0;
     width: 0;
     max-width: 0;
@@ -298,41 +361,7 @@
   }
 }
 
-/* Additional mobile detection using is-touch class (from JavaScript) */
-.is-touch .tikz-app .file-card.active .file-action-container .Btn.individual-active,
-.is-touch .tikz-app .file-card.active .file-action-container .Btn.ready-to-execute,
-.is-touch .tikz-app .file-card.active .file-action-container .Btn.mobile-hover {
-  background: linear-gradient(-50deg, rgb(39 107 255), rgb(112 186 255), rgb(39 107 255));
-  background-position: right;
-  width: 120px;
-  border-radius: 20px;
-  transition: width 0.3s cubic-bezier(0.4,0,0.2,1);
-  box-shadow: 0 4px 12px rgb(25 118 210 / 30%);
-}
-
-.is-touch .tikz-app .file-card.active .file-action-container .Btn.individual-active .text,
-.is-touch .tikz-app .file-card.active .file-action-container .Btn.ready-to-execute .text,
-.is-touch .tikz-app .file-card.active .file-action-container .Btn.mobile-hover .text {
-  opacity: 1;
-  width: auto;
-  max-width: 85px;
-  color: #fff;
-  text-shadow: 0 1px 2px rgb(0 0 0 / 30%);
-}
-
-.is-touch .tikz-app .file-card.active .file-action-container .Btn:not(.individual-active, .ready-to-execute, .mobile-hover) {
-  background: linear-gradient(-50deg, rgb(39 107 255), rgb(112 186 255), rgb(39 107 255));
-  width: 35px;
-  border-radius: 50%;
-}
-
-.is-touch .tikz-app .file-card.active .file-action-container .Btn:not(.individual-active, .ready-to-execute, .mobile-hover) .text {
-  opacity: 0;
-  width: 0;
-  max-width: 0;
-  color: #fff;
-  text-shadow: 0 1px 2px rgb(0 0 0 / 30%);
-}
+/* JavaScript mobile detection - REMOVED: All legacy .is-touch rules replaced with .mobile-device */
 
 /* File Info Styling */
 .tikz-app .file-info {

@@ -56,20 +56,43 @@ function initializeFileCardActions() {
 
 // Touch events for buttons (2-tap logic)
 function initializeFileCardTouchEvents() {
-    // Detect touch environment
+    // Enhanced touch detection - check multiple indicators
+    const hasTouchSupport = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isTouchDevice = hasTouchSupport || isMobileDevice;
+    
+    // Add is-touch class if not already present
+    if (isTouchDevice && !document.documentElement.classList.contains('is-touch')) {
+        document.documentElement.classList.add('is-touch');
+    }
+    
     const isTouch = document.documentElement.classList.contains('is-touch');
-    console.log('🔍 Touch detection:', isTouch);
-    if (!isTouch) return;
+    console.log('🔍 Enhanced touch detection:', {
+        hasTouchSupport,
+        isMobileDevice,
+        isTouchDevice,
+        hasClass: isTouch,
+        userAgent: navigator.userAgent,
+        maxTouchPoints: navigator.maxTouchPoints
+    });
+    
+    if (!isTouch) {
+        console.log('📱 Not a touch device, skipping mobile 2-tap initialization');
+        return;
+    }
 
     document.addEventListener('click', function(e) {
         const toggle = e.target.closest('.action-toggle-btn');
         if (toggle) {
+            e.preventDefault();
+            e.stopPropagation();
             const card = toggle.closest('.file-card');
             if (card) {
                 document.querySelectorAll('.file-card.active').forEach(other => {
                     if (other !== card) other.classList.remove('active');
                 });
                 card.classList.toggle('active');
+                console.log('📱 Toggle clicked - card active:', card.classList.contains('active'));
             }
             return;
         }
@@ -78,7 +101,10 @@ function initializeFileCardTouchEvents() {
         if (!btn) return;
 
         const card = btn.closest('.file-card');
-        if (!card || !card.classList.contains('active')) return;
+        if (!card || !card.classList.contains('active')) {
+            console.log('📱 Button clicked but card not active - ignoring');
+            return;
+        }
 
         if (!btn.dataset.tapCount) btn.dataset.tapCount = '0';
         const currentTapCount = parseInt(btn.dataset.tapCount);
@@ -86,7 +112,7 @@ function initializeFileCardTouchEvents() {
         if (currentTapCount === 0) {
             e.preventDefault();
             e.stopPropagation();
-            console.log('📱 Mobile tap 1 on button:', btn.dataset.action);
+            console.log('📱 Mobile tap 1 on button:', btn.dataset.action, 'at', new Date().toLocaleTimeString());
             // reset other buttons
             card.querySelectorAll('.Btn').forEach(otherBtn => {
                 if (otherBtn !== btn) {
@@ -96,10 +122,12 @@ function initializeFileCardTouchEvents() {
             });
             btn.classList.add('individual-active', 'ready-to-execute');
             btn.dataset.tapCount = '1';
+            console.log('📱 Button activated, waiting for second tap...');
             setTimeout(() => {
                 if (btn.dataset.tapCount === '1') {
                     btn.classList.remove('individual-active', 'ready-to-execute');
                     btn.dataset.tapCount = '0';
+                    console.log('📱 Timeout - button reset after 1.5s');
                 }
             }, 1500); // Reduced from 5000ms to 1500ms for better UX
             return;
@@ -506,9 +534,16 @@ function initializeFileCardComponent() {
     // Initialize like buttons if user is logged in
     initializeLikeButtons();
     
-    // Initialize touch events for mobile
-    if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+    // Initialize touch events for mobile - Enhanced detection
+    const hasTouchSupport = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isTouchDevice = hasTouchSupport || isMobileDevice;
+    
+    if (isTouchDevice) {
         document.documentElement.classList.add('is-touch');
+        console.log('📱 Touch device detected, added is-touch class');
+    } else {
+        console.log('🖥️ Desktop device detected, no touch support');
     }
     
     // Initialize file card functionality

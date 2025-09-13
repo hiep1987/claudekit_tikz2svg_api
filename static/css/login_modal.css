@@ -14,14 +14,20 @@
 
 .tikz-app .login-modal-box {
   background: white;
-  padding: 32px 40px;
+  padding: 12px;
   border-radius: 12px;
   box-shadow: 0 2px 16px rgb(0 0 0 / 15%);
   min-width: 320px;
   text-align: center;
 }
 
-.tikz-app #login-modal h3 { margin-bottom: 24px; }
+.tikz-app #login-modal h3 {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-snug);
+  margin: 0 0 var(--spacing-8) 0;
+  color: #1a1a1a;
+}
 .tikz-app #login-modal p { 
   margin-bottom: 16px; 
   color: #666; 
@@ -48,7 +54,47 @@
   flex-wrap: wrap;
 }
 
-.tikz-app #modal-login-btn { margin: 0; }
+/* Google Login Button Styles */
+.tikz-app .google-login-btn {
+  max-width: 320px;
+  display: flex;
+  padding: var(--spacing-3) var(--spacing-8);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-tight);
+  font-weight: var(--font-weight-bold);
+  text-align: center;
+  text-transform: uppercase;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  gap: var(--spacing-4);
+  color: var(--text-muted);
+  background-color: var(--bg-primary);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  min-height: 40px;
+  margin: 0;
+}
+
+.tikz-app .google-login-btn svg {
+  height: var(--icon-md);
+  flex-shrink: 0;
+}
+
+.tikz-app .google-login-btn:hover {
+  transform: scale(1.02);
+  background-color: var(--primary-color);
+  color: var(--text-white);
+}
+
+.tikz-app .google-login-content {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-6);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+}
 
 .tikz-app .btn-cancel {
   background: #eee;

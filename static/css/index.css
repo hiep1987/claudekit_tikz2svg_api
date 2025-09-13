@@ -664,46 +664,7 @@
     border-bottom: none;
 }
 
-/* Google Login Button */
-.tikz-app .google-login-btn {
-    max-width: 320px;
-    display: flex;
-    padding: var(--spacing-3) var(--spacing-8);
-    font-size: var(--font-size-sm);
-    line-height: var(--line-height-tight);
-    font-weight: var(--font-weight-bold);
-    text-align: center;
-    text-transform: uppercase;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-color);
-    gap: var(--spacing-4);
-    color: var(--text-muted);
-    background-color: var(--bg-primary);
-    cursor: pointer;
-    transition: all var(--transition-normal);
-    min-height: 40px;
-}
-
-.tikz-app .google-login-btn svg {
-    height: var(--icon-md);
-    flex-shrink: 0;
-}
-
-.tikz-app .google-login-btn:hover {
-    transform: scale(1.02);
-    background-color: var(--primary-color);
-    color: var(--text-white);
-}
-
-.tikz-app .google-login-content {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-6);
-    font-weight: var(--font-weight-medium);
-    font-size: var(--font-size-sm);
-}
+/* Google Login Button styles moved to login_modal.css to avoid duplication */
 
 .tikz-app #logout-btn {
     background: var(--danger-color);
@@ -1076,70 +1037,7 @@
 
 /* Footer styling now handled by foundation/global-base.css */
 
-/* Login modal overlay */
-.tikz-app #login-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: var(--modal-overlay);
-    z-index: var(--z-modal);
-    align-items: center;
-    justify-content: center;
-}
-
-/* Login modal content box */
-.tikz-app .login-modal-box {
-    background: var(--bg-primary);
-    padding: var(--spacing-16) var(--spacing-20);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-xl);
-    min-width: 320px;
-    text-align: center;
-}
-
-/* Login modal text spacings */
-.tikz-app #login-modal h3 { margin-bottom: var(--spacing-12); }
-
-.tikz-app #login-modal p { 
-    margin-bottom: var(--spacing-8); 
-    color: var(--text-secondary); 
-}
-
-.tikz-app #login-modal ul {
-    margin-bottom: var(--spacing-12);
-    color: var(--text-secondary);
-    text-align: left;
-    display: inline-block;
-}
-
-.tikz-app #login-modal .login-note {
-    margin-bottom: var(--spacing-12);
-    color: var(--primary-color);
-    font-weight: var(--font-weight-medium);
-}
-
-.tikz-app .login-modal-actions {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: var(--spacing-6);
-    flex-wrap: wrap;
-}
-
-.tikz-app #modal-login-btn { margin: 0; }
-
-.tikz-app .btn-cancel {
-    background: var(--bg-muted);
-    color: var(--text-primary);
-    padding: var(--spacing-6) var(--spacing-12);
-    border-radius: var(--radius-md);
-    border: none;
-    font-weight: var(--font-weight-bold);
-    margin: 0;
-}
+/* Login modal styles moved to login_modal.css to avoid duplication */
 
 /* Keyword suggestions dropdown in modal */
 .tikz-app #keyword-suggestions {

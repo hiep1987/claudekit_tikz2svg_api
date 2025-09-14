@@ -73,17 +73,6 @@
     opacity: 0.5;
 }
 
-/* Mobile responsive adjustments - Using Shared Variables */
-@media (width <= 768px) {
-    .tikz-app .page-container.container {
-        padding: var(--container-padding-mobile-md);
-    }
-    
-    .tikz-app .followed-posts-section {
-        padding: var(--container-padding-mobile-md);
-    }
-}
-
 /* CodeMirror and TikZ code block styles are handled by file_card.css */
 
 /* Loading spinner styles */
@@ -120,6 +109,13 @@
     box-shadow: var(--container-shadow-medium);
     max-width: var(--container-max-width);
     margin: 0;
+}
+
+/* Mobile responsive adjustments - Using Shared Variables */
+@media (width <= 768px) {
+    .tikz-app .followed-posts-section {
+        padding: var(--container-padding-mobile-md);
+    }
 }
 
 .tikz-app .followed-posts-section h3 {

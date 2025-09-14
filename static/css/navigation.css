@@ -292,7 +292,6 @@
     -webkit-overflow-scrolling: touch;
     -ms-overflow-style: none;
     scrollbar-width: none;
-    padding-bottom: 0.75rem;
 }
 
 .tikz-app #scrollable-menu::-webkit-scrollbar {

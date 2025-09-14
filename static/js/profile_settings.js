@@ -32,19 +32,74 @@
       if (cropper) cropper.destroy();
       cropper = new Cropper(img, {
         aspectRatio: 1,
-        viewMode: 1,
+        viewMode: 0,
         dragMode: 'move',
         background: false,
-        guides: false,
-        autoCropArea: 1,
+        guides: true,
+        center: false,
+        autoCropArea: 0.8,
         movable: true,
         zoomable: true,
         rotatable: false,
         scalable: false,
-        cropBoxResizable: false,
-        cropBoxMovable: false,
-        minContainerWidth: 220,
-        minContainerHeight: 220,
+        cropBoxResizable: true,
+        cropBoxMovable: true,
+        minContainerWidth: 280,
+        minContainerHeight: 280,
+        minCropBoxWidth: 100,
+        minCropBoxHeight: 100,
+        maxCropBoxWidth: 280,
+        maxCropBoxHeight: 280,
+        checkCrossOrigin: false,
+        checkOrientation: false,
+        modal: false,
+        highlight: true,
+        background: true,
+        autoCrop: true,
+        responsive: true,
+        restore: false,
+        checkImageUrl: false,
+        ready: function() {
+          // Set initial crop box size to be smaller for better UX
+          const containerData = cropper.getContainerData();
+          const initialSize = Math.min(containerData.width, containerData.height) * 0.7;
+          cropper.setCropBoxData({
+            left: (containerData.width - initialSize) / 2,
+            top: (containerData.height - initialSize) / 2,
+            width: initialSize,
+            height: initialSize
+          });
+        },
+        cropmove: function(event) {
+          // Allow free movement and resizing
+          return true;
+        },
+        cropstart: function(event) {
+          // Allow all crop operations
+          return true;
+        },
+        cropend: function(event) {
+          // Ensure crop box stays within bounds with proper spacing
+          const cropBoxData = cropper.getCropBoxData();
+          const containerData = cropper.getContainerData();
+          const minSpacing = 10;
+          
+          // Check if crop box is too close to edges
+          if (cropBoxData.left < minSpacing || 
+              cropBoxData.top < minSpacing ||
+              cropBoxData.left + cropBoxData.width > containerData.width - minSpacing ||
+              cropBoxData.top + cropBoxData.height > containerData.height - minSpacing) {
+            
+            // Adjust crop box to stay within bounds
+            const newLeft = Math.max(minSpacing, Math.min(cropBoxData.left, containerData.width - cropBoxData.width - minSpacing));
+            const newTop = Math.max(minSpacing, Math.min(cropBoxData.top, containerData.height - cropBoxData.height - minSpacing));
+            
+            cropper.setCropBoxData({
+              left: newLeft,
+              top: newTop
+            });
+          }
+        }
       });
     };
     reader.readAsDataURL(file);
@@ -57,6 +112,27 @@
     selectedFile = null;
     const input = document.getElementById('avatar-input');
     if (input) input.value = '';
+  }
+
+  // Debug function to check cropper state
+  function debugCropperState() {
+    if (!cropper) {
+      console.log('❌ Cropper not initialized');
+      return;
+    }
+    
+    const containerData = cropper.getContainerData();
+    const cropBoxData = cropper.getCropBoxData();
+    const canvasData = cropper.getCanvasData();
+    
+    console.log('🔍 Cropper Debug Info:');
+    console.log('Container:', containerData);
+    console.log('CropBox:', cropBoxData);
+    console.log('Canvas:', canvasData);
+    console.log('Min crop size:', cropper.options.minCropBoxWidth, 'x', cropper.options.minCropBoxHeight);
+    console.log('Max crop size:', cropper.options.maxCropBoxWidth, 'x', cropper.options.maxCropBoxHeight);
+    console.log('CropBox resizable:', cropper.options.cropBoxResizable);
+    console.log('CropBox movable:', cropper.options.cropBoxMovable);
   }
 
   function handleCropAndAttach(){
@@ -193,6 +269,14 @@
 
     const cancelBtn = document.getElementById('cancel-verification-btn');
     if (cancelBtn) cancelBtn.addEventListener('click', handleCancelVerification);
+
+    // Add debug event listeners for cropper
+    document.addEventListener('keydown', function(e) {
+      // Press 'D' key to debug cropper state
+      if (e.key === 'd' || e.key === 'D') {
+        debugCropperState();
+      }
+    });
 
     // FIX: Sync Quill content before form submission
     const form = document.querySelector('form');

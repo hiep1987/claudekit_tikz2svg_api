@@ -874,96 +874,126 @@
         }
     }
 
-    // Search functionality
-    function initializeSearch() {
-        console.log('🔍 initializeSearch() called');
-        const searchInput = document.getElementById('main-search-input');
-        const suggestionsBox = document.getElementById('search-suggestions');
+// Search functionality
+function initializeSearch() {
+    console.log('🔍 initializeSearch() called');
+    const searchInput = document.getElementById('main-search-input');
+    const suggestionsBox = document.getElementById('search-suggestions');
+    const blurOverlay = document.getElementById('search-blur-overlay');
+    
+    console.log('🔍 searchInput:', searchInput);
+    console.log('🔍 suggestionsBox:', suggestionsBox);
+    console.log('🔍 blurOverlay:', blurOverlay);
+    
+    if (!searchInput || !suggestionsBox) {
+        console.log('❌ Missing searchInput or suggestionsBox');
+        return;
+    }
+    
+    // Helper function to toggle blur effect
+    function toggleSearchBlur(show) {
+        if (blurOverlay) {
+            if (show) {
+                blurOverlay.classList.add('active');
+            } else {
+                blurOverlay.classList.remove('active');
+            }
+        }
+    }
+    
+    // Helper function to show suggestions with blur
+    function showSuggestions() {
+        suggestionsBox.style.display = 'block';
+        toggleSearchBlur(true);
+    }
+    
+    // Helper function to hide suggestions and remove blur
+    function hideSuggestions() {
+        suggestionsBox.style.display = 'none';
+        toggleSearchBlur(false);
+    }
+    
+    // Handle input changes
+    searchInput.addEventListener('input', function() {
+        console.log('🔍 Search input event triggered');
+        if (window.typingTimeout) {
+            clearTimeout(window.typingTimeout);
+        }
+        const query = this.value.trim();
+        console.log('🔍 Query:', query);
         
-        console.log('🔍 searchInput:', searchInput);
-        console.log('🔍 suggestionsBox:', suggestionsBox);
-        
-        if (!searchInput || !suggestionsBox) {
-            console.log('❌ Missing searchInput or suggestionsBox');
+        if (query.length < 1) {
+            console.log('🔍 Query too short, hiding suggestions');
+            hideSuggestions();
             return;
         }
         
-        // Handle input changes
-        searchInput.addEventListener('input', function() {
-            console.log('🔍 Search input event triggered');
-            if (window.typingTimeout) {
-                clearTimeout(window.typingTimeout);
-            }
-            const query = this.value.trim();
-            console.log('🔍 Query:', query);
-            
-            if (query.length < 1) {
-                console.log('🔍 Query too short, hiding suggestions');
-                suggestionsBox.style.display = 'none';
-                return;
-            }
-            
-            console.log('🔍 Fetching suggestions for query:', query);
-            window.typingTimeout = setTimeout(() => {
-                fetch(`/api/keywords/search?q=${encodeURIComponent(query)}`)
-                    .then(res => {
-                        console.log('🔍 API response status:', res.status);
-                        return res.json();
-                    })
-                    .then(data => {
-                        console.log('🔍 API response data:', data);
-                        suggestionsBox.innerHTML = '';
-                        
-                        if (data.length === 0) {
-                            console.log('🔍 No suggestions found');
-                            suggestionsBox.style.display = 'none';
-                            return;
-                        }
-                        
-                        console.log('🔍 Adding suggestions:', data);
-                        data.forEach(keyword => {
-                            const item = document.createElement('div');
-                            item.className = 'search-suggestion-item';
-                            item.textContent = keyword;
-                            item.addEventListener('click', () => {
-                                searchInput.value = keyword;
-                                suggestionsBox.style.display = 'none';
-                                // Navigate to search results page
-                                window.location.href = `/search?q=${encodeURIComponent(keyword)}`;
-                            });
-                            suggestionsBox.appendChild(item);
+        console.log('🔍 Fetching suggestions for query:', query);
+        window.typingTimeout = setTimeout(() => {
+            fetch(`/api/keywords/search?q=${encodeURIComponent(query)}`)
+                .then(res => {
+                    console.log('🔍 API response status:', res.status);
+                    return res.json();
+                })
+                .then(data => {
+                    console.log('🔍 API response data:', data);
+                    suggestionsBox.innerHTML = '';
+                    
+                    if (data.length === 0) {
+                        console.log('🔍 No suggestions found');
+                        hideSuggestions();
+                        return;
+                    }
+                    
+                    console.log('🔍 Adding suggestions:', data);
+                    data.forEach(keyword => {
+                        const item = document.createElement('div');
+                        item.className = 'search-suggestion-item';
+                        item.textContent = keyword;
+                        item.addEventListener('click', () => {
+                            searchInput.value = keyword;
+                            hideSuggestions();
+                            // Navigate to search results page
+                            window.location.href = `/search?q=${encodeURIComponent(keyword)}`;
                         });
-                        
-                        suggestionsBox.style.display = 'block';
-                        console.log('🔍 Suggestions displayed');
-                    })
-                    .catch(err => {
-                        console.error('❌ Search error:', err);
-                        suggestionsBox.style.display = 'none';
+                        suggestionsBox.appendChild(item);
                     });
-            }, 300);
-        });
-        
-        // Handle Enter key
-        searchInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                const query = this.value.trim();
-                if (query) {
-                    suggestionsBox.style.display = 'none';
-                    window.location.href = `/search?q=${encodeURIComponent(query)}`;
-                }
+                    
+                    showSuggestions();
+                    console.log('🔍 Suggestions displayed');
+                })
+                .catch(err => {
+                    console.error('❌ Search error:', err);
+                    hideSuggestions();
+                });
+        }, 300);
+    });
+    
+    // Handle Enter key
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            const query = this.value.trim();
+            if (query) {
+                hideSuggestions();
+                window.location.href = `/search?q=${encodeURIComponent(query)}`;
             }
-        });
-        
-        // Hide suggestions when clicking outside
-        document.addEventListener('click', function(e) {
-            if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
-                suggestionsBox.style.display = 'none';
-            }
+        }
+    });
+    
+    // Hide suggestions when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+            hideSuggestions();
+        }
+    });
+    
+    // Hide suggestions when clicking on blur overlay
+    if (blurOverlay) {
+        blurOverlay.addEventListener('click', function() {
+            hideSuggestions();
         });
     }
-
-
+}
 
     // Initialize form event listeners
     function initializeFormEvents() {

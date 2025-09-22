@@ -29,6 +29,8 @@
     border: none;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
+    position: relative;
+    z-index: var(--z-modal); /* Ensure entire search container is above other sections */
 }
 
 /* Block: Input-Preview Section - Enhanced Glass Morphism with Better Contrast */
@@ -561,6 +563,7 @@
     position: relative;
     max-width: 400px;
     width: 100%;
+    overflow: visible; /* Ensure dropdown suggestions are not clipped */
 }
 
 .tikz-app .input {
@@ -656,7 +659,7 @@
     box-shadow: var(--shadow-lg);
     max-height: 200px;
     overflow-y: auto;
-    z-index: var(--z-dropdown);
+    z-index: var(--z-modal); /* Increased from --z-dropdown to ensure visibility over input-preview-section */
     margin-top: var(--spacing-1);
     display: none;
 }
@@ -674,6 +677,23 @@
 
 .tikz-app .search-suggestion-item:last-child {
     border-bottom: none;
+}
+
+/* Search Focus Blur Effect */
+.tikz-app .search-blur-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgb(0 0 0 / 10%);
+    backdrop-filter: blur(3px);
+    z-index: var(--z-sticky); /* Below search container but above everything else */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.tikz-app .search-blur-overlay.active {
+    opacity: 1;
+    visibility: visible;
 }
 
 /* Google Login Button styles moved to login_modal.css to avoid duplication */

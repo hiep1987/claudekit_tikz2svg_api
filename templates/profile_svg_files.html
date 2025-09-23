@@ -38,9 +38,9 @@
     };
     
     // Debug comparison with search_results.html
-    console.log('🔬 EXACT COPY of search_results.html approach:');
-    console.log('isLoggedIn variable:', isLoggedIn);
-    console.log('window.appState:', window.appState);
+    // console.log('🔬 EXACT COPY of search_results.html approach:');
+    // console.log('isLoggedIn variable:', isLoggedIn);
+    // console.log('window.appState:', window.appState);
 </script>
 {% endblock %}
 
@@ -158,75 +158,75 @@
 <!-- Debug and Initialization Script -->
     <script>
         // Debug ALL template variables and context
-        console.log('🔍 DEEP DEBUG Profile SVG Files:');
-        console.log('isLoggedIn variable:', isLoggedIn);
-        console.log('window.appState:', window.appState);
-        console.log('appState.loggedIn:', window.appState ? window.appState.loggedIn : 'appState undefined');
-        console.log('appState.userEmail:', window.appState ? window.appState.userEmail : 'appState undefined');
-        console.log('isUserLoggedIn():', typeof window.isUserLoggedIn === 'function' ? window.isUserLoggedIn() : 'function not available');
+        // console.log('🔍 DEEP DEBUG Profile SVG Files:');
+        // console.log('isLoggedIn variable:', isLoggedIn);
+        // console.log('window.appState:', window.appState);
+        // console.log('appState.loggedIn:', window.appState ? window.appState.loggedIn : 'appState undefined');
+        // console.log('appState.userEmail:', window.appState ? window.appState.userEmail : 'appState undefined');
+        // console.log('isUserLoggedIn():', typeof window.isUserLoggedIn === 'function' ? window.isUserLoggedIn() : 'function not available');
         
         // Check file_card.html template context - THIS IS CRITICAL
-        console.log('🚨 Template Context Debug:');
-        console.log('- current_user.is_authenticated:', {{ current_user.is_authenticated|tojson }});
-        console.log('- logged_in variable (for file_card):', {% if logged_in is defined %}{{ logged_in|tojson }}{% else %}'UNDEFINED'{% endif %});
+        // console.log('🚨 Template Context Debug:');
+        // console.log('- current_user.is_authenticated:', {{ current_user.is_authenticated|tojson }});
+        // console.log('- logged_in variable (for file_card):', {% if logged_in is defined %}{{ logged_in|tojson }}{% else %}'UNDEFINED'{% endif %});
         
         // Test like button elements with detailed analysis
         const likeInputs = document.querySelectorAll('input[id^="heart-"]');
-        console.log('📌 Found like button inputs:', likeInputs.length);
-        likeInputs.forEach((input, index) => {
-            console.log(`- Like input ${index + 1}:`, {
-                id: input.id, 
-                checked: input.checked,
-                disabled: input.disabled,
-                hasChangeListener: input.onchange ? 'Yes' : 'No'
-            });
-        });
+        // console.log('📌 Found like button inputs:', likeInputs.length);
+        // likeInputs.forEach((input, index) => {
+        //     console.log(`- Like input ${index + 1}:`, {
+        //         id: input.id, 
+        //         checked: input.checked,
+        //         disabled: input.disabled,
+        //         hasChangeListener: input.onchange ? 'Yes' : 'No'
+        //     });
+        // });
         
         // Check if file cards have the necessary data
         const fileCards = document.querySelectorAll('.file-card');
-        console.log('📂 Found file cards:', fileCards.length);
-        fileCards.forEach((card, index) => {
-            const likeInput = card.querySelector('input[id^="heart-"]');
-            console.log(`- File card ${index + 1}:`, {
-                dataFileId: card.getAttribute('data-file-id'),
-                hasLikeInput: !!likeInput,
-                likeInputId: likeInput ? likeInput.id : 'none',
-                isLikeInputDisabled: likeInput ? likeInput.disabled : 'N/A'
-            });
-        });
+        // console.log('📂 Found file cards:', fileCards.length);
+        // fileCards.forEach((card, index) => {
+        //     const likeInput = card.querySelector('input[id^="heart-"]');
+        //     console.log(`- File card ${index + 1}:`, {
+        //         dataFileId: card.getAttribute('data-file-id'),
+        //         hasLikeInput: !!likeInput,
+        //         likeInputId: likeInput ? likeInput.id : 'none',
+        //         isLikeInputDisabled: likeInput ? likeInput.disabled : 'N/A'
+        //     });
+        // });
         
         // Compare with search_results.html approach - simplified appState
-        console.log('🔬 Testing search_results.html approach...');
+        // console.log('🔬 Testing search_results.html approach...');
         
         // Ensure file card component is initialized
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
-                console.log('🔄 DOMContentLoaded - Checking FileCardComponent...');
-                console.log('window.FileCardComponent exists:', !!window.FileCardComponent);
-                console.log('FileCardComponent.init function exists:', !!(window.FileCardComponent && typeof window.FileCardComponent.init === 'function'));
+                // console.log('🔄 DOMContentLoaded - Checking FileCardComponent...');
+                // console.log('window.FileCardComponent exists:', !!window.FileCardComponent);
+                // console.log('FileCardComponent.init function exists:', !!(window.FileCardComponent && typeof window.FileCardComponent.init === 'function'));
                 
                 if (window.FileCardComponent && typeof window.FileCardComponent.init === 'function') {
-                    console.log('🔄 Manually initializing FileCardComponent...');
+                    // console.log('🔄 Manually initializing FileCardComponent...');
                     window.FileCardComponent.init();
                     
                     // Test like functionality after init with more details
                     setTimeout(() => {
                         const testInput = document.querySelector('input[id^="heart-"]');
                         if (testInput) {
-                            console.log('🧪 Testing like button after init:');
-                            console.log('- Element ID:', testInput.id);
-                            console.log('- Disabled:', testInput.disabled);
-                            console.log('- Current checked state:', testInput.checked);
-                            console.log('- Parent elements:', testInput.closest('.like-button'));
-                            console.log('- Has event listeners:', testInput.onclick ? 'onclick' : 'no onclick');
+                            // console.log('🧪 Testing like button after init:');
+                            // console.log('- Element ID:', testInput.id);
+                            // console.log('- Disabled:', testInput.disabled);
+                            // console.log('- Current checked state:', testInput.checked);
+                            // console.log('- Parent elements:', testInput.closest('.like-button'));
+                            // console.log('- Has event listeners:', testInput.onclick ? 'onclick' : 'no onclick');
                             
                             // Try to manually trigger to test
-                            console.log('🧪 Attempting manual trigger test...');
+                            // console.log('🧪 Attempting manual trigger test...');
                             if (!testInput.disabled) {
                                 // Don't actually trigger, just test if we could
-                                console.log('✅ Like button is enabled - should work if event listeners are attached');
+                                // console.log('✅ Like button is enabled - should work if event listeners are attached');
                             } else {
-                                console.log('❌ Like button is disabled - this is why it doesn\'t work!');
+                                // console.log('❌ Like button is disabled - this is why it doesn\'t work!');
                             }
                         }
                     }, 100);
@@ -237,8 +237,8 @@
         });
     </script>
     
-    <!-- Profile SVG Files JavaScript - Page specific (TEMPORARILY DISABLED FOR DEBUGGING) -->
-    <!--<script src="{{ url_for('static', filename='js/profile_svg_files.js', v='1.0') }}"></script>-->
+    <!-- Profile SVG Files JavaScript - Page specific -->
+    <script src="{{ url_for('static', filename='js/profile_svg_files.js', v='1.0') }}"></script>
     
     <!-- EMERGENCY DEBUG SCRIPT - Manual like button test -->
     <script>
@@ -247,29 +247,29 @@
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
                 const likeInputs = document.querySelectorAll('input[id^="heart-"]');
-                console.log('🆘 EMERGENCY DEBUG: Testing manual like functionality');
-                console.log('📌 Found like buttons:', likeInputs.length);
+                // console.log('🆘 EMERGENCY DEBUG: Testing manual like functionality');
+                // console.log('📌 Found like buttons:', likeInputs.length);
                 
                 // Just test if like buttons are properly enabled now
                 likeInputs.forEach((input, index) => {
-                    console.log(`- Like button ${index + 1}:`, {
-                        id: input.id, 
-                        disabled: input.disabled,
-                        checked: input.checked
-                    });
+                    // console.log(`- Like button ${index + 1}:`, {
+                    //     id: input.id, 
+                    //     disabled: input.disabled,
+                    //     checked: input.checked
+                    // });
                     
                     if (input.disabled) {
-                        console.log(`❌ Like button ${input.id} still disabled - template issue`);
+                        // console.log(`❌ Like button ${input.id} still disabled - template issue`);
                         // Force enable for testing
                         input.disabled = false;
-                        console.log(`🔧 Force-enabled ${input.id} for testing`);
+                        // console.log(`🔧 Force-enabled ${input.id} for testing`);
                     } else {
-                        console.log(`✅ Like button ${input.id} properly enabled`);
+                        // console.log(`✅ Like button ${input.id} properly enabled`);
                     }
                 });
                 
                 // Let file_card.js handle the actual functionality
-                console.log('🎯 Letting file_card.js handle like functionality...');
+                // console.log('🎯 Letting file_card.js handle like functionality...');
             }, 600);
         });
     /* eslint-enable */

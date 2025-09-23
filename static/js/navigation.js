@@ -9,11 +9,11 @@ let isNavigationInitialized = false;
 // Initialize navigation component
 function initializeNavigationComponent() {
     if (isNavigationInitialized) {
-        console.log('🔄 NavigationComponent already initialized, skipping...');
+//         console.log('🔄 NavigationComponent already initialized, skipping...');
         return;
     }
     
-    console.log('🚀 Initializing NavigationComponent...');
+//     console.log('🚀 Initializing NavigationComponent...');
     isNavigationInitialized = true;
     
     // Initialize mobile menu
@@ -22,7 +22,7 @@ function initializeNavigationComponent() {
     // Initialize logout functionality
     initializeLogoutHandler();
     
-    console.log('🔄 Navigation component initialized');
+//     console.log('🔄 Navigation component initialized');
 }
 
 // ===== MOBILE MENU FUNCTIONALITY =====
@@ -51,7 +51,7 @@ function initializeMobileMenu() {
             }
         });
         
-        console.log('🔄 Mobile menu initialized');
+//         console.log('🔄 Mobile menu initialized');
     }
 }
 
@@ -66,7 +66,7 @@ function initializeLogoutHandler() {
             e.preventDefault();
             window.location.href = '/logout?next=/';
         });
-        console.log('🔄 Desktop logout button handler initialized');
+//         console.log('🔄 Desktop logout button handler initialized');
     }
     
     // Handle mobile logout button
@@ -76,7 +76,7 @@ function initializeLogoutHandler() {
             e.preventDefault();
             window.location.href = '/logout?next=/';
         });
-        console.log('🔄 Mobile logout button handler initialized');
+//         console.log('🔄 Mobile logout button handler initialized');
     }
     
     // Handle legacy logout link (for backward compatibility)
@@ -86,7 +86,7 @@ function initializeLogoutHandler() {
             e.preventDefault();
             window.location.href = '/logout?next=/';
         });
-        console.log('🔄 Legacy logout link handler initialized');
+//         console.log('🔄 Legacy logout link handler initialized');
     }
 }
 
@@ -98,10 +98,10 @@ function updateHeaderLoginState() {
     // This function can be extended based on specific needs
     
     if (window.appState && window.appState.loggedIn) {
-        console.log('🔄 Header login state updated - User logged in');
+//         console.log('🔄 Header login state updated - User logged in');
         // Add any specific header logic here
     } else {
-        console.log('🔄 Header login state updated - User not logged in');
+//         console.log('🔄 Header login state updated - User not logged in');
         // Add any specific header logic here
     }
 }

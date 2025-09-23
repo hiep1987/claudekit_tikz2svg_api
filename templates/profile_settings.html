@@ -428,7 +428,7 @@ class VerificationEnhancer {
                 // Restart countdown
                 this.startCountdown();
                 
-                console.log('✅ Verification code resent successfully');
+                // console.log('✅ Verification code resent successfully');
             } else {
                 throw new Error(data.message || 'Lỗi không xác định');
             }
@@ -517,7 +517,7 @@ class VerificationEnhancer {
             this.countdownTimer = null;
         }
         
-        console.log(`🔒 Security: Verification form hidden after ${this.resendAttempts} resend attempts`);
+        // console.log(`🔒 Security: Verification form hidden after ${this.resendAttempts} resend attempts`);
     }
 }
 

@@ -117,7 +117,7 @@
   // Debug function to check cropper state
   function debugCropperState() {
     if (!cropper) {
-      console.log('❌ Cropper not initialized');
+//       console.log('❌ Cropper not initialized');
       return;
     }
     
@@ -125,14 +125,14 @@
     const cropBoxData = cropper.getCropBoxData();
     const canvasData = cropper.getCanvasData();
     
-    console.log('🔍 Cropper Debug Info:');
-    console.log('Container:', containerData);
-    console.log('CropBox:', cropBoxData);
-    console.log('Canvas:', canvasData);
-    console.log('Min crop size:', cropper.options.minCropBoxWidth, 'x', cropper.options.minCropBoxHeight);
-    console.log('Max crop size:', cropper.options.maxCropBoxWidth, 'x', cropper.options.maxCropBoxHeight);
-    console.log('CropBox resizable:', cropper.options.cropBoxResizable);
-    console.log('CropBox movable:', cropper.options.cropBoxMovable);
+//     console.log('🔍 Cropper Debug Info:');
+//     console.log('Container:', containerData);
+//     console.log('CropBox:', cropBoxData);
+//     console.log('Canvas:', canvasData);
+//     console.log('Min crop size:', cropper.options.minCropBoxWidth, 'x', cropper.options.minCropBoxHeight);
+//     console.log('Max crop size:', cropper.options.maxCropBoxWidth, 'x', cropper.options.maxCropBoxHeight);
+//     console.log('CropBox resizable:', cropper.options.cropBoxResizable);
+//     console.log('CropBox movable:', cropper.options.cropBoxMovable);
   }
 
   function handleCropAndAttach(){
@@ -218,10 +218,10 @@
       const bioHidden = document.getElementById('bio-hidden');
       if (bioHidden) {
         bioHidden.value = quill.root.innerHTML;
-        console.log('🔄 Initial Quill content synced:', bioHidden.value.substring(0, 50) + '...');
+//         console.log('🔄 Initial Quill content synced:', bioHidden.value.substring(0, 50) + '...');
       }
       
-      console.log('✅ Quill initialized for bio editor');
+//       console.log('✅ Quill initialized for bio editor');
     }
 
     // Verification helpers in page scope
@@ -285,7 +285,7 @@
         const bioHidden = document.getElementById('bio-hidden');
         if (bioHidden && quill) {
           bioHidden.value = quill.root.innerHTML;
-          console.log('🔄 Synced Quill content before submit:', bioHidden.value.substring(0, 100) + '...');
+//           console.log('🔄 Synced Quill content before submit:', bioHidden.value.substring(0, 100) + '...');
         }
       });
     }

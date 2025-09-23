@@ -800,7 +800,7 @@
 
     // ===== INITIALIZATION =====
     function initializeProfileSvgFiles() {
-        console.log('🚀 Initializing Profile SVG Files page');
+        // console.log('🚀 Initializing Profile SVG Files page');
         
         if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
             document.documentElement.classList.add('is-touch');
@@ -809,10 +809,10 @@
         // Initialize FileCard component for like buttons and other file card functionality
         // Make sure this runs after file_card.js has loaded
         if (window.FileCardComponent && typeof window.FileCardComponent.init === 'function') {
-            console.log('🔄 Initializing FileCardComponent from profile_svg_files.js');
+            // console.log('🔄 Initializing FileCardComponent from profile_svg_files.js');
             window.FileCardComponent.init();
         } else {
-            console.warn('⚠️ FileCardComponent not available in profile_svg_files.js');
+            // console.warn('⚠️ FileCardComponent not available in profile_svg_files.js');
         }
         
         initializeButtonEventListeners();
@@ -832,7 +832,7 @@
             }, 1000);
         }
         
-        console.log('✅ Profile SVG Files page initialized successfully');
+        // console.log('✅ Profile SVG Files page initialized successfully');
     }
 
     // ===== EXPORT ONLY NECESSARY FUNCTIONS =====

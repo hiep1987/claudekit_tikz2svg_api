@@ -442,7 +442,7 @@
         if (followedPostsPollingInterval) {
             clearInterval(followedPostsPollingInterval);
             followedPostsPollingInterval = null;
-            console.log('🔄 Followed posts polling stopped');
+//             console.log('🔄 Followed posts polling stopped');
         }
     }
     
@@ -451,7 +451,7 @@
         if (likePollingInterval) {
             clearInterval(likePollingInterval);
             likePollingInterval = null;
-            console.log('🔄 Like polling stopped');
+//             console.log('🔄 Like polling stopped');
         }
     }
     
@@ -459,7 +459,7 @@
     function cleanupAllPolling() {
         stopFollowedPostsPolling();
         stopLikePolling();
-        console.log('🔄 All polling cleanup completed');
+//         console.log('🔄 All polling cleanup completed');
     }
     
     // Expose cleanup function globally for manual cleanup if needed

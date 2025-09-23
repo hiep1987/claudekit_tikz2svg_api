@@ -7,7 +7,19 @@
     font-variant-ligatures: contextual;
 }
 
-/* Files Section Container - Moved to page-specific CSS files to avoid conflicts */
+/* Files Section Container - Unified Container Styles for Consistent Sizing */
+.tikz-app .files-section-container {
+    margin-top: var(--spacing-20);
+    background-color: var(--container-bg-secondary);
+    backdrop-filter: var(--container-bg-blur);
+    padding: var(--container-padding-md);
+    border: none;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    max-width: var(--container-max-width);
+    margin-left: auto;
+    margin-right: auto;
+}
 
 /* Files Section Title */
 .tikz-app .files-section-title {
@@ -618,6 +630,21 @@
     color: #868e96;
     margin: 0;
     font-size: 14px;
+}
+
+/* Back link for search results page */
+.tikz-app .no-files .back-link {
+    margin-top: 10px;
+    font-size: 0.9rem;
+}
+
+.tikz-app .no-files .back-link a {
+    color: #1976d2;
+    text-decoration: none;
+}
+
+.tikz-app .no-files .back-link a:hover {
+    text-decoration: underline;
 }
 
 /* Mobile responsiveness */

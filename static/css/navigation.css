@@ -313,11 +313,9 @@
     display: none;
 }
 
-.tikz-app #scrollable-menu-list {
-    /* Bootstrap utilities handle list styling: list-unstyled p-0 m-0 */
+/* Bootstrap utilities handle list styling for #scrollable-menu-list: list-unstyled p-0 m-0 */
 
-    /* No overrides needed - clean Bootstrap integration */
-}
+/* No overrides needed - clean Bootstrap integration */
 
 .tikz-app #scrollable-menu-list .menu-item {
     flex-shrink: 0;
@@ -335,11 +333,9 @@
     text-decoration: none;
 }
 
-.tikz-app #main-menu {
-    /* Bootstrap utilities handle list styling: list-unstyled p-0 m-0 */
+/* Bootstrap utilities handle list styling for #main-menu: list-unstyled p-0 m-0 */
 
-    /* No overrides needed - clean Bootstrap integration */
-}
+/* No overrides needed - clean Bootstrap integration */
 
 /* Hamburger button styling */
 .tikz-app #menu-toggle {

@@ -7,16 +7,7 @@
 /* All base styles now handled by global-base.css - no duplicates */
 
 
-/* Block: Files Section */
-.tikz-app .files-section-container.page-container {
-    margin-top: var(--spacing-20);
-    background-color: var(--container-bg-secondary);
-    backdrop-filter: var(--container-bg-blur);
-    padding: var(--container-padding-md);
-    border: none;
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg);
-}
+/* Block: Files Section - Now handled by unified .files-section-container in file_card.css */
 
 /* Index top spacing container - now applied to search-container */
 .tikz-app .search-container.page-container.index-top-container {
@@ -753,9 +744,7 @@
                     0 2px 8px rgb(0 0 0 / 15%);
     }
     
-    .tikz-app .files-section-container.page-container {
-        margin-top: var(--spacing-16);
-    }
+    /* Files section responsive styles now handled by file_card.css */
     
     .tikz-app .group {
         max-width: 300px;
@@ -834,9 +823,7 @@
         padding: var(--spacing-8) 0;
     }
     
-    .tikz-app .files-section-container.page-container.container {
-        margin-top: var(--spacing-12);
-    }
+    /* Files section responsive styles now handled by file_card.css */
     
     .tikz-app .input-preview-section.page-container.container {
         padding: var(--spacing-10);

@@ -45,17 +45,7 @@
     color: #ff4757;
 }
 
-/* Like button wrapper - needed for this page */
-.tikz-app .like-button-wrapper {
-    position: relative;
-    display: flex;
-    justify-content: flex-end;
-    margin-top: var(--spacing-3);
-    z-index: var(--z-raised);
-    border-radius: var(--radius-md);
-}
-
-/* Like button components and heartBeat animation are handled by file_card.css */
+/* Like button wrapper and components now handled by file_card.css - removed duplicate */
 
 /* No Followed Posts */
 .tikz-app .no-followed-posts {
@@ -102,26 +92,7 @@
 }
 
 /* ===== Section Headers ===== */
-.tikz-app .followed-posts-section {
-    background: var(--container-bg-secondary);
-    padding: var(--container-padding-md);
-    border-radius: var(--container-radius-md);
-    box-shadow: var(--container-shadow-medium);
-    max-width: var(--container-max-width);
-    margin: 0;
-}
-
-/* Mobile responsive adjustments - Using Shared Variables */
-@media (width <= 768px) {
-    .tikz-app .followed-posts-section {
-        padding: var(--container-padding-mobile-md);
-    }
-}
-
-.tikz-app .followed-posts-section h3 {
-    color: var(--primary-dark);
-    margin-bottom: var(--spacing-16);
-}
+/* Section styles now handled by unified .files-section-container in file_card.css */
 
 /* Logout modal styles */
 .tikz-app #logout-modal {

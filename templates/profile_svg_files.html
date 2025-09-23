@@ -106,8 +106,8 @@
         {% endif %}
     </div>
 
-    <section class="svg-files-section">
-        <h3>
+    <div class="files-section-container files-section" data-is-owner="{{ 'true' if is_owner else 'false' }}">
+        <h3 class="files-section-title">
             {% if is_owner %}
                 📂 Các file SVG bạn đã tạo
             {% else %}
@@ -129,7 +129,7 @@
             <p>Hãy thử chuyển đổi một code TikZ để tạo file SVG đầu tiên!</p>
         </div>
         {% endif %}
-    </section>
+    </div>
 
     <!-- Login Modal (shared component) -->
     {% include 'partials/_login_modal.html' %}

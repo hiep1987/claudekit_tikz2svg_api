@@ -472,19 +472,7 @@
  /* Like Button and Copy Button styles are handled by file_card.css - no duplicates needed */
 
 /* ===== Section Headers ===== */
-.tikz-app .svg-files-section {
-  background: var(--container-bg-secondary);
-  padding: var(--container-padding-md);
-  border-radius: var(--container-radius-md);
-  box-shadow: var(--container-shadow-medium);
-  max-width: var(--container-max-width);
-  margin: 0 auto var(--spacing-16);
-}
-
-.tikz-app .svg-files-section h3 {
-  color: var(--primary-dark);
-  margin-bottom: var(--spacing-16);
-}
+/* Section styles now handled by unified .files-section-container in file_card.css */
 
 /* ===== TikZ Code Block ===== */
 .tikz-app .tikz-code-block {
@@ -531,10 +519,6 @@
 
 /* Responsive Design for Delete Modal */
 @media (width <= 768px) {
-  .tikz-app .svg-files-section {
-    padding: var(--container-padding-mobile-md);
-  }
-  
   .tikz-app .delete-modal .modal-content {
     min-width: 320px;
     max-width: 90vw;

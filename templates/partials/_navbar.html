@@ -38,7 +38,7 @@
     <div class="flex items-center gap-2 flex-shrink-0">
         {% if current_user.is_authenticated %}
             <div class="flex items-center gap-2">
-                <div class="flex items-center gap-2 bg-gray-100 px-2 py-1.5 rounded-lg border border-gray-300">
+                <a href="/profile/{{ current_user.id }}/settings" class="flex items-center gap-2 bg-gray-100 px-2 py-1.5 rounded-lg border border-gray-300 hover:bg-gray-200 hover:border-gray-400 transition-all duration-200 cursor-pointer">
                     {% if current_avatar %}
                         <img src="{{ url_for('static', filename='avatars/' ~ current_avatar) }}" 
                              alt="Avatar" class="w-6 h-6 rounded-full"
@@ -55,7 +55,7 @@
                             <img src="{{ url_for('static', filename='identity-verification-icon.svg') }}" alt="Verified" style="width: 14px; height: 14px; vertical-align: middle;" />
                         {% endif %}
                     </span>
-                </div>
+                </a>
                 <button id="logout-btn" class="hidden md:block bg-gradient-to-r from-red-400 to-red-600 text-white px-3 py-1.5 rounded-xl shadow hover:scale-105 transition-all duration-200 font-semibold text-xs border-0 hover:from-red-500 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-opacity-50">Đăng xuất</button>
             </div>
         {% else %}

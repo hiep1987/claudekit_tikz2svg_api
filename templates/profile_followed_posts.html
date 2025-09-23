@@ -36,8 +36,8 @@
 {% block content %}
 
     <!-- Section Bài đăng theo dõi -->
-    <section class="followed-posts-section" data-is-owner="{{ 'true' if is_owner else 'false' }}">
-        <h3>📰 Bài đăng từ người bạn theo dõi</h3>
+    <div class="files-section-container files-section" data-is-owner="{{ 'true' if is_owner else 'false' }}">
+        <h3 class="files-section-title">📰 Bài đăng từ người bạn theo dõi</h3>
         <div id="followed-posts-container" class="files-grid">
             {% if followed_posts %}
                 <!-- Set logged_in variable for file_card.html compatibility -->
@@ -53,7 +53,7 @@
                 </div>
             {% endif %}
         </div>
-    </section>
+    </div>
 
     <!-- Modal đăng xuất chỉ render nếu đã login -->
     {% if user_email %}

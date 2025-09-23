@@ -527,7 +527,6 @@
   outline-color: rgb(51 153 255 / 75%);
   overflow: hidden;
   width: 100%;
-  margin: 10px auto;
   position: relative;
   border-radius: 50%;
 }

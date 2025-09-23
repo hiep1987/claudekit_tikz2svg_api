@@ -378,4 +378,21 @@
 
 /* Responsive navbar inherits padding from utility classes and page container */
 
+/* User Profile Link Styling */
+.tikz-app .bg-gray-100 { background-color: #f3f4f6; }
+.tikz-app .border-gray-300 { border-color: #d1d5db; }
+.tikz-app .hover\:bg-gray-200:hover { background-color: #e5e7eb; }
+.tikz-app .hover\:border-gray-400:hover { border-color: #9ca3af; }
+
+/* Profile link hover and transition effects */
+.tikz-app a.flex.items-center.gap-2.bg-gray-100 {
+  text-decoration: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.tikz-app a.flex.items-center.gap-2.bg-gray-100:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
+}
+
 /* Moved login modal styles to login_modal.css */

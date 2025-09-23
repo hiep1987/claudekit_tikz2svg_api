@@ -207,7 +207,7 @@
 
 /* Fix mobile menu styling */
 .tikz-app #mobile-menu {
-  z-index: 1000;
+  z-index: var(--z-popover); /* Higher than search container (z-modal: 1050) to ensure mobile menu appears on top */
   transition: opacity 0.3s ease;
 }
 

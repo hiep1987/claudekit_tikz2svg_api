@@ -572,7 +572,7 @@
     line-height: var(--line-height-relaxed);
     padding: 0 var(--spacing-4);
     padding-left: 36px; /* 36px left padding for 20px icon + 16px spacing */
-    border: 2px solid var(--input-border);
+    border: 2px solid var(--primary-light);
     border-radius: var(--radius-md);
     outline: none;
     background-color: var(--input-bg);
@@ -584,26 +584,31 @@
 }
 
 .tikz-app .input::placeholder {
-    color: var(--input-placeholder);
+    color: var(--text-on-glass); /* High contrast for glass backgrounds */
 }
 
-.tikz-app .input:focus,
+/* Enhanced placeholder visibility on glass morphism search container */
+.tikz-app .search-container.page-container.index-top-container .input::placeholder {
+    color: var(--text-on-glass);
+    font-weight: var(--font-weight-medium); /* Slightly bolder for better visibility */
+}
+
 .tikz-app .input:hover {
     outline: none;
-    border-color: var(--input-border-focus);
-    background-color: var(--input-focus-bg);
+    border-color: var(--primary-light);
     box-shadow: var(--input-focus-shadow), inset 0 1px 3px rgb(0 0 0 / 10%);
 }
 
 .tikz-app .input:focus {
+    outline: none;
     background-color: var(--input-focus-bg);
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgb(25 118 210 / 15%), inset 0 1px 3px rgb(0 0 0 / 10%);
 }
 
-.tikz-app .input:hover {
-    background-color: var(--bg-secondary);
-    border-color: var(--primary-light);
+/* Enhanced text visibility on glass morphism search container - placed after hover/focus */
+.tikz-app .search-container.page-container.index-top-container .input {
+    color: var(--text-on-glass); /* High contrast text on glass background */
 }
 
 .tikz-app .icon {
@@ -612,25 +617,27 @@
     top: 50%; /* Vertical center */
     transform: translateY(-50%); /* Perfect vertical center */
     fill: none; /* Remove fill for stroke-based icon */
-    stroke: var(--input-icon-default); /* Use stroke color instead of fill */
+    color: var(--text-on-glass); /* Set color for currentColor support */
     width: var(--input-icon-size); /* 20px - consistent sizing */
     height: var(--input-icon-size); /* 20px - consistent sizing */
 
     /* Full visibility always - no accessibility issues */
     opacity: 1;
-    transition: stroke var(--transition-normal), transform var(--transition-normal);
+    transition: color var(--transition-normal), transform var(--transition-normal);
 }
 
 /* Smooth icon state transitions */
 .tikz-app .group:hover .icon {
-    stroke: var(--input-icon-hover); /* Subtle darkening - progressive enhancement */
+    color: var(--input-icon-hover); /* Subtle darkening - progressive enhancement */
     transform: translateY(-50%) scale(1.05); /* Maintain vertical center + scale */
 }
 
 .tikz-app .input:focus ~ .icon {
-    stroke: var(--input-icon-focus); /* Brand color - active state */
+    color: var(--input-icon-focus); /* Brand color - active state */
     transform: translateY(-50%) scale(1.05); /* Maintain vertical center + scale */
 }
+
+
 
 .tikz-app .search-title {
     color: var(--primary-color);

@@ -106,6 +106,7 @@
   --container-bg-primary: var(--bg-primary);
   --container-bg-secondary: rgb(255 255 255 / 80%);
   --container-bg-tertiary: var(--bg-tertiary);
+  --container-bg-dark: rgb(42 42 42 / 85%); /* Dark glass morphism */
   --container-bg-blur: blur(8px);
   
   /* Glass Morphism - Enhanced Contrast */
@@ -259,5 +260,8 @@
     --bg-secondary: #2a2a2a;
     --bg-tertiary: #3a3a3a;
     --border-color: #444;
+    
+    /* Input system dark mode */
+    --input-placeholder: #9ca3af; /* Light gray for better visibility in dark mode */
   }
 }

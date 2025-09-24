@@ -11,7 +11,7 @@
 5. [🔄 Chuyển đổi định dạng](#5-chuyển-đổi-định-dạng)
 6. [👤 Profile & Tương tác xã hội](#6-profile--tương-tác-xã-hội)
 7. [🛡️ Xác thực danh tính & Bảo mật](#7-xác-thực-danh-tính--bảo-mật)
-8. [ Tìm kiếm & Từ khóa](#8-tìm-kiếm--từ-khóa)
+8. [🔍 Tìm kiếm & Từ khóa](#8-tìm-kiếm--từ-khóa)
 9. [🛠️ Xử lý lỗi & Troubleshooting](#9-xử-lý-lỗi--troubleshooting)
 10. [💡 Tips & Best Practices](#10-tips--best-practices)
 
@@ -375,9 +375,9 @@ Mỗi SVG file được hiển thị dưới dạng "thẻ" (card) bao gồm:
 
 ---
 
-## 8.  Tìm kiếm & Từ khóa
+## 8. 🔍 Tìm kiếm & Từ khóa
 
-### 9.1 Cách sử dụng tìm kiếm
+### 8.1 Cách sử dụng tìm kiếm
 **Tìm kiếm SVG theo từ khóa:**
 1. **Nhập từ khóa** vào ô tìm kiếm trên navbar
 2. **Hệ thống tìm** trong các keywords đã gắn thẻ

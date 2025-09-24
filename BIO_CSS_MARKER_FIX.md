@@ -76,7 +76,7 @@ Sau khi sửa, phần bio sẽ hiển thị:
 Với bullet points sát với text và khoảng cách hợp lý.
 
 ## Test
-Khi truy cập `https://tikz2svg.mathlib.io.vn/profile/5/svg-files`, phần bio của user Quávui🐱 sẽ hiển thị với bullet points sát với text và layout đẹp mắt hơn.
+Khi truy cập `https://tikz2svg.com/profile/5/svg-files`, phần bio của user Quávui🐱 sẽ hiển thị với bullet points sát với text và layout đẹp mắt hơn.
 
 ## Lưu ý
 - CSS chỉ áp dụng cho `.public-profile-header` để không ảnh hưởng đến các phần khác

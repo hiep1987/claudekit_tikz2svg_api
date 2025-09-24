@@ -91,4 +91,4 @@ Với bullet points sát với text và khoảng cách giữa các dòng ngắn 
 - App vẫn import thành công sau khi thêm CSS
 
 ## Test
-Khi truy cập `https://tikz2svg.mathlib.io.vn/profile/5/svg-files`, phần bio sẽ hiển thị với bullet points sát với text và khoảng cách gọn gàng. 
+Khi truy cập `https://tikz2svg.com/profile/5/svg-files`, phần bio sẽ hiển thị với bullet points sát với text và khoảng cách gọn gàng. 

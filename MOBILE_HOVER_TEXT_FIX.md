@@ -2,7 +2,7 @@
 
 ## ✅ Đã sửa màu text cho mobile hover states trong file-action-container
 
-**Vấn đề phát hiện:** Trên mobile, khi đã đăng nhập tại [https://tikz2svg.mathlib.io.vn/profile/5/svg-files](https://tikz2svg.mathlib.io.vn/profile/5/svg-files), text hover vẫn chưa có màu trắng.
+**Vấn đề phát hiện:** Trên mobile, khi đã đăng nhập tại [https://tikz2svg.com/profile/5/svg-files](https://tikz2svg.com/profile/5/svg-files), text hover vẫn chưa có màu trắng.
 
 ## 🔧 Vấn đề ban đầu:
 
@@ -119,21 +119,21 @@ Low Priority: General button text styles
 ## 🧪 Test Cases:
 
 ### 1. Mobile (Logged In):
-1. Open [https://tikz2svg.mathlib.io.vn/profile/5/svg-files](https://tikz2svg.mathlib.io.vn/profile/5/svg-files) on mobile
+1. Open [https://tikz2svg.com/profile/5/svg-files](https://tikz2svg.com/profile/5/svg-files) on mobile
 2. Tap action toggle button (⋯) to open menu
 3. Tap any button once - expected: button highlights with white text (100% opacity)
 4. Tap button again - expected: action executes with white text feedback
 5. Expected: Text always white and readable in all states
 
 ### 2. Mobile (Not Logged In):
-1. Open [https://tikz2svg.mathlib.io.vn/profile/5/svg-files](https://tikz2svg.mathlib.io.vn/profile/5/svg-files) on mobile (not logged in)
+1. Open [https://tikz2svg.com/profile/5/svg-files](https://tikz2svg.com/profile/5/svg-files) on mobile (not logged in)
 2. Tap action toggle button (⋯) to open menu
 3. Tap any button once - expected: button highlights with white text
 4. Tap button again - expected: login modal shows
 5. Expected: Text always white and readable
 
 ### 3. Desktop Hover:
-1. Open [https://tikz2svg.mathlib.io.vn/profile/5/svg-files](https://tikz2svg.mathlib.io.vn/profile/5/svg-files) on desktop
+1. Open [https://tikz2svg.com/profile/5/svg-files](https://tikz2svg.com/profile/5/svg-files) on desktop
 2. Hover over file card to show action menu
 3. Hover over any button - expected: text appears with white color
 4. Expected: Text always white and readable

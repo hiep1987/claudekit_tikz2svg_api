@@ -142,7 +142,7 @@ ls -la /var/www/tikz2svg_api/shared/static/
 4. **PROD**: CSS/JS tự động cập nhật
 
 ### Kiểm tra sau khi fix
-- **URL test**: `https://tikz2svg.mathlib.io.vn/static/css/file_card.css`
+- **URL test**: `https://tikz2svg.com/static/css/file_card.css`
 - **Browser dev tools**: Network tab xem có 404 không
 - **Functionality**: Test nút "Xem Code" có hoạt động không
 

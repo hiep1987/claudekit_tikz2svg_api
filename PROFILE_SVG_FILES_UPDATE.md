@@ -4,8 +4,8 @@
 Khi tách trang `profile.html` thành 3 trang riêng biệt, trang `profile_svg_files.html` cần hiển thị giống như trang profile cũ với header thông tin user và logic tương tự.
 
 ## URL mục tiêu
-- **URL cũ**: `https://tikz2svg.mathlib.io.vn/profile/5`
-- **URL mới**: `https://tikz2svg.mathlib.io.vn/profile/5/svg-files`
+- **URL cũ**: `https://tikz2svg.com/profile/5`
+- **URL mới**: `https://tikz2svg.com/profile/5/svg-files`
 
 ## Những thay đổi đã thực hiện
 
@@ -201,7 +201,7 @@ function unfollowUser(userId) {
 
 ## Kết quả
 
-Khi truy cập `https://tikz2svg.mathlib.io.vn/profile/5/svg-files` với tài khoản id=1, trang sẽ hiển thị:
+Khi truy cập `https://tikz2svg.com/profile/5/svg-files` với tài khoản id=1, trang sẽ hiển thị:
 
 1. **Header thông tin user id=5**:
    - Avatar của Quávui🐱

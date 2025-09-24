@@ -82,6 +82,6 @@ ls -la /var/www/tikz2svg_api/shared/static/
 ✅ **Symlink**: Tự động, chỉ làm 1 lần, luôn đồng bộ, tiết kiệm dung lượng  
 
 ## Kiểm tra sau khi fix:
-1. **URL test**: `https://tikz2svg.mathlib.io.vn/static/css/file_card.css`
+1. **URL test**: `https://tikz2svg.com/static/css/file_card.css`
 2. **Browser dev tools**: Network tab xem có 404 không
 3. **Functionality**: Test nút "Xem Code" có hoạt động không

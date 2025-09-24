@@ -7,25 +7,25 @@ File `profile.html` gốc đã được tách thành 3 trang riêng biệt với
 ## 📍 Cách truy cập các trang
 
 ### 1. Trang Profile chính (gốc)
-**URL:** `https://tikz2svg.mathlib.io.vn/profile/1`
+**URL:** `https://tikz2svg.com/profile/1`
 - Hiển thị tổng quan profile và tất cả các phần
 - Giữ nguyên như cũ
 
 ### 2. Trang Cài đặt Profile (mới)
-**URL:** `https://tikz2svg.mathlib.io.vn/profile/1/settings`
+**URL:** `https://tikz2svg.com/profile/1/settings`
 - Chỉ owner mới có thể truy cập
 - Form cài đặt thông tin cá nhân
 - Upload và crop avatar
 - Editor bio (Quill)
 
 ### 3. Trang File SVG (mới)
-**URL:** `https://tikz2svg.mathlib.io.vn/profile/1/svg-files`
+**URL:** `https://tikz2svg.com/profile/1/svg-files`
 - Hiển thị tất cả file SVG của user
 - Có thể truy cập bởi bất kỳ ai
 - Bao gồm chức năng like, share, copy link, xem code
 
 ### 4. Trang Bài đăng theo dõi (mới)
-**URL:** `https://tikz2svg.mathlib.io.vn/profile/1/followed-posts`
+**URL:** `https://tikz2svg.com/profile/1/followed-posts`
 - Chỉ owner mới có thể truy cập
 - Hiển thị bài đăng từ người đã follow
 - Cần đăng nhập để truy cập
@@ -58,13 +58,13 @@ Mỗi trang đều có navigation bar với các link:
 ## 🧪 Test
 
 ### Test Case 1: Truy cập profile user ID = 1
-1. Vào `https://tikz2svg.mathlib.io.vn/profile/1`
+1. Vào `https://tikz2svg.com/profile/1`
 2. Click vào các link navigation
 3. Kiểm tra chuyển đổi giữa các trang
 
 ### Test Case 2: Truy cập với quyền owner
 1. Đăng nhập với tài khoản có ID = 1
-2. Truy cập `https://tikz2svg.mathlib.io.vn/profile/1/settings`
+2. Truy cập `https://tikz2svg.com/profile/1/settings`
 3. Test chức năng cập nhật profile
 
 ### Test Case 3: Truy cập với quyền khác

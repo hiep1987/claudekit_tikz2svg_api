@@ -105,7 +105,7 @@ Redirect to login
 ```
 🖥️ Adding Desktop button logic (logged in)
 🖥️ Desktop button clicked (logged in): Btn fb-share-btn
-🖥️ Desktop Facebook Share URL: https://tikz2svg.mathlib.io.vn/view_svg/filename.svg
+🖥️ Desktop Facebook Share URL: https://tikz2svg.com/view_svg/filename.svg
 ✅ Desktop Facebook button: Link copied successfully
 ```
 
@@ -113,7 +113,7 @@ Redirect to login
 ```
 🖥️ Adding Desktop button logic (logged in)
 🖥️ Desktop button clicked (logged in): Btn file-copy-link-btn
-🖥️ Desktop Copy Link URL: https://tikz2svg.mathlib.io.vn/static/filename.svg
+🖥️ Desktop Copy Link URL: https://tikz2svg.com/static/filename.svg
 ✅ Desktop Copy Link button: Link copied successfully
 ```
 

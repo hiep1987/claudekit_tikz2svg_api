@@ -210,7 +210,7 @@ sudo systemctl restart tikz2svg.service
 
 ### Kết quả:
 - ✅ Service `tikz2svg.service` đã chạy thành công
-- ✅ Website https://tikz2svg.mathlib.io.vn/ hoạt động bình thường
+- ✅ Website https://tikz2svg.com/ hoạt động bình thường
 - ✅ Trả về HTTP 200 thay vì 502 Bad Gateway
 
 ## 🚨 Vấn đề File SVG được lưu sai thư mục - ĐÃ KHẮC PHỤC HOÀN TOÀN

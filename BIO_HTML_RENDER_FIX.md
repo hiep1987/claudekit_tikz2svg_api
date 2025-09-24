@@ -63,4 +63,4 @@ Filter `| safe` cho phép render HTML, điều này có thể tạo ra lỗ hổ
 - ✅ App vẫn import thành công sau khi sửa
 
 ## Test
-Khi truy cập `https://tikz2svg.mathlib.io.vn/profile/5/svg-files`, phần bio của user Quávui🐱 sẽ hiển thị đúng định dạng HTML thay vì raw code. 
+Khi truy cập `https://tikz2svg.com/profile/5/svg-files`, phần bio của user Quávui🐱 sẽ hiển thị đúng định dạng HTML thay vì raw code. 

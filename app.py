@@ -840,6 +840,24 @@ def test_base_template():
                          logged_in=logged_in,
                          current_user_email=user_email)
 
+# Privacy Policy route - Required for Google OAuth
+@app.route("/privacy-policy")
+def privacy_policy():
+    """Route cho trang Privacy Policy - yêu cầu của Google OAuth Platform"""
+    from datetime import datetime
+    current_date = datetime.now().strftime("%d/%m/%Y")
+    
+    return render_template('privacy_policy.html', current_date=current_date)
+
+# Terms of Service route
+@app.route("/terms-of-service")
+def terms_of_service():
+    """Route cho trang Terms of Service"""
+    from datetime import datetime
+    current_date = datetime.now().strftime("%d/%m/%Y")
+    
+    return render_template('terms_of_service.html', current_date=current_date)
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     print(f"DEBUG: Index route accessed - method: {request.method}")

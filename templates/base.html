@@ -72,6 +72,64 @@
     <!-- Page-specific CSS -->
     {% block extra_css %}{% endblock %}
     
+    <!-- Footer Styles -->
+    <style>
+    .site-footer {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-top: 1px solid rgba(25, 118, 210, 0.1);
+        margin-top: 3rem;
+        padding: 2rem 0;
+        text-align: center;
+        color: var(--text-secondary);
+    }
+    
+    .footer-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+    
+    .footer-content p {
+        margin: 0 0 1rem 0;
+        font-size: 0.9rem;
+        color: var(--text-dark);
+    }
+    
+    .footer-links {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+    
+    .footer-links a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .footer-links a:hover {
+        background: rgba(25, 118, 210, 0.1);
+        color: var(--primary-dark);
+    }
+    
+    @media (max-width: 768px) {
+        .footer-links {
+            gap: 1rem;
+        }
+        
+        .footer-links a {
+            font-size: 0.8rem;
+            padding: 0.4rem 0.8rem;
+        }
+    }
+    </style>
+    
     <!-- Page-specific JavaScript Variables -->
     {% block head_js %}{% endblock %}
 </head>
@@ -89,7 +147,16 @@
     
     <!-- Footer -->
     {% block footer %}
-    <footer class='site-footer'>© 2024 TikZ2SVG - All rights reserved.</footer>
+    <footer class='site-footer'>
+        <div class="footer-content">
+            <p>© 2025 TikZ2SVG - All rights reserved.</p>
+            <div class="footer-links">
+                <a href="/privacy-policy">🔒 Chính sách bảo mật</a>
+                <a href="/terms-of-service">📋 Điều khoản sử dụng</a>
+                <a href="/">🏠 Trang chủ</a>
+            </div>
+        </div>
+    </footer>
     {% endblock %}
     
     <!-- Login Modal (có điều kiện) -->

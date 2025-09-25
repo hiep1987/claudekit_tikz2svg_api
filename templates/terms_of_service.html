@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+
+{# Configuration flags #}
+{% set include_highlight_js = false %}
+{% set include_codemirror = false %}
+{% set include_file_card = false %}
+{% set include_navigation = true %}
+{% set include_login_modal = true %}
+{% set include_navbar = true %}
+
+{# Page Title #}
+{% block title %}Điều khoản sử dụng - TikZ to SVG{% endblock %}
+
+{# Custom Meta Tags #}
+{% block meta %}
+<meta name="description" content="Điều khoản sử dụng của TikZ2SVG - Quy định và điều khoản khi sử dụng dịch vụ">
+<meta name="keywords" content="điều khoản sử dụng, terms of service, TikZ2SVG, quy định">
+<meta name="author" content="TikZ to SVG">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="Điều khoản sử dụng - TikZ to SVG">
+<meta property="og:description" content="Điều khoản sử dụng dịch vụ TikZ2SVG">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="vi_VN">
+{% endblock %}
+
+{# Extra CSS for legal pages #}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/legal-pages.css') }}">
+{% endblock %}
+
+{# Main Content #}
+{% block content %}
+<div class="legal-container">
+    <div class="legal-header">
+        <h1>📋 Điều khoản sử dụng</h1>
+        <p class="last-updated">Cập nhật lần cuối: {{ current_date or "25/09/2025" }}</p>
+    </div>
+
+    <div class="legal-section">
+        <h2>1. Chấp nhận điều khoản</h2>
+        <p>
+            Chào mừng bạn đến với <strong>TikZ2SVG</strong>! Bằng việc truy cập và sử dụng dịch vụ của chúng tôi, 
+            bạn đồng ý tuân thủ và bị ràng buộc bởi các điều khoản và điều kiện được nêu trong tài liệu này. 
+            Nếu bạn không đồng ý với bất kỳ phần nào của các điều khoản này, vui lòng không sử dụng dịch vụ.
+        </p>
+    </div>
+
+    <div class="legal-section">
+        <h2>2. Mô tả dịch vụ</h2>
+        
+        <h3>2.1 Dịch vụ cung cấp</h3>
+        <p>TikZ2SVG là một nền tảng trực tuyến miễn phí cung cấp:</p>
+        <ul>
+            <li><strong>Chuyển đổi TikZ</strong>: Chuyển đổi mã TikZ/LaTeX thành hình ảnh SVG và PNG</li>
+            <li><strong>Lưu trữ file</strong>: Lưu trữ và quản lý các file đã tạo</li>
+            <li><strong>Chia sẻ</strong>: Chia sẻ file với cộng đồng</li>
+            <li><strong>Tương tác xã hội</strong>: Like, follow và khám phá nội dung từ người dùng khác</li>
+        </ul>
+
+        <h3>2.2 Tính chất dịch vụ</h3>
+        <ul>
+            <li>Dịch vụ hoàn toàn miễn phí</li>
+            <li>Không yêu cầu cài đặt phần mềm</li>
+            <li>Truy cập qua trình duyệt web</li>
+            <li>Hỗ trợ đa thiết bị (desktop, mobile, tablet)</li>
+        </ul>
+    </div>
+
+    <div class="legal-section">
+        <h2>3. Tài khoản người dùng</h2>
+        
+        <h3>3.1 Đăng ký tài khoản</h3>
+        <ul>
+            <li>Sử dụng Google OAuth để đăng nhập an toàn</li>
+            <li>Chỉ cần tài khoản Google hợp lệ</li>
+            <li>Không yêu cầu thông tin cá nhân bổ sung</li>
+        </ul>
+
+        <h3>3.2 Trách nhiệm người dùng</h3>
+        <ul>
+            <li><strong>Bảo mật</strong>: Bảo vệ thông tin đăng nhập Google của bạn</li>
+            <li><strong>Sử dụng hợp pháp</strong>: Chỉ sử dụng dịch vụ cho mục đích hợp pháp</li>
+            <li><strong>Thông tin chính xác</strong>: Đảm bảo thông tin profile là chính xác</li>
+            <li><strong>Tuân thủ quy định</strong>: Không vi phạm các điều khoản sử dụng</li>
+        </ul>
+    </div>
+
+    <div class="legal-section">
+        <h2>4. Quy định sử dụng nội dung</h2>
+        
+        <h3>4.1 Nội dung được phép</h3>
+        <div class="highlight-box">
+            <p><strong>✅ Được khuyến khích:</strong></p>
+            <ul>
+                <li>Mã TikZ giáo dục và học tập</li>
+                <li>Biểu đồ khoa học và toán học</li>
+                <li>Hình minh họa kỹ thuật</li>
+                <li>Nghệ thuật vector sáng tạo</li>
+                <li>Chia sẻ kiến thức với cộng đồng</li>
+            </ul>
+        </div>
+
+        <h3>4.2 Nội dung bị cấm</h3>
+        <div class="warning-box">
+            <p><strong>❌ Nghiêm cấm:</strong></p>
+            <ul>
+                <li>Nội dung bạo lực, khiêu dâm hoặc phản động</li>
+                <li>Vi phạm bản quyền hoặc sở hữu trí tuệ</li>
+                <li>Spam hoặc nội dung lừa đảo</li>
+                <li>Mã độc hại hoặc có thể gây hại hệ thống</li>
+                <li>Quảng cáo thương mại không được phép</li>
+            </ul>
+        </div>
+
+        <h3>4.3 Bản quyền và sở hữu trí tuệ</h3>
+        <ul>
+            <li>Bạn giữ quyền sở hữu đối với nội dung TikZ bạn tạo ra</li>
+            <li>Bằng việc chia sẻ, bạn cấp phép sử dụng phi thương mại cho cộng đồng</li>
+            <li>Tôn trọng bản quyền của người khác</li>
+            <li>Báo cáo vi phạm bản quyền khi phát hiện</li>
+        </ul>
+    </div>
+
+    <div class="legal-section">
+        <h2>5. Chính sách cộng đồng</h2>
+        
+        <h3>5.1 Hành vi được khuyến khích</h3>
+        <ul>
+            <li><strong>Hỗ trợ lẫn nhau</strong>: Giúp đỡ người mới học TikZ</li>
+            <li><strong>Chia sẻ kiến thức</strong>: Đóng góp code hữu ích</li>
+            <li><strong>Phản hồi tích cực</strong>: Like và comment xây dựng</li>
+            <li><strong>Tôn trọng</strong>: Đối xử lịch sự với mọi người</li>
+        </ul>
+
+        <h3>5.2 Hành vi không được phép</h3>
+        <ul>
+            <li>Quấy rối hoặc bắt nạt người dùng khác</li>
+            <li>Spam like hoặc follow hàng loạt</li>
+            <li>Tạo nhiều tài khoản ảo</li>
+            <li>Sử dụng bot hoặc công cụ tự động</li>
+        </ul>
+    </div>
+
+    <div class="legal-section">
+        <h2>6. Giới hạn dịch vụ</h2>
+        
+        <h3>6.1 Giới hạn kỹ thuật</h3>
+        <ul>
+            <li><strong>Kích thước file</strong>: Tối đa 1MB cho mỗi file TikZ</li>
+            <li><strong>Thời gian xử lý</strong>: Tối đa 30 giây cho mỗi conversion</li>
+            <li><strong>Rate limiting</strong>: Tối đa 10 requests/phút</li>
+            <li><strong>Dung lượng lưu trữ</strong>: 50MB/người dùng</li>
+        </ul>
+
+        <h3>6.2 Giới hạn sử dụng</h3>
+        <ul>
+            <li>Chỉ hỗ trợ TikZ code hợp lệ</li>
+            <li>Không hỗ trợ tất cả packages LaTeX</li>
+            <li>Một số tính năng có thể tạm thời không khả dụng</li>
+        </ul>
+    </div>
+
+    <div class="legal-section">
+        <h2>7. Quyền và trách nhiệm của chúng tôi</h2>
+        
+        <h3>7.1 Quyền của chúng tôi</h3>
+        <ul>
+            <li><strong>Moderation</strong>: Xóa nội dung vi phạm điều khoản</li>
+            <li><strong>Suspend/Ban</strong>: Tạm khóa hoặc khóa vĩnh viễn tài khoản vi phạm</li>
+            <li><strong>Cập nhật dịch vụ</strong>: Thay đổi tính năng theo thời gian</li>
+            <li><strong>Sao lưu và bảo trì</strong>: Tạm ngừng dịch vụ để bảo trì</li>
+        </ul>
+
+        <h3>7.2 Trách nhiệm của chúng tôi</h3>
+        <ul>
+            <li>Cung cấp dịch vụ ổn định và chất lượng</li>
+            <li>Bảo vệ thông tin cá nhân người dùng</li>
+            <li>Hỗ trợ kỹ thuật khi cần thiết</li>
+            <li>Thông báo trước khi có thay đổi lớn</li>
+        </ul>
+    </div>
+
+    <div class="legal-section">
+        <h2>8. Giới hạn trách nhiệm</h2>
+        
+        <div class="warning-box">
+            <p><strong>⚠️ Lưu ý quan trọng:</strong></p>
+            <ul>
+                <li>Dịch vụ được cung cấp "như hiện tại" (as-is)</li>
+                <li>Không bảo đảm hoạt động 100% không lỗi</li>
+                <li>Người dùng tự chịu trách nhiệm về dữ liệu của mình</li>
+                <li>Khuyến khích sao lưu dữ liệu quan trọng</li>
+            </ul>
+        </div>
+
+        <h3>8.1 Không chịu trách nhiệm về</h3>
+        <ul>
+            <li>Mất mát dữ liệu do sự cố kỹ thuật</li>
+            <li>Thiệt hại gián tiếp từ việc sử dụng dịch vụ</li>
+            <li>Nội dung do người dùng khác tạo ra</li>
+            <li>Gián đoạn dịch vụ do bảo trì hoặc cập nhật</li>
+        </ul>
+    </div>
+
+    <div class="legal-section">
+        <h2>9. Thay đổi điều khoản</h2>
+        <p>
+            Chúng tôi có quyền cập nhật các Điều khoản sử dụng này theo thời gian để phản ánh 
+            những thay đổi trong dịch vụ hoặc yêu cầu pháp lý. Những thay đổi quan trọng sẽ được 
+            thông báo trước ít nhất 7 ngày qua email hoặc thông báo trên website.
+        </p>
+        
+        <div class="highlight-box">
+            <p><strong>📢 Thông báo:</strong> Việc tiếp tục sử dụng dịch vụ sau khi có thay đổi được coi như bạn đồng ý với các điều khoản mới.</p>
+        </div>
+    </div>
+
+    <div class="legal-section">
+        <h2>10. Chấm dứt sử dụng</h2>
+        
+        <h3>10.1 Người dùng chấm dứt</h3>
+        <ul>
+            <li>Bạn có thể ngừng sử dụng dịch vụ bất cứ lúc nào</li>
+            <li>Có thể yêu cầu xóa tài khoản và dữ liệu</li>
+            <li>Dữ liệu công khai có thể vẫn hiển thị cho cộng đồng</li>
+        </ul>
+
+        <h3>10.2 Chúng tôi chấm dứt</h3>
+        <ul>
+            <li>Vi phạm điều khoản sử dụng</li>
+            <li>Hoạt động bất hợp pháp hoặc có hại</li>
+            <li>Yêu cầu từ cơ quan chức năng</li>
+            <li>Ngừng hoạt động dịch vụ</li>
+        </ul>
+    </div>
+
+    <div class="contact-info">
+        <h3>📞 Liên hệ và hỗ trợ</h3>
+        <p>Nếu bạn có câu hỏi về các Điều khoản sử dụng này hoặc cần hỗ trợ:</p>
+        <ul>
+            <li><strong>Website:</strong> <a href="/">TikZ2SVG.com</a></li>
+            <li><strong>Email hỗ trợ:</strong> support@tikz2svg.com</li>
+            <li><strong>Báo cáo vi phạm:</strong> report@tikz2svg.com</li>
+            <li><strong>Địa chỉ:</strong> Việt Nam</li>
+        </ul>
+        <p>
+            Thời gian phản hồi: 1-3 ngày làm việc cho các yêu cầu thông thường, 
+            24 giờ cho các báo cáo vi phạm nghiêm trọng.
+        </p>
+    </div>
+
+    <div class="legal-section">
+        <p class="thank-you-message">
+            Cảm ơn bạn đã đọc và tuân thủ các điều khoản sử dụng. <br>
+            Chúc bạn có trải nghiệm tuyệt vời với TikZ2SVG! 🚀
+        </p>
+    </div>
+</div>
+{% endblock %}

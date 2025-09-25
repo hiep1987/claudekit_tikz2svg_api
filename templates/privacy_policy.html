@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+
+{# Configuration flags #}
+{% set include_highlight_js = false %}
+{% set include_codemirror = false %}
+{% set include_file_card = false %}
+{% set include_navigation = true %}
+{% set include_login_modal = true %}
+{% set include_navbar = true %}
+
+{# Page Title #}
+{% block title %}Chính sách bảo mật - TikZ to SVG{% endblock %}
+
+{# Custom Meta Tags #}
+{% block meta %}
+<meta name="description" content="Chính sách bảo mật của TikZ2SVG - Tìm hiểu cách chúng tôi thu thập, sử dụng và bảo vệ thông tin cá nhân của bạn">
+<meta name="keywords" content="chính sách bảo mật, privacy policy, TikZ2SVG, bảo mật thông tin">
+<meta name="author" content="TikZ to SVG">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="Chính sách bảo mật - TikZ to SVG">
+<meta property="og:description" content="Chính sách bảo mật của TikZ2SVG về thu thập và sử dụng thông tin cá nhân">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="vi_VN">
+{% endblock %}
+
+{# Extra CSS for legal pages #}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/legal-pages.css') }}">
+{% endblock %}
+
+{# Main Content #}
+{% block content %}
+<div class="legal-container">
+    <div class="legal-header">
+        <h1>🔒 Chính sách bảo mật</h1>
+        <p class="last-updated">Cập nhật lần cuối: {{ current_date or "25/09/2025" }}</p>
+    </div>
+
+    <div class="legal-section">
+        <h2>1. Giới thiệu</h2>
+        <p>
+            Chào mừng bạn đến với <strong>TikZ2SVG</strong> - nền tảng chuyển đổi mã TikZ thành hình ảnh SVG trực tuyến. 
+            Chúng tôi cam kết bảo vệ quyền riêng tư và thông tin cá nhân của bạn. Chính sách bảo mật này giải thích 
+            cách chúng tôi thu thập, sử dụng, lưu trữ và bảo vệ thông tin của bạn khi sử dụng dịch vụ của chúng tôi.
+        </p>
+    </div>
+
+    <div class="legal-section">
+        <h2>2. Thông tin chúng tôi thu thập</h2>
+        
+        <h3>2.1 Thông tin cá nhân</h3>
+        <p>Khi bạn đăng ký tài khoản thông qua Google OAuth, chúng tôi thu thập:</p>
+        <ul>
+            <li><strong>Tên đầy đủ</strong> từ tài khoản Google của bạn</li>
+            <li><strong>Địa chỉ email</strong> để liên lạc và xác thực</li>
+            <li><strong>Ảnh đại diện</strong> từ Google Profile (nếu có)</li>
+            <li><strong>Google User ID</strong> để định danh tài khoản</li>
+        </ul>
+
+        <h3>2.2 Thông tin hoạt động</h3>
+        <p>Chúng tôi thu thập thông tin về việc sử dụng dịch vụ của bạn:</p>
+        <ul>
+            <li>Mã TikZ bạn tạo và chuyển đổi</li>
+            <li>File SVG và PNG được tạo ra</li>
+            <li>Thời gian tạo và cập nhật file</li>
+            <li>Lượt xem và lượt thích trên các bài đăng</li>
+            <li>Danh sách người dùng bạn theo dõi</li>
+        </ul>
+
+        <h3>2.3 Thông tin kỹ thuật</h3>
+        <ul>
+            <li>Địa chỉ IP của bạn</li>
+            <li>Thông tin trình duyệt và hệ điều hành</li>
+            <li>Thời gian truy cập và hoạt động</li>
+            <li>Cookies và dữ liệu phiên làm việc</li>
+        </ul>
+    </div>
+
+    <div class="legal-section">
+        <h2>3. Cách chúng tôi sử dụng thông tin</h2>
+        
+        <h3>3.1 Cung cấp dịch vụ</h3>
+        <ul>
+            <li>Tạo và quản lý tài khoản người dùng</li>
+            <li>Xử lý và chuyển đổi mã TikZ thành SVG</li>
+            <li>Lưu trữ và hiển thị các file đã tạo</li>
+            <li>Cung cấp tính năng tìm kiếm và khám phá</li>
+        </ul>
+
+        <h3>3.2 Cải thiện dịch vụ</h3>
+        <ul>
+            <li>Phân tích cách sử dụng để cải thiện hiệu suất</li>
+            <li>Phát triển tính năng mới dựa trên nhu cầu người dùng</li>
+            <li>Khắc phục lỗi và tối ưu hóa hệ thống</li>
+        </ul>
+
+        <h3>3.3 Liên lạc</h3>
+        <ul>
+            <li>Gửi thông báo về hoạt động tài khoản</li>
+            <li>Cập nhật chính sách và điều khoản</li>
+            <li>Hỗ trợ kỹ thuật khi cần thiết</li>
+        </ul>
+    </div>
+
+    <div class="legal-section">
+        <h2>4. Chia sẻ thông tin</h2>
+        
+        <div class="highlight-box">
+            <p><strong>🔒 Cam kết bảo mật:</strong> Chúng tôi KHÔNG bán, cho thuê hoặc chia sẻ thông tin cá nhân của bạn với bên thứ ba cho mục đích thương mại.</p>
+        </div>
+
+        <h3>4.1 Nội dung công khai</h3>
+        <p>Thông tin sau được hiển thị công khai trên nền tảng:</p>
+        <ul>
+            <li>Tên người dùng và ảnh đại diện</li>
+            <li>Mã TikZ và file SVG bạn chia sẻ</li>
+            <li>Thời gian tạo file</li>
+            <li>Số lượt xem và lượt thích</li>
+        </ul>
+
+        <h3>4.2 Trường hợp chia sẻ hợp pháp</h3>
+        <p>Chúng tôi chỉ chia sẻ thông tin cá nhân khi:</p>
+        <ul>
+            <li>Có yêu cầu hợp pháp từ cơ quan chức năng</li>
+            <li>Bảo vệ quyền lợi hợp pháp của chúng tôi</li>
+            <li>Ngăn chặn hoạt động bất hợp pháp</li>
+        </ul>
+    </div>
+
+    <div class="legal-section">
+        <h2>5. Bảo mật thông tin</h2>
+        
+        <h3>5.1 Các biện pháp bảo mật</h3>
+        <ul>
+            <li><strong>Mã hóa dữ liệu:</strong> Sử dụng HTTPS cho tất cả giao tiếp</li>
+            <li><strong>Xác thực OAuth:</strong> Đăng nhập an toàn qua Google</li>
+            <li><strong>Bảo vệ cơ sở dữ liệu:</strong> Truy cập hạn chế và mã hóa</li>
+            <li><strong>Giới hạn tốc độ:</strong> Chống spam và tấn công brute force</li>
+        </ul>
+
+        <h3>5.2 Lưu trữ dữ liệu</h3>
+        <p>
+            Dữ liệu của bạn được lưu trữ trên máy chủ bảo mật với các biện pháp bảo vệ vật lý và kỹ thuật. 
+            Chúng tôi thường xuyên sao lưu dữ liệu để đảm bảo tính toàn vẹn.
+        </p>
+    </div>
+
+    <div class="legal-section">
+        <h2>6. Quyền của người dùng</h2>
+        
+        <h3>6.1 Truy cập và chỉnh sửa</h3>
+        <p>Bạn có quyền:</p>
+        <ul>
+            <li>Xem và chỉnh sửa thông tin cá nhân trong trang Cài đặt</li>
+            <li>Cập nhật ảnh đại diện và thông tin bio</li>
+            <li>Quản lý danh sách file SVG đã tạo</li>
+        </ul>
+
+        <h3>6.2 Xóa dữ liệu</h3>
+        <ul>
+            <li>Xóa từng file SVG cụ thể</li>
+            <li>Yêu cầu xóa toàn bộ tài khoản</li>
+            <li>Rút lại sự đồng ý xử lý dữ liệu</li>
+        </ul>
+
+        <div class="warning-box">
+            <p><strong>⚠️ Lưu ý:</strong> Việc xóa tài khoản sẽ xóa vĩnh viễn tất cả dữ liệu liên quan. Quá trình này không thể hoàn tác.</p>
+        </div>
+    </div>
+
+    <div class="legal-section">
+        <h2>7. Cookies và theo dõi</h2>
+        
+        <h3>7.1 Sử dụng Cookies</h3>
+        <p>Chúng tôi sử dụng cookies để:</p>
+        <ul>
+            <li>Duy trì phiên đăng nhập</li>
+            <li>Lưu trữ tùy chọn giao diện</li>
+            <li>Theo dõi hoạt động để cải thiện dịch vụ</li>
+            <li>Bảo mật chống CSRF</li>
+        </ul>
+
+        <h3>7.2 Quản lý Cookies</h3>
+        <p>
+            Bạn có thể quản lý cookies thông qua cài đặt trình duyệt. Tuy nhiên, việc vô hiệu hóa cookies 
+            có thể ảnh hưởng đến một số tính năng của dịch vụ.
+        </p>
+    </div>
+
+    <div class="legal-section">
+        <h2>8. Dịch vụ bên thứ ba</h2>
+        
+        <h3>8.1 Google OAuth</h3>
+        <p>
+            Chúng tôi sử dụng Google OAuth để xác thực người dùng. Việc sử dụng này tuân thủ 
+            <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Chính sách bảo mật của Google</a>.
+        </p>
+
+        <h3>8.2 Các dịch vụ khác</h3>
+        <ul>
+            <li><strong>LaTeX/TikZ Engine:</strong> Xử lý mã TikZ cục bộ, không chia sẻ với bên thứ ba</li>
+            <li><strong>File hosting:</strong> Lưu trữ file SVG/PNG trên máy chủ riêng</li>
+        </ul>
+    </div>
+
+    <div class="legal-section">
+        <h2>9. Quyền riêng tư của trẻ em</h2>
+        <p>
+            Dịch vụ của chúng tôi không nhắm đến trẻ em dưới 13 tuổi. Chúng tôi không cố ý thu thập 
+            thông tin cá nhân từ trẻ em dưới 13 tuổi. Nếu bạn phát hiện trường hợp này, vui lòng liên hệ 
+            với chúng tôi để xử lý kịp thời.
+        </p>
+    </div>
+
+    <div class="legal-section">
+        <h2>10. Thay đổi chính sách</h2>
+        <p>
+            Chúng tôi có thể cập nhật Chính sách bảo mật này theo thời gian. Mọi thay đổi quan trọng 
+            sẽ được thông báo qua email hoặc thông báo trên website. Việc tiếp tục sử dụng dịch vụ 
+            sau khi có thay đổi được coi như bạn đồng ý với chính sách mới.
+        </p>
+        
+        <div class="highlight-box">
+            <p><strong>📧 Thông báo:</strong> Chúng tôi khuyến khích bạn kiểm tra trang này định kỳ để cập nhật các thay đổi mới nhất.</p>
+        </div>
+    </div>
+
+    <div class="contact-info">
+        <h3>📞 Liên hệ</h3>
+        <p>Nếu bạn có bất kỳ câu hỏi nào về Chính sách bảo mật này, vui lòng liên hệ với chúng tôi:</p>
+        <ul>
+            <li><strong>Website:</strong> <a href="/">TikZ2SVG.com</a></li>
+            <li><strong>Email hỗ trợ:</strong> support@tikz2svg.com</li>
+            <li><strong>Địa chỉ:</strong> Việt Nam</li>
+        </ul>
+        <p>
+            Chúng tôi cam kết phản hồi mọi yêu cầu liên quan đến quyền riêng tư của bạn trong vòng 7 ngày làm việc.
+        </p>
+    </div>
+
+    <div class="legal-section">
+        <p class="thank-you-message">
+            Cảm ơn bạn đã tin tưởng và sử dụng TikZ2SVG! 🙏
+        </p>
+    </div>
+</div>
+{% endblock %}

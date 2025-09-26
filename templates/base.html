@@ -131,19 +131,82 @@
     </style>
     
     <!-- Google Analytics (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DH7Q258GXF"></script>
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
+      // Check if GA4 is already loaded to prevent duplicates
+      if (window.gtag || window.dataLayer) {
+          console.warn('⚠️ GA4 already loaded - skipping duplicate setup');
+      } else {
+          // Environment detection
+          const isProduction = window.location.hostname === 'tikz2svg.com' || 
+                              window.location.hostname === 'www.tikz2svg.com';
+          const isDevelopment = window.location.hostname === 'localhost' || 
+                               window.location.hostname === '127.0.0.1' || 
+                               window.location.port === '5173' ||
+                               window.location.port === '5000' ||
+                               window.location.hostname.includes('localhost');
 
-      gtag('config', 'G-DH7Q258GXF');
+          // Initialize dataLayer and gtag function
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          window.gtag = gtag;
 
+          if (isDevelopment) {
+              // Development: Cookieless mode to avoid warnings
+              if (console && console.log) console.log('🔧 GA4 Development Mode');
+              
+              gtag('consent', 'default', {
+                  'analytics_storage': 'denied'
+              });
+              
+              gtag('config', 'G-DH7Q258GXF', {
+                  'storage': 'none',
+                  'client_storage': 'none', 
+                  'anonymize_ip': true,
+                  'allow_google_signals': false,
+                  'send_page_view': true,
+                  'debug_mode': true
+              });
+              
+          } else {
+              // Production: Full tracking with cookies and GDPR compliance
+              gtag('consent', 'default', {
+                  'analytics_storage': 'granted',
+                  'ad_storage': 'denied',
+                  'personalization_storage': 'denied',
+                  'functionality_storage': 'denied',
+                  'security_storage': 'granted'
+              });
+              
+              gtag('config', 'G-DH7Q258GXF', {
+                  'cookie_domain': isProduction ? '.tikz2svg.com' : 'auto',
+                  'cookie_expires': 63072000, // 2 years
+                  'anonymize_ip': true,
+                  'allow_google_signals': false,
+                  'send_page_view': true,
+                  'cookie_flags': 'SameSite=Lax;Secure'
+              });
+          }
+          
+          // Load the GA4 script after configuration
+          const script = document.createElement('script');
+          script.async = true;
+          script.src = 'https://www.googletagmanager.com/gtag/js?id=G-DH7Q258GXF';
+          document.head.appendChild(script);
+          
+          // Store environment detection globally for helper functions
+          window._gaEnvironment = { isDevelopment: isDevelopment };
+      }
+      
       // Helper function để gửi custom events
       function trackEvent(eventName, parameters = {}) {
           if (typeof gtag === 'function') {
               gtag('event', eventName, parameters);
-              console.log('GA4 Event:', eventName, parameters);
+              // Only log in development
+              if (window._gaEnvironment && window._gaEnvironment.isDevelopment && console && console.log) {
+                  console.log('GA4 Event:', eventName, parameters);
+              }
+          } else if (window._gaEnvironment && window._gaEnvironment.isDevelopment && console && console.warn) {
+              console.warn('⚠️ gtag function not available');
           }
       }
 

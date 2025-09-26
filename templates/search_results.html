@@ -12,7 +12,7 @@
 {% block title %}Kết quả tìm kiếm - TikZ to SVG{% endblock %}
 
 {# Body attributes for authentication #}
-{% block body_attrs %} data-is-logged-in="{% if user_email %}true{% else %}false{% endif %}" data-set-next-url="{{ url_for('set_next_url') }}"{% endblock %}
+{% block body_attrs %} data-is-logged-in="{% if user_email %}true{% else %}false{% endif %}" data-set-next-url="{{ url_for('set_next_url') }}" data-search-query="{{ search_query }}" data-results-count="{{ results_count }}"{% endblock %}
 
 {# Page-specific CSS #}
 {% block extra_css %}
@@ -63,6 +63,29 @@
         loggedIn: {% if user_email %}true{% else %}false{% endif %},
         userEmail: {% if user_email %}'{{ user_email }}'{% else %}null{% endif %}
     };
+    
+    // Track search results page view
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.analytics) {
+            const searchQuery = document.body.getAttribute('data-search-query');
+            const resultCount = parseInt(document.body.getAttribute('data-results-count') || '0');
+            
+            // Track search results page view
+            window.analytics.trackSearch(searchQuery, 'results_page_view', resultCount);
+            
+            // Track search performance (success/failure)
+            if (resultCount > 0) {
+                window.analytics.trackUserAction('search_success', {
+                    'query': searchQuery,
+                    'result_count': resultCount
+                });
+            } else {
+                window.analytics.trackUserAction('search_no_results', {
+                    'query': searchQuery
+                });
+            }
+        }
+    });
 </script>
 <script src="{{ url_for('static', filename='js/file_card.js', v='1.2') }}"></script>
 {% endblock %}

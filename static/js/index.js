@@ -79,6 +79,11 @@
         if (codeBlock && copyBtn) {
             const code = codeBlock.textContent;
             navigator.clipboard.writeText(code).then(function() {
+                // Track successful copy
+                if (window.analytics) {
+                    window.analytics.trackFileCopy('svg', 'clipboard');
+                }
+                
                 copyBtn.textContent = '✅ Đã copy!';
                 setTimeout(() => { 
                     copyBtn.textContent = '📋 Copy Code'; 
@@ -96,6 +101,12 @@
                 textArea.select();
                 document.execCommand('copy');
                 document.body.removeChild(textArea);
+                
+                // Track successful copy (fallback method)
+                if (window.analytics) {
+                    window.analytics.trackFileCopy('svg', 'fallback');
+                }
+                
                 copyBtn.textContent = '✅ Đã copy!';
                 setTimeout(() => { 
                     copyBtn.textContent = '📋 Copy Code'; 
@@ -295,6 +306,12 @@
                     const fullLog = fullLogEl ? fullLogEl.textContent : '';
 //                     console.log('Error detected:', msg);
 //                     console.log('Full log:', fullLog ? 'Yes' : 'No');
+                    
+                    // Track TikZ render error
+                    if (window.analytics) {
+                        window.analytics.trackTikzRender(false, 'compile_error');
+                    }
+                    
                     displayCompileError(msg, fullLog);
                     // Reset button ngay khi có lỗi
 //                     console.log('🔧 TIKZ ERROR: Resetting button to:', originalText);
@@ -356,6 +373,11 @@
                     resultToolsSection.style.display = 'none';
                 }
 
+                // Track TikZ render success
+                if (window.analytics) {
+                    window.analytics.trackTikzRender(true, null);
+                }
+                
                 // Khởi tạo lại CodeMirror cho textarea id="code"
                 ensureCodeMirror();
                 
@@ -452,6 +474,15 @@
                                     });
                                     const data = await res.json();
                                     if (data.url) {
+                                        // Track successful export/download
+                                        if (window.analytics) {
+                                            if (format === 'svg') {
+                                                window.analytics.trackFileDownload('svg', data.filename || 'exported.svg');
+                                            } else {
+                                                window.analytics.trackImageExport(format, data.actual_size || `${widthVal || 'auto'}x${heightVal || 'auto'}`);
+                                            }
+                                        }
+                                        
                                         // Container to make layout clean like view_svg
                                         const container = document.createElement('div');
                                         container.style.display = 'flex';
@@ -490,9 +521,25 @@
 
                                         msg.appendChild(container);
                                     } else {
+                                        // Track export error
+                                        if (window.analytics) {
+                                            window.analytics.trackUserAction('export_error', {
+                                                'format': format,
+                                                'error_type': 'server_error',
+                                                'error_message': data.error || 'unknown_error'
+                                            });
+                                        }
                                         msg.textContent = data.error || 'Lỗi không xác định!';
                                     }
                                 } catch (err) {
+                                    // Track export network error
+                                    if (window.analytics) {
+                                        window.analytics.trackUserAction('export_error', {
+                                            'format': format,
+                                            'error_type': 'network_error',
+                                            'error_message': err.message || 'connection_error'
+                                        });
+                                    }
                                     msg.textContent = 'Lỗi kết nối hoặc máy chủ!';
                                 }
 
@@ -951,6 +998,13 @@ function initializeSearch() {
                         item.className = 'search-suggestion-item';
                         item.textContent = keyword;
                         item.addEventListener('click', () => {
+                            // Track suggestion click
+                            if (window.analytics) {
+                                const position = Array.from(suggestionsBox.children).indexOf(item) + 1;
+                                window.analytics.trackSearchSuggestionClick(keyword, position);
+                                window.analytics.trackSearch(keyword, 'suggestion');
+                            }
+                            
                             searchInput.value = keyword;
                             hideSuggestions();
                             // Navigate to search results page
@@ -974,6 +1028,11 @@ function initializeSearch() {
         if (e.key === 'Enter') {
             const query = this.value.trim();
             if (query) {
+                // Track search via Enter key
+                if (window.analytics) {
+                    window.analytics.trackSearch(query, 'enter_key');
+                }
+                
                 hideSuggestions();
                 window.location.href = `/search?q=${encodeURIComponent(query)}`;
             }

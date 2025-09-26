@@ -130,6 +130,84 @@
     }
     </style>
     
+    <!-- Google Analytics (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DH7Q258GXF"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-DH7Q258GXF');
+
+      // Helper function để gửi custom events
+      function trackEvent(eventName, parameters = {}) {
+          if (typeof gtag === 'function') {
+              gtag('event', eventName, parameters);
+              console.log('GA4 Event:', eventName, parameters);
+          }
+      }
+
+      // Helper function cho các events thường dùng
+      window.analytics = {
+          trackTikzRender: function(success, errorType = null) {
+              trackEvent('tikz_render', {
+                  'success': success,
+                  'error_type': errorType,
+                  'page_location': window.location.href
+              });
+          },
+          
+          trackFileCopy: function(fileType, method = 'clipboard') {
+              trackEvent('file_copy', {
+                  'file_type': fileType,
+                  'method': method,
+                  'page_location': window.location.href
+              });
+          },
+          
+          trackFileDownload: function(fileType, fileName = null) {
+              trackEvent('file_download', {
+                  'file_type': fileType,
+                  'file_name': fileName,
+                  'page_location': window.location.href
+              });
+          },
+          
+          trackImageExport: function(format, size = null) {
+              trackEvent('image_export', {
+                  'format': format,
+                  'image_size': size,
+                  'page_location': window.location.href
+              });
+          },
+          
+          trackUserAction: function(action, details = {}) {
+              trackEvent('user_action', {
+                  'action_type': action,
+                  ...details,
+                  'page_location': window.location.href
+              });
+          },
+          
+          trackSearch: function(query, method = 'manual', resultCount = null) {
+              trackEvent('search', {
+                  'search_term': query,
+                  'method': method, // manual, suggestion, enter_key
+                  'result_count': resultCount,
+                  'page_location': window.location.href
+              });
+          },
+          
+          trackSearchSuggestionClick: function(suggestion, position) {
+              trackEvent('search_suggestion_click', {
+                  'suggestion_text': suggestion,
+                  'position': position,
+                  'page_location': window.location.href
+              });
+          }
+      };
+    </script>
+    
     <!-- Page-specific JavaScript Variables -->
     {% block head_js %}{% endblock %}
 </head>

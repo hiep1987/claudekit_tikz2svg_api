@@ -22,16 +22,51 @@ function initializeFileCardActions() {
             case 'share-facebook':
                 const filename = btn.getAttribute('data-filename');
                 const shareUrl = `${window.location.origin}/view_svg/${filename}`;
+                
+                // Track facebook share action
+                if (window.analytics) {
+                    window.analytics.trackUserAction('social_share', {
+                        'platform': 'facebook',
+                        'filename': filename,
+                        'method': 'copy_link'
+                    });
+                }
+                
                 copyToClipboard(shareUrl, btn, 'Facebook', 'Đã copy!');
                 break;
                 
             case 'copy-link':
                 const url = btn.getAttribute('data-url');
+                
+                // Track copy link action
+                if (window.analytics) {
+                    window.analytics.trackFileCopy('link', 'button');
+                }
+                
                 copyToClipboard(url, btn, 'Copy Link', 'Đã copy!');
                 break;
                 
             case 'download-image':
                 const downloadFilename = btn.getAttribute('data-filename');
+                
+                // Track SVG file view from search results
+                if (window.analytics && window.location.pathname.includes('/search')) {
+                    const searchQuery = document.body.getAttribute('data-search-query');
+                    window.analytics.trackUserAction('search_result_click', {
+                        'query': searchQuery,
+                        'filename': downloadFilename,
+                        'action': 'view_svg'
+                    });
+                }
+                
+                // Track general file view
+                if (window.analytics) {
+                    window.analytics.trackUserAction('file_view', {
+                        'filename': downloadFilename,
+                        'source': window.location.pathname.includes('/search') ? 'search' : 'browse'
+                    });
+                }
+                
                 window.location.href = `/view_svg/${downloadFilename}`;
                 break;
                 
@@ -200,6 +235,17 @@ function initializeFileCardTouchEvents() {
                 case 'share-facebook':
                     const filename = btn.getAttribute('data-filename');
                     const shareUrl = `${window.location.origin}/view_svg/${filename}`;
+                    
+                    // Track facebook share action (mobile)
+                    if (window.analytics) {
+                        window.analytics.trackUserAction('social_share', {
+                            'platform': 'facebook',
+                            'filename': filename,
+                            'method': 'copy_link',
+                            'device': 'mobile'
+                        });
+                    }
+                    
                     copyToClipboard(shareUrl, btn, 'Facebook', 'Đã copy!');
                     setTimeout(() => {
                         btn.dataset.tapCount = '0';
@@ -209,6 +255,12 @@ function initializeFileCardTouchEvents() {
                     
                 case 'copy-link':
                     const url = btn.getAttribute('data-url');
+                    
+                    // Track copy link action (mobile)
+                    if (window.analytics) {
+                        window.analytics.trackFileCopy('link', 'button_mobile');
+                    }
+                    
                     copyToClipboard(url, btn, 'Copy Link', 'Đã copy!');
                     setTimeout(() => {
                         btn.dataset.tapCount = '0';
@@ -218,6 +270,27 @@ function initializeFileCardTouchEvents() {
                     
                 case 'download-image':
                     const downloadFilename = btn.getAttribute('data-filename');
+                    
+                    // Track SVG file view from search results (mobile)
+                    if (window.analytics && window.location.pathname.includes('/search')) {
+                        const searchQuery = document.body.getAttribute('data-search-query');
+                        window.analytics.trackUserAction('search_result_click', {
+                            'query': searchQuery,
+                            'filename': downloadFilename,
+                            'action': 'view_svg',
+                            'device': 'mobile'
+                        });
+                    }
+                    
+                    // Track general file view (mobile)
+                    if (window.analytics) {
+                        window.analytics.trackUserAction('file_view', {
+                            'filename': downloadFilename,
+                            'source': window.location.pathname.includes('/search') ? 'search' : 'browse',
+                            'device': 'mobile'
+                        });
+                    }
+                    
                     if (downloadFilename) window.location.href = `/view_svg/${downloadFilename}`;
                     btn.dataset.tapCount = '0';
                     btn.classList.remove('individual-active', 'ready-to-execute');

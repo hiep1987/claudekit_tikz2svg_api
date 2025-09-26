@@ -19,6 +19,11 @@
   function copyToClipboard(text, button, originalText) {
     if (navigator.clipboard && window.isSecureContext) {
       navigator.clipboard.writeText(text).then(() => {
+        // Track copy action
+        if (window.analytics) {
+          window.analytics.trackFileCopy('link', 'clipboard');
+        }
+        
         button.textContent = '✅ Đã copy!';
         setTimeout(() => { button.textContent = originalText; }, 2000);
       });
@@ -31,6 +36,12 @@
       textArea.select();
       document.execCommand('copy');
       document.body.removeChild(textArea);
+      
+      // Track copy action (fallback)
+      if (window.analytics) {
+        window.analytics.trackFileCopy('link', 'fallback');
+      }
+      
       button.textContent = '✅ Đã copy!';
       setTimeout(() => { button.textContent = originalText; }, 2000);
     }
@@ -67,6 +78,15 @@
       });
       const data = await res.json();
       if (data.url) {
+        // Track successful export
+        if (window.analytics) {
+          if (format === 'svg') {
+            window.analytics.trackFileDownload('svg', data.filename || 'exported.svg');
+          } else {
+            window.analytics.trackImageExport(format, data.actual_size || `${widthVal || 'auto'}x${heightVal || 'auto'}`);
+          }
+        }
+        
         let fileInfoText = '';
         if (data.file_size) {
           const sizeKB = (data.file_size / 1024).toFixed(1);
@@ -75,6 +95,16 @@
         msg.className = '';
         msg.innerHTML = `<a href="${data.url}" download class="export-download-link">Tải về ${format.toUpperCase()}</a>${fileInfoText}`;
       } else {
+        // Track export error
+        if (window.analytics) {
+          window.analytics.trackUserAction('export_error', {
+            'format': format,
+            'error_type': 'server_error',
+            'error_message': data.error || 'unknown_error',
+            'page': 'view_svg'
+          });
+        }
+        
         msg.className = 'error';
         msg.textContent = data.error || 'Lỗi không xác định!';
         if (data.estimated_size_mb) {
@@ -93,6 +123,16 @@
         }
       }
     } catch (err) {
+      // Track network error
+      if (window.analytics) {
+        window.analytics.trackUserAction('export_error', {
+          'format': format,
+          'error_type': 'network_error',
+          'error_message': err.message || 'connection_error',
+          'page': 'view_svg'
+        });
+      }
+      
       msg.className = 'error';
       msg.textContent = 'Lỗi kết nối hoặc máy chủ!';
     }
@@ -219,6 +259,11 @@
     if (downloadSvgBtn) {
       downloadSvgBtn.addEventListener('click', function() {
         requireLogin(() => {
+          // Track SVG download
+          if (window.analytics) {
+            window.analytics.trackFileDownload('svg', 'direct_download.svg');
+          }
+          
           const svgUrl = document.getElementById('view-svg-img').getAttribute('src');
           const link = document.createElement('a');
           link.href = svgUrl;

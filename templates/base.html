@@ -130,91 +130,56 @@
     }
     </style>
     
-    <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-N6J4LQJ4');</script>
-    <!-- End Google Tag Manager -->
-    <!-- Google Analytics (gtag.js) -->
+    <!-- Google Tag Manager (Production only) -->
     <script>
-      // Check if GA4 is already loaded to prevent duplicates
-      if (window.gtag || window.dataLayer) {
-          console.warn('⚠️ GA4 already loaded - skipping duplicate setup');
-      } else {
-          // Environment detection
-          const isProduction = window.location.hostname === 'tikz2svg.com' || 
-                              window.location.hostname === 'www.tikz2svg.com';
-          const isDevelopment = window.location.hostname === 'localhost' || 
-                               window.location.hostname === '127.0.0.1' || 
-                               window.location.port === '5173' ||
-                               window.location.port === '5000' ||
-                               window.location.hostname.includes('localhost');
-
-          // Initialize dataLayer and gtag function
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          window.gtag = gtag;
-
-          if (isDevelopment) {
-              // Development: Cookieless mode to avoid warnings
-              if (console && console.log) console.log('🔧 GA4 Development Mode');
-              
-              gtag('consent', 'default', {
-                  'analytics_storage': 'denied'
-              });
-              
-              gtag('config', 'G-DH7Q258GXF', {
-                  'storage': 'none',
-                  'client_storage': 'none', 
-                  'anonymize_ip': true,
-                  'allow_google_signals': false,
-                  'send_page_view': true,
-                  'debug_mode': true
-              });
-              
-          } else {
-              // Production: Full tracking with cookies and GDPR compliance
-              gtag('consent', 'default', {
-                  'analytics_storage': 'granted',
-                  'ad_storage': 'denied',
-                  'personalization_storage': 'denied',
-                  'functionality_storage': 'denied',
-                  'security_storage': 'granted'
-              });
-              
-              gtag('config', 'G-DH7Q258GXF', {
-                  'cookie_domain': isProduction ? '.tikz2svg.com' : 'auto',
-                  'cookie_expires': 63072000, // 2 years
-                  'anonymize_ip': true,
-                  'allow_google_signals': false,
-                  'send_page_view': true,
-                  'cookie_flags': 'SameSite=Lax;Secure'
-              });
-          }
-          
-          // Load the GA4 script after configuration
-          const script = document.createElement('script');
-          script.async = true;
-          script.src = 'https://www.googletagmanager.com/gtag/js?id=G-DH7Q258GXF';
-          document.head.appendChild(script);
-          
-          // Store environment detection globally for helper functions
-          window._gaEnvironment = { isDevelopment: isDevelopment };
-      }
+      // Environment detection
+      const isProduction = window.location.hostname === 'tikz2svg.com' || 
+                          window.location.hostname === 'www.tikz2svg.com';
+      const isDevelopment = window.location.hostname === 'localhost' || 
+                           window.location.hostname === '127.0.0.1' || 
+                           window.location.port === '5173' ||
+                           window.location.port === '5000' ||
+                           window.location.hostname.includes('localhost');
       
-      // Helper function để gửi custom events
-      // Đã xóa toàn bộ hàm gửi event custom. Chỉ giữ lại cấu hình pageview mặc định GA4.
+      // Only load GTM in production to avoid cookie warnings in development
+      if (isProduction) {
+          (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+          new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+          j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+          'https://www.googletagmanager.com/gtag/js?id='+i+dl;f.parentNode.insertBefore(j,f);
+          })(window,document,'script','dataLayer','GTM-N6J4LQJ4');
+      } else {
+          // Development: Initialize minimal dataLayer for compatibility
+          window.dataLayer = window.dataLayer || [];
+          console.log('🔧 Development Mode - GTM disabled, no cookies');
+      }
+    </script>
+    <!-- End Google Tag Manager -->
+    <!-- Environment detection for helper functions -->
+    <script>
+      // Store environment detection globally for helper functions
+      window._gaEnvironment = { 
+          isDevelopment: window.location.hostname === 'localhost' || 
+                        window.location.hostname === '127.0.0.1' || 
+                        window.location.port === '5173' ||
+                        window.location.port === '5000' ||
+                        window.location.hostname.includes('localhost'),
+          isProduction: window.location.hostname === 'tikz2svg.com' || 
+                       window.location.hostname === 'www.tikz2svg.com'
+      };
     </script>
     
     <!-- Page-specific JavaScript Variables -->
     {% block head_js %}{% endblock %}
 </head>
 <body{% block body_attrs %}{% endblock %}>
-    <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N6J4LQJ4"
-    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- Google Tag Manager (noscript) - Production only -->
+    <script>
+      // Only show GTM noscript in production
+      if (window.location.hostname === 'tikz2svg.com' || window.location.hostname === 'www.tikz2svg.com') {
+          document.write('<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N6J4LQJ4" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>');
+      }
+    </script>
     <!-- End Google Tag Manager (noscript) -->
     <!-- TikZ App Container Scope -->
     <div class="tikz-app">

@@ -145,37 +145,35 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       
-      // Direct GA4 implementation (replacing problematic GTM)
+      // GTM with proper consent mode to prevent Firefox cookie warnings
       if (isProduction) {
-          // Set consent mode BEFORE GA4 loads to prevent Firefox cookie warnings
+          // CRITICAL: Set consent mode BEFORE GTM loads to control cookie behavior
           gtag('consent', 'default', {
-              'analytics_storage': 'granted',
+              'analytics_storage': 'denied',  // Start with denied
               'ad_storage': 'denied',
               'personalization_storage': 'denied',
               'functionality_storage': 'denied',
               'security_storage': 'granted'
           });
           
-          // Configure GA4 with proper settings for Firefox compatibility
-          gtag('config', 'G-DH7Q258GXF', {
-              'cookie_domain': '.tikz2svg.com',
-              'cookie_expires': 63072000, // 2 years
-              'anonymize_ip': true,
-              'allow_google_signals': false,
-              'send_page_view': true,
-              'cookie_flags': 'SameSite=Lax;Secure'
-          });
+          // Load GTM with consent already configured
+          (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+          new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+          j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+          'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+          })(window,document,'script','dataLayer','GTM-N6J4LQJ4');
           
-          // Load GA4 script
-          const script = document.createElement('script');
-          script.async = true;
-          script.src = 'https://www.googletagmanager.com/gtag/js?id=G-DH7Q258GXF';
-          document.head.appendChild(script);
+          // Grant consent AFTER GTM loads to prevent cookie conflicts
+          setTimeout(() => {
+              gtag('consent', 'update', {
+                  'analytics_storage': 'granted'
+              });
+              console.log('✅ GTM loaded with delayed consent - Firefox compatible');
+          }, 100);
           
-          console.log('✅ Direct GA4 loaded with Firefox-compatible settings');
       } else {
           // Development: No analytics
-          console.log('🔧 Development Mode - Analytics disabled, no cookies');
+          console.log('🔧 Development Mode - GTM disabled, no cookies');
       }
     </script>
     <!-- End Google Tag Manager -->
@@ -197,7 +195,13 @@
     {% block head_js %}{% endblock %}
 </head>
 <body{% block body_attrs %}{% endblock %}>
-    <!-- Direct GA4 - No noscript needed (GTM removed) -->
+    <!-- Google Tag Manager (noscript) - Production only -->
+    <script>
+      // Only show GTM noscript in production
+      if (window.location.hostname === 'tikz2svg.com' || window.location.hostname === 'www.tikz2svg.com') {
+          document.write('<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N6J4LQJ4" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>');
+      }
+    </script>
     <!-- End Google Tag Manager (noscript) -->
     <!-- TikZ App Container Scope -->
     <div class="tikz-app">

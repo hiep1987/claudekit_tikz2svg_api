@@ -145,8 +145,8 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       
-      // Only load GTM in production to avoid cookie warnings in development
-      if (isProduction) {
+      // TEMPORARILY DISABLE GTM to test if it's causing Firefox cookie warnings
+      if (false && isProduction) {
           // Set consent mode BEFORE GTM loads to prevent automatic cookie creation
           gtag('consent', 'default', {
               'analytics_storage': 'granted',
@@ -163,8 +163,8 @@
           'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
           })(window,document,'script','dataLayer','GTM-N6J4LQJ4');
       } else {
-          // Development: Initialize minimal dataLayer for compatibility
-          console.log('🔧 Development Mode - GTM disabled, no cookies');
+          // GTM DISABLED FOR TESTING - checking if it causes Firefox cookie warnings
+          console.log('🧪 GTM temporarily disabled for Firefox cookie warning testing');
       }
     </script>
     <!-- End Google Tag Manager -->
@@ -186,10 +186,10 @@
     {% block head_js %}{% endblock %}
 </head>
 <body{% block body_attrs %}{% endblock %}>
-    <!-- Google Tag Manager (noscript) - Production only -->
+    <!-- Google Tag Manager (noscript) - TEMPORARILY DISABLED FOR TESTING -->
     <script>
-      // Only show GTM noscript in production
-      if (window.location.hostname === 'tikz2svg.com' || window.location.hostname === 'www.tikz2svg.com') {
+      // GTM noscript disabled for Firefox cookie warning testing
+      if (false && (window.location.hostname === 'tikz2svg.com' || window.location.hostname === 'www.tikz2svg.com')) {
           document.write('<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N6J4LQJ4" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>');
       }
     </script>

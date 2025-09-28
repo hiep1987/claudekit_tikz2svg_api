@@ -145,20 +145,38 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       
-      // TEMPORARY: Disable GTM completely to test cookie warnings
-      if (false && isProduction) {
-          // Only load GTM, let GTM handle all GA4 setup
-          (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-          new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-          j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-          'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-          })(window,document,'script','dataLayer','GTM-N6J4LQJ4');
+      // Direct GA4 implementation - GTM proved to be problematic
+      if (isProduction) {
+          // Set consent mode for Firefox compatibility
+          gtag('consent', 'default', {
+              'analytics_storage': 'granted',
+              'ad_storage': 'denied',
+              'personalization_storage': 'denied',
+              'functionality_storage': 'denied',
+              'security_storage': 'granted'
+          });
           
-          console.log('✅ GTM loaded - GA4 handled by GTM HTML tag only');
+          // Configure GA4 with Firefox-compatible settings
+          gtag('config', 'G-DH7Q258GXF', {
+              'cookie_domain': '.tikz2svg.com',
+              'cookie_expires': 63072000,
+              'anonymize_ip': true,
+              'allow_google_signals': false,
+              'send_page_view': true,
+              'cookie_flags': 'SameSite=Lax;Secure'
+          });
+          
+          // Load GA4 script
+          const script = document.createElement('script');
+          script.async = true;
+          script.src = 'https://www.googletagmanager.com/gtag/js?id=G-DH7Q258GXF';
+          document.head.appendChild(script);
+          
+          console.log('✅ Direct GA4 loaded - Firefox compatible, no GTM conflicts');
           
       } else {
-          // GTM disabled for cookie warning testing
-          console.log('🧪 GTM completely disabled - testing if cookie warnings disappear');
+          // Development: No analytics
+          console.log('🔧 Development Mode - Analytics disabled, no cookies');
       }
     </script>
     <!-- End Google Tag Manager -->

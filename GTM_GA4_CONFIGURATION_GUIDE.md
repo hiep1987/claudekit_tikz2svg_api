@@ -15,8 +15,9 @@
 - ✅ Chỉ GTM quản lý GA4 (chỉ trong production)
 - ✅ Loại bỏ code GA4 riêng biệt
 - ✅ GTM bị disable hoàn toàn trong development
+- ✅ Implement GA4 Consent Mode trước khi GTM load
 - ✅ Giữ lại environment detection cho các helper functions
-- ✅ Không còn duplicate warnings và cookie conflicts
+- ✅ Không còn duplicate warnings và cookie conflicts (cả Firefox)
 
 ## 🔧 Cấu hình GTM Container: GTM-N6J4LQJ4
 
@@ -91,10 +92,11 @@ console.log('🔧 Analytics Development Mode - GTM Active');
 
 ### 3. Không còn warnings
 - ✅ Không còn "GA4 already loaded"
-- ✅ Không còn cookie overwrite warnings  
+- ✅ Không còn cookie overwrite warnings (cả Firefox và Chrome)
 - ✅ Clean console logs
 - ✅ GTM chỉ load trong production (tikz2svg.com)
 - ✅ Development mode: "🔧 Development Mode - GTM disabled, no cookies"
+- ✅ Consent Mode prevents automatic cookie creation conflicts
 
 ## 📋 Checklist
 

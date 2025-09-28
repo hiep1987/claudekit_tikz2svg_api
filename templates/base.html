@@ -130,35 +130,25 @@
     }
     </style>
     
-    <!-- Google tag (gtag.js) - Production only -->
+    <!-- Google Tag Manager - Exactly as Google recommends -->
     <script>
       // Environment detection
       const isProduction = window.location.hostname === 'tikz2svg.com' || 
                           window.location.hostname === 'www.tikz2svg.com';
-      const isDevelopment = window.location.hostname === 'localhost' || 
-                           window.location.hostname === '127.0.0.1' || 
-                           window.location.port === '5173' ||
-                           window.location.port === '5000' ||
-                           window.location.hostname.includes('localhost');
       
       if (isProduction) {
-          // Load GA4 script first
-          const script = document.createElement('script');
-          script.async = true;
-          script.src = 'https://www.googletagmanager.com/gtag/js?id=G-DH7Q258GXF';
-          document.head.appendChild(script);
+          // Google Tag Manager - Standard implementation
+          (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+          new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+          j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+          'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+          })(window,document,'script','dataLayer','GTM-N6J4LQJ4');
           
-          // Initialize exactly as Google recommends
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-DH7Q258GXF');
-          
-          console.log('✅ Google Standard GA4 loaded - Simple implementation');
+          console.log('✅ Google Standard GTM loaded');
           
       } else {
           // Development: No analytics
-          console.log('🔧 Development Mode - Analytics disabled, no cookies');
+          console.log('🔧 Development Mode - GTM disabled, no cookies');
       }
     </script>
     <!-- End Google Tag Manager -->
@@ -180,13 +170,9 @@
     {% block head_js %}{% endblock %}
 </head>
 <body{% block body_attrs %}{% endblock %}>
-    <!-- Google Tag Manager (noscript) - Production only -->
-    <script>
-      // Only show GTM noscript in production
-      if (window.location.hostname === 'tikz2svg.com' || window.location.hostname === 'www.tikz2svg.com') {
-          document.write('<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N6J4LQJ4" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>');
-      }
-    </script>
+    <!-- Google Tag Manager (noscript) - Exactly as Google recommends -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N6J4LQJ4"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
     <!-- TikZ App Container Scope -->
     <div class="tikz-app">

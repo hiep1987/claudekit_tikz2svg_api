@@ -145,45 +145,20 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       
-      // Hybrid approach: GTM for events only + Direct GA4 for pageviews
+      // Simple GTM approach - let GTM handle everything but set consent properly
       if (isProduction) {
-          // 1. Setup Direct GA4 first with consent mode
-          gtag('consent', 'default', {
-              'analytics_storage': 'granted',
-              'ad_storage': 'denied',
-              'personalization_storage': 'denied',
-              'functionality_storage': 'denied',
-              'security_storage': 'granted'
-          });
-          
-          // 2. Configure GA4 directly (not through GTM)
-          gtag('config', 'G-DH7Q258GXF', {
-              'cookie_domain': '.tikz2svg.com',
-              'cookie_expires': 63072000,
-              'anonymize_ip': true,
-              'allow_google_signals': false,
-              'send_page_view': true,
-              'cookie_flags': 'SameSite=Lax;Secure'
-          });
-          
-          // 3. Load GA4 script
-          const gaScript = document.createElement('script');
-          gaScript.async = true;
-          gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-DH7Q258GXF';
-          document.head.appendChild(gaScript);
-          
-          // 4. Load GTM for events only (should not have GA4 Configuration tag)
+          // Load GTM normally
           (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
           new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
           j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
           })(window,document,'script','dataLayer','GTM-N6J4LQJ4');
           
-          console.log('✅ Hybrid setup: Direct GA4 + GTM events only');
+          console.log('✅ GTM loaded - Configure GA4 tag in GTM with Firefox-compatible settings');
           
       } else {
           // Development: No analytics
-          console.log('🔧 Development Mode - Analytics disabled, no cookies');
+          console.log('🔧 Development Mode - GTM disabled, no cookies');
       }
     </script>
     <!-- End Google Tag Manager -->

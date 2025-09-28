@@ -145,8 +145,8 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       
-      // GTM approach - prevent duplicate GA4 loading
-      if (isProduction) {
+      // TEMPORARY: Disable GTM completely to test cookie warnings
+      if (false && isProduction) {
           // Only load GTM, let GTM handle all GA4 setup
           (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
           new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -157,8 +157,8 @@
           console.log('✅ GTM loaded - GA4 handled by GTM HTML tag only');
           
       } else {
-          // Development: No analytics
-          console.log('🔧 Development Mode - GTM disabled, no cookies');
+          // GTM disabled for cookie warning testing
+          console.log('🧪 GTM completely disabled - testing if cookie warnings disappear');
       }
     </script>
     <!-- End Google Tag Manager -->

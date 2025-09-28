@@ -130,7 +130,7 @@
     }
     </style>
     
-    <!-- Google Tag Manager (Production only) -->
+    <!-- Google tag (gtag.js) - Production only -->
     <script>
       // Environment detection
       const isProduction = window.location.hostname === 'tikz2svg.com' || 
@@ -141,48 +141,20 @@
                            window.location.port === '5000' ||
                            window.location.hostname.includes('localhost');
       
-      // Initialize dataLayer before GTM loads
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      
-      // Hybrid approach: Direct GA4 + Clean GTM for events
       if (isProduction) {
-          // 1. Set consent mode FIRST for Firefox compatibility
-          gtag('consent', 'default', {
-              'analytics_storage': 'granted',
-              'ad_storage': 'denied',
-              'personalization_storage': 'denied',
-              'functionality_storage': 'denied',
-              'security_storage': 'granted'
-          });
+          // Load GA4 script first
+          const script = document.createElement('script');
+          script.async = true;
+          script.src = 'https://www.googletagmanager.com/gtag/js?id=G-DH7Q258GXF';
+          document.head.appendChild(script);
           
-          // 2. Load GA4 script for direct configuration
-          const gaScript = document.createElement('script');
-          gaScript.async = true;
-          gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-DH7Q258GXF';
-          document.head.appendChild(gaScript);
+          // Initialize exactly as Google recommends
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-DH7Q258GXF');
           
-          // 3. Configure GA4 directly (pageviews + base setup)
-          gaScript.onload = function() {
-              gtag('config', 'G-DH7Q258GXF', {
-                  'cookie_domain': '.tikz2svg.com',
-                  'cookie_expires': 63072000,
-                  'anonymize_ip': true,
-                  'allow_google_signals': false,
-                  'send_page_view': true,
-                  'cookie_flags': 'SameSite=Lax;Secure'
-              });
-              console.log('✅ Direct GA4 configured - Firefox compatible');
-          };
-          
-          // 4. Load GTM for events only (no GA4 config tags!)
-          (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-          new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-          j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-          'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-          })(window,document,'script','dataLayer','GTM-N6J4LQJ4');
-          
-          console.log('✅ Clean GTM loaded - Events only, no config conflicts');
+          console.log('✅ Google Standard GA4 loaded - Simple implementation');
           
       } else {
           // Development: No analytics

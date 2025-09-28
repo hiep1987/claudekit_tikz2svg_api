@@ -145,9 +145,9 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       
-      // Direct GA4 implementation - GTM proved to be problematic
+      // Hybrid approach: Direct GA4 + Clean GTM for events
       if (isProduction) {
-          // Set consent mode for Firefox compatibility
+          // 1. Set consent mode FIRST for Firefox compatibility
           gtag('consent', 'default', {
               'analytics_storage': 'granted',
               'ad_storage': 'denied',
@@ -156,23 +156,33 @@
               'security_storage': 'granted'
           });
           
-          // Configure GA4 with Firefox-compatible settings
-          gtag('config', 'G-DH7Q258GXF', {
-              'cookie_domain': '.tikz2svg.com',
-              'cookie_expires': 63072000,
-              'anonymize_ip': true,
-              'allow_google_signals': false,
-              'send_page_view': true,
-              'cookie_flags': 'SameSite=Lax;Secure'
-          });
+          // 2. Load GA4 script for direct configuration
+          const gaScript = document.createElement('script');
+          gaScript.async = true;
+          gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-DH7Q258GXF';
+          document.head.appendChild(gaScript);
           
-          // Load GA4 script
-          const script = document.createElement('script');
-          script.async = true;
-          script.src = 'https://www.googletagmanager.com/gtag/js?id=G-DH7Q258GXF';
-          document.head.appendChild(script);
+          // 3. Configure GA4 directly (pageviews + base setup)
+          gaScript.onload = function() {
+              gtag('config', 'G-DH7Q258GXF', {
+                  'cookie_domain': '.tikz2svg.com',
+                  'cookie_expires': 63072000,
+                  'anonymize_ip': true,
+                  'allow_google_signals': false,
+                  'send_page_view': true,
+                  'cookie_flags': 'SameSite=Lax;Secure'
+              });
+              console.log('✅ Direct GA4 configured - Firefox compatible');
+          };
           
-          console.log('✅ Direct GA4 loaded - Firefox compatible, no GTM conflicts');
+          // 4. Load GTM for events only (no GA4 config tags!)
+          (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+          new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+          j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+          'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+          })(window,document,'script','dataLayer','GTM-N6J4LQJ4');
+          
+          console.log('✅ Clean GTM loaded - Events only, no config conflicts');
           
       } else {
           // Development: No analytics

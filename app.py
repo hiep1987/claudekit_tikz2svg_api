@@ -1175,9 +1175,11 @@ def api_search_keywords():
 @app.route('/search')
 def search_results():
     query = request.args.get('q', '').strip()
+    search_type = request.args.get('type', 'keywords')  # Default to keywords search
+
     if not query:
         return redirect(url_for('index'))
-    
+
     try:
         conn = mysql.connector.connect(
             host=os.environ.get('DB_HOST', 'localhost'),
@@ -1186,44 +1188,64 @@ def search_results():
             database=os.environ.get('DB_NAME', 'tikz2svg')
         )
         cursor = conn.cursor(dictionary=True)
-        
-        # Search for SVG files that match the keyword
-        cursor.execute("""
-            SELECT DISTINCT s.*, u.username as creator_username, u.id as creator_id,
-                   (SELECT COUNT(*) FROM svg_like WHERE svg_image_id = s.id) as like_count,
-                   (SELECT COUNT(*) FROM svg_like WHERE svg_image_id = s.id AND user_id = %s) as is_liked_by_current_user
-            FROM svg_image s
-            JOIN user u ON s.user_id = u.id
-            JOIN svg_image_keyword sik ON s.id = sik.svg_image_id
-            JOIN keyword k ON sik.keyword_id = k.id
-            WHERE k.word LIKE %s COLLATE utf8mb4_general_ci
-            ORDER BY s.created_at DESC
-        """, (get_user_id_from_session() or 0, f"%{query}%"))
-        
+
+        if search_type == 'username':
+            # Search for SVG files by username
+            cursor.execute("""
+                SELECT DISTINCT s.*, u.username as creator_username, u.id as creator_id,
+                       (SELECT COUNT(*) FROM svg_like WHERE svg_image_id = s.id) as like_count,
+                       (SELECT COUNT(*) FROM svg_like WHERE svg_image_id = s.id AND user_id = %s) as is_liked_by_current_user
+                FROM svg_image s
+                JOIN user u ON s.user_id = u.id
+                WHERE u.username LIKE %s COLLATE utf8mb4_general_ci
+                ORDER BY s.created_at DESC
+            """, (get_user_id_from_session() or 0, f"%{query}%"))
+        else:
+            # Default: Search for SVG files by keywords
+            cursor.execute("""
+                SELECT DISTINCT s.*, u.username as creator_username, u.id as creator_id,
+                       (SELECT COUNT(*) FROM svg_like WHERE svg_image_id = s.id) as like_count,
+                       (SELECT COUNT(*) FROM svg_like WHERE svg_image_id = s.id AND user_id = %s) as is_liked_by_current_user
+                FROM svg_image s
+                JOIN user u ON s.user_id = u.id
+                JOIN svg_image_keyword sik ON s.id = sik.svg_image_id
+                JOIN keyword k ON sik.keyword_id = k.id
+                WHERE k.word LIKE %s COLLATE utf8mb4_general_ci
+                ORDER BY s.created_at DESC
+            """, (get_user_id_from_session() or 0, f"%{query}%"))
+
         search_results = cursor.fetchall()
-        
+
         # Format the results
         for result in search_results:
             result['url'] = f"/static/{result['filename']}"
             result['created_time_vn'] = result['created_at'].strftime('%d/%m/%Y %H:%M') if result['created_at'] else ''
             result['is_liked_by_current_user'] = bool(result['is_liked_by_current_user'])
-        
+
         cursor.close()
         conn.close()
-        
-        return render_template('search_results.html', 
+
+        # Set search type description for template
+        search_type_description = "Tên tài khoản" if search_type == 'username' else "Từ khóa"
+
+        return render_template('search_results.html',
                              search_query=query,
+                             search_type=search_type,
+                             search_type_description=search_type_description,
                              search_results=search_results,
                              results_count=len(search_results),
                              logged_in=current_user.is_authenticated,
                              user_email=current_user.email if current_user.is_authenticated else None,
                              username=current_user.username if current_user.is_authenticated else None,
                              avatar=current_user.avatar if current_user.is_authenticated else None)
-        
+
     except Exception as e:
         print(f"[ERROR] /search: {e}", flush=True)
-        return render_template('search_results.html', 
+        search_type_description = "Tên tài khoản" if search_type == 'username' else "Từ khóa"
+        return render_template('search_results.html',
                              search_query=query,
+                             search_type=search_type,
+                             search_type_description=search_type_description,
                              search_results=[],
                              results_count=0,
                              logged_in=current_user.is_authenticated,

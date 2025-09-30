@@ -24,7 +24,7 @@
 <!-- Search Results Header -->
 <div class="search-results-header">
     <h1>🔍 Kết quả tìm kiếm</h1>
-    <div class="search-query">Từ khóa: "{{ search_query }}"</div>
+    <div class="search-query">{{ search_type_description }}: "{{ search_query }}"</div>
     <div class="results-count">
         Tìm thấy {{ results_count }} kết quả
     </div>
@@ -44,7 +44,7 @@
             <div class="no-files">
                 <div class="no-files-icon">🔍</div>
                 <h4>Không tìm thấy kết quả</h4>
-                <p>Không có ảnh SVG nào khớp với từ khóa "{{ search_query }}"</p>
+                <p>Không có ảnh SVG nào khớp với {{ search_type_description|lower }} "{{ search_query }}"</p>
                 <p class="back-link">
                     <a href="/">← Quay về trang chủ</a>
                 </p>

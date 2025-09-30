@@ -377,32 +377,64 @@ Mỗi SVG file được hiển thị dưới dạng "thẻ" (card) bao gồm:
 
 ## 8. 🔍 Tìm kiếm & Từ khóa
 
-### 8.1 Cách sử dụng tìm kiếm
-**Tìm kiếm SVG theo từ khóa:**
-1. **Nhập từ khóa** vào ô tìm kiếm trên navbar
-2. **Hệ thống tìm** trong các keywords đã gắn thẻ
-3. **Xem kết quả** với hình ảnh preview
-4. **Click vào SVG** để xem chi tiết
+### 8.1 Tính năng tìm kiếm mới (2024)
+**Enhanced Search Bar với hai chế độ:**
 
-### 9.2 Hệ thống từ khóa
+🔹 **Tìm theo từ khóa** (mặc định)
+- **Placeholder**: "Tìm theo từ khóa..."
+- **Auto-suggestions**: Hiển thị gợi ý từ keywords database
+- **Tìm kiếm**: SVG files có keywords matching
+- **Real-time**: Suggestions xuất hiện khi gõ
+
+🔹 **Tìm theo tên tài khoản**
+- **Placeholder**: "Tìm theo tên tài khoản..."
+- **No suggestions**: Tìm kiếm trực tiếp, không có dropdown
+- **Tìm kiếm**: SVG files của username matching
+- **Fuzzy search**: Hỗ trợ tìm kiếm gần đúng
+
+### 8.2 Cách sử dụng Search Bar
+**Bước 1: Chọn loại tìm kiếm**
+1. **Click button "Từ khóa"** (active mặc định) - màu xanh
+2. **Hoặc click "Tên tài khoản"** để chuyển mode
+
+**Bước 2: Nhập và tìm kiếm**
+- **Mode từ khóa**: Gõ từ khóa → chọn từ suggestions → Enter
+- **Mode tên tài khoản**: Gõ username → Enter (không có suggestions)
+
+**Bước 3: Xem kết quả**
+- **Hiển thị loại tìm kiếm**: "Từ khóa: 'abc'" hoặc "Tên tài khoản: 'user123'"
+- **Grid layout**: Tất cả SVG files matching
+- **File cards**: Preview, likes, creator info
+
+### 8.3 Backend API
+**Endpoints:**
+```
+GET /search?q={query}&type=keywords    # Tìm theo keywords
+GET /search?q={query}&type=username    # Tìm theo username
+GET /api/keywords/search?q={query}     # API suggestions
+```
+
+**Database queries:**
+- **Keywords**: Join `svg_image` → `svg_image_keyword` → `keyword`
+- **Username**: Join `svg_image` → `user` on `username LIKE %query%`
+
+### 8.4 Hệ thống từ khóa
 **Gắn thẻ cho SVG:**
 - **Khi lưu SVG**: Nhập keywords để dễ tìm kiếm sau
 - **Gợi ý tự động**: Hệ thống gợi ý từ keywords có sẵn
 - **Không phân biệt hoa thường**: "Circle" và "circle" được coi như nhau
 
-### 9.3 Tính năng tìm kiếm nâng cao
-- **Tìm kiếm mờ**: Chấp nhận lỗi gõ và các biến thể
-- **Nhiều từ khóa**: Tìm kiếm nhiều từ khóa cách nhau bằng dấu cách
-- **Lọc người dùng**: Tùy chọn lọc theo người dùng cụ thể
-- **Khoảng thời gian**: Lọc theo ngày tạo
-- **Tùy chọn sắp xếp**: Độ liên quan, ngày tháng, độ phổ biến
+### 8.5 UI/UX Design
+**Glass Morphism Design:**
+- **Custom buttons**: Thay thế radio buttons để tránh conflicts
+- **Active state**: Button được chọn có background xanh
+- **Hover effects**: Smooth transitions
+- **Responsive**: Mobile-friendly button sizing
 
-### 9.4 Giao diện tìm kiếm
-- **Thanh tìm kiếm**: Ô tìm kiếm nổi bật trong navbar
-- **Tự động hoàn thành**: Gợi ý theo thời gian thực khi gõ
-- **Trang kết quả**: Bố cục lưới giống trang chủ
-- **Không có kết quả**: Gợi ý hữu ích khi không tìm thấy
-- **Lịch sử tìm kiếm**: Các tìm kiếm gần đây để tiện lợi
+**Technical Implementation:**
+- **CSS Foundation System**: Sử dụng design variables
+- **JavaScript**: Custom button state management
+- **No radio button conflicts**: Stable behavior across browsers
 
 ---
 

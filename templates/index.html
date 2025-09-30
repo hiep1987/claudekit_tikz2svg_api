@@ -41,12 +41,23 @@
 <!-- Search Bar -->
 <div class="search-container page-container index-top-container">
     <h3 class="search-title">Tìm kiếm ảnh SVG</h3>
+
+    <!-- Search Type Selection -->
+    <div class="search-type-selector">
+        <button type="button" class="search-type-option active" id="search-type-keywords" data-type="keywords">
+            <span class="radio-label">Từ khóa</span>
+        </button>
+        <button type="button" class="search-type-option" id="search-type-username" data-type="username">
+            <span class="radio-label">Tên tài khoản</span>
+        </button>
+    </div>
+
     <div class="group">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" class="icon">
-            <path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+            <path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                   d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607z"/>
         </svg>
-        <input class="input" type="search" placeholder="Tìm kiếm..." id="main-search-input" />
+        <input class="input" type="search" placeholder="Tìm theo từ khóa..." id="main-search-input" />
         <div id="search-suggestions" class="search-suggestions"></div>
     </div>
 </div>

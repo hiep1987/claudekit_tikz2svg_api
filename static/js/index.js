@@ -923,19 +923,76 @@
 
 // Search functionality
 function initializeSearch() {
-//     console.log('🔍 initializeSearch() called');
+    console.log('🔍 initializeSearch() called');
     const searchInput = document.getElementById('main-search-input');
     const suggestionsBox = document.getElementById('search-suggestions');
     const blurOverlay = document.getElementById('search-blur-overlay');
-    
-//     console.log('🔍 searchInput:', searchInput);
-//     console.log('🔍 suggestionsBox:', suggestionsBox);
-//     console.log('🔍 blurOverlay:', blurOverlay);
-    
+    const keywordsButton = document.getElementById('search-type-keywords');
+    const usernameButton = document.getElementById('search-type-username');
+
+    console.log('🔍 searchInput:', searchInput);
+    console.log('🔍 suggestionsBox:', suggestionsBox);
+    console.log('🔍 blurOverlay:', blurOverlay);
+    console.log('🔍 keywordsButton:', keywordsButton);
+    console.log('🔍 usernameButton:', usernameButton);
+
     if (!searchInput || !suggestionsBox) {
-//         console.log('❌ Missing searchInput or suggestionsBox');
+        console.log('❌ Missing searchInput or suggestionsBox');
         return;
     }
+
+    // Helper function to get current search type
+    function getCurrentSearchType() {
+        console.log('🔍 getCurrentSearchType() called');
+        const activeButton = document.querySelector('.search-type-option.active');
+        const result = activeButton ? activeButton.dataset.type : 'keywords';
+        console.log('🔍 getCurrentSearchType() returning:', result);
+        return result;
+    }
+
+    // Helper function to update placeholder text
+    function updateSearchPlaceholder() {
+        console.log('🔍 updateSearchPlaceholder() called');
+        const searchType = getCurrentSearchType();
+        console.log('🔍 updateSearchPlaceholder searchType:', searchType);
+        if (searchType === 'username') {
+            searchInput.placeholder = 'Tìm theo tên tài khoản...';
+        } else {
+            searchInput.placeholder = 'Tìm theo từ khóa...';
+        }
+        console.log('🔍 updateSearchPlaceholder finished, placeholder:', searchInput.placeholder);
+    }
+
+    // Helper function to navigate to search results
+    function navigateToSearch(query) {
+        const searchType = getCurrentSearchType();
+        const url = `/search?q=${encodeURIComponent(query)}&type=${searchType}`;
+        window.location.href = url;
+    }
+
+    // Handle button clicks
+    if (keywordsButton && usernameButton) {
+        keywordsButton.addEventListener('click', function() {
+            console.log('🔍 Keywords button clicked');
+            keywordsButton.classList.add('active');
+            usernameButton.classList.remove('active');
+            updateSearchPlaceholder();
+            hideSuggestions();
+            searchInput.value = '';
+        });
+
+        usernameButton.addEventListener('click', function() {
+            console.log('🔍 Username button clicked');
+            usernameButton.classList.add('active');
+            keywordsButton.classList.remove('active');
+            updateSearchPlaceholder();
+            hideSuggestions();
+            searchInput.value = '';
+        });
+    }
+
+    // Initialize placeholder
+    updateSearchPlaceholder();
     
     // Helper function to toggle blur effect
     function toggleSearchBlur(show) {
@@ -950,7 +1007,26 @@ function initializeSearch() {
     
     // Helper function to show suggestions with blur
     function showSuggestions() {
+        console.log('🔍 showSuggestions() called');
+        console.log('🔍 suggestionsBox:', suggestionsBox);
+        console.log('🔍 suggestionsBox.children.length:', suggestionsBox.children.length);
+        console.log('🔍 suggestionsBox.innerHTML before:', suggestionsBox.innerHTML);
+
         suggestionsBox.style.display = 'block';
+        suggestionsBox.style.visibility = 'visible';
+        suggestionsBox.style.opacity = '1';
+
+        console.log('🔍 suggestionsBox.style.display set to:', suggestionsBox.style.display);
+        console.log('🔍 suggestionsBox final computed style:');
+        const computedStyle = window.getComputedStyle(suggestionsBox);
+        console.log('🔍   - display:', computedStyle.display);
+        console.log('🔍   - visibility:', computedStyle.visibility);
+        console.log('🔍   - opacity:', computedStyle.opacity);
+        console.log('🔍   - position:', computedStyle.position);
+        console.log('🔍   - z-index:', computedStyle.zIndex);
+        console.log('🔍   - top:', computedStyle.top);
+        console.log('🔍   - left:', computedStyle.left);
+
         toggleSearchBlur(true);
     }
     
@@ -962,37 +1038,48 @@ function initializeSearch() {
     
     // Handle input changes
     searchInput.addEventListener('input', function() {
-//         console.log('🔍 Search input event triggered');
+        console.log('🔍 Search input event triggered');
         if (window.typingTimeout) {
             clearTimeout(window.typingTimeout);
         }
         const query = this.value.trim();
-//         console.log('🔍 Query:', query);
-        
+
+        console.log('🔍 Query:', query);
+
         if (query.length < 1) {
-//             console.log('🔍 Query too short, hiding suggestions');
+            console.log('🔍 Query too short, hiding suggestions');
             hideSuggestions();
             return;
         }
-        
-//         console.log('🔍 Fetching suggestions for query:', query);
+
+        // Only show suggestions for keyword search, not username search
+        const searchType = getCurrentSearchType();
+        console.log('🔍 Search type:', searchType);
+        if (searchType === 'username') {
+            console.log('🔍 Username search mode, hiding suggestions');
+            hideSuggestions();
+            return;
+        }
+
+        console.log('🔍 Fetching suggestions for query:', query);
         window.typingTimeout = setTimeout(() => {
+            console.log('🔍 Making API call to:', `/api/keywords/search?q=${encodeURIComponent(query)}`);
             fetch(`/api/keywords/search?q=${encodeURIComponent(query)}`)
                 .then(res => {
-//                     console.log('🔍 API response status:', res.status);
+                    console.log('🔍 API response status:', res.status);
                     return res.json();
                 })
                 .then(data => {
-//                     console.log('🔍 API response data:', data);
+                    console.log('🔍 API response data:', data);
                     suggestionsBox.innerHTML = '';
-                    
+
                     if (data.length === 0) {
-//                         console.log('🔍 No suggestions found');
+                        console.log('🔍 No suggestions found');
                         hideSuggestions();
                         return;
                     }
-                    
-//                     console.log('🔍 Adding suggestions:', data);
+
+                    console.log('🔍 Adding suggestions:', data);
                     data.forEach(keyword => {
                         const item = document.createElement('div');
                         item.className = 'search-suggestion-item';
@@ -1004,17 +1091,18 @@ function initializeSearch() {
                                 window.analytics.trackSearchSuggestionClick(keyword, position);
                                 window.analytics.trackSearch(keyword, 'suggestion');
                             }
-                            
+
                             searchInput.value = keyword;
                             hideSuggestions();
                             // Navigate to search results page
-                            window.location.href = `/search?q=${encodeURIComponent(keyword)}`;
+                            navigateToSearch(keyword);
                         });
                         suggestionsBox.appendChild(item);
                     });
-                    
+
+                    console.log('🔍 Calling showSuggestions()');
                     showSuggestions();
-//                     console.log('🔍 Suggestions displayed');
+                    console.log('🔍 Suggestions displayed, suggestionsBox.style.display:', suggestionsBox.style.display);
                 })
                 .catch(err => {
                     console.error('❌ Search error:', err);
@@ -1034,7 +1122,7 @@ function initializeSearch() {
                 }
                 
                 hideSuggestions();
-                window.location.href = `/search?q=${encodeURIComponent(query)}`;
+                navigateToSearch(query);
             }
         }
     });

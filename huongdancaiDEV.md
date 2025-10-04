@@ -82,6 +82,7 @@ Nếu ra:
 
 Có 2 cách:
 
+
 ### 5.1. Thủ công
 ```bash
 cd /Users/hieplequoc/web/work/tikz2svg_api
@@ -95,6 +96,29 @@ Script này vừa mở tunnel vừa chạy server:
 cd /Users/hieplequoc/web/work/tikz2svg_api
 tikz2svg-dev-proxy
 ```
+
+### 5.3. Chạy nhanh local dev với alias (không cần tunnel, dùng DB local)
+
+**Bước 1:** Thêm alias vào cuối file `~/.zshrc`:
+```sh
+alias tikz2svg-dev-local="/Users/hieplequoc/web/work/tikz2svg_api/tikz2svg-dev-local.sh"
+```
+
+Sau đó nạp lại cấu hình:
+```sh
+source ~/.zshrc
+```
+
+**Bước 2:** Chạy development server chỉ với 1 lệnh:
+```sh
+tikz2svg-dev-local
+```
+
+Script sẽ tự động:
+- Load biến môi trường từ `.env`
+- Kích hoạt virtualenv
+- Kiểm tra kết nối database local
+- Khởi động Flask server ở http://127.0.0.1:5173/
 
 ---
 

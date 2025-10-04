@@ -230,6 +230,21 @@ Mỗi SVG file được hiển thị dưới dạng "thẻ" (card) bao gồm:
 - Click vào sẽ **yêu cầu đăng nhập**
 - **Không giới hạn** số lượng file có thể like
 
+### 4.5.1 Xem tất cả người đã like (modal danh sách)
+
+Bạn có thể **click vào số lượt like** (bên cạnh nút ❤️) trên mỗi file SVG để xem **danh sách tất cả người đã like** file đó.
+
+- Một **modal** sẽ hiện ra, hiển thị avatar, username và thời gian like của từng người.
+- Danh sách này hỗ trợ **phân trang** (20 người/lần), có nút "Xem thêm" để tải thêm.
+- Có thể click vào username để truy cập profile của người đó.
+- Modal này hoạt động tốt trên cả desktop và mobile.
+
+**Lưu ý:**
+- Nếu file chưa có ai like, modal sẽ hiển thị thông báo phù hợp.
+- Nếu bạn chưa đăng nhập, vẫn xem được danh sách này (trừ khi file đặt ở chế độ riêng tư).
+
+Tính năng này giúp bạn dễ dàng khám phá cộng đồng, xem ai đã yêu thích các tác phẩm SVG của mình hoặc của người khác.
+
 ### 4.6 Thông tin hiển thị trên File Card
 
 **Thông tin tác giả:**

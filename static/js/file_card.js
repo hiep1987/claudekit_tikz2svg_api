@@ -855,19 +855,7 @@ if (document.readyState === 'loading') {
 function initializeLikesModal() {
     console.log('🚀 Initializing Likes Modal...');
 
-    // Handle click on like count buttons
-    document.addEventListener('click', function(e) {
-        const likeCountBtn = e.target.closest('.like-count-btn');
-        if (!likeCountBtn) return;
-
-        e.preventDefault();
-        const svgId = likeCountBtn.dataset.svgId;
-        const isDisabled = likeCountBtn.disabled;
-
-        if (isDisabled || !svgId) return;
-
-        openLikesModal(svgId);
-    });
+    // Modal functionality removed from like count - only "Xem tất cả" button opens modal now
 
     // Handle modal close buttons
     document.addEventListener('click', function(e) {
@@ -1305,23 +1293,27 @@ function generateLikesPreviewText(users, totalLikes, currentUserLiked) {
         names.push(user.username);
     });
 
-    // Build short text
+    // Calculate how many users we're showing vs total
+    const displayedCount = (currentUserLiked ? 1 : 0) + displayUsers.length;
+    const hasMoreUsers = totalLikes > displayedCount;
+
+    // Build text based on actual counts
     let text = '';
 
     if (names.length === 1) {
-        text = `${names[0]} thích`;
+        if (hasMoreUsers) {
+            text = `${names[0]} và những...`;
+        } else {
+            text = `${names[0]} thích`;
+        }
     } else if (names.length === 2) {
+        if (hasMoreUsers) {
+            text = `${names[0]}, ${names[1]} và những...`;
+        } else {
+            text = `${names[0]}, ${names[1]} thích`;
+        }
+    } else if (names.length >= 3) {
         text = `${names[0]}, ${names[1]} và những...`;
-    } else if (names.length === 3) {
-        text = `${names[0]}, ${names[1]} và những...`;
-    }
-
-    // Always show "và những..." if there are more than displayed
-    const displayedCount = (currentUserLiked ? 1 : 0) + displayUsers.length;
-    if (totalLikes > displayedCount && names.length >= 2) {
-        // Already handled above
-    } else if (totalLikes > 1 && names.length === 1) {
-        text += ' và những...';
     }
 
     return text;

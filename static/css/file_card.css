@@ -424,13 +424,14 @@
     display: flex;
     align-items: center;
     height: 32px;
-    width: 90px;
+    width: auto;
+    min-width: 60px;
     border-radius: 8px;
     border: none;
     background-color: #2d2d2d;
     overflow: hidden;
     box-shadow: 0 2px 4px rgb(0 0 0 / 20%);
-    padding: 0 8px;
+    padding: 0;
 }
 
 .tikz-app .like-button input[type="checkbox"] {
@@ -441,8 +442,13 @@
     display: flex;
     cursor: pointer;
     align-items: center;
-    gap: 4px;
+    justify-content: flex-start;
+    gap: 6px;
     flex: 1;
+    width: 100%;
+    height: 100%;
+    padding: 0 8px;
+    position: relative;
 }
 
 .tikz-app .like-icon {
@@ -452,18 +458,10 @@
     transition: fill 0.2s ease;
 }
 
-.tikz-app .like-text {
-    color: #e0e0e0;
-    font-size: 12px;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-    font-weight: 500;
-}
-
 .tikz-app .like-count {
     color: #808080;
     font-size: 12px;
     font-weight: 500;
-    margin-left: 4px;
     transition: all 0.3s ease;
 }
 
@@ -483,12 +481,12 @@
     animation: heart-beat 0.3s ease;
 }
 
-.tikz-app input[id^="heart-"]:checked ~ .like-count.one {
+.tikz-app input[id^="heart-"]:checked ~ .like .like-count.one {
     transform: translateY(-20px);
     opacity: 0;
 }
 
-.tikz-app input[id^="heart-"]:checked ~ .like-count.two {
+.tikz-app input[id^="heart-"]:checked ~ .like .like-count.two {
     transform: translateY(0);
     opacity: 1;
     color: #ff4757;
@@ -758,25 +756,6 @@
 }
 
 /* ===== LIKES MODAL STYLES ===== */
-
-/* Make like count clickable */
-.tikz-app .like-count-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    display: inline-block;
-    transition: opacity 0.2s ease;
-}
-
-.tikz-app .like-count-btn:hover:not(:disabled) {
-    opacity: 0.8;
-}
-
-.tikz-app .like-count-btn:disabled {
-    cursor: default;
-    opacity: 0.6;
-}
 
 /* Modal Base - Contained within file card */
 .tikz-app .likes-modal {

@@ -2814,6 +2814,172 @@ def api_like_counts():
 
     return jsonify(result)
 
+@app.route('/api/svg/<int:svg_id>/likes', methods=['GET'])
+def get_svg_likes(svg_id):
+    """
+    Lấy danh sách người dùng đã like một SVG file.
+    Hỗ trợ pagination.
+    """
+    try:
+        # Parse query params
+        limit = min(int(request.args.get('limit', 20)), 100)  # Max 100
+        offset = int(request.args.get('offset', 0))
+
+        # Validate parameters
+        if svg_id <= 0:
+            return jsonify({"success": False, "message": "Invalid SVG ID"}), 400
+        if limit <= 0 or offset < 0:
+            return jsonify({"success": False, "message": "Invalid pagination parameters"}), 400
+
+        conn = mysql.connector.connect(
+            host=os.environ.get('DB_HOST', 'localhost'),
+            user=os.environ.get('DB_USER', 'hiep1987'),
+            password=os.environ.get('DB_PASSWORD', ''),
+            database=os.environ.get('DB_NAME', 'tikz2svg')
+        )
+        cursor = conn.cursor(dictionary=True)
+
+        # Check SVG exists
+        cursor.execute("SELECT id FROM svg_image WHERE id = %s", (svg_id,))
+        if not cursor.fetchone():
+            cursor.close()
+            conn.close()
+            return jsonify({"success": False, "message": "SVG not found"}), 404
+
+        # Get total like count
+        cursor.execute("""
+            SELECT COUNT(*) as total
+            FROM svg_like
+            WHERE svg_image_id = %s
+        """, (svg_id,))
+        total_likes = cursor.fetchone()['total']
+
+        # Get paginated users who liked
+        cursor.execute("""
+            SELECT
+                u.id as user_id,
+                u.username,
+                u.avatar,
+                sl.created_at as liked_at
+            FROM svg_like sl
+            JOIN user u ON sl.user_id = u.id
+            WHERE sl.svg_image_id = %s
+            ORDER BY sl.created_at DESC
+            LIMIT %s OFFSET %s
+        """, (svg_id, limit, offset))
+
+        users = cursor.fetchall()
+
+        # Format datetime và avatar paths cho JSON
+        for user in users:
+            if user['liked_at']:
+                user['liked_at'] = user['liked_at'].isoformat()
+            if user['avatar']:
+                user['avatar'] = f"/static/avatars/{user['avatar']}"
+
+        # Check if there are more results
+        has_more = (offset + limit) < total_likes
+
+        cursor.close()
+        conn.close()
+
+        print(f"✅ SVG {svg_id} likes: {len(users)} users returned, total: {total_likes}, has_more: {has_more}", flush=True)
+
+        return jsonify({
+            "success": True,
+            "total_likes": total_likes,
+            "users": users,
+            "has_more": has_more,
+            "offset": offset,
+            "limit": limit
+        })
+
+    except ValueError:
+        return jsonify({"success": False, "message": "Invalid parameters"}), 400
+    except Exception as e:
+        print(f"Error in get_svg_likes: {e}", flush=True)
+        return jsonify({"success": False, "message": "Server error"}), 500
+
+@app.route('/api/svg/<int:svg_id>/likes/preview', methods=['GET'])
+def get_svg_likes_preview(svg_id):
+    """
+    Lấy preview danh sách người đã like (3-5 users đầu tiên) để hiển thị text
+    """
+    try:
+        # Validate parameters
+        if svg_id <= 0:
+            return jsonify({"success": False, "message": "Invalid SVG ID"}), 400
+
+        conn = mysql.connector.connect(
+            host=os.environ.get('DB_HOST', 'localhost'),
+            user=os.environ.get('DB_USER', 'hiep1987'),
+            password=os.environ.get('DB_PASSWORD', ''),
+            database=os.environ.get('DB_NAME', 'tikz2svg')
+        )
+        cursor = conn.cursor(dictionary=True)
+
+        # Check SVG exists
+        cursor.execute("SELECT id FROM svg_image WHERE id = %s", (svg_id,))
+        if not cursor.fetchone():
+            cursor.close()
+            conn.close()
+            return jsonify({"success": False, "message": "SVG not found"}), 404
+
+        # Get total like count
+        cursor.execute("""
+            SELECT COUNT(*) as total
+            FROM svg_like
+            WHERE svg_image_id = %s
+        """, (svg_id,))
+        total_likes = cursor.fetchone()['total']
+
+        # Get first 3 users who liked (for preview text)
+        cursor.execute("""
+            SELECT
+                u.id as user_id,
+                u.username,
+                u.avatar,
+                sl.created_at as liked_at
+            FROM svg_like sl
+            JOIN user u ON sl.user_id = u.id
+            WHERE sl.svg_image_id = %s
+            ORDER BY sl.created_at DESC
+            LIMIT 3
+        """, (svg_id,))
+
+        users = cursor.fetchall()
+
+        # Format avatar paths cho JSON
+        for user in users:
+            if user['avatar']:
+                user['avatar'] = f"/static/avatars/{user['avatar']}"
+
+        # Check if current user liked this SVG
+        current_user_liked = False
+        current_user_id = current_user.id if current_user.is_authenticated else None
+
+        if current_user_id:
+            cursor.execute("""
+                SELECT id FROM svg_like
+                WHERE svg_image_id = %s AND user_id = %s
+            """, (svg_id, current_user_id))
+            current_user_liked = cursor.fetchone() is not None
+
+        cursor.close()
+        conn.close()
+
+        return jsonify({
+            "success": True,
+            "total_likes": total_likes,
+            "preview_users": users,
+            "current_user_liked": current_user_liked,
+            "current_user_id": current_user_id
+        })
+
+    except Exception as e:
+        print(f"Error in get_svg_likes_preview: {e}", flush=True)
+        return jsonify({"success": False, "message": "Server error"}), 500
+
 @app.route('/api/follower_count/<int:user_id>', methods=['GET'])
 def api_follower_count(user_id):
     """API endpoint để lấy số follower count của một user"""

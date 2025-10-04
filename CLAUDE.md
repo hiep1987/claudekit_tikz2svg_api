@@ -35,6 +35,8 @@ Tệp này cung cấp hướng dẫn cho Claude Code (claude.ai/code) khi hỗ t
 - **Rate Limiting:** Custom implementation cho email và API
 - **Static Files:** Flask static folder với persistent storage
 - **File Management:** Unique naming cho SVG files và avatars
+- **API Endpoints:**
+  - `/api/svg/<svg_id>/likes` - Lấy danh sách users đã like SVG (pagination support)
 
 ### Frontend
 - **Template Engine:** Jinja2 với partials (reusable components)
@@ -48,9 +50,14 @@ Tệp này cung cấp hướng dẫn cho Claude Code (claude.ai/code) khi hỗ t
   - **CodeMirror:** Trình soạn thảo code cho TikZ
   - **Quill.js:** Rich text editor cho user bio
   - **Cropper.js:** Cắt và chỉnh sửa ảnh đại diện
-- **UI Components:** Modal dialogs, file upload, real-time interactions
+- **UI Components:** Modal dialogs, file upload, real-time interactions, likes modal
 - **Design Features:** Glass morphism, responsive design, accessibility compliance
 - **Real-time Features:** Polling cho likes, follows, new posts
+- **Likes System:**
+  - Click-to-view likes modal với user list
+  - Pagination support (20 users per page)
+  - Real-time like count updates
+  - Avatar placeholders và profile links
 
 ### Database Schema
 - **Users:** id, email, username, avatar, bio, identity_verified

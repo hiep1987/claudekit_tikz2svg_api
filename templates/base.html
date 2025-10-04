@@ -155,15 +155,18 @@
     <!-- Environment detection for helper functions -->
     <script>
       // Store environment detection globally for helper functions
-      window._gaEnvironment = { 
-          isDevelopment: window.location.hostname === 'localhost' || 
-                        window.location.hostname === '127.0.0.1' || 
+      window._gaEnvironment = {
+          isDevelopment: window.location.hostname === 'localhost' ||
+                        window.location.hostname === '127.0.0.1' ||
                         window.location.port === '5173' ||
                         window.location.port === '5000' ||
                         window.location.hostname.includes('localhost'),
-          isProduction: window.location.hostname === 'tikz2svg.com' || 
+          isProduction: window.location.hostname === 'tikz2svg.com' ||
                        window.location.hostname === 'www.tikz2svg.com'
       };
+
+      // Set current user ID for frontend use
+      window.currentUserId = {% if current_user.is_authenticated %}{{ current_user.id }}{% else %}null{% endif %};
     </script>
     
     <!-- Page-specific JavaScript Variables -->

@@ -1,0 +1,35 @@
+{
+    "terminal.integrated.env.osx": {
+        "ANTHROPIC_AUTH_TOKEN": "sk-Hkk0lXdFxvOQSjzRoiRc5NG4mCSacATh2LgS6IhwG54OGsZV",
+        "ANTHROPIC_BASE_URL": "https://aishopacc.com",
+        "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "32000",
+        "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+        "API_TIMEOUT_MS": "600000",
+        "BASH_DEFAULT_TIMEOUT_MS": "600000",
+        "BASH_MAX_TIMEOUT_MS": "600000",
+        "MCP_TIMEOUT": "30000",
+        "MCP_TOOL_TIMEOUT": "600000",
+        "ANTHROPIC_MODEL": "glm-4.5",
+        "CLAUDE_API_TIMEOUT": "600000"
+    },
+    "terminal.integrated.defaultProfile.osx": "zsh",
+    "terminal.integrated.profiles.osx": {
+        "zsh": {
+            "path": "/bin/zsh",
+            "args": ["-l"]
+        },
+        "Claude Terminal": {
+            "path": "/bin/zsh",
+            "args": ["-c", "export ANTHROPIC_AUTH_TOKEN=sk-Hkk0lXdFxvOQSjzRoiRc5NG4mCSacATh2LgS6IhwG54OGsZV && export ANTHROPIC_BASE_URL=https://aishopacc.com && export ANTHROPIC_MODEL=glm-4.5 && exec zsh"]
+        }
+    },
+    // Disable Cursor AI extension authentication
+    "cursor.ai.autoLogin": false,
+    "cursor.ai.requireAuth": false,
+    "cursor.ai.useTerminalEnvironment": true,
+    // General settings
+    "extensions.autoUpdate": false,
+    "extensions.autoCheckUpdates": false
+}
+
+

@@ -666,6 +666,12 @@ function initializeFileCardComponent() {
     // Initialize file card functionality
     initializeFileCardActions();
     initializeFileCardTouchEvents();
+
+    // NEW: Initialize likes modal
+    initializeLikesModal();
+
+    // NEW: Initialize likes preview text
+    initializeLikesPreview();
     
     // Add login modal event listener
     const loginModal = document.getElementById('login-modal');
@@ -838,6 +844,495 @@ if (document.readyState === 'loading') {
             window.FileCardComponent.init();
         }
     }, 100);
+}
+
+// ===== LIKES MODAL FUNCTIONALITY =====
+
+/**
+ * Initialize likes modal functionality
+ * Handles click on like count to show modal with list of users who liked
+ */
+function initializeLikesModal() {
+    console.log('🚀 Initializing Likes Modal...');
+
+    // Handle click on like count buttons
+    document.addEventListener('click', function(e) {
+        const likeCountBtn = e.target.closest('.like-count-btn');
+        if (!likeCountBtn) return;
+
+        e.preventDefault();
+        const svgId = likeCountBtn.dataset.svgId;
+        const isDisabled = likeCountBtn.disabled;
+
+        if (isDisabled || !svgId) return;
+
+        openLikesModal(svgId);
+    });
+
+    // Handle modal close buttons
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.likes-modal-close') ||
+            e.target.closest('.likes-modal-overlay')) {
+            closeLikesModal();
+        }
+    });
+
+    // Handle ESC key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeLikesModal();
+        }
+    });
+
+    // Handle load more button
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.load-more-btn')) {
+            const modal = e.target.closest('.likes-modal');
+            const svgId = modal.id.replace('likes-modal-', '');
+            const currentOffset = parseInt(modal.dataset.offset || '0');
+            const limit = 20;
+
+            loadMoreLikes(svgId, currentOffset + limit);
+        }
+    });
+
+    // Handle retry button
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.retry-btn')) {
+            const modal = e.target.closest('.likes-modal');
+            const svgId = modal.id.replace('likes-modal-', '');
+            fetchLikes(svgId, 0);
+        }
+    });
+}
+
+/**
+ * Open likes modal for a specific SVG
+ */
+function openLikesModal(svgId) {
+    const modal = document.getElementById(`likes-modal-${svgId}`);
+    if (!modal) return;
+
+    // Show modal (no need for body scroll lock since modal is contained)
+    modal.classList.add('active');
+
+    // Reset state
+    modal.dataset.offset = '0';
+
+    // Show loading state
+    showModalState(modal, 'loading');
+
+    // Fetch likes data
+    fetchLikes(svgId, 0);
+
+    // Focus management for accessibility
+    const closeBtn = modal.querySelector('.likes-modal-close');
+    if (closeBtn) closeBtn.focus();
+}
+
+/**
+ * Close active likes modal
+ */
+function closeLikesModal() {
+    const activeModal = document.querySelector('.likes-modal.active');
+    if (!activeModal) return;
+
+    // Close modal (no need to restore scroll position since modal is contained)
+    activeModal.classList.remove('active');
+
+    // Clear data
+    const usersList = activeModal.querySelector('.likes-users-list');
+    if (usersList) usersList.innerHTML = '';
+}
+
+/**
+ * Fetch likes data from API
+ */
+function fetchLikes(svgId, offset = 0) {
+    const modal = document.getElementById(`likes-modal-${svgId}`);
+    if (!modal) return;
+
+    const limit = 20;
+
+    fetch(`/api/svg/${svgId}/likes?limit=${limit}&offset=${offset}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                renderLikes(modal, data, offset);
+            } else {
+                showModalState(modal, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching likes:', error);
+            showModalState(modal, 'error');
+        });
+}
+
+/**
+ * Load more likes (pagination)
+ */
+function loadMoreLikes(svgId, offset) {
+    const modal = document.getElementById(`likes-modal-${svgId}`);
+    if (!modal) return;
+
+    const loadMoreBtn = modal.querySelector('.load-more-btn');
+    if (loadMoreBtn) {
+        loadMoreBtn.disabled = true;
+        loadMoreBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tải...';
+    }
+
+    const limit = 20;
+
+    fetch(`/api/svg/${svgId}/likes?limit=${limit}&offset=${offset}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                appendLikes(modal, data, offset);
+            } else {
+                if (loadMoreBtn) {
+                    loadMoreBtn.disabled = false;
+                    loadMoreBtn.innerHTML = '<i class="fas fa-chevron-down"></i> Xem thêm';
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error loading more likes:', error);
+            if (loadMoreBtn) {
+                loadMoreBtn.disabled = false;
+                loadMoreBtn.innerHTML = '<i class="fas fa-chevron-down"></i> Xem thêm';
+            }
+        });
+}
+
+/**
+ * Render likes data in modal
+ */
+function renderLikes(modal, data, offset) {
+    // Update total count
+    const countSpan = modal.querySelector('.likes-modal-count');
+    if (countSpan) countSpan.textContent = data.total_likes;
+
+    // Get users list container
+    const usersList = modal.querySelector('.likes-users-list');
+    if (!usersList) return;
+
+    // Clear existing content if offset is 0
+    if (offset === 0) {
+        usersList.innerHTML = '';
+    }
+
+    // Render users
+    if (data.users && data.users.length > 0) {
+        data.users.forEach(user => {
+            const userItem = createUserListItem(user);
+            usersList.appendChild(userItem);
+        });
+
+        showModalState(modal, 'content');
+
+        // Update offset
+        modal.dataset.offset = data.offset + data.limit;
+
+        // Show/hide load more button
+        const loadMoreBtn = modal.querySelector('.load-more-btn');
+        if (loadMoreBtn) {
+            if (data.has_more) {
+                loadMoreBtn.style.display = 'block';
+                loadMoreBtn.disabled = false;
+                loadMoreBtn.innerHTML = '<i class="fas fa-chevron-down"></i> Xem thêm';
+            } else {
+                loadMoreBtn.style.display = 'none';
+            }
+        }
+    } else if (offset === 0) {
+        showModalState(modal, 'empty');
+    }
+}
+
+/**
+ * Append more likes to existing list (for pagination)
+ */
+function appendLikes(modal, data, offset) {
+    const usersList = modal.querySelector('.likes-users-list');
+    if (!usersList) return;
+
+    // Append new users
+    if (data.users && data.users.length > 0) {
+        data.users.forEach(user => {
+            const userItem = createUserListItem(user);
+            usersList.appendChild(userItem);
+        });
+
+        // Update offset
+        modal.dataset.offset = data.offset + data.limit;
+
+        // Update load more button
+        const loadMoreBtn = modal.querySelector('.load-more-btn');
+        if (loadMoreBtn) {
+            if (data.has_more) {
+                loadMoreBtn.disabled = false;
+                loadMoreBtn.innerHTML = '<i class="fas fa-chevron-down"></i> Xem thêm';
+            } else {
+                loadMoreBtn.style.display = 'none';
+            }
+        }
+    }
+}
+
+/**
+ * Create user list item HTML element
+ */
+function createUserListItem(user) {
+    const li = document.createElement('li');
+    li.className = 'likes-user-item';
+
+    const link = document.createElement('a');
+    link.href = `/profile/${user.user_id}/svg-files`;
+    link.className = 'likes-user-link';
+
+    // Avatar
+    const avatarDiv = document.createElement('div');
+    avatarDiv.className = 'likes-user-avatar';
+
+    if (user.avatar) {
+        const img = document.createElement('img');
+        img.src = user.avatar;
+        img.alt = user.username;
+        img.loading = 'lazy';
+
+        // Add error handling for broken images
+        img.onerror = function() {
+            console.warn(`Failed to load avatar: ${user.avatar} for user: ${user.username}`);
+            // Replace with placeholder on error
+            const placeholder = document.createElement('div');
+            placeholder.className = 'avatar-placeholder';
+            placeholder.textContent = getInitials(user.username);
+            avatarDiv.innerHTML = '';
+            avatarDiv.appendChild(placeholder);
+        };
+
+        img.onload = function() {
+            console.log(`Avatar loaded successfully: ${user.username}`);
+        };
+
+        avatarDiv.appendChild(img);
+    } else {
+        // Create placeholder with initials
+        const placeholder = document.createElement('div');
+        placeholder.className = 'avatar-placeholder';
+        placeholder.textContent = getInitials(user.username);
+        avatarDiv.appendChild(placeholder);
+    }
+
+    // User info
+    const infoDiv = document.createElement('div');
+    infoDiv.className = 'likes-user-info';
+
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'likes-user-name';
+    nameSpan.textContent = user.username;
+
+    const timeSpan = document.createElement('span');
+    timeSpan.className = 'likes-user-time';
+    timeSpan.textContent = formatTimeAgo(user.liked_at);
+
+    infoDiv.appendChild(nameSpan);
+    infoDiv.appendChild(timeSpan);
+
+    link.appendChild(avatarDiv);
+    link.appendChild(infoDiv);
+    li.appendChild(link);
+
+    return li;
+}
+
+/**
+ * Show different modal states (loading, content, empty, error)
+ */
+function showModalState(modal, state) {
+    const loading = modal.querySelector('.likes-loading');
+    const usersList = modal.querySelector('.likes-users-list');
+    const empty = modal.querySelector('.likes-empty');
+    const error = modal.querySelector('.likes-error');
+    const footer = modal.querySelector('.likes-modal-footer');
+
+    // Hide all
+    if (loading) loading.style.display = 'none';
+    if (usersList) usersList.style.display = 'none';
+    if (empty) empty.style.display = 'none';
+    if (error) error.style.display = 'none';
+    if (footer) footer.style.display = 'none';
+
+    // Show active state
+    switch(state) {
+        case 'loading':
+            if (loading) loading.style.display = 'block';
+            break;
+        case 'content':
+            if (usersList) usersList.style.display = 'block';
+            if (footer) footer.style.display = 'flex';
+            break;
+        case 'empty':
+            if (empty) empty.style.display = 'block';
+            break;
+        case 'error':
+            if (error) error.style.display = 'block';
+            break;
+    }
+}
+
+/**
+ * Get initials from username for avatar placeholder
+ */
+function getInitials(username) {
+    if (!username) return '??';
+    return username.substring(0, 2).toUpperCase();
+}
+
+/**
+ * Format timestamp to "time ago" format
+ */
+function formatTimeAgo(timestamp) {
+    if (!timestamp) return '';
+
+    const now = new Date();
+    const likedAt = new Date(timestamp);
+    const diffMs = now - likedAt;
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+    const diffHour = Math.floor(diffMin / 60);
+    const diffDay = Math.floor(diffHour / 24);
+
+    if (diffSec < 60) return 'Vừa xong';
+    if (diffMin < 60) return `${diffMin} phút trước`;
+    if (diffHour < 24) return `${diffHour} giờ trước`;
+    if (diffDay < 7) return `${diffDay} ngày trước`;
+    if (diffDay < 30) return `${Math.floor(diffDay / 7)} tuần trước`;
+    if (diffDay < 365) return `${Math.floor(diffDay / 30)} tháng trước`;
+    return `${Math.floor(diffDay / 365)} năm trước`;
+}
+
+// ===== LIKES PREVIEW TEXT FUNCTIONALITY =====
+
+/**
+ * Initialize likes preview text functionality
+ * Load and display preview text below like buttons automatically
+ */
+function initializeLikesPreview() {
+    console.log('🚀 Initializing Likes Preview...');
+
+    // Load preview for all file cards on page
+    const fileCards = document.querySelectorAll('.file-card[data-file-id]');
+    fileCards.forEach(card => {
+        const svgId = card.dataset.fileId;
+        if (svgId) {
+            loadLikesPreview(svgId);
+        }
+    });
+
+    // Handle "Xem tất cả" button clicks
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.likes-view-all-btn')) {
+            const previewContainer = e.target.closest('.likes-preview-text');
+            const svgId = previewContainer.dataset.svgId;
+            openLikesModal(svgId);
+        }
+    });
+}
+
+/**
+ * Load likes preview data for a specific SVG
+ */
+function loadLikesPreview(svgId) {
+    fetch(`/api/svg/${svgId}/likes/preview`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.total_likes > 0) {
+                renderLikesPreview(svgId, data);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading likes preview:', error);
+        });
+}
+
+/**
+ * Render likes preview text based on data
+ */
+function renderLikesPreview(svgId, data) {
+    const previewContainer = document.querySelector(`.likes-preview-text[data-svg-id="${svgId}"]`);
+    if (!previewContainer) return;
+
+    const contentSpan = previewContainer.querySelector('.likes-preview-content');
+    if (!contentSpan) return;
+
+    const { total_likes, preview_users, current_user_liked } = data;
+
+    if (total_likes === 0) {
+        previewContainer.style.display = 'none';
+        return;
+    }
+
+    // Generate preview text
+    let previewText = generateLikesPreviewText(preview_users, total_likes, current_user_liked);
+
+    contentSpan.textContent = previewText;
+    previewContainer.style.display = 'block';
+}
+
+/**
+ * Generate likes preview text based on who liked
+ */
+function generateLikesPreviewText(users, totalLikes, currentUserLiked) {
+    if (!users || users.length === 0) return '';
+
+    let names = [];
+
+    // Add "Bạn" if current user liked
+    if (currentUserLiked) {
+        names.push('Bạn');
+    }
+
+    // Add other users (filter out current user if they're in the list)
+    const otherUsers = users.filter(user => !currentUserLiked || user.user_id !== getCurrentUserId());
+
+    // Take only 1-2 other users for preview to keep it short
+    const maxOtherUsers = currentUserLiked ? 1 : 2;
+    const displayUsers = otherUsers.slice(0, maxOtherUsers);
+
+    displayUsers.forEach(user => {
+        names.push(user.username);
+    });
+
+    // Build short text
+    let text = '';
+
+    if (names.length === 1) {
+        text = `${names[0]} thích`;
+    } else if (names.length === 2) {
+        text = `${names[0]}, ${names[1]} và những...`;
+    } else if (names.length === 3) {
+        text = `${names[0]}, ${names[1]} và những...`;
+    }
+
+    // Always show "và những..." if there are more than displayed
+    const displayedCount = (currentUserLiked ? 1 : 0) + displayUsers.length;
+    if (totalLikes > displayedCount && names.length >= 2) {
+        // Already handled above
+    } else if (totalLikes > 1 && names.length === 1) {
+        text += ' và những...';
+    }
+
+    return text;
+}
+
+/**
+ * Get current user ID (helper function)
+ */
+function getCurrentUserId() {
+    // This should be set by the backend when rendering the page
+    return window.currentUserId || null;
 }
 
 // Expose necessary functions to global scope

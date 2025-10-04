@@ -1,0 +1,34 @@
+{
+    // Global VS Code User Settings cho Claude
+    // Copy nội dung này vào VS Code User Settings
+    // (Cmd+Shift+P -> "Preferences: Open User Settings (JSON)")
+    
+    "claude.apiKey": "sk-Hkk0lXdFxvOQSjzRoiRc5NG4mCSacATh2LgS6IhwG54OGsZV",
+    "claude.baseUrl": "https://aishopacc.com",
+    "claude.model": "glm-4.5",
+    "claude.timeout": 600000,
+    "claude.skipAuth": true,
+    "claude.autoLogin": false,
+    "claude.requireAuth": false,
+    
+    "anthropic.apiKey": "sk-Hkk0lXdFxvOQSjzRoiRc5NG4mCSacATh2LgS6IhwG54OGsZV",
+    "anthropic.baseUrl": "https://aishopacc.com",
+    "anthropic.model": "glm-4.5",
+    "anthropic.timeout": 600000,
+    "anthropic.skipAuth": true,
+    "anthropic.autoLogin": false,
+    "anthropic.requireAuth": false,
+    
+    "claude-dev.apiKey": "sk-Hkk0lXdFxvOQSjzRoiRc5NG4mCSacATh2LgS6IhwG54OGsZV",
+    "claude-dev.baseUrl": "https://aishopacc.com",
+    "claude-dev.model": "glm-4.5",
+    "claude-dev.autoLogin": false,
+    "claude-dev.requireAuth": false,
+    
+    // Terminal environment
+    "terminal.integrated.env.osx": {
+        "ANTHROPIC_AUTH_TOKEN": "sk-Hkk0lXdFxvOQSjzRoiRc5NG4mCSacATh2LgS6IhwG54OGsZV",
+        "ANTHROPIC_BASE_URL": "https://aishopacc.com",
+        "ANTHROPIC_MODEL": "glm-4.5"
+    }
+}

@@ -1,7 +1,7 @@
 <!-- File Card Component -->
 <div class="file-card" data-file-id="{{ file.id }}">
     <button class="action-toggle-btn" type="button" aria-label="Hiện menu hành động">⋯</button>
-    
+
     <!-- File Info -->
     <div class="file-info">
         <div class="file-creator" style="margin-bottom: 0; font-size: 12px;">
@@ -11,13 +11,13 @@
             <span style="margin-left:8px; color: #666; font-size: 11px;">{{ file.created_time_vn or file.created_time }}</span>
         </div>
     </div>
-    
+
     <!-- Image Container -->
     <div class="file-img-container">
         <img src="{{ file.url }}" alt="{{ file.filename }}">
-        
-        <!-- Like Button -->
-        <div class="like-button-wrapper">
+
+        <!-- Like Button - Moved to image overlay -->
+        <div class="like-button-wrapper-overlay">
             <div class="like-button">
                 <input id="heart-{{ file.id }}" type="checkbox" {{ 'checked' if file.is_liked_by_current_user else '' }} {{ 'disabled' if not logged_in else '' }} />
                 <label class="like" for="heart-{{ file.id }}" {{ 'style="opacity: 0.6; cursor: not-allowed;"' if not logged_in else '' }}>
@@ -26,12 +26,28 @@
                     </svg>
                     <span class="like-text">Likes</span>
                 </label>
-                <span class="like-count one">{{ file.like_count }}</span>
-                <span class="like-count two">{{ file.like_count }}</span>
+
+                <!-- Make like count clickable -->
+                <button class="like-count-btn"
+                        data-svg-id="{{ file.id }}"
+                        type="button"
+                        aria-label="Xem người đã thích"
+                        {{ 'disabled' if file.like_count == 0 else '' }}>
+                    <span class="like-count one">{{ file.like_count }}</span>
+                    <span class="like-count two">{{ file.like_count }}</span>
+                </button>
             </div>
         </div>
     </div>
-    
+
+    <!-- Likes Preview Text - Moved to replace old like button position -->
+    <div class="likes-preview-text" data-svg-id="{{ file.id }}" style="margin-top: 8px; display: none;">
+        <span class="likes-preview-content"></span>
+        <button class="likes-view-all-btn" type="button" style="color: #1976d2; background: none; border: none; cursor: pointer; font-size: 13px; padding: 0; margin-left: 4px;">
+            Xem tất cả
+        </button>
+    </div>
+
     <!-- Action Container -->
     <div class="file-action-container">
         <ul class="file-action-list">
@@ -81,7 +97,7 @@
             {% endif %}
         </ul>
     </div>
-    
+
     <!-- TikZ Code Section -->
     {% if file.tikz_code %}
     <div class="tikz-code-block" style="margin-top:10px;">
@@ -94,5 +110,55 @@
         </div>
     </div>
     {% endif %}
+
+    <!-- Likes Modal - Back inside file card for contained display -->
+    <div class="likes-modal" id="likes-modal-{{ file.id }}" role="dialog" aria-modal="true" aria-labelledby="likes-modal-title-{{ file.id }}">
+        <div class="likes-modal-overlay"></div>
+        <div class="likes-modal-content">
+            <!-- Header -->
+            <div class="likes-modal-header">
+                <h3 id="likes-modal-title-{{ file.id }}" class="likes-modal-title">
+                    <i class="fas fa-heart"></i>
+                    Người đã thích (<span class="likes-modal-count">0</span>)
+                </h3>
+                <button class="likes-modal-close" type="button" aria-label="Đóng">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Body -->
+            <div class="likes-modal-body">
+                <!-- Loading state -->
+                <div class="likes-loading">
+                    <div class="spinner"></div>
+                    <p>Đang tải...</p>
+                </div>
+
+                <!-- Users list -->
+                <ul class="likes-users-list">
+                    <!-- Dynamically populated by JS -->
+                </ul>
+
+                <!-- Empty state -->
+                <div class="likes-empty" style="display: none;">
+                    <p>Chưa có ai thích bài này</p>
+                </div>
+
+                <!-- Error state -->
+                <div class="likes-error" style="display: none;">
+                    <p>Không thể tải danh sách. Vui lòng thử lại.</p>
+                    <button class="retry-btn" type="button">Thử lại</button>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="likes-modal-footer">
+                <button class="load-more-btn" type="button" style="display: none;">
+                    <i class="fas fa-chevron-down"></i>
+                    Xem thêm
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 

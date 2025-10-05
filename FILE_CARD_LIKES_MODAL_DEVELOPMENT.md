@@ -2851,7 +2851,85 @@ mysql -u hiep1987 -p tikz2svg -e "SELECT COUNT(*) FROM svg_like;"
 
 ---
 
-## 📚 ADDITIONAL RESOURCES
+## �️ Desktop Modal Optimization (2025-10-06)
+
+Context: Ensure the "See all likes" modal fits neatly within narrow file cards (≈258–316px) on desktop while remaining readable on mobile.
+
+Changes implemented
+- Modal header: padding 8px 12px (from 12px 16px), min-height 40px
+- Modal title: font-size 13px (from 16px), single-line with ellipsis, flex: 1, min-width: 0
+- Heart icon in title: 14px (from 20px)
+- Close button: font-size 14px, padding 4px, fixed 24x24px, margin-left 8px, flex-shrink: 0
+- Modal content: width 240px (from 280px), min-width 200px, max-width 95%
+
+Reference CSS (adjust selectors to your actual markup)
+```css
+/* Root modal container for likes list */
+.likes-modal .modal-dialog {
+    width: 240px;            /* was 280px */
+    min-width: 200px;        /* guard against too small */
+    max-width: 95%;          /* was 90% */
+    margin: 0 auto;          /* center align in card */
+}
+
+/* Header tweaks */
+.likes-modal .modal-header {
+    padding: 8px 12px;       /* was 12px 16px */
+    min-height: 40px;
+    gap: 8px;                /* spacing between title and close */
+}
+
+/* Keep title on one line and responsive */
+.likes-modal .modal-title {
+    font-size: 13px;         /* was 16px */
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;                 /* take remaining space */
+    min-width: 0;            /* allow flex truncation */
+    display: flex;           /* support optional icon + text */
+    align-items: center;
+    gap: 8px;
+}
+
+/* Optional: icon next to title text */
+.likes-modal .modal-title .icon-heart {
+    width: 14px;             /* was 20px */
+    height: 14px;
+    flex: 0 0 14px;
+}
+
+/* Close button: compact and fixed touch area */
+.likes-modal .btn-close {
+    font-size: 14px;         /* was 20px */
+    padding: 4px;            /* was 8px */
+    width: 24px;
+    height: 24px;            /* fixed size for consistency */
+    margin-left: 8px;        /* separate from title */
+    flex-shrink: 0;          /* prevent shrinking */
+}
+
+/* Ensure mobile keeps good readability */
+@media (max-width: 480px) {
+    .likes-modal .modal-dialog {
+        max-width: 96%;
+        width: auto;           /* let it be fluid on small screens */
+    }
+}
+```
+
+Notes
+- Keep the close button's hit area ≥ 24px for accessibility.
+- Title truncation relies on the container being a flex item with min-width: 0 and a sibling close button set to flex-shrink: 0.
+- If using Bootstrap's default .btn-close, size can also be adjusted via transform: scale(.85) when needed.
+
+Acceptance checks
+- Title stays on a single line in 258–316px file cards without overlapping the close button.
+- Close button aligns to the right edge and remains visually compact.
+- Modal remains readable and functional on mobile.
+
+## �📚 ADDITIONAL RESOURCES
 
 ### Documentation Links
 - Flask-Limiter: https://flask-limiter.readthedocs.io/
@@ -2873,7 +2951,7 @@ mysql -u hiep1987 -p tikz2svg -e "SELECT COUNT(*) FROM svg_like;"
 ---
 
 **Created:** 2025-10-04  
-**Last Updated:** 2025-10-04  
+**Last Updated:** 2025-10-06  
 **Version:** 2.0  
 **Author:** Development Team  
 **Reviewers:** Backend Team, Frontend Team, DevOps Team  

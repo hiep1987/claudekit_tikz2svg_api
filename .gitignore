@@ -2,6 +2,11 @@
 __pycache__/
 *.pyc
 
+# Environment variables
+.env
+*.env
+!.env.example
+
 # Node.js
 node_modules/
 npm-debug.log*
@@ -63,3 +68,4 @@ templates/backup_*/
 
 # Work directory - không đẩy lên GitHub
 work/
+.env

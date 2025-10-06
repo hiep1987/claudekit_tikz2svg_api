@@ -2873,7 +2873,10 @@ def get_svg_likes(svg_id):
         # Format datetime và avatar paths cho JSON
         for user in users:
             if user['liked_at']:
-                user['liked_at'] = user['liked_at'].isoformat()
+                # Convert to VN timezone before sending to client
+                liked_at_utc = user['liked_at'].replace(tzinfo=timezone.utc)
+                liked_at_vn = liked_at_utc.astimezone(tz_vn)
+                user['liked_at'] = liked_at_vn.isoformat()
             if user['avatar']:
                 user['avatar'] = f"/static/avatars/{user['avatar']}"
 

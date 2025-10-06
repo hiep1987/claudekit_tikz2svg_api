@@ -562,13 +562,16 @@ function initializeLikeButtons() {
                     if (data.success) {
                         // Update with actual server count
                         const serverCount = data.like_count;
-                        
+
                         // Update both displays to server count
                         currentNumber.textContent = serverCount;
                         moveNumber.textContent = serverCount;
-                        
+
                         // Update checkbox state based on server response
                         this.checked = data.is_liked;
+
+                        // ✅ NEW: Refresh likes preview text to show updated user list
+                        refreshLikesPreviewText(fileId);
                     } else {
                         // Revert UI if backend failed
                         this.checked = !isLiked;
@@ -1325,6 +1328,28 @@ function generateLikesPreviewText(users, totalLikes, currentUserLiked) {
 function getCurrentUserId() {
     // This should be set by the backend when rendering the page
     return window.currentUserId || null;
+}
+
+/**
+ * ✅ NEW: Refresh likes preview text after like/unlike action
+ * Calls the preview API to get updated user list and refreshes the display
+ */
+function refreshLikesPreviewText(svgId) {
+    console.log(`🔄 Refreshing likes preview for SVG ${svgId}`);
+
+    fetch(`/api/svg/${svgId}/likes/preview`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log(`✅ Preview data received:`, data);
+                renderLikesPreview(svgId, data);
+            } else {
+                console.error('❌ Failed to refresh likes preview:', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('❌ Error refreshing likes preview:', error);
+        });
 }
 
 // Expose necessary functions to global scope

@@ -598,4 +598,152 @@ Error: Access denied - insufficient permissions
 
 ---
 
-**🎯 Tài liệu này bao gồm tất cả hướng dẫn sử dụng TikZ2SVG web application để giúp người dùng tận dụng tối đa các tính năng có sẵn.**
+## 11. ❓ Câu hỏi thường gặp (FAQ)
+
+### Q: Tôi có thể sử dụng miễn phí không?
+**A:** Có, TikZ2SVG hoàn toàn miễn phí cho tất cả tính năng cơ bản. Bạn chỉ cần đăng nhập bằng Google để sử dụng đầy đủ tính năng.
+
+### Q: File SVG có bị xóa tự động không?
+**A:** Không, file SVG của bạn được lưu trữ vĩnh viễn sau khi tạo. Chỉ có chủ sở hữu mới có thể xóa file của mình.
+
+### Q: Tôi có thể tạo bao nhiêu file SVG mỗi ngày?
+**A:** Hiện tại giới hạn 10 file SVG mới mỗi ngày cho mỗi tài khoản để đảm bảo chất lượng dịch vụ.
+
+### Q: Tại sao tôi không thể follow người khác?
+**A:** Để follow người khác, bạn cần xác thực tài khoản qua email. Vào Profile Settings → Xác thực tài khoản để mở khóa tính năng này.
+
+### Q: File TikZ của tôi không biên dịch được, phải làm sao?
+**A:** Kiểm tra:
+- Cú pháp TikZ có đúng không
+- Có thiếu packages không (sử dụng `%!<\usepackage{...}>` nếu cần)
+- Xem log lỗi chi tiết để khắc phục
+
+### Q: Tôi có thể sử dụng TikZ code của người khác không?
+**A:** Có, nhưng chỉ nên sử dụng để học hỏi và tham khảo. Hãy tôn trọng tác giả và không copy hoàn toàn mà không ghi nguồn.
+
+### Q: Làm sao để file SVG của tôi được nhiều người thấy?
+**A:**
+- Sử dụng keywords/tags phù hợp khi lưu file
+- Tạo nội dung chất lượng và hữu ích
+- Tương tác với cộng đồng bằng cách like và follow người khác
+
+### Q: Tôi quên mật khẩu thì sao?
+**A:** TikZ2SVG sử dụng Google OAuth, bạn chỉ cần đăng nhập bằng tài khoản Google của mình. Không cần nhớ mật khẩu riêng.
+
+---
+
+## 12. 🎥 Hướng dẫn trực quan
+
+### Video tutorials (sắp ra mắt):
+- **"Tạo SVG đầu tiên trong 3 phút"** - Hướng dẫn từ A-Z cho người mới
+- **"Sử dụng advanced TikZ features"** - Packages, libraries và tricks nâng cao
+- **"Mobile tips & tricks"** - Tối ưu trải nghiệm trên điện thoại
+- **"Quản lý profile và tương tác xã hội"** - Follow, like và xây dựng cộng đồng
+
+### Screenshots quan trọng:
+📸 **Giao diện chính** - Overview toàn bộ layout với annotations
+📸 **Menu actions comparison** - Desktop hover vs Mobile 2-tap
+📸 **Verification process** - Step-by-step với email screenshots
+📸 **Search functionality** - Keywords vs Username modes
+📸 **File conversion** - SVG to PNG/JPEG options
+
+### Interactive demos:
+🎮 **TikZ Playground** - Thử nghiệm code mẫu ngay trên browser
+🎮 **Package Explorer** - Khám phá packages được hỗ trợ với examples
+🎮 **Mobile Simulator** - Test giao diện mobile trên desktop
+
+---
+
+## 13. 👥 Quy tắc cộng đồng
+
+### Nội dung được khuyến khích:
+- ✅ **Chia sẻ TikZ code hữu ích** - Giúp cộng đồng học hỏi
+- ✅ **Tạo tutorials và examples** - Hướng dẫn các techniques mới
+- ✅ **Giúp đỡ người dùng mới** - Trả lời câu hỏi, chia sẻ kinh nghiệm
+- ✅ **Feedback xây dựng** - Góp ý cải thiện tính năng
+- ✅ **Nội dung giáo dục** - Mathematical diagrams, scientific illustrations
+
+### Nội dung không được phép:
+- ❌ **Spam hoặc nội dung không phù hợp** - Quảng cáo, nội dung nhạy cảm
+- ❌ **Vi phạm bản quyền** - Copy code/design của người khác không ghi nguồn
+- ❌ **Tài khoản fake** - Giả mạo danh tính, tạo nhiều tài khoản
+- ❌ **Harassment** - Quấy rối, bình luận tiêu cực về người khác
+- ❌ **Malicious code** - TikZ code có thể gây hại hệ thống
+
+### Báo cáo vi phạm:
+📧 **Email**: admin@tikz2svg.com
+📝 **Thông tin cần cung cấp**: Link file, mô tả vi phạm, screenshots (nếu có)
+⏱️ **Thời gian xử lý**: 24-48 giờ cho các báo cáo hợp lệ
+
+---
+
+## 14. 🆕 Tính năng mới & Cập nhật
+
+### Tháng 10/2024 - Major Update:
+- ✨ **Likes Modal Enhancement**: Xem danh sách đầy đủ người đã like với pagination
+- ✨ **Real-time Like Updates**: Like count và preview text cập nhật ngay lập tức
+- ✨ **Enhanced Search Bar**: Tìm kiếm theo keywords và username với auto-suggestions
+- 🔧 **Mobile UX Improvements**: Tối ưu 2-tap logic và touch responsiveness
+- 🔧 **Timezone Fix**: Hiển thị thời gian chính xác theo múi giờ Việt Nam
+
+### Tháng 9/2024:
+- ✨ **Profile Verification System**: Xác thực tài khoản qua email với 6-digit code
+- ✨ **Follow/Unfollow Feature**: Theo dõi người dùng và xem bài đăng từ người đã follow
+- 🔧 **CSS Foundation Migration**: Cải thiện performance và consistency
+- 🔧 **Glass Morphism UI**: Giao diện hiện đại với hiệu ứng transparency
+
+### Tháng 8/2024:
+- ✨ **Advanced Package Detection**: Tự động phát hiện 50+ LaTeX packages
+- ✨ **Manual Package Specification**: Syntax `%!<\usepackage{...}>` cho packages đặc biệt
+- ✨ **File Conversion System**: SVG → PNG/JPEG với tùy chỉnh DPI và kích thước
+- 🔧 **Rate Limiting**: Bảo vệ server khỏi spam và abuse
+
+### Sắp ra mắt (Q4 2024):
+- 🔔 **Push Notifications**: Thông báo real-time cho likes, follows và comments
+- 📱 **Progressive Web App (PWA)**: Cài đặt như app native trên mobile
+- 🤝 **Collaboration Features**: Chia sẻ và co-work trên TikZ projects
+- 📊 **Analytics Dashboard**: Thống kê views, likes và engagement cho creators
+- 🎨 **Theme Customization**: Dark mode và custom color schemes
+- 💬 **Comment System**: Bình luận và thảo luận trên từng SVG file
+
+### Roadmap 2025:
+- 🔗 **API v2**: RESTful API công khai cho third-party integrations
+- 🏆 **Gamification**: Badges, achievements và leaderboards
+- 📚 **Learning Hub**: Interactive TikZ tutorials và challenges
+- 🌐 **Internationalization**: Hỗ trợ đa ngôn ngữ (English, Japanese, Korean)
+
+---
+
+## 15. 🌐 Tương thích trình duyệt
+
+### Được hỗ trợ đầy đủ tính năng:
+- ✅ **Chrome 80+** (recommended) - Hiệu suất tốt nhất, tất cả tính năng hoạt động
+- ✅ **Firefox 75+** - Hỗ trợ tốt, một số animation có thể chậm hơn
+- ✅ **Safari 13+** - Tương thích tốt trên macOS và iOS
+- ✅ **Edge 80+** - Chromium-based, hiệu suất tương đương Chrome
+
+### Hỗ trợ hạn chế:
+- ⚠️ **Chrome/Firefox cũ hơn** - Một số tính năng CSS modern có thể không hoạt động
+- ⚠️ **Safari 12 và cũ hơn** - Glass morphism effects có thể không hiển thị
+- ⚠️ **Mobile browsers cũ** - Touch events có thể không responsive
+
+### Không được hỗ trợ:
+- ❌ **Internet Explorer** (tất cả versions) - Không tương thích với ES6+ và modern CSS
+- ❌ **Opera Mini** - JavaScript bị hạn chế, không thể biên dịch TikZ
+- ❌ **UC Browser** - WebView engine cũ, performance kém
+
+### Yêu cầu Browser Settings:
+- 🍪 **Cookies enabled** - Bắt buộc cho authentication và user preferences
+- 📜 **JavaScript enabled** - Cần thiết cho tất cả interactive features
+- 💾 **Local Storage** - Lưu trữ temporary data và user settings
+- 🔒 **HTTPS support** - Required cho Google OAuth và secure features
+
+### Performance Tips:
+- 🚀 **Chrome recommended**: Tốc độ biên dịch nhanh nhất
+- 🧹 **Clear cache định kỳ**: Tránh conflicts khi có updates
+- 🔄 **Update browser**: Luôn dùng version mới nhất để có trải nghiệm tốt nhất
+- 📱 **Mobile**: Safari (iOS) và Chrome (Android) cho performance tối ưu
+
+---
+
+**🎯 Tài liệu này bao gồm tất cả hướng dẫn sử dụng TikZ2SVG web application để giúp người dùng tận dụng tối đa các tính năng có sẵn và hiểu rõ cách thức hoạt động của hệ thống.**

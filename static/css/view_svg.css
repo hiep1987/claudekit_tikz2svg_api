@@ -572,8 +572,7 @@
     
     .tikz-app #view-export-form {
         display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
+        flex-flow: row wrap;
         gap: var(--spacing-4);
         align-items: start;
         justify-content: center;
@@ -581,8 +580,7 @@
 
     .tikz-app #view-export-form .export-pair {
         display: flex;
-        flex-direction: row;
-        flex-wrap: nowrap;
+        flex-flow: row nowrap;
         align-items: center;
         justify-content: flex-start;
         gap: var(--spacing-4);
@@ -895,8 +893,7 @@
 
     .tikz-app #view-export-form {
         display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
+        flex-flow: row wrap;
         gap: var(--spacing-4);
         align-items: start;
         justify-content: flex-start;
@@ -904,8 +901,7 @@
 
     .tikz-app #view-export-form .export-pair {
         display: flex;
-        flex-direction: row;
-        flex-wrap: nowrap;
+        flex-flow: row nowrap;
         align-items: center;
         justify-content: flex-start;
         gap: var(--spacing-4);
@@ -992,8 +988,7 @@
 
     .tikz-app #view-export-form {
         display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
+        flex-flow: row wrap;
         gap: var(--spacing-5);
         align-items: start;
         justify-content: flex-start;
@@ -1001,8 +996,7 @@
 
     .tikz-app #view-export-form .export-pair {
         display: flex;
-        flex-direction: row;
-        flex-wrap: nowrap;
+        flex-flow: row nowrap;
         align-items: center;
         justify-content: flex-start;
         gap: var(--spacing-5);

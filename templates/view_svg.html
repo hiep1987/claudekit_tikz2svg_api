@@ -26,14 +26,26 @@
 {# Additional CSS #}
 {% block extra_css %}
 <!-- View SVG Page CSS -->
-<link rel="stylesheet" href="{{ url_for('static', filename='css/view_svg.css', v='1.0') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/view_svg.css', v='2.0') }}">
+
+<!-- Responsive Demo CSS (for development) -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/responsive-demo.css', v='1.0') }}">
 {% endblock %}
 
 {# Main content #}
 {% block content %}
+<!-- Responsive Breakpoint Indicator (Development Only) -->
+<div class="breakpoint-indicator"></div>
+
 <!-- View SVG Section -->
 <div class="view-svg-container">
     <h2 class="view-svg-title">{{ display_name }}</h2>
+    
+    <!-- Responsive Demo (Development Only) -->
+    <div class="responsive-demo">
+        <p>Responsive breakpoints đã được cập nhật theo chuẩn Bootstrap!</p>
+        <small>Thay đổi kích thước cửa sổ để xem các breakpoints khác nhau</small>
+    </div>
     <div id="view-mode-row">
         <div class="view-col">
             <div id="view-svg-preview">

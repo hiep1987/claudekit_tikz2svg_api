@@ -1,0 +1,124 @@
+/* ===== RESPONSIVE BREAKPOINTS DEMO ===== */
+/* File này demo các breakpoints mới cho view_svg.html */
+
+/* Base styles: áp dụng cho tất cả thiết bị nhỏ hơn 576px */
+.responsive-demo {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1rem;
+  text-align: center;
+  border-radius: 8px;
+  margin: 1rem 0;
+}
+
+.responsive-demo::before {
+  content: "📱 Mobile (< 576px)";
+  display: block;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+/* ≥ 576px — điện thoại lớn (ví dụ iPhone Plus, Pixel XL) */
+@media (min-width: 576px) {
+  .responsive-demo {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  }
+  
+  .responsive-demo::before {
+    content: "📱 Large Phone (≥ 576px)";
+  }
+}
+
+/* ≥ 768px — tablet dọc/ngang */
+@media (min-width: 768px) {
+  .responsive-demo {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  }
+  
+  .responsive-demo::before {
+    content: "📱 Tablet (≥ 768px)";
+  }
+}
+
+/* ≥ 992px — laptop nhỏ / desktop thường */
+@media (min-width: 992px) {
+  .responsive-demo {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  }
+  
+  .responsive-demo::before {
+    content: "💻 Desktop (≥ 992px)";
+  }
+}
+
+/* ≥ 1200px — desktop rộng */
+@media (min-width: 1200px) {
+  .responsive-demo {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  }
+  
+  .responsive-demo::before {
+    content: "🖥️ Wide Desktop (≥ 1200px)";
+  }
+}
+
+/* ≥ 1400px — màn hình rất rộng (ultra-wide) */
+@media (min-width: 1400px) {
+  .responsive-demo {
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+    color: #333;
+  }
+  
+  .responsive-demo::before {
+    content: "🖥️ Ultra-Wide (≥ 1400px)";
+  }
+}
+
+/* ===== BREAKPOINT INDICATOR ===== */
+.breakpoint-indicator {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: monospace;
+  z-index: 9999;
+  transition: all 0.3s ease;
+}
+
+.breakpoint-indicator::before {
+  content: "📱 < 576px";
+}
+
+@media (min-width: 576px) {
+  .breakpoint-indicator::before {
+    content: "📱 ≥ 576px";
+  }
+}
+
+@media (min-width: 768px) {
+  .breakpoint-indicator::before {
+    content: "📱 ≥ 768px";
+  }
+}
+
+@media (min-width: 992px) {
+  .breakpoint-indicator::before {
+    content: "💻 ≥ 992px";
+  }
+}
+
+@media (min-width: 1200px) {
+  .breakpoint-indicator::before {
+    content: "🖥️ ≥ 1200px";
+  }
+}
+
+@media (min-width: 1400px) {
+  .breakpoint-indicator::before {
+    content: "🖥️ ≥ 1400px";
+  }
+}

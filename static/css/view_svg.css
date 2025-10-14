@@ -690,22 +690,18 @@
     
     .tikz-app #view-export-form {
         display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
+        flex-direction: column;
         gap: var(--spacing-3);
-        align-items: start;
-        justify-content: center;
+        align-items: center;
     }
 
     .tikz-app #view-export-form .export-pair {
         display: flex;
         flex-direction: row;
-        flex-wrap: nowrap;
         align-items: center;
         justify-content: flex-start;
         gap: var(--spacing-3);
-        flex: 1;
-        min-width: 220px;
+        width: auto;
     }
 
     .tikz-app #view-export-form .export-label {
@@ -716,9 +712,8 @@
     }
 
     .tikz-app #view-export-form .export-select {
-        flex: 1;
-        width: auto;
-        min-width: 100px;
+        flex: 0 0 auto;
+        width: 100px;
         font-size: 0.875rem;
         border: 1px solid #ddd;
         border-radius: 5px;
@@ -730,9 +725,8 @@
     }
 
     .tikz-app #view-export-form .export-number {
-        flex: 1;
-        width: auto;
-        min-width: 100px;
+        flex: 0 0 auto;
+        width: 100px;
         font-size: 0.875rem;
         border: 1px solid #ddd;
         border-radius: 5px;
@@ -789,9 +783,10 @@
     }
     
     .tikz-app #view-export-form {
-        grid-template-columns: 1fr;
+        display: flex;
+        flex-direction: column;
         gap: var(--spacing-3);
-        align-items: start;
+        align-items: center;
     }
 
     .tikz-app #view-export-form .export-pair {
@@ -849,6 +844,31 @@
     
     .tikz-app #view-svg-actions .view-action-btn {
         min-width: 160px;
+    }
+}
+
+/* 992px-1200px: Keep 1-column layout but center like smaller screens */
+@media (width >= 992px) and (width < 1200px) {
+    .tikz-app #view-export-form {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-3);
+        align-items: center;
+    }
+
+    .tikz-app #view-export-form .export-pair {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        gap: var(--spacing-3);
+        width: auto;
+    }
+
+    .tikz-app #view-export-form .export-select,
+    .tikz-app #view-export-form .export-number {
+        flex: 0 0 auto;
+        width: 100px;
     }
 }
 

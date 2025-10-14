@@ -10,6 +10,7 @@
     // Private variables (không pollute global scope)
     let isLoggedIn = false;
     let cm = null; // CodeMirror instance
+    let pendingTikzCode = null; // Code TikZ đang chờ được set vào CodeMirror
 
     // Initialize app state from HTML
     function initializeAppState() {
@@ -71,6 +72,12 @@
             lineNumbers: true,
             placeholder: 'Nhập code TikZ tại đây...'
         });
+        
+        // Nếu có code đang chờ, set vào CodeMirror
+        if (pendingTikzCode && typeof cm.setValue === 'function') {
+            cm.setValue(pendingTikzCode);
+            pendingTikzCode = null; // Clear sau khi đã set
+        }
     }
 
     function copySvgCode() {
@@ -117,19 +124,30 @@
 
     // Khởi tạo CodeMirror sẽ được gọi trong init chính
     function initCodeMirrorAndBindings() {
-        var tikzCode = document.getElementById('code');
-        cm = CodeMirror.fromTextArea(tikzCode, {
-            mode: 'stex',
-            theme: 'material',
-            lineNumbers: true,
-            lineWrapping: true,
-            placeholder: 'Nhập code TikZ tại đây...'
-        });
-        // Giá trị ban đầu từ server
-        try {
-            cm.setValue(JSON.parse(document.getElementById('initial-tikz')?.textContent || '""'));
-        } catch(e) {
-            cm.setValue('');
+        // Nếu CodeMirror chưa tồn tại, khởi tạo nó
+        if (!cm) {
+            var tikzCode = document.getElementById('code');
+            cm = CodeMirror.fromTextArea(tikzCode, {
+                mode: 'stex',
+                theme: 'material',
+                lineNumbers: true,
+                lineWrapping: true,
+                placeholder: 'Nhập code TikZ tại đây...'
+            });
+            
+            // Nếu có code đang chờ từ localStorage, ưu tiên nó
+            if (pendingTikzCode) {
+                cm.setValue(pendingTikzCode);
+                pendingTikzCode = null; // Clear sau khi đã set
+            } else {
+                // Giá trị ban đầu từ server
+                try {
+                    const initialTikz = JSON.parse(document.getElementById('initial-tikz')?.textContent || '""');
+                    cm.setValue(initialTikz);
+                } catch(e) {
+                    cm.setValue('');
+                }
+            }
         }
         
         // Thêm sự kiện click vào CodeMirror để hiện modal đăng nhập nếu chưa đăng nhập
@@ -158,7 +176,6 @@
 
     // Hiển thị lỗi biên dịch TikZ, kèm log chi tiết nếu có
     function displayCompileError(message, fullLog) {
-//         console.log('displayCompileError called with:', { message, hasFullLog: !!fullLog });
         // Xóa TẤT CẢ error sections cũ
         document.querySelectorAll('.result-section, #result-section, #ajax-result-section').forEach(el => {
             if (el.querySelector('.error') || el.querySelector('#ajax-show-log-btn')) {
@@ -214,7 +231,6 @@
                     }
                 }
             };
-//             console.log('Log button event handler attached');
         }
         if (copyBtn) {
             copyBtn.onclick = function() {
@@ -236,7 +252,6 @@
 
     // Hàm AJAX mới để submit không reload trang
     async function submitTikzCodeAjax(event) {
-//         console.log('AJAX submit started'); // Debug
         event.preventDefault(); // Ngăn form submit bình thường
         
         // Kiểm tra đăng nhập
@@ -260,9 +275,6 @@
         const currentText = compileBtn.textContent;
         
         // Debug: Log original text
-//         console.log('🔧 Original button text (fixed):', originalText);
-//         console.log('🔧 Current button text:', currentText);
-//         console.log('🔧 Button element:', compileBtn);
         
         // Lưu originalText vào global để debug
         window.debugOriginalText = originalText;
@@ -293,10 +305,6 @@
                 const standaloneError = doc.querySelector('.error');
 
                 // Debug để kiểm tra error detection
-//                 console.log('Checking for errors in response...');
-//                 console.log('Preview col error:', previewColError);
-//                 console.log('Result section error:', resultSectionError);
-//                 console.log('Standalone error:', standaloneError);
 
                 const errorElement = previewColError || resultSectionError || standaloneError;
                 if (errorElement) {
@@ -304,8 +312,6 @@
                     // Tìm full log trong cùng document
                     const fullLogEl = doc.getElementById('full-log');
                     const fullLog = fullLogEl ? fullLogEl.textContent : '';
-//                     console.log('Error detected:', msg);
-//                     console.log('Full log:', fullLog ? 'Yes' : 'No');
                     
                     // Track TikZ render error
                     if (window.analytics) {
@@ -314,15 +320,9 @@
                     
                     displayCompileError(msg, fullLog);
                     // Reset button ngay khi có lỗi
-//                     console.log('🔧 TIKZ ERROR: Resetting button to:', originalText);
-//                     console.log('🔧 TIKZ ERROR: compileBtn exists:', !!compileBtn);
-//                     console.log('🔧 TIKZ ERROR: originalText exists:', !!originalText);
                     if (compileBtn && originalText) {
                         compileBtn.textContent = originalText;
                         compileBtn.disabled = false;
-//                         console.log('🔧 TIKZ ERROR: Button reset completed');
-                    } else {
-//                         console.log('🔧 TIKZ ERROR: Button reset FAILED - missing compileBtn or originalText');
                     }
                     return;
                 }
@@ -382,52 +382,35 @@
                 ensureCodeMirror();
                 
                 // Reset nút biên dịch về trạng thái ban đầu khi thành công
-//                 console.log('🔧 SUCCESS: Resetting button to:', originalText);
-//                 console.log('🔧 SUCCESS: compileBtn exists:', !!compileBtn);
-//                 console.log('🔧 SUCCESS: originalText exists:', !!originalText);
                 
                 // Thử tìm lại nút compile sau AJAX (có thể DOM đã thay đổi)
                 const currentCompileBtn = document.getElementById('compile-btn');
-//                 console.log('🔧 SUCCESS: Current compileBtn after AJAX:', !!currentCompileBtn);
-//                 console.log('🔧 SUCCESS: Current compileBtn text:', currentCompileBtn?.textContent);
                 
                 if (compileBtn && originalText) {
                     compileBtn.textContent = originalText;
                     compileBtn.disabled = false;
-//                     console.log('🔧 SUCCESS: Button reset completed with original compileBtn');
                 } else if (currentCompileBtn && originalText) {
                     currentCompileBtn.textContent = originalText;
                     currentCompileBtn.disabled = false;
-//                     console.log('🔧 SUCCESS: Button reset completed with current compileBtn');
                 } else {
-//                     console.log('🔧 SUCCESS: Button reset FAILED - missing compileBtn or originalText');
                     // Fallback: thử reset sau một chút delay
                     setTimeout(() => {
                         const delayedCompileBtn = document.getElementById('compile-btn');
                         if (delayedCompileBtn && originalText) {
                             delayedCompileBtn.textContent = originalText;
                             delayedCompileBtn.disabled = false;
-//                             console.log('🔧 SUCCESS: Button reset completed with delayed approach');
                         } else if (delayedCompileBtn && window.debugOriginalText) {
                             delayedCompileBtn.textContent = window.debugOriginalText;
                             delayedCompileBtn.disabled = false;
-//                             console.log('🔧 SUCCESS: Button reset completed with delayed approach + global fallback');
                         } else if (delayedCompileBtn) {
                             delayedCompileBtn.textContent = 'Biên dịch';
                             delayedCompileBtn.disabled = false;
-//                             console.log('🔧 SUCCESS: Button reset completed with delayed approach + fixed text');
                         }
                     }, 100);
                 }
                 
                 // Debug: Kiểm tra nút save server có được gán event chưa
                 const saveServerBtn = document.getElementById('save-server-btn');
-                if (saveServerBtn) {
-//                     console.log('Save server button found after AJAX update');
-//                     console.log('Button onclick:', saveServerBtn.onclick);
-                } else {
-//                     console.log('Save server button not found after AJAX update');
-                }
 
                 // Hiện nút Lưu server sau khi biên dịch thành công
                 if (saveServerBtn && newResultToolsSection) {
@@ -587,55 +570,34 @@
                     displayCompileError('Lỗi kết nối với server', '');
                 }
                 // Reset nút ngay khi có HTTP error
-//                 console.log('🔧 HTTP ERROR: Resetting button to:', originalText);
-//                 console.log('🔧 HTTP ERROR: compileBtn exists:', !!compileBtn);
-//                 console.log('🔧 HTTP ERROR: originalText exists:', !!originalText);
                 if (compileBtn && originalText) {
                     compileBtn.textContent = originalText;
                     compileBtn.disabled = false;
-//                     console.log('🔧 HTTP ERROR: Button reset completed');
-                } else {
-//                     console.log('🔧 HTTP ERROR: Button reset FAILED - missing compileBtn or originalText');
                 }
             }
         } catch (error) {
             console.error('AJAX Error:', error);
             displayCompileError('Có lỗi xảy ra khi biên dịch: ' + error.message, '');
             // Reset nút ngay khi có exception
-//             console.log('🔧 EXCEPTION: Resetting button to:', originalText);
-//             console.log('🔧 EXCEPTION: compileBtn exists:', !!compileBtn);
-//             console.log('🔧 EXCEPTION: originalText exists:', !!originalText);
             if (compileBtn && originalText) {
                 compileBtn.textContent = originalText;
                 compileBtn.disabled = false;
-//                 console.log('🔧 EXCEPTION: Button reset completed');
-            } else {
-//                 console.log('🔧 EXCEPTION: Button reset FAILED - missing compileBtn or originalText');
             }
         } finally {
             // Khôi phục nút (backup reset) - với safety check
-//             console.log('🔧 FINALLY: Resetting button to:', originalText);
-//             console.log('🔧 FINALLY: compileBtn exists:', !!compileBtn);
-//             console.log('🔧 FINALLY: originalText exists:', !!originalText);
-//             console.log('🔧 FINALLY: Global debugOriginalText:', window.debugOriginalText);
             if (compileBtn && originalText) {
                 compileBtn.textContent = originalText;
                 compileBtn.disabled = false;
-//                 console.log('🔧 FINALLY: Button reset completed');
             } else {
-//                 console.log('🔧 FINALLY: Button reset FAILED - missing compileBtn or originalText');
                 // Fallback: thử dùng global debugOriginalText hoặc text cố định
                 if (compileBtn && window.debugOriginalText) {
-//                     console.log('🔧 FINALLY: Trying fallback with global debugOriginalText');
                     compileBtn.textContent = window.debugOriginalText;
                     compileBtn.disabled = false;
                 } else if (compileBtn) {
-//                     console.log('🔧 FINALLY: Trying fallback with fixed text');
                     compileBtn.textContent = 'Biên dịch';
                     compileBtn.disabled = false;
                 }
             }
-//             console.log('AJAX submit completed'); // Debug
         }
         return false;
     }
@@ -711,7 +673,6 @@
                 }
             }
         } catch (error) {
-//             console.log('Input preview update failed:', error);
             if (previewContainer) {
                 previewContainer.innerHTML = '<div class="preview-placeholder"><p>Lỗi kết nối</p></div>';
             }
@@ -923,44 +884,31 @@
 
 // Search functionality
 function initializeSearch() {
-    console.log('🔍 initializeSearch() called');
     const searchInput = document.getElementById('main-search-input');
     const suggestionsBox = document.getElementById('search-suggestions');
     const blurOverlay = document.getElementById('search-blur-overlay');
     const keywordsButton = document.getElementById('search-type-keywords');
     const usernameButton = document.getElementById('search-type-username');
 
-    console.log('🔍 searchInput:', searchInput);
-    console.log('🔍 suggestionsBox:', suggestionsBox);
-    console.log('🔍 blurOverlay:', blurOverlay);
-    console.log('🔍 keywordsButton:', keywordsButton);
-    console.log('🔍 usernameButton:', usernameButton);
-
     if (!searchInput || !suggestionsBox) {
-        console.log('❌ Missing searchInput or suggestionsBox');
         return;
     }
 
     // Helper function to get current search type
     function getCurrentSearchType() {
-        console.log('🔍 getCurrentSearchType() called');
         const activeButton = document.querySelector('.search-type-option.active');
         const result = activeButton ? activeButton.dataset.type : 'keywords';
-        console.log('🔍 getCurrentSearchType() returning:', result);
         return result;
     }
 
     // Helper function to update placeholder text
     function updateSearchPlaceholder() {
-        console.log('🔍 updateSearchPlaceholder() called');
         const searchType = getCurrentSearchType();
-        console.log('🔍 updateSearchPlaceholder searchType:', searchType);
         if (searchType === 'username') {
             searchInput.placeholder = 'Tìm theo tên tài khoản...';
         } else {
             searchInput.placeholder = 'Tìm theo từ khóa...';
         }
-        console.log('🔍 updateSearchPlaceholder finished, placeholder:', searchInput.placeholder);
     }
 
     // Helper function to navigate to search results
@@ -973,7 +921,6 @@ function initializeSearch() {
     // Handle button clicks
     if (keywordsButton && usernameButton) {
         keywordsButton.addEventListener('click', function() {
-            console.log('🔍 Keywords button clicked');
             keywordsButton.classList.add('active');
             usernameButton.classList.remove('active');
             updateSearchPlaceholder();
@@ -982,7 +929,6 @@ function initializeSearch() {
         });
 
         usernameButton.addEventListener('click', function() {
-            console.log('🔍 Username button clicked');
             usernameButton.classList.add('active');
             keywordsButton.classList.remove('active');
             updateSearchPlaceholder();
@@ -1007,25 +953,11 @@ function initializeSearch() {
     
     // Helper function to show suggestions with blur
     function showSuggestions() {
-        console.log('🔍 showSuggestions() called');
-        console.log('🔍 suggestionsBox:', suggestionsBox);
-        console.log('🔍 suggestionsBox.children.length:', suggestionsBox.children.length);
-        console.log('🔍 suggestionsBox.innerHTML before:', suggestionsBox.innerHTML);
 
         suggestionsBox.style.display = 'block';
         suggestionsBox.style.visibility = 'visible';
         suggestionsBox.style.opacity = '1';
 
-        console.log('🔍 suggestionsBox.style.display set to:', suggestionsBox.style.display);
-        console.log('🔍 suggestionsBox final computed style:');
-        const computedStyle = window.getComputedStyle(suggestionsBox);
-        console.log('🔍   - display:', computedStyle.display);
-        console.log('🔍   - visibility:', computedStyle.visibility);
-        console.log('🔍   - opacity:', computedStyle.opacity);
-        console.log('🔍   - position:', computedStyle.position);
-        console.log('🔍   - z-index:', computedStyle.zIndex);
-        console.log('🔍   - top:', computedStyle.top);
-        console.log('🔍   - left:', computedStyle.left);
 
         toggleSearchBlur(true);
     }
@@ -1038,48 +970,37 @@ function initializeSearch() {
     
     // Handle input changes
     searchInput.addEventListener('input', function() {
-        console.log('🔍 Search input event triggered');
         if (window.typingTimeout) {
             clearTimeout(window.typingTimeout);
         }
         const query = this.value.trim();
 
-        console.log('🔍 Query:', query);
 
         if (query.length < 1) {
-            console.log('🔍 Query too short, hiding suggestions');
             hideSuggestions();
             return;
         }
 
         // Only show suggestions for keyword search, not username search
         const searchType = getCurrentSearchType();
-        console.log('🔍 Search type:', searchType);
         if (searchType === 'username') {
-            console.log('🔍 Username search mode, hiding suggestions');
             hideSuggestions();
             return;
         }
 
-        console.log('🔍 Fetching suggestions for query:', query);
         window.typingTimeout = setTimeout(() => {
-            console.log('🔍 Making API call to:', `/api/keywords/search?q=${encodeURIComponent(query)}`);
             fetch(`/api/keywords/search?q=${encodeURIComponent(query)}`)
                 .then(res => {
-                    console.log('🔍 API response status:', res.status);
                     return res.json();
                 })
                 .then(data => {
-                    console.log('🔍 API response data:', data);
                     suggestionsBox.innerHTML = '';
 
                     if (data.length === 0) {
-                        console.log('🔍 No suggestions found');
                         hideSuggestions();
                         return;
                     }
 
-                    console.log('🔍 Adding suggestions:', data);
                     data.forEach(keyword => {
                         const item = document.createElement('div');
                         item.className = 'search-suggestion-item';
@@ -1100,9 +1021,7 @@ function initializeSearch() {
                         suggestionsBox.appendChild(item);
                     });
 
-                    console.log('🔍 Calling showSuggestions()');
                     showSuggestions();
-                    console.log('🔍 Suggestions displayed, suggestionsBox.style.display:', suggestionsBox.style.display);
                 })
                 .catch(err => {
                     console.error('❌ Search error:', err);
@@ -1147,7 +1066,6 @@ function initializeSearch() {
         const tikzForm = document.getElementById('tikz-form');
         if (tikzForm) {
             tikzForm.addEventListener('submit', function(event) {
-//                 console.log('Form submit event');
                 return submitTikzCodeAjax(event);
             });
         }
@@ -1356,9 +1274,7 @@ function initializeSearch() {
         // 14) Action buttons, polling, cleanup đã được initialize trong file_card.js
 
         // 15) Touch events đã được xử lý trong initializeTouchBtnEvents cho tất cả users
-//         console.log('🔄 Touch events initialized for all users');
 
-//         console.log('DOMContentLoaded - appState.loggedIn:', window.appState && window.appState.loggedIn);
 
 
 
@@ -1366,22 +1282,28 @@ function initializeSearch() {
         // Thực thi sau khi tất cả đã được khởi tạo
         setTimeout(() => {
             const tikzFromStorage = localStorage.getItem('tikz_code_for_compile');
+            
             if (tikzFromStorage) {
-//                 console.log('Found tikz_code_for_compile in localStorage:', tikzFromStorage);
+                // Đảm bảo CodeMirror được khởi tạo trước
+                if (!cm) {
+                    ensureCodeMirror();
+                }
+                
                 // Điền code vào textarea chính
                 if (cm && typeof cm.setValue === 'function') {
                     cm.setValue(tikzFromStorage);
-//                     console.log('Code set to CodeMirror successfully');
+                    // Chỉ xóa localStorage sau khi đã set thành công vào CodeMirror
+                    localStorage.removeItem('tikz_code_for_compile');
                 } else {
+                    // Nếu CodeMirror vẫn chưa sẵn sàng, lưu code vào pendingTikzCode
+                    pendingTikzCode = tikzFromStorage;
                     const textarea = document.getElementById('code');
                     if (textarea) {
                         textarea.value = tikzFromStorage;
-//                         console.log('Code set to textarea successfully');
                     }
+                    // Xóa localStorage sau khi đã lưu vào pendingTikzCode
+                    localStorage.removeItem('tikz_code_for_compile');
                 }
-                // Xóa dữ liệu đã sử dụng
-                localStorage.removeItem('tikz_code_for_compile');
-//                 console.log('tikz_code_for_compile removed from localStorage');
             }
         }, 100); // Delay 100ms để đảm bảo CodeMirror đã sẵn sàng
     });

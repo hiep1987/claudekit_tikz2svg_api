@@ -6,7 +6,6 @@ function initializeFileCardActions() {
     // Only handle desktop clicks - mobile will be handled by touch events
     const tikzApp = document.querySelector('.tikz-app');
     if (tikzApp && tikzApp.classList.contains('mobile-device')) {
-//         console.log('📱 Mobile device detected, skipping desktop action initialization');
         return;
     }
     
@@ -112,24 +111,13 @@ function initializeFileCardTouchEvents() {
     // Add mobile-device class if not already present
     if (isTouchDevice && !tikzApp.classList.contains('mobile-device')) {
         tikzApp.classList.add('mobile-device');
-//         console.log('✅ Added mobile-device class to .tikz-app');
     }
     
     const isMobile = tikzApp.classList.contains('mobile-device');
-    // console.log('🔍 Enhanced touch detection:', {
-    //     hasTouchSupport,
-    //     isMobileDevice,
-    //     isTouchDevice,
-    //     hasClass: isMobile,
-    //     userAgent: navigator.userAgent,
-    //     maxTouchPoints: navigator.maxTouchPoints
-    // });
     
     // Log mobile detection status
-//     console.log('📱 Mobile touch events initialized successfully');
     
     if (!isMobile) {
-//         console.log('📱 Not a mobile device, skipping mobile 2-tap initialization');
         return;
     }
 
@@ -153,7 +141,6 @@ function initializeFileCardTouchEvents() {
                 
                 // Log toggle action
                 const isMenuOpen = card.classList.contains('menu-open');
-//                 console.log('📱 Toggle clicked - card menu-open:', isMenuOpen);
             }
             return;
         }
@@ -162,7 +149,6 @@ function initializeFileCardTouchEvents() {
         const activeCard = document.querySelector('.file-card.menu-open');
         if (activeCard && !activeCard.contains(e.target) && !e.target.closest('.action-toggle-btn')) {
             activeCard.classList.remove('menu-open');
-//             console.log('📱 Clicked outside - closing menu');
             return;
         }
 
@@ -172,7 +158,6 @@ function initializeFileCardTouchEvents() {
 
         const card = btn.closest('.file-card');
         if (!card || !card.classList.contains('menu-open')) {
-//             console.log('📱 Button clicked but card not menu-open - ignoring');
             return;
         }
 
@@ -185,7 +170,6 @@ function initializeFileCardTouchEvents() {
             e.stopPropagation();
             e.stopImmediatePropagation();
             
-//             console.log('📱 Mobile tap 1 on button:', btn.dataset.action, 'at', new Date().toLocaleTimeString());
             
             // Reset other buttons in the same card
             card.querySelectorAll('.Btn').forEach(otherBtn => {
@@ -199,14 +183,12 @@ function initializeFileCardTouchEvents() {
             btn.classList.add('individual-active', 'ready-to-execute');
             btn.dataset.tapCount = '1';
             
-//             console.log('📱 Button activated, waiting for second tap...');
             
             // Auto reset after timeout
             setTimeout(() => {
                 if (btn.dataset.tapCount === '1') {
                     btn.classList.remove('individual-active', 'ready-to-execute');
                     btn.dataset.tapCount = '0';
-//                     console.log('📱 Timeout - button reset after 2s');
                 }
             }, 2000); // Increased to 2s for better UX
             return;
@@ -215,7 +197,6 @@ function initializeFileCardTouchEvents() {
         if (currentTapCount === 1) {
             // Execute based on data-action attribute
             const action = btn.dataset.action;
-//             console.log('📱 Mobile tap 2 executing:', action);
             
             if (!action) {
                 // Fallback for buttons without data-action
@@ -297,11 +278,8 @@ function initializeFileCardTouchEvents() {
                     break;
                     
                 case 'delete-file':
-//                     console.log('🗑️ Mobile delete executing...');
                     const fileId = btn.getAttribute('data-file-id');
-//                     console.log('🔍 File ID:', fileId);
                     if (fileId && confirm('Bạn có chắc muốn xóa file này? Hành động này không thể hoàn tác!')) {
-//                         console.log('✅ User confirmed, calling deleteFile()');
                         deleteFile(fileId, btn);
                     }
                     btn.dataset.tapCount = '0';
@@ -471,7 +449,6 @@ function copyTikzCode(btn) {
             fallbackCopyTikzCode(code, btn);
         });
     } else {
-//         console.log('🔄 Using fallback copy method for TikZ code (no clipboard permission)');
         fallbackCopyTikzCode(code, btn);
     }
 }
@@ -622,7 +599,6 @@ function deleteFile(fileId, btn) {
             
             setTimeout(() => {
                 fileCard.remove();
-//                 console.log(`✅ File ${fileId} deleted successfully`);
             }, 300);
         } else {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -644,11 +620,9 @@ let isFileCardInitialized = false;
 
 function initializeFileCardComponent() {
     if (isFileCardInitialized) {
-//         console.log('🔄 FileCardComponent already initialized, skipping...');
         return;
     }
     
-//     console.log('🚀 Initializing FileCardComponent...');
     isFileCardInitialized = true;
     
     // Initialize like buttons if user is logged in
@@ -661,9 +635,7 @@ function initializeFileCardComponent() {
     
     if (isTouchDevice) {
         document.documentElement.classList.add('is-touch');
-//         console.log('📱 Touch device detected, added is-touch class');
     } else {
-//         console.log('🖥️ Desktop device detected, no touch support');
     }
     
     // Initialize file card functionality
@@ -701,12 +673,10 @@ let activeFeedbackCount = 0;
 // Real-time synchronization for likes via polling
 // Only update like counts, not entire file list
 function startFilesPolling() {
-//     console.log('🔄 Starting likes polling...');
     
     const pollInterval = 15000; // 15 seconds
     
     pollingInterval = setInterval(function() {
-//         console.log('🔄 Polling likes...', new Date().toLocaleTimeString());
         
         // Kiểm tra flag toàn cục
         if (activeFeedbackCount > 0) {
@@ -730,7 +700,6 @@ function startFilesPolling() {
             });
     }, pollInterval);
     
-//     console.log('🔄 Started likes polling (15s interval)');
 }
 
 // Function to update only like counts without reloading entire file list
@@ -770,7 +739,6 @@ function stopFilesPolling() {
     if (pollingInterval) {
         clearInterval(pollingInterval);
         pollingInterval = null;
-//         console.log('🔄 Stopped files polling');
     }
 }
 
@@ -778,7 +746,6 @@ function stopFilesPolling() {
 
 // Cleanup function for page unload
 function cleanupOnPageUnload() {
-//     console.log('🧹 Cleaning up resources on page unload...');
     
     // Stop polling
     stopFilesPolling();
@@ -797,7 +764,6 @@ function cleanupOnPageUnload() {
     // Clear any other intervals or timeouts if needed
     // Add more cleanup logic here as needed
     
-//     console.log('🧹 Cleanup completed');
 }
 
 // Setup cleanup event listeners
@@ -814,15 +780,12 @@ function setupCleanupEventListeners() {
     // Cleanup when page becomes hidden (user switches tabs)
     document.addEventListener('visibilitychange', function() {
         if (document.hidden) {
-//             console.log('📱 Page hidden, pausing polling...');
             stopFilesPolling();
         } else {
-//             console.log('📱 Page visible, resuming polling...');
             startFilesPolling();
         }
     });
     
-//     console.log('🧹 Cleanup event listeners setup complete');
 }
 
 // Expose module initializer
@@ -856,7 +819,6 @@ if (document.readyState === 'loading') {
  * Handles click on like count to show modal with list of users who liked
  */
 function initializeLikesModal() {
-    console.log('🚀 Initializing Likes Modal...');
 
     // Modal functionality removed from like count - only "Xem tất cả" button opens modal now
 
@@ -1104,7 +1066,6 @@ function createUserListItem(user) {
         };
 
         img.onload = function() {
-            console.log(`Avatar loaded successfully: ${user.username}`);
         };
 
         avatarDiv.appendChild(img);
@@ -1211,7 +1172,6 @@ function formatTimeAgo(timestamp) {
  * Load and display preview text below like buttons automatically
  */
 function initializeLikesPreview() {
-    console.log('🚀 Initializing Likes Preview...');
 
     // Load preview for all file cards on page
     const fileCards = document.querySelectorAll('.file-card[data-file-id]');
@@ -1335,13 +1295,11 @@ function getCurrentUserId() {
  * Calls the preview API to get updated user list and refreshes the display
  */
 function refreshLikesPreviewText(svgId) {
-    console.log(`🔄 Refreshing likes preview for SVG ${svgId}`);
 
     fetch(`/api/svg/${svgId}/likes/preview`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                console.log(`✅ Preview data received:`, data);
                 renderLikesPreview(svgId, data);
             } else {
                 console.error('❌ Failed to refresh likes preview:', data.message);

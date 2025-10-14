@@ -1,0 +1,673 @@
+/* View SVG Page Styles */
+
+/* TikZ App Scoped Container */
+.tikz-app {
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* Foundation system handles global styles - removed conflicting html/body rules */
+
+/* Foundation system handles global page-container - removed conflicting duplicate rules */
+
+.tikz-app button, 
+.tikz-app input, 
+.tikz-app select, 
+.tikz-app textarea {
+    font-family: inherit;
+}
+
+/* CodeMirror styles now centralized in foundation/global-base.css */
+
+/* Preserve monospace for any code-related elements */
+.tikz-app pre, 
+.tikz-app code, 
+.tikz-app .code, 
+.tikz-app .tikz-code, 
+.tikz-app textarea[name="code"] {
+    font-family: var(--font-family-mono);
+    font-feature-settings: "liga" 1, "calt" 1;
+    font-variant-ligatures: contextual;
+}
+
+/* View SVG Section Container - Enhanced Glass Morphism matching Index */
+.tikz-app .view-svg-container {
+    background: var(--glass-bg-strong);
+    backdrop-filter: var(--glass-blur-medium);
+    padding: var(--spacing-12);
+    margin-bottom: var(--spacing-8);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--glass-shadow);
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* Add subtle background pattern for texture - matching index */
+.tikz-app .view-svg-container::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, 
+                rgb(255 255 255 / 10%) 0%, 
+                transparent 50%, 
+                rgb(255 255 255 / 10%) 100%);
+    border-radius: inherit;
+    pointer-events: none;
+}
+
+.tikz-app .view-svg-title {
+    text-align: center;
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-6);
+    position: relative;
+    z-index: 1;
+}
+
+/* Ensure all content is above the pattern */
+.tikz-app .view-svg-container > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* Google Login Button styles moved to login_modal.css to avoid duplication */
+
+/* View Mode Row Layout - Default desktop layout */
+.tikz-app #view-mode-row {
+  display: flex;
+  gap: var(--spacing-8);
+  margin-bottom: var(--spacing-6);
+  flex-flow: row nowrap;
+  align-items: flex-start;
+}
+
+.tikz-app .view-col {
+  flex: 1 1 auto;
+  min-width: 280px;
+}
+
+/* Left column (SVG preview) should be larger */
+.tikz-app .view-col:first-child {
+  flex: 2 1 auto;
+  min-width: 400px;
+}
+
+/* Right column (actions/export) should be smaller */
+.tikz-app .view-col:last-child {
+  flex: 1 1 auto;
+  min-width: 300px;
+  max-width: 400px;
+}
+
+/* SVG Preview Block - Enhanced with Index-style Background */
+.tikz-app #view-svg-preview {
+  background: #fff;  /* Pure white background for SVG container - matching index */
+  border: 1.5px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 320px;
+  height: 400px;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Add subtle background pattern for texture - matching index */
+.tikz-app #view-svg-preview::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, 
+              rgb(255 255 255 / 10%) 0%, 
+              transparent 50%, 
+              rgb(255 255 255 / 10%) 100%);
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* SVG image styling - above the pattern */
+.tikz-app #view-svg-preview img {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Action Buttons below SVG */
+.tikz-app #view-svg-actions {
+  margin-top: var(--spacing-4);
+  display: flex;
+  gap: var(--spacing-3);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.tikz-app #view-svg-actions .view-action-btn {
+  background: var(--warning-color);
+  color: var(--text-dark);
+  padding: var(--spacing-3) var(--spacing-5);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  text-decoration: none;
+  box-shadow: var(--shadow-warning);
+  transition: all var(--transition-fast);
+}
+
+.tikz-app #view-svg-actions .view-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgb(255 193 7 / 30%);
+}
+
+.tikz-app #view-svg-actions .view-download-btn {
+  background: #17a2b8;
+  color: white;
+}
+
+.tikz-app #view-svg-actions .view-download-btn:hover {
+  box-shadow: 0 4px 12px rgb(23 162 184 / 30%);
+}
+
+/* Back to Edit Button */
+.tikz-app #view-back-to-edit-btn {
+  background: linear-gradient(90deg, #28a745 0%, #218838 100%);
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.tikz-app #view-back-to-edit-btn:hover {
+  box-shadow: 0 4px 12px rgb(40 167 69 / 30%);
+  transform: translateY(-2px);
+}
+
+/* Modal Styles shared with index login modal */
+.tikz-app #login-modal {
+  display: none;
+}
+
+/* Login modal styles are imported from login_modal.css */
+
+/* No local definitions needed for .login-modal-box */
+
+.tikz-app .btn-danger {
+  display: inline-block;
+  background: #d32f2f;
+  color: white;
+  padding: 10px 28px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.tikz-app .btn-secondary {
+  background: #eee;
+  color: #333;
+  padding: 10px 28px;
+  border-radius: 6px;
+  border: none;
+  font-weight: bold;
+}
+
+.tikz-app .btn-secondary-lg {
+  padding: 12px 24px;
+}
+
+/* Footer styling now handled by foundation/global-base.css */
+
+/* Actions section */
+.tikz-app .actions-header {
+  margin-bottom: 20px;
+}
+
+.tikz-app .actions-title {
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.tikz-app .actions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Spacing utility for cancel buttons */
+.tikz-app .btn-cancel {
+  margin-left: 18px;
+}
+
+/* Small info text */
+.tikz-app .small-info {
+  margin-top: 8px;
+  font-size: 0.75rem;
+  color: #666;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* Export Section */
+.tikz-app .export-section {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgb(0 0 0 / 8%);
+  padding: 24px;
+  margin-top: 24px;
+}
+
+.tikz-app .export-section h4 {
+  color: #333;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.tikz-app #view-export-form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  align-items: start;
+  margin-bottom: 16px;
+}
+
+.tikz-app #view-export-form .export-pair {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tikz-app #view-export-form .export-label {
+  font-weight: 500;
+  color: #555;
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
+.tikz-app .export-input {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.tikz-app .export-select {
+  width: 100%;
+  min-width: 120px;
+  max-width: 180px;
+  height: 40px;
+  padding: 8px 12px;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  background: #f8f9fa;
+}
+
+.tikz-app .export-number {
+  width: 100px;
+}
+
+.tikz-app #view-export-form .export-btn-group {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.tikz-app #view-export-form .export-btn {
+  background: linear-gradient(90deg, #1976d2 0%, #1565c0 100%);
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  min-width: 140px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.tikz-app #view-export-form .export-btn:hover {
+  box-shadow: 0 4px 12px rgb(25 118 210 / 30%);
+  transform: translateY(-2px);
+}
+
+.tikz-app #view-export-msg {
+  text-align: center;
+  color: #388e3c;
+  font-weight: bold;
+  margin-top: 8px;
+}
+
+.tikz-app #view-export-msg.error {
+  color: #d32f2f;
+}
+
+/* Export Download Link Style */
+.tikz-app .export-download-link {
+  display: inline-block;
+  background: linear-gradient(90deg, #17a2b8 0%, #138496 100%);
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgb(23 162 184 / 20%);
+  margin-top: 8px;
+}
+
+.tikz-app .export-download-link:hover {
+  background: linear-gradient(90deg, #138496 0%, #117a8b 100%);
+  box-shadow: 0 4px 12px rgb(23 162 184 / 30%);
+  transform: translateY(-2px);
+  color: white;
+  text-decoration: none;
+}
+
+/* ===== RESPONSIVE BREAKPOINTS SYSTEM ===== */
+
+/* Base styles: áp dụng cho tất cả thiết bị nhỏ hơn 576px */
+.tikz-app .view-svg-container {
+  padding: var(--spacing-6);
+}
+
+.tikz-app #view-mode-row {
+  flex-direction: column;
+  gap: var(--spacing-6);
+}
+
+.tikz-app .view-col:first-child,
+.tikz-app .view-col:last-child {
+  flex: 1 1 auto;
+  min-width: 100%;
+  max-width: none;
+}
+
+.tikz-app #view-export-form {
+  grid-template-columns: 1fr;
+  gap: var(--spacing-4);
+}
+
+.tikz-app #view-export-form .export-pair {
+  flex-direction: column;
+  align-items: stretch;
+  text-align: left;
+}
+
+.tikz-app #view-svg-actions {
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.tikz-app #view-svg-actions .view-action-btn,
+.tikz-app #view-export-form .export-btn,
+.tikz-app #view-back-to-edit-btn {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* ≥ 576px — điện thoại lớn (ví dụ iPhone Plus, Pixel XL) */
+@media (width >= 576px) {
+  .tikz-app .view-svg-container {
+    padding: var(--spacing-8);
+  }
+  
+  .tikz-app #view-mode-row {
+    gap: var(--spacing-8);
+  }
+  
+  .tikz-app #view-svg-actions {
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .tikz-app #view-svg-actions .view-action-btn {
+    width: auto;
+    min-width: 140px;
+  }
+  
+  .tikz-app #view-export-form .export-pair {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--spacing-3);
+  }
+  
+  .tikz-app #view-export-form .export-label {
+    min-width: 80px;
+    flex-shrink: 0;
+  }
+}
+
+/* ≥ 768px — tablet dọc/ngang */
+@media (width >= 768px) {
+  .tikz-app .view-svg-container {
+    padding: var(--spacing-10);
+  }
+  
+  .tikz-app #view-mode-row {
+    flex-direction: row;
+    gap: var(--spacing-8);
+    align-items: flex-start;
+  }
+  
+  .tikz-app .view-col:first-child {
+    flex: 1.5 1 auto;
+    min-width: 320px;
+  }
+  
+  .tikz-app .view-col:last-child {
+    flex: 1 1 auto;
+    min-width: 280px;
+    max-width: 350px;
+  }
+  
+  .tikz-app #view-export-form {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-4);
+  }
+  
+  .tikz-app #view-export-form .export-pair {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    flex-direction: row;
+  }
+  
+  .tikz-app #view-export-form .export-label {
+    min-width: 70px;
+    flex-shrink: 0;
+  }
+  
+  .tikz-app #view-export-form .export-select {
+    flex: 1;
+    min-width: 120px;
+  }
+  
+  .tikz-app #view-export-form .export-number {
+    flex: 1;
+    min-width: 80px;
+  }
+  
+  .tikz-app #view-svg-actions {
+    justify-content: center;
+  }
+  
+  .tikz-app #view-back-to-edit-btn {
+    width: 100%;
+  }
+}
+
+/* ≥ 992px — laptop nhỏ / desktop thường */
+@media (width >= 992px) {
+  .tikz-app .view-svg-container {
+    padding: var(--spacing-12);
+  }
+  
+  .tikz-app .view-col:first-child {
+    flex: 2 1 auto;
+    min-width: 400px;
+  }
+  
+  .tikz-app .view-col:last-child {
+    flex: 1 1 auto;
+    min-width: 300px;
+    max-width: 400px;
+  }
+  
+  .tikz-app #view-export-form {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-4);
+  }
+  
+  .tikz-app #view-export-form .export-pair {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    flex-direction: row;
+  }
+  
+  .tikz-app #view-export-form .export-label {
+    min-width: 80px;
+    flex-shrink: 0;
+  }
+  
+  .tikz-app #view-export-form .export-btn-group {
+    grid-column: 1 / -1;
+    justify-content: center;
+    margin-top: var(--spacing-4);
+  }
+  
+  .tikz-app #view-svg-actions {
+    justify-content: center;
+    gap: var(--spacing-4);
+  }
+  
+  .tikz-app #view-svg-actions .view-action-btn {
+    min-width: 160px;
+  }
+}
+
+/* ≥ 1200px — desktop rộng */
+@media (width >= 1200px) {
+  .tikz-app .view-svg-container {
+    padding: var(--spacing-16);
+  }
+  
+  .tikz-app #view-mode-row {
+    gap: var(--spacing-12);
+  }
+  
+  .tikz-app .view-col:first-child {
+    flex: 2.5 1 auto;
+    min-width: 500px;
+  }
+  
+  .tikz-app .view-col:last-child {
+    flex: 1 1 auto;
+    min-width: 350px;
+    max-width: 450px;
+  }
+  
+  .tikz-app #view-export-form {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-5);
+  }
+  
+  .tikz-app #view-export-form .export-pair {
+    gap: var(--spacing-4);
+  }
+  
+  .tikz-app #view-export-form .export-label {
+    min-width: 90px;
+  }
+  
+  .tikz-app #view-svg-actions {
+    gap: var(--spacing-5);
+  }
+  
+  .tikz-app #view-svg-actions .view-action-btn {
+    min-width: 180px;
+    padding: var(--spacing-4) var(--spacing-6);
+  }
+}
+
+/* ≥ 1400px — màn hình rất rộng (ultra-wide) */
+@media (width >= 1400px) {
+  .tikz-app .view-svg-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: var(--spacing-20);
+  }
+  
+  .tikz-app #view-mode-row {
+    gap: var(--spacing-16);
+  }
+  
+  .tikz-app .view-col:first-child {
+    flex: 3 1 auto;
+    min-width: 600px;
+  }
+  
+  .tikz-app .view-col:last-child {
+    flex: 1 1 auto;
+    min-width: 400px;
+    max-width: 500px;
+  }
+  
+  .tikz-app #view-export-form {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: var(--spacing-6);
+  }
+  
+  .tikz-app #view-export-form .export-pair {
+    gap: var(--spacing-5);
+  }
+  
+  .tikz-app #view-export-form .export-label {
+    min-width: 100px;
+  }
+  
+  .tikz-app #view-svg-actions {
+    gap: var(--spacing-6);
+  }
+  
+  .tikz-app #view-svg-actions .view-action-btn {
+    min-width: 200px;
+    padding: var(--spacing-5) var(--spacing-8);
+    font-size: var(--font-size-lg);
+  }
+  
+  .tikz-app #view-back-to-edit-btn {
+    padding: var(--spacing-5) var(--spacing-8);
+    font-size: var(--font-size-lg);
+  }
+}

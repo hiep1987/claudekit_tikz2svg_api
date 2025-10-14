@@ -1261,7 +1261,7 @@
     .tikz-app #view-export-form .export-select,
     .tikz-app #view-export-form .export-number {
         width: 120px;
-        text-align: center;
+        text-align: left;
         flex-shrink: 0;
     }
 }

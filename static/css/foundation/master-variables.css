@@ -216,11 +216,15 @@
   --scrollbar-track: #f1f1f1;
   --scrollbar-width: 8px;
   
-  /* ===== BREAKPOINTS (for JS usage) ===== */
-  --breakpoint-sm: 640px;
-  --breakpoint-md: 768px;
-  --breakpoint-lg: 1024px;
-  --breakpoint-xl: 1280px;
+  /* ===== BREAKPOINTS (Bootstrap Standard) ===== */
+  --breakpoint-xs: 0px;      /* Extra small devices (portrait phones) */
+  --breakpoint-sm: 576px;    /* Small devices (landscape phones) */
+  --breakpoint-md: 768px;    /* Medium devices (tablets) */
+  --breakpoint-lg: 992px;    /* Large devices (desktops) */
+  --breakpoint-xl: 1200px;   /* Extra large devices (large desktops) */
+  --breakpoint-xxl: 1400px;  /* Extra extra large devices (ultra-wide) */
+  
+  /* Legacy breakpoints for backward compatibility */
   --breakpoint-2xl: 1536px;
   
   /* ===== FORM INPUT SYSTEM ===== */

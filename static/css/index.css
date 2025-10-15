@@ -16,7 +16,7 @@
     overflow: visible;
     background-color: var(--container-bg-secondary);
     backdrop-filter: var(--container-bg-blur);
-    padding: var(--spacing-20) 0;
+    padding: var(--spacing-16) var(--spacing-16);
     border: none;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
@@ -231,36 +231,44 @@
 
 /* Export Section */
 .tikz-app .export-section {
-    margin-top: var(--spacing-10);
-    padding: var(--spacing-10);
-    background-color: var(--container-bg-secondary);
-    border-radius: var(--radius-sm);
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgb(0 0 0 / 8%);
+    padding: 20px;
+    margin-top: var(--spacing-8); /* Use foundation variable */
+    margin-left: auto;
+    margin-right: auto;
+    width: 900px;
+    max-width: 900px; /* Changed from 100% to match width */
 }
 
 .tikz-app .export-section h4 {
-    color: var(--text-header-glass);
-    margin-bottom: var(--spacing-4);
+    color: #333;
     text-align: center;
+    margin-bottom: 16px;
 }
 
 .tikz-app .export-form {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-10) var(--spacing-16);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
     align-items: start;
-    margin-bottom: var(--spacing-4);
+    margin-bottom: 16px;
 }
 
-@media (width >= 1000px) {
-    .tikz-app .export-form {
-        grid-template-columns: 1fr 1fr 1fr 1fr;
-    }
-}
 
 .tikz-app .export-pair {
     display: flex;
     align-items: center;
-    gap: var(--spacing-3);
+    justify-content: flex-start;
+    gap: 10px;
+}
+
+.tikz-app .export-label {
+    font-weight: 500;
+    color: #555;
+    min-width: 80px;
+    flex-shrink: 0;
 }
 
 .tikz-app .export-btn-group {
@@ -272,35 +280,63 @@
 }
 
 .tikz-app .export-form .export-btn-group {
-    grid-column: 1/-1;
+    grid-column: 1 / -1;
     display: flex;
     justify-content: center;
-    margin-top: var(--spacing-3);
+    align-items: center;
+    margin-top: 16px;
 }
 
 .tikz-app .export-form .export-btn {
+    background: linear-gradient(90deg, #1976d2 0%, #1565c0 100%);
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
     min-width: 160px;
 }
 
+.tikz-app .export-form .export-btn:hover {
+    box-shadow: 0 4px 12px rgb(25 118 210 / 30%);
+    transform: translateY(-2px);
+}
+
 .tikz-app .export-input {
-    padding: var(--spacing-3);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 0.875rem;
+    transition: border-color 0.2s ease;
+}
+
+.tikz-app .export-input:focus {
+    outline: none;
+    border-color: #1976d2;
+    box-shadow: 0 0 0 2px rgb(25 118 210 / 20%);
 }
 
 .tikz-app .export-select {
-    width: 90%;
-    min-width: 120px;
-    max-width: 180px;
-    height: 40px;
-    padding: var(--spacing-3) var(--spacing-6);
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border-color);
-    vertical-align: middle;
+    flex: 0 0 auto;
+    width: 100px;
+    font-size: 0.875rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 8px 12px;
+    background: white;
+    cursor: pointer;
 }
 
 .tikz-app .export-number {
+    flex: 0 0 auto;
     width: 100px;
+    font-size: 0.875rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 8px 12px;
+    background: white;
 }
 
 .tikz-app .export-msg {
@@ -311,6 +347,691 @@
     width: 100%;
     display: flex;
     justify-content: center;
+}
+
+/* ===== RESPONSIVE BREAKPOINTS SYSTEM ===== */
+/* Base styles: áp dụng cho tất cả thiết bị nhỏ hơn 576px */
+@media (width < 576px) {
+    /* Export Section - Mobile First */
+    .tikz-app .export-section {
+        padding: var(--spacing-6);
+        margin: var(--spacing-6) auto;  /* nhất quán với các breakpoint khác */
+        width: 100%;          /* nhất quán với các breakpoint khác */
+        max-width: calc(100vw - var(--spacing-8));
+        box-sizing: border-box;
+        background: #fff;
+        border-radius: var(--radius-lg);
+        box-shadow: 0 8px 32px rgb(0 0 0 / 8%);
+    }
+
+    .tikz-app .export-section h4 {
+        font-size: 1rem;
+        margin-bottom: var(--spacing-3);
+        color: #333;
+        text-align: center;
+    }
+
+    .tikz-app .export-form {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-4);
+        align-items: center;
+    }
+
+    .tikz-app .export-form .export-pair {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        width: 100%;
+        max-width: 280px;
+        gap: var(--spacing-2);
+    }
+
+    .tikz-app .export-label {
+        flex-shrink: 0;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-right: var(--spacing-2);
+        color: var(--text-secondary);
+        white-space: nowrap;
+        min-width: 70px;
+    }
+
+    .tikz-app .export-select,
+    .tikz-app .export-number {
+        flex: 1;
+        width: auto;
+        min-width: 90px;
+        font-size: 0.875rem;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 6px 8px;
+        background: white;
+        box-sizing: border-box;
+    }
+
+    .tikz-app .export-form .export-btn {
+        width: 100%;
+        max-width: 100%;
+        font-size: 0.8rem;
+        padding: var(--spacing-3) var(--spacing-6);
+    }
+
+    .tikz-app .export-form .export-btn-group {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        margin-top: var(--spacing-3);
+    }
+
+    /* Input Preview Section - Mobile */
+    .tikz-app .input-preview-section.page-container {
+        padding: var(--spacing-8) var(--spacing-4);
+        margin: 0 var(--spacing-4);
+        max-width: calc(100vw - var(--spacing-8));
+        box-sizing: border-box;
+    }
+
+    .tikz-app .table-scroll-x {
+        width: 100%;
+        margin: 0;
+    }
+
+    .tikz-app .table-content {
+        min-width: 100%;
+        flex-direction: row; /* Horizontal layout like tablet */
+        height: 452px; /* Fixed height to match table-scroll-x */
+    }
+
+    .tikz-app .col {
+        flex: 1 1 auto;
+        width: auto;
+        max-width: none;
+        min-width: 100%;
+        height: 452px; /* Fixed height */
+        min-height: 452px;
+        max-height: 452px;
+        padding: var(--spacing-4);
+        border-right: 1px solid var(--border-light);
+        border-bottom: none;
+        overflow: auto;
+    }
+
+    .tikz-app .col:last-child {
+        border-right: none;
+        min-height: 452px;
+    }
+
+    .tikz-app #input-preview-row {
+        flex-direction: column;
+        gap: var(--spacing-4);
+        margin-bottom: var(--spacing-4);
+        overflow-x: visible;
+    }
+
+    .tikz-app #input-preview-row .input-col,
+    .tikz-app #input-preview-row .preview-col {
+        min-width: auto;
+        flex: none;
+        width: 100%;
+    }
+
+    /* Search Container - Mobile */
+    .tikz-app .search-container.page-container.index-top-container {
+        margin: var(--spacing-6);
+        padding: var(--spacing-16) var(--spacing-16);
+    }
+
+    .tikz-app .group {
+        max-width: 280px;
+    }
+
+    .tikz-app .search-title {
+        font-size: var(--font-size-lg);
+    }
+}
+
+/* ≥ 576px — điện thoại lớn (ví dụ iPhone Plus, Pixel XL) */
+@media (width >= 576px) {
+    /* Export Section - Small Phones */
+    .tikz-app .export-section {
+        padding: var(--spacing-8);
+        margin: var(--spacing-8) var(--spacing-6);
+        width: 100%;          /* nhất quán với các breakpoint khác */
+        max-width: calc(100vw - var(--spacing-12));
+        box-sizing: border-box;
+    }
+
+    .tikz-app .export-form {
+        gap: var(--spacing-3);
+    }
+
+    .tikz-app .export-form .export-pair {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        gap: var(--spacing-3);
+        width: 100%;
+        max-width: 320px;
+    }
+
+    .tikz-app .export-label {
+        font-size: 0.875rem;
+        margin-right: var(--spacing-3);
+        min-width: 75px;
+    }
+
+    .tikz-app .export-select,
+    .tikz-app .export-number {
+        flex: 1;
+        width: auto;
+        min-width: 100px;
+        padding: 6px 10px;
+    }
+
+    /* Input Preview Section - Small Phones */
+    .tikz-app .input-preview-section.page-container {
+        padding: var(--spacing-12) var(--spacing-6);
+        margin: 0 var(--spacing-6);
+        max-width: calc(100vw - var(--spacing-12));
+    }
+
+    .tikz-app .table-content {
+        min-width: 100%;
+        flex-direction: row; /* Horizontal layout like tablet */
+        height: 452px; /* Fixed height to match table-scroll-x */
+    }
+
+    .tikz-app .col {
+        flex: 1 1 auto;
+        width: auto;
+        max-width: none;
+        min-width: 100%;
+        height: 452px; /* Fixed height */
+        min-height: 452px;
+        max-height: 452px;
+        padding: var(--spacing-4);
+        border-right: 1px solid var(--border-light);
+        border-bottom: none;
+        overflow: auto;
+    }
+
+    .tikz-app .col:last-child {
+        border-right: none;
+        min-height: 452px;
+    }
+
+    /* Search Container - Small Phones */
+    .tikz-app .search-container.page-container.index-top-container {
+        margin: var(--spacing-8) var(--spacing-6);
+        padding: var(--spacing-16) var(--spacing-16);
+    }
+
+    .tikz-app .group {
+        max-width: 320px;
+    }
+
+    .tikz-app .search-title {
+        font-size: var(--font-size-xl);
+    }
+}
+
+/* 576px-768px — khoảng trung gian cần xử lý đặc biệt */
+@media (width >= 576px) and (width < 768px) {
+    /* Export Section - Medium-small */
+    .tikz-app .export-section {
+        padding: var(--spacing-6);
+        margin: var(--spacing-8) auto;
+        width: 100%;          /* linh hoạt theo container */
+    }
+
+    .tikz-app .export-form {
+        display: flex;
+        flex-flow: row wrap;
+        gap: var(--spacing-4);
+        align-items: start;
+        justify-content: center;
+    }
+
+    .tikz-app .export-form .export-pair {
+        display: flex;
+        flex-flow: row nowrap;
+        align-items: center;
+        justify-content: flex-start;
+        gap: var(--spacing-3);
+        flex: 1;
+        min-width: 240px;
+    }
+
+    .tikz-app .export-label {
+        flex-shrink: 0;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-right: var(--spacing-2);
+        min-width: 70px;
+    }
+
+    .tikz-app .export-select,
+    .tikz-app .export-number {
+        flex: 1;
+        width: auto;
+        min-width: 120px;
+    }
+
+    .tikz-app .export-form .export-btn-group {
+        width: 100%;
+        justify-content: center;
+        align-items: center;
+        margin-top: var(--spacing-3);
+        flex-basis: 100%;
+    }
+
+    .tikz-app .export-form .export-btn {
+        padding: var(--spacing-3) var(--spacing-6);
+        font-size: 0.8rem;
+        min-width: 140px;
+    }
+
+    /* Input Preview Section - Medium-small */
+    .tikz-app .input-preview-section.page-container {
+        padding: var(--spacing-16);
+        margin: 0 auto;
+        max-width: 700px;
+    }
+
+    /* FIX: Keep horizontal layout for consistency with other breakpoints */
+    .tikz-app .table-content {
+        min-width: 100%;
+        flex-direction: row; /* Horizontal layout like other breakpoints */
+    }
+
+    .tikz-app .col {
+        height: 340px;
+        min-height: 340px;
+        padding: var(--spacing-4);
+        border-right: 1px solid var(--border-light);
+        border-bottom: none;
+        overflow: auto;
+    }
+
+    .tikz-app .col:last-child {
+        border-right: none;
+        min-height: 340px;
+    }
+
+    /* Search Container - Medium-small */
+    .tikz-app .search-container.page-container.index-top-container {
+        margin: var(--spacing-10) auto;
+        padding: var(--spacing-16) var(--spacing-16);
+        max-width: 700px;
+    }
+
+    .tikz-app .group {
+        max-width: 350px;
+    }
+}
+
+/* ≥ 768px — tablet dọc/ngang */
+@media (width >= 768px) {
+    /* Fix: Limit page-container max-width for stable margins in 768px-992px range */
+    .tikz-app #result-tools-section.page-container {
+        max-width: 900px; /* Match input-preview-section max-width */
+    }
+
+    /* Export Section - Tablets */
+    .tikz-app .export-section {
+        padding: var(--spacing-8);
+        margin: var(--spacing-8) auto;
+        width: 100%;          /* linh hoạt theo container */
+    }
+
+    .tikz-app .export-form {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-3);
+        align-items: center;
+    }
+
+    .tikz-app .export-form .export-pair {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        gap: var(--spacing-3);
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .tikz-app .export-label {
+        flex-shrink: 0;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-right: var(--spacing-3);
+        min-width: 80px;
+    }
+
+    .tikz-app .export-select,
+    .tikz-app .export-number {
+        flex: 1;
+        width: auto;
+        min-width: 120px;
+        padding: 8px 12px;
+    }
+
+    .tikz-app .export-form .export-btn {
+        padding: var(--spacing-4) var(--spacing-8);
+        font-size: 0.9rem;
+        min-width: 160px;
+    }
+
+    /* Input Preview Section - Tablets (Row Layout) */
+    .tikz-app .input-preview-section.page-container {
+        padding: var(--spacing-20);
+        margin: 0 auto;
+        max-width: 900px;
+    }
+
+    .tikz-app .table-content {
+        min-width: 100%;
+        flex-direction: row;
+    }
+
+    .tikz-app .col {
+        flex: 1 1 auto;
+        width: auto;
+        max-width: none;
+        min-width: 400px;
+        height: 400px;
+        min-height: 400px;
+        padding: var(--spacing-6);
+        border-right: 1px solid var(--border-light);
+    }
+
+    .tikz-app .col:last-child {
+        border-right: none;
+        min-height: 400px;
+    }
+
+    .tikz-app #input-preview-row {
+        flex-direction: row;
+        gap: var(--spacing-6);
+        overflow-x: auto;
+    }
+
+    .tikz-app #input-preview-row .input-col,
+    .tikz-app #input-preview-row .preview-col {
+        min-width: 400px;
+        flex: 1 1 auto;
+    }
+
+    /* Search Container - Tablets */
+    .tikz-app .search-container.page-container.index-top-container {
+        margin: var(--spacing-12) auto;
+        padding: var(--spacing-16) var(--spacing-16);
+        max-width: 900px;
+    }
+
+    .tikz-app .group {
+        max-width: 400px;
+    }
+}
+
+/* ≥ 992px — laptop nhỏ / desktop thường */
+@media (width >= 992px) {
+    /* Container: ổn định biên */
+    .tikz-app #result-tools-section.page-container {
+        max-width: 1100px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* Export Section - Desktop: co giãn, không khóa cứng */
+    .tikz-app .export-section {
+        padding: var(--spacing-10);
+        margin: var(--spacing-8) auto;
+        width: 100%;          /* linh hoạt theo container */
+    }
+
+    .tikz-app .export-form {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-3);
+        align-items: center;
+    }
+
+    .tikz-app .export-form .export-pair {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: var(--spacing-4);
+        width: 100%;
+        max-width: 450px;
+    }
+
+    .tikz-app .export-label {
+        flex-shrink: 0;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-right: var(--spacing-3);
+        min-width: 85px;
+    }
+
+    .tikz-app .export-select,
+    .tikz-app .export-number {
+        flex: 1;
+        width: auto;
+        min-width: 130px;
+        padding: 8px 12px;
+    }
+
+    .tikz-app .export-form .export-btn {
+        padding: var(--spacing-4) var(--spacing-10);
+        font-size: 0.9rem;
+        min-width: 180px;
+    }
+
+    /* Input Preview Section - Desktop */
+    .tikz-app .input-preview-section.page-container {
+        padding: var(--spacing-24);
+        margin: 0 auto;
+        max-width: 1100px;
+    }
+
+    /* Table Scroll X - Desktop with Fixed Width */
+    .tikz-app .table-scroll-x {
+        width: 916px; /* Fixed width for screens ≥ 992px */
+        margin: 0 auto;
+    }
+
+    /* Table Content - Desktop with Fixed Width */
+    .tikz-app .table-content {
+        width: 916px; /* Fixed width for screens ≥ 992px */
+        min-width: 916px; /* Ensure minimum width is maintained */
+    }
+
+    .tikz-app .col {
+        min-width: 450px;
+        height: 450px;
+        min-height: 450px;
+        padding: var(--spacing-8);
+    }
+
+    .tikz-app .col:last-child {
+        min-height: 450px;
+    }
+
+    .tikz-app #input-preview-row .input-col,
+    .tikz-app #input-preview-row .preview-col {
+        min-width: 450px;
+    }
+
+    /* Search Container - Desktop */
+    .tikz-app .search-container.page-container.index-top-container {
+        margin: var(--spacing-16) auto;
+        padding: var(--spacing-16) var(--spacing-16);
+        max-width: 1100px;
+    }
+
+    .tikz-app .group {
+        max-width: 450px;
+    }
+}
+
+/* ≥ 1200px — desktop rộng */
+@media (width >= 1200px) {
+    /* Export Section - Large Desktop */
+    .tikz-app .export-section {
+        padding: var(--spacing-12);
+        margin: var(--spacing-8) auto;
+        width: 100%;          /* linh hoạt theo container */
+    }
+
+    .tikz-app .export-form {
+        display: flex;
+        flex-flow: row wrap;
+        gap: var(--spacing-4);
+        align-items: start;
+        justify-content: flex-start;
+    }
+
+    .tikz-app .export-form .export-pair {
+        display: flex;
+        flex-flow: row nowrap;
+        align-items: center;
+        justify-content: flex-start;
+        gap: var(--spacing-4);
+        flex: 1;
+        min-width: 250px;
+    }
+
+    .tikz-app .export-label {
+        flex-shrink: 0;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-right: var(--spacing-3);
+        min-width: 90px;
+    }
+
+    .tikz-app .export-select,
+    .tikz-app .export-number {
+        flex: 1;
+        width: auto;
+        min-width: 140px;
+    }
+
+    .tikz-app .export-form .export-btn-group {
+        width: 100%;
+        justify-content: center;
+        align-items: center;
+        margin-top: var(--spacing-4);
+        flex-basis: 100%;
+    }
+
+    .tikz-app .export-form .export-btn {
+        padding: var(--spacing-5) var(--spacing-12);
+        font-size: 1rem;
+        min-width: 200px;
+    }
+
+    /* Input Preview Section - Large Desktop */
+    .tikz-app .input-preview-section.page-container {
+        padding: var(--spacing-32);
+        max-width: 1400px;
+    }
+
+    .tikz-app .col {
+        min-width: 500px;
+        height: 500px;
+        min-height: 500px;
+        padding: var(--spacing-10);
+    }
+
+    .tikz-app .col:last-child {
+        min-height: 500px;
+    }
+
+    .tikz-app #input-preview-row .input-col,
+    .tikz-app #input-preview-row .preview-col {
+        min-width: 500px;
+    }
+
+    /* Search Container - Large Desktop */
+    .tikz-app .search-container.page-container.index-top-container {
+        margin: var(--spacing-20) auto;
+        padding: var(--spacing-16) var(--spacing-16);
+        max-width: 1400px;
+    }
+
+    .tikz-app .group {
+        max-width: 500px;
+    }
+}
+
+/* ≥ 1400px — màn hình rất rộng (ultra-wide) */
+@media (width >= 1400px) {
+    /* Export Section - Ultra-wide */
+    .tikz-app .export-section {
+        margin: var(--spacing-8) auto;
+        width: 100%;          /* linh hoạt theo container */
+    }
+
+    .tikz-app .export-form {
+        gap: var(--spacing-5);
+    }
+
+    .tikz-app .export-form .export-pair {
+        min-width: 280px;
+    }
+
+    .tikz-app .export-label {
+        min-width: 100px;
+    }
+
+    .tikz-app .export-select,
+    .tikz-app .export-number {
+        min-width: 160px;
+    }
+
+    .tikz-app .export-form .export-btn {
+        padding: var(--spacing-6) var(--spacing-16);
+        font-size: 1.1rem;
+        min-width: 220px;
+    }
+
+    /* Input Preview Section - Ultra-wide */
+    .tikz-app .input-preview-section.page-container {
+        max-width: 1600px;
+        padding: var(--spacing-40);
+    }
+
+    .tikz-app .col {
+        min-width: 550px;
+        height: 550px;
+        min-height: 550px;
+        padding: var(--spacing-12);
+    }
+
+    .tikz-app .col:last-child {
+        min-height: 550px;
+    }
+
+    .tikz-app #input-preview-row .input-col,
+    .tikz-app #input-preview-row .preview-col {
+        min-width: 550px;
+    }
+
+    /* Search Container - Ultra-wide */
+    .tikz-app .search-container.page-container.index-top-container {
+        max-width: 1600px;
+        padding: var(--spacing-16) var(--spacing-16);
+    }
+
+    .tikz-app .group {
+        max-width: 550px;
+    }
 }
 
 /* Input Preview Layout */
@@ -416,26 +1137,11 @@
 /* Table Scroll Layout */
 .tikz-app .table-scroll-x {
     overflow-x: auto;
-    width: 100%;
     -webkit-overflow-scrolling: touch;
     border: 1px solid var(--success-color);
     border-radius: var(--radius-md);
     background: var(--bg-primary);
-}
-
-/* Fix responsive gap for 960-1200px range */
-@media (width >= 960px) and (width <= 1199px) {
-    .tikz-app .table-scroll-x {
-        width: 900px;
-        margin: 0 auto;
-    }
-}
-
-@media (width >= 1200px) {
-    .tikz-app .table-scroll-x {
-        width: 900px;
-        margin: 0 auto;
-    }
+    height: 452px; /* Fixed height for all screen sizes */
 }
 
 .tikz-app .table-content {
@@ -536,6 +1242,19 @@
                 rgb(255 255 255 / 10%) 100%);
     border-radius: inherit;
     pointer-events: none;
+}
+
+.tikz-app .responsive-demo .demo-info p {
+    margin: 0 0 8px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    text-shadow: 0 1px 2px rgb(0 0 0 / 30%);
+}
+
+.tikz-app .responsive-demo .demo-info small {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    text-shadow: 0 1px 2px rgb(0 0 0 / 30%);
 }
 
 .tikz-app .table-scroll-x .table-content .col:last-child .preview-placeholder p {
@@ -771,157 +1490,9 @@
     }
 }
 
-@media (width <= 768px) {
-    .tikz-app .input-preview-section {
-        padding: var(--spacing-10) 0;
-    }
-    
-    .tikz-app .input-preview-section.page-container.container {
-        /* Stronger background for mobile - better contrast */
-        background: var(--glass-bg-light);
-        backdrop-filter: var(--glass-blur-light);
-        padding: var(--spacing-16) 0;
-        border-width: 2px;
-        overflow-x: visible;
-        padding-left: var(--spacing-4);
-        padding-right: var(--spacing-4);
 
-        /* Enhanced shadow for mobile */
-        box-shadow: var(--glass-shadow), 
-                    0 2px 8px rgb(0 0 0 / 15%);
-    }
-    
-    /* Files section responsive styles now handled by file_card.css */
-    
-    .tikz-app .group {
-        max-width: 300px;
-    }
-    
-    .tikz-app .search-title {
-        font-size: var(--font-size-xl);
-    }
-    
-    .tikz-app .search-container {
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-.tikz-app #input-preview-row, .tikz-app #view-mode-row {
-        gap: 16px;
-        margin-bottom: 16px;
-        min-width: calc(100vw - 40px);
-        max-width: none;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        padding: 16px 16px 10px;
-    }
-    
-.tikz-app #tikz-form { 
-        padding: 0; 
-        box-shadow: none; 
-    }
-    
-.tikz-app #input-preview-row .input-col, .tikz-app #input-preview-row .preview-col, .tikz-app #view-mode-row .view-col {
-        min-width: 300px;
-        flex-shrink: 0;
-        flex-basis: 300px;
-    }
-    
-.tikz-app #input-preview-row .CodeMirror, .tikz-app #view-mode-row .CodeMirror {
-        font-size: var(--font-size-base);
-    }
-    
-.tikz-app #input-preview-row .preview-col, .tikz-app #view-svg-preview {
-        background: #fff;  /* Ensure white background on mobile */
-        padding: 12px;
-        min-height: 280px;
-    }
-    
-    .tikz-app .export-form {
-        grid-template-columns: 1fr;
-    }
-}
 
-@media (width <= 600px) {
-    .tikz-app .btn-action,
-    .tikz-app .compile-save-row-btn,
-    .tikz-app .export-btn,
-    .tikz-app .copy-btn {
-        width: 100%;
-        min-width: 0;
-        font-size: var(--font-size-lg);
-        padding: 14px 0;
-        border-radius: 8px;
-        margin-bottom: 10px;
-        height: 48px;
-    }
-    
-    .tikz-app .group {
-        max-width: 250px;
-    }
-    
-    .tikz-app .search-title {
-        font-size: var(--font-size-lg);
-    }
-}
 
-@media (width <= 480px) {
-    .tikz-app .input-preview-section {
-        padding: var(--spacing-8) 0;
-    }
-    
-    /* Files section responsive styles now handled by file_card.css */
-    
-    .tikz-app .input-preview-section.page-container.container {
-        padding: var(--spacing-10);
-
-        /* Maximum contrast for smallest screens */
-        background: var(--glass-bg-light);
-        backdrop-filter: var(--glass-blur-light);
-        border-width: 2px;
-        box-shadow: var(--glass-shadow), 
-                    0 4px 12px rgb(0 0 0 / 20%);
-    }
-    
-.tikz-app #input-preview-row, .tikz-app #view-mode-row {
-        gap: 12px;
-        min-width: calc(100vw - 30px);
-        border: 2px solid var(--success-color);
-        border-radius: 8px;
-        padding: 12px 12px 8px;
-        background: var(--bg-primary);
-        box-shadow: 0 2px 8px rgb(62 159 6 / 20%);
-    }
-    
-.tikz-app #input-preview-row .input-col, .tikz-app #input-preview-row .preview-col, .tikz-app #view-mode-row .view-col {
-        min-width: 280px;
-        flex-basis: 280px;
-    }
-    
-.tikz-app #input-preview-row .preview-col, .tikz-app #view-svg-preview {
-        background: #fff;  /* Ensure white background on smallest screens */
-        padding: 8px;
-        min-height: 250px;
-    }
-    
-    .tikz-app .compile-save-row-btn {
-        min-height: 44px;
-        font-size: var(--font-size-base);
-        padding: 12px 20px;
-    }
-    
-    .tikz-app .btn-action, .export-btn, .copy-btn {
-        min-height: 44px;
-        font-size: var(--font-size-base);
-        padding: 12px 20px;
-    }
-}
-
-@media (width <= 950px) {
-    .tikz-app .table-content {
-        min-width: 100vw;
-    }
-}
 
 .tikz-app .CodeMirror-placeholder {
     color: var(--text-muted);
@@ -1231,63 +1802,68 @@
     box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
 }
 
-/* Responsive for view mode */
-@media (width <= 1000px) {
-.tikz-app #view-export-form {
-        grid-template-columns: 1fr;
-        justify-items: center;
-        gap: 16px;
-    }
-    
-.tikz-app #view-export-form .export-pair {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: center;
-        gap: 12px;
-        width: 100%;
-        max-width: 300px;
-    }
-    
-.tikz-app #view-export-form .export-label {
-        text-align: right;
-        font-weight: 600;
-        color: var(--text-primary);
-        min-width: 80px;
-        flex-shrink: 0;
-    }
-    
-    .tikz-app #view-export-form .export-input,
-    .tikz-app #view-export-form .export-select,
-    .tikz-app #view-export-form .export-number {
-        width: 120px;
-        text-align: left;
-        flex-shrink: 0;
-    }
-}
 
-@media (width <= 800px) {
-.tikz-app #view-svg-actions {
-        flex-direction: column;
-        gap: 8px;
-    }
-}
 
-@media (width <= 600px) {
-    .tikz-app .export-form {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (width <= 900px) {
-    .tikz-app .export-select {
-        min-width: 100px;
-        max-width: 100%;
-    }
-}
 
 /* Animation */
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+/* Responsive Demo (Development Only) */
+.tikz-app .responsive-demo {
+    background: linear-gradient(90deg, #ff6b6b 0%, #ffa726 50%, #ffeb3b 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgb(255 107 107 / 30%);
+    position: relative;
+    overflow: hidden;
+}
+
+.tikz-app .responsive-demo::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(45deg, transparent 30%, rgb(255 255 255 / 10%) 50%, transparent 70%);
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.tikz-app .breakpoint-indicator {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    position: relative;
+    z-index: 1;
+}
+
+.tikz-app .current-breakpoint {
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgb(0 0 0 / 30%);
+}
+
+.tikz-app .breakpoint-badge {
+    background: rgb(0 0 0 / 20%);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgb(255 255 255 / 20%);
+}
+
+.tikz-app .demo-info {
+    position: relative;
+    z-index: 1;
+}
+

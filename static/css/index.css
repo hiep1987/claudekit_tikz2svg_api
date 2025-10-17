@@ -28,12 +28,15 @@
 .tikz-app .input-preview-section.page-container {
     box-shadow: var(--glass-shadow);
     position: relative;
-    margin-top: var(--spacing-20);
+    margin: var(--spacing-20) auto; /* Căn giữa với auto margin */
     background-color: var(--container-bg-secondary);
     backdrop-filter: var(--container-bg-blur);
     padding: var(--spacing-20) 0;
     border: none;
     border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Căn giữa nội dung */
 }
 
 /* Index Page Specific Elements - No Foundation Conflicts */
@@ -235,11 +238,12 @@
     border-radius: 16px;
     box-shadow: 0 8px 32px rgb(0 0 0 / 8%);
     padding: 20px;
-    margin-top: var(--spacing-8); /* Use foundation variable */
-    margin-left: auto;
-    margin-right: auto;
+    margin: var(--spacing-8) auto; /* Căn giữa với auto margin left/right */
     width: 900px;
     max-width: 900px; /* Changed from 100% to match width */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Căn giữa nội dung trong section */
 }
 
 .tikz-app .export-section h4 {
@@ -412,9 +416,9 @@
     }
 
     .tikz-app .export-form .export-btn {
-        width: 100%;
+        width: 50%;
         max-width: 100%;
-        font-size: 0.8rem;
+        font-size: 1rem;
         padding: var(--spacing-3) var(--spacing-6);
     }
 
@@ -585,7 +589,8 @@
     .tikz-app .export-section {
         padding: var(--spacing-6);
         margin: var(--spacing-8) auto;
-        width: 100%;          /* linh hoạt theo container */
+        width: 90%;          /* linh hoạt theo container */
+        /* max-width: 750px; */     /* Xóa max-width để không giới hạn width */
     }
 
     .tikz-app .export-form {
@@ -631,7 +636,7 @@
 
     .tikz-app .export-form .export-btn {
         padding: var(--spacing-3) var(--spacing-6);
-        font-size: 0.8rem;
+        font-size: 1rem;
         min-width: 140px;
     }
 
@@ -679,52 +684,6 @@
     /* Fix: Limit page-container max-width for stable margins in 768px-992px range */
     .tikz-app #result-tools-section.page-container {
         max-width: 900px; /* Match input-preview-section max-width */
-    }
-
-    /* Export Section - Tablets */
-    .tikz-app .export-section {
-        padding: var(--spacing-8);
-        margin: var(--spacing-8) auto;
-        width: 100%;          /* linh hoạt theo container */
-    }
-
-    .tikz-app .export-form {
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-3);
-        align-items: center;
-    }
-
-    .tikz-app .export-form .export-pair {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: flex-start;
-        gap: var(--spacing-3);
-        width: 100%;
-        max-width: 400px;
-    }
-
-    .tikz-app .export-label {
-        flex-shrink: 0;
-        font-size: 0.875rem;
-        font-weight: 600;
-        margin-right: var(--spacing-3);
-        min-width: 80px;
-    }
-
-    .tikz-app .export-select,
-    .tikz-app .export-number {
-        flex: 1;
-        width: auto;
-        min-width: 120px;
-        padding: 8px 12px;
-    }
-
-    .tikz-app .export-form .export-btn {
-        padding: var(--spacing-4) var(--spacing-8);
-        font-size: 0.9rem;
-        min-width: 160px;
     }
 
     /* Input Preview Section - Tablets (Row Layout) */
@@ -779,6 +738,75 @@
     }
 }
 
+/* 768px to < 992px — tablet lớn với layout 2 cột ngang căn giữa */
+@media (width >= 768px) and (width < 992px) {
+    /* Export Section - 2 Column Layout for Tablets */
+    .tikz-app .export-section {
+        padding: var(--spacing-8);
+        margin: var(--spacing-8) auto;
+        width: 100%;
+        max-width: 800px;
+    }
+
+    .tikz-app .export-form {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); /* 2 cột bằng nhau */
+        gap: var(--spacing-5); /* Tăng gap cho không gian thở */
+        align-items: start;
+        justify-content: center; /* Căn giữa grid */
+        width: 100%;
+        max-width: 600px; /* Giới hạn width để căn giữa tốt hơn */
+    }
+
+    .tikz-app .export-form .export-pair {
+        display: flex;
+        flex-flow: row nowrap; /* Layout ngang - label và input cùng dòng */
+        align-items: center;
+        justify-content: flex-start;
+        gap: var(--spacing-3);
+        min-width: 0;
+        justify-self: center; /* Căn giữa từng cột */
+        width: 100%;
+        max-width: 280px; /* Giới hạn width cho mỗi cột */
+    }
+
+    .tikz-app .export-label {
+        flex-shrink: 0;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-right: 0;
+        margin-bottom: 0; /* Xóa margin bottom vì layout ngang */
+        min-width: 80px; /* Fixed width cho label */
+        text-align: left;
+    }
+
+    .tikz-app .export-select,
+    .tikz-app .export-number {
+        flex: 1; /* Chiếm không gian còn lại */
+        width: auto;
+        min-width: 100px; /* Width tối thiểu cho input/select */
+        font-size: 0.875rem;
+        padding: 6px 8px;
+    }
+
+    .tikz-app .export-form .export-btn-group {
+        grid-column: 1 / -1; /* Span cả 2 cột */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: var(--spacing-5);
+        justify-self: center; /* Căn giữa button group */
+        width: 100%;
+        max-width: 300px; /* Giới hạn width cho button */
+    }
+
+    .tikz-app .export-form .export-btn {
+        padding: var(--spacing-3) var(--spacing-6);
+        font-size: 1rem;
+        min-width: 150px;
+    }
+}
+
 /* ≥ 992px — laptop nhỏ / desktop thường */
 @media (width >= 992px) {
     /* Container: ổn định biên */
@@ -786,51 +814,6 @@
         max-width: 1100px;
         margin-left: auto;
         margin-right: auto;
-    }
-
-    /* Export Section - Desktop: co giãn, không khóa cứng */
-    .tikz-app .export-section {
-        padding: var(--spacing-10);
-        margin: var(--spacing-8) auto;
-        width: 100%;          /* linh hoạt theo container */
-    }
-
-    .tikz-app .export-form {
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-3);
-        align-items: center;
-    }
-
-    .tikz-app .export-form .export-pair {
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-        gap: var(--spacing-4);
-        width: 100%;
-        max-width: 450px;
-    }
-
-    .tikz-app .export-label {
-        flex-shrink: 0;
-        font-size: 0.875rem;
-        font-weight: 600;
-        margin-right: var(--spacing-3);
-        min-width: 85px;
-    }
-
-    .tikz-app .export-select,
-    .tikz-app .export-number {
-        flex: 1;
-        width: auto;
-        min-width: 130px;
-        padding: 8px 12px;
-    }
-
-    .tikz-app .export-form .export-btn {
-        padding: var(--spacing-4) var(--spacing-10);
-        font-size: 0.9rem;
-        min-width: 180px;
     }
 
     /* Input Preview Section - Desktop */
@@ -880,60 +863,86 @@
     }
 }
 
-/* ≥ 1200px — desktop rộng */
-@media (width >= 1200px) {
-    /* Export Section - Large Desktop */
+/* ≥ 992px — desktop với layout 4 cột căn giữa */
+@media (width >= 992px) {
+    /* Export Section - 4 Column Layout */
     .tikz-app .export-section {
-        padding: var(--spacing-12);
+        padding: var(--spacing-10);
         margin: var(--spacing-8) auto;
-        width: 100%;          /* linh hoạt theo container */
+        width: 100%;
+        max-width: 1000px; /* Giới hạn width để layout không quá rộng */
     }
 
     .tikz-app .export-form {
-        display: flex;
-        flex-flow: row wrap;
-        gap: var(--spacing-4);
+        display: grid;
+        grid-template-columns: repeat(4, 1fr); /* 4 cột bằng nhau */
+        gap: var(--spacing-4); /* Tăng gap cho không gian thở */
         align-items: start;
-        justify-content: flex-start;
+        justify-content: center; /* Căn giữa grid */
+        width: 100%;
+        max-width: 900px; /* Giới hạn width để căn giữa tốt hơn */
     }
 
     .tikz-app .export-form .export-pair {
         display: flex;
-        flex-flow: row nowrap;
-        align-items: center;
+        flex-flow: column nowrap; /* Layout dọc */
+        align-items: center; /* Căn giữa nội dung trong mỗi cột */
         justify-content: flex-start;
-        gap: var(--spacing-4);
-        flex: 1;
-        min-width: 250px;
+        gap: var(--spacing-2);
+        min-width: 0;
+        justify-self: center; /* Căn giữa từng cột */
+        width: 100%;
+        max-width: 200px; /* Giới hạn width cho mỗi cột */
     }
 
     .tikz-app .export-label {
         flex-shrink: 0;
-        font-size: 0.875rem;
+        font-size: 0.85rem;
         font-weight: 600;
-        margin-right: var(--spacing-3);
-        min-width: 90px;
+        margin-right: 0;
+        margin-bottom: var(--spacing-1);
+        min-width: 0;
+        text-align: center; /* Căn giữa label */
+        width: 100%;
     }
 
     .tikz-app .export-select,
     .tikz-app .export-number {
-        flex: 1;
-        width: auto;
-        min-width: 140px;
+        width: 100%;
+        min-width: 100px; /* Giảm width cho phù hợp với màn hình nhỏ hơn */
+        max-width: 160px; /* Giới hạn width tối đa */
+        font-size: 0.85rem;
+        padding: 6px 8px; /* Giảm padding cho compact hơn */
+        text-align: center; /* Căn giữa text trong input */
     }
 
     .tikz-app .export-form .export-btn-group {
-        width: 100%;
+        grid-column: 1 / -1; /* Span toàn bộ 4 cột */
+        display: flex;
         justify-content: center;
         align-items: center;
         margin-top: var(--spacing-4);
-        flex-basis: 100%;
+        justify-self: center; /* Căn giữa button group */
+        width: 100%;
+        max-width: 400px; /* Giới hạn width cho button */
     }
 
     .tikz-app .export-form .export-btn {
-        padding: var(--spacing-5) var(--spacing-12);
+        padding: var(--spacing-3) var(--spacing-6);
         font-size: 1rem;
-        min-width: 200px;
+        min-width: 160px;
+        width: 50%;
+    }
+}
+
+/* ≥ 1200px — desktop rộng */
+@media (width >= 1200px) {
+    /* Export Section - Large Desktop */
+    .tikz-app .export-form .export-btn {
+        padding: var(--spacing-3) var(--spacing-6);
+        font-size: 1rem;
+        min-width: 220px;
+        width: 50%;
     }
 
     /* Input Preview Section - Large Desktop */
@@ -972,38 +981,88 @@
 
 /* ≥ 1400px — màn hình rất rộng (ultra-wide) */
 @media (width >= 1400px) {
-    /* Export Section - Ultra-wide */
+    /* Result Tools Section - Ultra-wide container - đồng bộ với input-preview */
+    .tikz-app #result-tools-section.page-container {
+        max-width: 1600px; /* Đồng bộ với input-preview-section */
+        margin: var(--spacing-8) auto; /* Căn giữa container */
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Căn giữa nội dung trong container */
+        padding: 0; /* Xóa padding để không ảnh hưởng centering */
+    }
+
+    /* Export Section - Ultra-wide với margin tăng - căn giữa theo input-preview */
     .tikz-app .export-section {
-        margin: var(--spacing-8) auto;
-        width: 100%;          /* linh hoạt theo container */
+        margin: var(--spacing-8) auto; /* Thay đổi thành auto margin để căn giữa */
+        width: 100%;
+        max-width: 1200px; /* Giữ max-width nhỏ hơn container */
+        padding: var(--spacing-8); /* Giảm padding để cân bằng */
     }
 
     .tikz-app .export-form {
-        gap: var(--spacing-5);
+        display: grid;
+        grid-template-columns: repeat(4, 1fr); /* 4 cột bằng nhau */
+        gap: var(--spacing-8); /* Giảm gap để các cột gần nhau hơn */
+        align-items: start;
+        justify-content: center;
+        width: 100%;
+        max-width: 1400px; /* Tăng max-width để tạo cảm giác rộng */
     }
 
     .tikz-app .export-form .export-pair {
-        min-width: 280px;
+        display: flex;
+        flex-flow: column nowrap;
+        align-items: center;
+        justify-content: flex-start;
+        gap: var(--spacing-2);
+        min-width: 0;
+        justify-self: center;
+        width: 100%;
+        max-width: 220px; /* Tăng width cho mỗi cột */
     }
 
     .tikz-app .export-label {
-        min-width: 100px;
+        flex-shrink: 0;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: var(--spacing-1);
+        text-align: center;
+        width: 100%;
     }
 
     .tikz-app .export-select,
     .tikz-app .export-number {
-        min-width: 160px;
+        width: 100%;
+        min-width: 120px;
+        max-width: 180px;
+        font-size: 0.9rem;
+        padding: 8px 12px;
+        text-align: center;
+    }
+
+    .tikz-app .export-form .export-btn-group {
+        grid-column: 1 / -1; /* Span toàn bộ 4 cột */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: var(--spacing-5);
+        justify-self: center;
+        width: 100%;
+        max-width: 500px;
     }
 
     .tikz-app .export-form .export-btn {
-        padding: var(--spacing-6) var(--spacing-16);
-        font-size: 1.1rem;
+        padding: var(--spacing-4) var(--spacing-8);
+        font-size: 1rem;
         min-width: 220px;
+        width: 50%;
     }
+}
 
     /* Input Preview Section - Ultra-wide */
     .tikz-app .input-preview-section.page-container {
         max-width: 1600px;
+        margin: var(--spacing-20) auto; /* Căn giữa với auto margin */
         padding: var(--spacing-40);
     }
 
@@ -1662,6 +1721,9 @@
 /* Result tools section spacing */
 .tikz-app #result-tools-section {
     margin-top: var(--spacing-8);
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Căn giữa nội dung trong result-tools-section */
 }
 
 /* Export message */

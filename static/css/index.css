@@ -153,7 +153,8 @@
 
 .tikz-app .code-title {
     font-weight: var(--font-weight-bold);
-    color: var(--text-primary);
+    color: var(--text-header-glass);
+    text-shadow: 0 1px 2px rgb(255 255 255 / 60%);
 }
 
 .tikz-app #svg-code.code-block {
@@ -354,6 +355,7 @@
 }
 
 /* ===== RESPONSIVE BREAKPOINTS SYSTEM ===== */
+
 /* Base styles: áp dụng cho tất cả thiết bị nhỏ hơn 576px */
 @media (width < 576px) {
     /* Export Section - Mobile First */
@@ -430,6 +432,43 @@
         margin-top: var(--spacing-3);
     }
 
+    /* Copy Button - Mobile (đồng bộ kích thước với export button) */
+    .tikz-app .copy-btn {
+        width: auto; /* Thay đổi từ % để tránh overflow */
+        max-width: 280px; /* Giới hạn width tối đa */
+        min-width: 160px; /* Đảm bảo chiều rộng tối thiểu cho text dài nhất */
+        flex-shrink: 0; /* Ngăn không cho co lại khi text ngắn hơn */
+        font-size: 1rem;
+        padding: var(--spacing-3) var(--spacing-6);
+        box-sizing: border-box; /* Đảm bảo padding không làm tăng kích thước tổng thể */
+    }
+
+    /* Code Block - Mobile (giới hạn width để tránh overflow) */
+    .tikz-app .code-section,
+    .tikz-app #svg-code-container {
+        max-width: 100%;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    /* Code block: wrap text và giới hạn width */
+    .tikz-app #svg-code.code-block {
+        max-width: 100%;
+        width: 100%;
+        overflow-x: auto;
+        box-sizing: border-box;
+        position: relative;
+    }
+    
+    /* Pre và Code: wrap text thay vì scroll ngang */
+    .tikz-app #svg-code.code-block pre,
+    .tikz-app #svg-code.code-block code {
+        white-space: pre-wrap; /* Wrap text khi quá dài */
+        word-break: break-word; /* Break long words */
+        overflow-wrap: break-word; /* Backup cho word-break */
+        max-width: 100%;
+    }
+
     /* Input Preview Section - Mobile */
     .tikz-app .input-preview-section.page-container {
         padding: var(--spacing-8) var(--spacing-4);
@@ -438,34 +477,57 @@
         box-sizing: border-box;
     }
 
+    /* Table Scroll X - Responsive với scroll ngang */
     .tikz-app .table-scroll-x {
-        width: 100%;
+        width: 100%; /* Responsive width để fit màn hình */
+        max-width: 100%;
+        height: 452px; /* 450px content + 2px border */
         margin: 0;
+        overflow-x: auto; /* Cho phép scroll ngang */
+        -webkit-overflow-scrolling: touch;
     }
 
+    /* Table Content - Fixed size giống >= 576px */
     .tikz-app .table-content {
-        min-width: 100%;
-        flex-direction: row; /* Horizontal layout like tablet */
-        height: 452px; /* Fixed height to match table-scroll-x */
+        width: 900px; /* Fixed width for screens < 576px */
+        min-width: 900px; /* Ensure minimum width is maintained */
+        height: 450px; /* Fixed height */
     }
 
     .tikz-app .col {
-        flex: 1 1 auto;
-        width: auto;
-        max-width: none;
-        min-width: 100%;
-        height: 452px; /* Fixed height */
-        min-height: 452px;
-        max-height: 452px;
-        padding: var(--spacing-4);
-        border-right: 1px solid var(--border-light);
-        border-bottom: none;
-        overflow: auto;
+        min-width: 450px;
+        width: 450px;
+        max-width: 450px;
+        height: 450px;
+        min-height: 450px;
+        max-height: 450px;
+        padding: var(--spacing-8);
+        overflow: hidden; /* Không cuộn dọc */
     }
 
     .tikz-app .col:last-child {
-        border-right: none;
-        min-height: 452px;
+        height: 450px;
+    }
+
+    /* Điều chỉnh padding cho col:first-child (chứa TikZ form) */
+    .tikz-app .table-scroll-x .table-content .col:first-child {
+        padding: 0; /* Bỏ toàn bộ padding */
+    }
+
+    /* Cố định width cho CodeMirror */
+    .tikz-app .table-scroll-x .table-content .col .CodeMirror {
+        width: 450px;
+        max-width: 450px;
+        border-radius: var(--radius-md) 0 0 var(--radius-md); /* Chỉ bo 2 góc trái */
+    }
+
+    /* Cố định kích thước img trong SVG Preview */
+    .tikz-app .table-scroll-x .table-content .col:last-child img,
+    .tikz-app .preview-img {
+        max-width: 450px;
+        max-height: 450px;
+        width: auto;
+        height: auto;
     }
 
     .tikz-app #input-preview-row {
@@ -499,104 +561,74 @@
 
 /* ≥ 576px — điện thoại lớn (ví dụ iPhone Plus, Pixel XL) */
 @media (width >= 576px) {
-    /* Export Section - Small Phones */
-    .tikz-app .export-section {
-        padding: var(--spacing-8);
-        margin: var(--spacing-8) var(--spacing-6);
-        width: 100%;          /* nhất quán với các breakpoint khác */
-        max-width: calc(100vw - var(--spacing-12));
-        box-sizing: border-box;
-    }
-
-    .tikz-app .export-form {
-        gap: var(--spacing-3);
-    }
-
-    .tikz-app .export-form .export-pair {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: flex-start;
-        gap: var(--spacing-3);
-        width: 100%;
-        max-width: 320px;
-    }
-
-    .tikz-app .export-label {
-        font-size: 0.875rem;
-        margin-right: var(--spacing-3);
-        min-width: 75px;
-    }
-
-    .tikz-app .export-select,
-    .tikz-app .export-number {
-        flex: 1;
-        width: auto;
-        min-width: 100px;
-        padding: 6px 10px;
-    }
-
-    /* Input Preview Section - Small Phones */
-    .tikz-app .input-preview-section.page-container {
-        padding: var(--spacing-12) var(--spacing-6);
-        margin: 0 var(--spacing-6);
-        max-width: calc(100vw - var(--spacing-12));
-    }
-
-    .tikz-app .table-content {
-        min-width: 100%;
-        flex-direction: row; /* Horizontal layout like tablet */
-        height: 452px; /* Fixed height to match table-scroll-x */
-    }
-
-    .tikz-app .col {
-        flex: 1 1 auto;
-        width: auto;
-        max-width: none;
-        min-width: 100%;
-        height: 452px; /* Fixed height */
-        min-height: 452px;
-        max-height: 452px;
-        padding: var(--spacing-4);
-        border-right: 1px solid var(--border-light);
-        border-bottom: none;
-        overflow: auto;
-    }
-
-    .tikz-app .col:last-child {
-        border-right: none;
-        min-height: 452px;
-    }
-
-    /* Search Container - Small Phones */
-    .tikz-app .search-container.page-container.index-top-container {
-        margin: var(--spacing-8) var(--spacing-6);
-        padding: var(--spacing-16) var(--spacing-16);
-    }
-
-    .tikz-app .group {
-        max-width: 320px;
+    /* Table Scroll X - Responsive với scroll ngang (sẽ bị override ở >= 768px và >= 992px) */
+    .tikz-app .table-scroll-x {
+        width: 100%; /* Responsive width để fit màn hình */
+        max-width: 100%;
+        height: 452px; /* 450px content + 2px border */
+        margin: 0;
+        overflow-x: auto; /* Cho phép scroll ngang */
+        -webkit-overflow-scrolling: touch;
     }
 
     .tikz-app .search-title {
         font-size: var(--font-size-xl);
     }
-}
 
-/* 576px-768px — khoảng trung gian cần xử lý đặc biệt */
-@media (width >= 576px) and (width < 768px) {
-    /* Export Section - Medium-small */
+    /* Override: Table Content - Different height (sẽ bị override ở >= 768px) */
+    .tikz-app .table-content {
+        min-width: 100%; /* Override từ 900px → 100% */
+        flex-direction: row;
+    }
+
+    .tikz-app .col {
+        height: 340px; /* Override từ 450px → 340px */
+        min-height: 340px; /* Override từ 450px → 340px */
+        max-height: none; /* Override từ 450px */
+        padding: var(--spacing-4); /* Override từ spacing-8 → spacing-4 */
+        border-right: 1px solid var(--border-light);
+        border-bottom: none;
+        overflow: auto; /* Override từ hidden → auto */
+    }
+
+    .tikz-app .col:last-child {
+        border-right: none;
+        min-height: 340px; /* Override từ 450px → 340px */
+        height: 340px; /* Override từ 450px → 340px */
+    }
+
+    /* Điều chỉnh padding cho col:first-child (chứa TikZ form) */
+    .tikz-app .table-scroll-x .table-content .col:first-child {
+        padding: 0; /* Bỏ toàn bộ padding */
+    }
+
+    /* Cố định width cho CodeMirror */
+    .tikz-app .table-scroll-x .table-content .col .CodeMirror {
+        width: 450px;
+        max-width: 450px;
+        border-radius: var(--radius-md) 0 0 var(--radius-md); /* Chỉ bo 2 góc trái */
+    }
+
+    /* Cố định kích thước img trong SVG Preview */
+    .tikz-app .table-scroll-x .table-content .col:last-child img,
+    .tikz-app .preview-img {
+        max-width: 450px;
+        max-height: 450px;
+        width: auto;
+        height: auto;
+    }
+
+    /* Override: Export Section - 2 column wrap layout (sẽ bị override ở >= 768px) */
     .tikz-app .export-section {
-        padding: var(--spacing-6);
-        margin: var(--spacing-8) auto;
-        width: 90%;          /* linh hoạt theo container */
-        /* max-width: 750px; */     /* Xóa max-width để không giới hạn width */
+        padding: var(--spacing-6); /* Override từ spacing-8 → spacing-6 */
+        margin: var(--spacing-8) auto; /* Override margin */
+        width: 90%; /* Override từ 100% → 90% */
     }
 
     .tikz-app .export-form {
         display: flex;
         flex-flow: row wrap;
-        gap: var(--spacing-4);
+        gap: var(--spacing-4); /* Override từ spacing-3 → spacing-4 */
         align-items: start;
         justify-content: center;
     }
@@ -608,22 +640,23 @@
         justify-content: flex-start;
         gap: var(--spacing-3);
         flex: 1;
-        min-width: 240px;
+        min-width: 240px; /* Override từ auto */
+        max-width: none; /* Override từ 320px */
     }
 
     .tikz-app .export-label {
         flex-shrink: 0;
         font-size: 0.875rem;
         font-weight: 600;
-        margin-right: var(--spacing-2);
-        min-width: 70px;
+        margin-right: var(--spacing-2); /* Override từ spacing-3 → spacing-2 */
+        min-width: 70px; /* Override từ 75px → 70px */
     }
 
     .tikz-app .export-select,
     .tikz-app .export-number {
         flex: 1;
         width: auto;
-        min-width: 120px;
+        min-width: 120px; /* Override từ 100px → 120px */
     }
 
     .tikz-app .export-form .export-btn-group {
@@ -640,78 +673,127 @@
         min-width: 140px;
     }
 
-    /* Input Preview Section - Medium-small */
+    /* Override: Input Preview Section (sẽ bị override ở >= 768px) */
     .tikz-app .input-preview-section.page-container {
-        padding: var(--spacing-16);
-        margin: 0 auto;
-        max-width: 700px;
+        padding: var(--spacing-16); /* Override */
+        margin: 0 auto; /* Override */
+        max-width: 700px; /* Override từ calc(100vw - ...) → 700px */
     }
 
-    /* FIX: Keep horizontal layout for consistency with other breakpoints */
-    .tikz-app .table-content {
-        min-width: 100%;
-        flex-direction: row; /* Horizontal layout like other breakpoints */
-    }
-
-    .tikz-app .col {
-        height: 340px;
-        min-height: 340px;
-        padding: var(--spacing-4);
-        border-right: 1px solid var(--border-light);
-        border-bottom: none;
-        overflow: auto;
-    }
-
-    .tikz-app .col:last-child {
-        border-right: none;
-        min-height: 340px;
-    }
-
-    /* Search Container - Medium-small */
+    /* Override: Search Container (sẽ bị override ở >= 768px) */
     .tikz-app .search-container.page-container.index-top-container {
-        margin: var(--spacing-10) auto;
+        margin: var(--spacing-10) auto; /* Override */
         padding: var(--spacing-16) var(--spacing-16);
-        max-width: 700px;
+        max-width: 700px; /* Override từ calc(...) → 700px */
     }
 
     .tikz-app .group {
-        max-width: 350px;
+        max-width: 350px; /* Override từ 320px → 350px */
+    }
+
+    /* Override: Copy Button (sẽ bị override ở >= 768px nếu cần) */
+    .tikz-app .copy-btn {
+        width: auto;
+        max-width: 280px;
+        min-width: 160px;
+        flex-shrink: 0;
+        font-size: 1rem;
+        padding: var(--spacing-3) var(--spacing-6);
+        box-sizing: border-box;
+    }
+
+    /* Override: Code Block (sẽ bị override ở >= 768px nếu cần) */
+    .tikz-app .code-section,
+    .tikz-app #svg-code-container {
+        max-width: 100%;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .tikz-app #svg-code.code-block {
+        max-width: 100%;
+        width: 100%;
+        overflow-x: auto;
+        box-sizing: border-box;
+        position: relative;
+    }
+    
+    .tikz-app #svg-code.code-block pre,
+    .tikz-app #svg-code.code-block code {
+        white-space: pre-wrap;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        max-width: 100%;
     }
 }
 
-/* ≥ 768px — tablet dọc/ngang */
+/* ≥ 768px — tablet (copy từ >= 992px với một số điều chỉnh) */
 @media (width >= 768px) {
-    /* Fix: Limit page-container max-width for stable margins in 768px-992px range */
+    /* Container: ổn định biên */
     .tikz-app #result-tools-section.page-container {
-        max-width: 900px; /* Match input-preview-section max-width */
+        max-width: 900px; /* 900px cho tablet, 1100px cho desktop */
+        margin-left: auto;
+        margin-right: auto;
     }
 
-    /* Input Preview Section - Tablets (Row Layout) */
+    /* Input Preview Section - Tablets */
     .tikz-app .input-preview-section.page-container {
-        padding: var(--spacing-20);
+        padding: var(--spacing-20); /* 20 cho tablet, 24 cho desktop */
         margin: 0 auto;
-        max-width: 900px;
+        max-width: 900px; /* 900px cho tablet, 1100px cho desktop */
     }
 
+    /* Table Scroll X - Responsive với scroll ngang (sẽ bị override ở >= 992px) */
+    .tikz-app .table-scroll-x {
+        width: 100%; /* KHÁC: Responsive cho tablet, 902px cho desktop */
+        max-width: 100%;
+        height: 452px; /* 450px content + 2px border */
+        margin: 0; /* KHÁC: margin 0 cho tablet, 0 auto cho desktop */
+        overflow-x: auto; /* Cho phép scroll ngang */
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Table Content - Desktop with Fixed Width */
     .tikz-app .table-content {
-        min-width: 100%;
-        flex-direction: row;
+        width: 900px; /* Fixed width for screens ≥ 768px */
+        min-width: 900px; /* Ensure minimum width is maintained */
+        height: 450px; /* Fixed height */
     }
 
     .tikz-app .col {
-        flex: 1 1 auto;
-        width: auto;
-        max-width: none;
-        min-width: 400px;
-        height: 400px;
-        min-height: 400px;
-        padding: var(--spacing-6);
-        border-right: 1px solid var(--border-light);
+        min-width: 450px;
+        width: 450px;
+        max-width: 450px;
+        height: 450px;
+        min-height: 450px;
+        max-height: 450px;
+        padding: var(--spacing-8);
+        overflow: hidden; /* Không cuộn dọc */
     }
 
     .tikz-app .col:last-child {
-        border-right: none;
-        min-height: 400px;
+        height: 450px;
+    }
+
+    /* Điều chỉnh padding cho col:first-child (chứa TikZ form) */
+    .tikz-app .table-scroll-x .table-content .col:first-child {
+        padding: 0; /* Bỏ toàn bộ padding */
+    }
+
+    /* Cố định width cho CodeMirror */
+    .tikz-app .table-scroll-x .table-content .col .CodeMirror {
+        width: 450px;
+        max-width: 450px;
+        border-radius: var(--radius-md) 0 0 var(--radius-md); /* Chỉ bo 2 góc trái */
+    }
+
+    /* Cố định kích thước img trong SVG Preview */
+    .tikz-app .table-scroll-x .table-content .col:last-child img,
+    .tikz-app .preview-img {
+        max-width: 450px;
+        max-height: 450px;
+        width: auto;
+        height: auto;
     }
 
     .tikz-app #input-preview-row {
@@ -722,24 +804,21 @@
 
     .tikz-app #input-preview-row .input-col,
     .tikz-app #input-preview-row .preview-col {
-        min-width: 400px;
+        min-width: 450px;
         flex: 1 1 auto;
     }
 
     /* Search Container - Tablets */
     .tikz-app .search-container.page-container.index-top-container {
-        margin: var(--spacing-12) auto;
+        margin: var(--spacing-12) auto; /* 12 cho tablet, 16 cho desktop */
         padding: var(--spacing-16) var(--spacing-16);
-        max-width: 900px;
+        max-width: 900px; /* 900px cho tablet, 1100px cho desktop */
     }
 
     .tikz-app .group {
-        max-width: 400px;
+        max-width: 400px; /* 400px cho tablet, 450px cho desktop */
     }
-}
 
-/* 768px to < 992px — tablet lớn với layout 2 cột ngang căn giữa */
-@media (width >= 768px) and (width < 992px) {
     /* Export Section - 2 Column Layout for Tablets */
     .tikz-app .export-section {
         padding: var(--spacing-8);
@@ -751,11 +830,11 @@
     .tikz-app .export-form {
         display: grid;
         grid-template-columns: repeat(2, 1fr); /* 2 cột bằng nhau */
-        gap: var(--spacing-5); /* Tăng gap cho không gian thở */
+        gap: var(--spacing-5);
         align-items: start;
-        justify-content: center; /* Căn giữa grid */
+        justify-content: center;
         width: 100%;
-        max-width: 600px; /* Giới hạn width để căn giữa tốt hơn */
+        max-width: 600px;
     }
 
     .tikz-app .export-form .export-pair {
@@ -765,9 +844,9 @@
         justify-content: flex-start;
         gap: var(--spacing-3);
         min-width: 0;
-        justify-self: center; /* Căn giữa từng cột */
+        justify-self: center;
         width: 100%;
-        max-width: 280px; /* Giới hạn width cho mỗi cột */
+        max-width: 280px;
     }
 
     .tikz-app .export-label {
@@ -775,16 +854,16 @@
         font-size: 0.875rem;
         font-weight: 600;
         margin-right: 0;
-        margin-bottom: 0; /* Xóa margin bottom vì layout ngang */
-        min-width: 80px; /* Fixed width cho label */
+        margin-bottom: 0;
+        min-width: 80px;
         text-align: left;
     }
 
     .tikz-app .export-select,
     .tikz-app .export-number {
-        flex: 1; /* Chiếm không gian còn lại */
+        flex: 1;
         width: auto;
-        min-width: 100px; /* Width tối thiểu cho input/select */
+        min-width: 100px;
         font-size: 0.875rem;
         padding: 6px 8px;
     }
@@ -795,9 +874,9 @@
         justify-content: center;
         align-items: center;
         margin-top: var(--spacing-5);
-        justify-self: center; /* Căn giữa button group */
+        justify-self: center;
         width: 100%;
-        max-width: 300px; /* Giới hạn width cho button */
+        max-width: 300px;
     }
 
     .tikz-app .export-form .export-btn {
@@ -805,66 +884,73 @@
         font-size: 1rem;
         min-width: 150px;
     }
+
+    /* Copy Button - Tablets */
+    .tikz-app .copy-btn {
+        width: auto;
+        max-width: 280px;
+        min-width: 160px;
+        flex-shrink: 0;
+        font-size: 1rem;
+        padding: var(--spacing-3) var(--spacing-6);
+        box-sizing: border-box;
+    }
+
+    /* Code Block - Tablets */
+    .tikz-app .code-section,
+    .tikz-app #svg-code-container {
+        max-width: 100%;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .tikz-app #svg-code.code-block {
+        max-width: 100%;
+        width: 100%;
+        overflow-x: auto;
+        box-sizing: border-box;
+        position: relative;
+    }
+    
+    .tikz-app #svg-code.code-block pre,
+    .tikz-app #svg-code.code-block code {
+        white-space: pre-wrap;
+        word-break: break-word;
+        overflow-wrap: break-word;
+        max-width: 100%;
+    }
 }
 
-/* ≥ 992px — laptop nhỏ / desktop thường */
+
+/* ≥ 992px — laptop nhỏ / desktop (override một số giá trị từ >= 768px) */
 @media (width >= 992px) {
-    /* Container: ổn định biên */
+    /* Container: override max-width */
     .tikz-app #result-tools-section.page-container {
-        max-width: 1100px;
-        margin-left: auto;
-        margin-right: auto;
+        max-width: 1100px; /* Override từ 900px → 1100px */
     }
 
-    /* Input Preview Section - Desktop */
+    /* Input Preview Section - Desktop: override padding và max-width */
     .tikz-app .input-preview-section.page-container {
-        padding: var(--spacing-24);
-        margin: 0 auto;
-        max-width: 1100px;
+        padding: var(--spacing-24); /* Override từ spacing-20 → spacing-24 */
+        max-width: 1100px; /* Override từ 900px → 1100px */
     }
 
-    /* Table Scroll X - Desktop with Fixed Width */
+    /* Table Scroll X - Desktop: override width và margin */
     .tikz-app .table-scroll-x {
-        width: 916px; /* Fixed width for screens ≥ 992px */
-        margin: 0 auto;
+        width: 902px; /* Override từ 100% → 902px (Fixed width) */
+        margin: 0 auto; /* Override từ 0 → 0 auto (Centered) */
     }
 
-    /* Table Content - Desktop with Fixed Width */
-    .tikz-app .table-content {
-        width: 916px; /* Fixed width for screens ≥ 992px */
-        min-width: 916px; /* Ensure minimum width is maintained */
-    }
-
-    .tikz-app .col {
-        min-width: 450px;
-        height: 450px;
-        min-height: 450px;
-        padding: var(--spacing-8);
-    }
-
-    .tikz-app .col:last-child {
-        min-height: 450px;
-    }
-
-    .tikz-app #input-preview-row .input-col,
-    .tikz-app #input-preview-row .preview-col {
-        min-width: 450px;
-    }
-
-    /* Search Container - Desktop */
+    /* Search Container - Desktop: override margin và max-width */
     .tikz-app .search-container.page-container.index-top-container {
-        margin: var(--spacing-16) auto;
-        padding: var(--spacing-16) var(--spacing-16);
-        max-width: 1100px;
+        margin: var(--spacing-16) auto; /* Override từ spacing-12 → spacing-16 */
+        max-width: 1100px; /* Override từ 900px → 1100px */
     }
 
     .tikz-app .group {
-        max-width: 450px;
+        max-width: 450px; /* Override từ 400px → 450px */
     }
-}
 
-/* ≥ 992px — desktop với layout 4 cột căn giữa */
-@media (width >= 992px) {
     /* Export Section - 4 Column Layout */
     .tikz-app .export-section {
         padding: var(--spacing-10);
@@ -933,7 +1019,43 @@
         min-width: 160px;
         width: 50%;
     }
+
+    /* Copy Button - Desktop (≥992px) - đồng bộ kích thước với mobile */
+    .tikz-app .copy-btn {
+        width: auto; /* Thay đổi từ % để tránh overflow */
+        max-width: 280px; /* Giới hạn width tối đa */
+        min-width: 160px; /* Đảm bảo chiều rộng tối thiểu cho text dài nhất */
+        flex-shrink: 0; /* Ngăn không cho co lại khi text ngắn hơn */
+        font-size: 1rem;
+        padding: var(--spacing-3) var(--spacing-6);
+        box-sizing: border-box; /* Đảm bảo padding không làm tăng kích thước tổng thể */
+    }
+
+    /* Code Block - Desktop (≥992px) - giới hạn width để tránh overflow */
+    .tikz-app .code-section,
+    .tikz-app #svg-code-container {
+        max-width: 100%;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .tikz-app #svg-code.code-block {
+        max-width: 100%;
+        width: 100%;
+        overflow-x: auto;
+        box-sizing: border-box;
+        position: relative;
+    }
+    
+    .tikz-app #svg-code.code-block pre,
+    .tikz-app #svg-code.code-block code {
+        white-space: pre-wrap; /* Wrap text khi quá dài */
+        word-break: break-word; /* Break long words */
+        overflow-wrap: break-word; /* Backup cho word-break */
+        max-width: 100%;
+    }
 }
+
 
 /* ≥ 1200px — desktop rộng */
 @media (width >= 1200px) {
@@ -951,20 +1073,59 @@
         max-width: 1400px;
     }
 
+    /* Table Scroll X - Large Desktop with Fixed Width */
+    .tikz-app .table-scroll-x {
+        width: 902px; /* Fixed width for screens ≥ 1200px (900px content + 2px border) */
+        height: 452px; /* 450px content + 2px border */
+        margin: 0 auto;
+    }
+
+    /* Table Content - Large Desktop with Fixed Width */
+    .tikz-app .table-content {
+        width: 900px; /* Fixed width for screens ≥ 1200px */
+        min-width: 900px; /* Ensure minimum width is maintained */
+        height: 450px; /* Điều chỉnh height */
+    }
+
     .tikz-app .col {
-        min-width: 500px;
-        height: 500px;
-        min-height: 500px;
+        min-width: 450px;
+        width: 450px;
+        max-width: 450px;
+        height: 450px;
+        min-height: 450px;
+        max-height: 450px;
         padding: var(--spacing-10);
+        overflow: hidden; /* Không cuộn dọc */
     }
 
     .tikz-app .col:last-child {
-        min-height: 500px;
+        height: 450px;
+    }
+
+    /* Điều chỉnh padding cho col:first-child (chứa TikZ form) */
+    .tikz-app .table-scroll-x .table-content .col:first-child {
+        padding: 0; /* Bỏ toàn bộ padding */
+    }
+
+    /* Cố định width cho CodeMirror */
+    .tikz-app .table-scroll-x .table-content .col .CodeMirror {
+        width: 450px;
+        max-width: 450px;
+        border-radius: var(--radius-md) 0 0 var(--radius-md); /* Chỉ bo 2 góc trái */
+    }
+
+    /* Cố định kích thước img trong SVG Preview */
+    .tikz-app .table-scroll-x .table-content .col:last-child img,
+    .tikz-app .preview-img {
+        max-width: 450px;
+        max-height: 450px;
+        width: auto;
+        height: auto;
     }
 
     .tikz-app #input-preview-row .input-col,
     .tikz-app #input-preview-row .preview-col {
-        min-width: 500px;
+        min-width: 450px;
     }
 
     /* Search Container - Large Desktop */
@@ -975,7 +1136,7 @@
     }
 
     .tikz-app .group {
-        max-width: 500px;
+        max-width: 450px;
     }
 }
 
@@ -1057,7 +1218,6 @@
         min-width: 220px;
         width: 50%;
     }
-}
 
     /* Input Preview Section - Ultra-wide */
     .tikz-app .input-preview-section.page-container {
@@ -1066,20 +1226,59 @@
         padding: var(--spacing-40);
     }
 
+    /* Table Scroll X - Ultra-wide with Fixed Width */
+    .tikz-app .table-scroll-x {
+        width: 902px; /* Fixed width for screens ≥ 1400px (900px content + 2px border) */
+        height: 452px; /* 450px content + 2px border */
+        margin: 0 auto;
+    }
+
+    /* Table Content - Ultra-wide with Fixed Width */
+    .tikz-app .table-content {
+        width: 900px; /* Fixed width for screens ≥ 1400px */
+        min-width: 900px; /* Ensure minimum width is maintained */
+        height: 450px; /* Điều chỉnh từ 452px sang 450px */
+    }
+
     .tikz-app .col {
-        min-width: 550px;
-        height: 550px;
-        min-height: 550px;
+        min-width: 450px;
+        width: 450px;
+        max-width: 450px;
+        height: 450px;
+        min-height: 450px;
+        max-height: 450px;
         padding: var(--spacing-12);
+        overflow: hidden; /* Không cuộn dọc */
     }
 
     .tikz-app .col:last-child {
-        min-height: 550px;
+        height: 450px;
+    }
+
+    /* Điều chỉnh padding cho col:first-child (chứa TikZ form) */
+    .tikz-app .table-scroll-x .table-content .col:first-child {
+        padding: 0; /* Bỏ toàn bộ padding */
+    }
+
+    /* Cố định width cho CodeMirror */
+    .tikz-app .table-scroll-x .table-content .col .CodeMirror {
+        width: 450px;
+        max-width: 450px;
+        border-radius: var(--radius-md) 0 0 var(--radius-md); /* Chỉ bo 2 góc trái */
+    }
+
+    /* Cố định kích thước img trong SVG Preview */
+    .tikz-app .table-scroll-x .table-content .col:last-child img,
+    .tikz-app .preview-img {
+        max-width: 450px;
+        max-height: 450px;
+        width: auto;
+        height: auto;
     }
 
     .tikz-app #input-preview-row .input-col,
     .tikz-app #input-preview-row .preview-col {
-        min-width: 550px;
+        min-width: 450px;
     }
 
     /* Search Container - Ultra-wide */
@@ -1089,7 +1288,44 @@
     }
 
     .tikz-app .group {
-        max-width: 550px;
+        max-width: 450px;
+    }
+
+    /* Copy Button - Ultra-wide (≥1400px) - đồng bộ kích thước với mobile */
+    .tikz-app .copy-btn {
+        width: auto; /* Thay đổi từ % để tránh overflow */
+        max-width: 280px; /* Giới hạn width tối đa */
+        min-width: 160px; /* Đảm bảo chiều rộng tối thiểu cho text dài nhất */
+        flex-shrink: 0; /* Ngăn không cho co lại khi text ngắn hơn */
+        font-size: 1rem;
+        padding: var(--spacing-3) var(--spacing-6);
+        box-sizing: border-box; /* Đảm bảo padding không làm tăng kích thước tổng thể */
+    }
+
+    /* Code Block - Ultra-wide (≥1400px) - giới hạn width để tránh overflow */
+    .tikz-app .code-section,
+    .tikz-app #svg-code-container {
+        max-width: 100%;
+        width: 100%;
+        box-sizing: border-box;
+        padding-left: 30px;
+        padding-right: 30px;
+    }
+    
+    .tikz-app #svg-code.code-block {
+        max-width: 100%;
+        width: 100%;
+        overflow-x: auto;
+        box-sizing: border-box;
+        position: relative;
+    }
+    
+    .tikz-app #svg-code.code-block pre,
+    .tikz-app #svg-code.code-block code {
+        white-space: pre-wrap; /* Wrap text khi quá dài */
+        word-break: break-word; /* Break long words */
+        overflow-wrap: break-word; /* Backup cho word-break */
+        max-width: 100%;
     }
 }
 
@@ -1152,10 +1388,10 @@
 }
 
 .tikz-app .table-scroll-x .table-content .col:last-child img {
-    max-width: 100%;
-    max-height: 100%;
     object-fit: contain;
     display: block;
+
+    /* max-width và max-height được set trong media queries để responsive */
 }
 
 .tikz-app #view-svg-preview img {
@@ -1246,9 +1482,6 @@
     margin-top: 4px;
 }
 
-.tikz-app .table-scroll-x .table-content .col:first-child {
-    padding: 0 16px;
-}
 
 .tikz-app .table-scroll-x .table-content .col:last-child {
     display: flex;
@@ -1531,27 +1764,6 @@
     font-size: var(--font-size-sm);
 }
 
-/* Responsive Design */
-@media (width <= 1000px) {
-    .tikz-app .compile-save-row-btn {
-        width: 100%;
-        min-width: 0;
-        font-size: var(--font-size-base);
-        padding: 14px 0;
-        border-radius: 8px;
-        margin-bottom: 10px;
-        height: 48px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        white-space: nowrap;
-    }
-}
-
-
-
-
 
 .tikz-app .CodeMirror-placeholder {
     color: var(--text-muted);
@@ -1689,10 +1901,10 @@
 
 /* Preview image full area */
 .tikz-app .preview-img {
-    width: 100%;
-    height: 100%;
     object-fit: contain;
     display: block;
+
+    /* width và height được set trong media queries để responsive */
 }
 
 /* Error detail controls */

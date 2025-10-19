@@ -472,7 +472,6 @@
     /* Input Preview Section - Mobile */
     .tikz-app .input-preview-section.page-container {
         padding: var(--spacing-8) var(--spacing-4);
-        margin: 0 var(--spacing-4);
         max-width: calc(100vw - var(--spacing-8));
         box-sizing: border-box;
     }
@@ -546,7 +545,6 @@
 
     /* Search Container - Mobile */
     .tikz-app .search-container.page-container.index-top-container {
-        margin: var(--spacing-6);
         padding: var(--spacing-16) var(--spacing-16);
     }
 
@@ -1223,7 +1221,7 @@
     .tikz-app .input-preview-section.page-container {
         max-width: 1600px;
         margin: var(--spacing-20) auto; /* Căn giữa với auto margin */
-        padding: var(--spacing-40);
+        padding: var(--spacing-32);
     }
 
     /* Table Scroll X - Ultra-wide with Fixed Width */
@@ -1534,19 +1532,6 @@
                 rgb(255 255 255 / 10%) 100%);
     border-radius: inherit;
     pointer-events: none;
-}
-
-.tikz-app .responsive-demo .demo-info p {
-    margin: 0 0 8px;
-    font-size: 1.1rem;
-    font-weight: 500;
-    text-shadow: 0 1px 2px rgb(0 0 0 / 30%);
-}
-
-.tikz-app .responsive-demo .demo-info small {
-    font-size: 0.9rem;
-    opacity: 0.9;
-    text-shadow: 0 1px 2px rgb(0 0 0 / 30%);
 }
 
 .tikz-app .table-scroll-x .table-content .col:last-child .preview-placeholder p {
@@ -2084,60 +2069,3 @@
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
-
-/* Responsive Demo (Development Only) */
-.tikz-app .responsive-demo {
-    background: linear-gradient(90deg, #ff6b6b 0%, #ffa726 50%, #ffeb3b 100%);
-    color: white;
-    padding: 20px;
-    border-radius: 12px;
-    margin-bottom: 20px;
-    text-align: center;
-    box-shadow: 0 4px 20px rgb(255 107 107 / 30%);
-    position: relative;
-    overflow: hidden;
-}
-
-.tikz-app .responsive-demo::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(45deg, transparent 30%, rgb(255 255 255 / 10%) 50%, transparent 70%);
-    animation: shimmer 3s infinite;
-}
-
-@keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
-}
-
-.tikz-app .breakpoint-indicator {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-    position: relative;
-    z-index: 1;
-}
-
-.tikz-app .current-breakpoint {
-    font-size: 1.5rem;
-    font-weight: 600;
-    text-shadow: 0 1px 2px rgb(0 0 0 / 30%);
-}
-
-.tikz-app .breakpoint-badge {
-    background: rgb(0 0 0 / 20%);
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgb(255 255 255 / 20%);
-}
-
-.tikz-app .demo-info {
-    position: relative;
-    z-index: 1;
-}
-

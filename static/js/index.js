@@ -1071,61 +1071,10 @@ function initializeSearch() {
         }
     }
 
-    // Responsive Demo functionality
-    function initializeResponsiveDemo() {
-        const currentBreakpoint = document.querySelector('.current-breakpoint');
-        const breakpointBadge = document.querySelector('.breakpoint-badge');
-        
-        if (!currentBreakpoint || !breakpointBadge) return;
-        
-        function updateBreakpointInfo() {
-            const width = window.innerWidth;
-            let breakpointName, breakpointValue;
-            
-            if (width >= 1400) {
-                breakpointName = 'Extra Large Desktop (≥ 1400px)';
-                breakpointValue = '≥ 1400px';
-            } else if (width >= 1200) {
-                breakpointName = 'Wide Desktop (≥ 1200px)';
-                breakpointValue = '≥ 1200px';
-            } else if (width >= 992) {
-                breakpointName = 'Desktop (≥ 992px)';
-                breakpointValue = '≥ 992px';
-            } else if (width >= 768) {
-                breakpointName = 'Tablet (≥ 768px)';
-                breakpointValue = '≥ 768px';
-            } else if (width >= 576) {
-                breakpointName = 'Mobile Large (≥ 576px)';
-                breakpointValue = '≥ 576px';
-            } else {
-                breakpointName = 'Mobile Small (< 576px)';
-                breakpointValue = '< 576px';
-            }
-            
-            currentBreakpoint.textContent = breakpointName;
-            breakpointBadge.textContent = breakpointValue;
-        }
-        
-        // Initial update
-        updateBreakpointInfo();
-        
-        // Update on resize
-        let resizeTimeout;
-        window.addEventListener('resize', function() {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(updateBreakpointInfo, 100);
-        });
-    }
-
     // Main initialization
     document.addEventListener('DOMContentLoaded', function() {
         // 0) Initialize app state first
         initializeAppState();
-        
-        // 0.5) Initialize responsive demo
-        initializeResponsiveDemo();
-        
-
 
         // 2) Initialize File Card component (single entry point)
         if (window.FileCardComponent && typeof window.FileCardComponent.init === 'function') {

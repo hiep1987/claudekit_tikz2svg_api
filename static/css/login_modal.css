@@ -28,6 +28,7 @@
   margin: 0 0 var(--spacing-8) 0;
   color: #1a1a1a;
 }
+
 .tikz-app #login-modal p { 
   margin-bottom: 16px; 
   color: #666; 
@@ -72,20 +73,32 @@
   color: var(--text-muted);
   background-color: var(--bg-primary);
   cursor: pointer;
-  transition: all var(--transition-normal);
+  transition: all var(--transition-fast);
   min-height: 40px;
   margin: 0;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
 }
 
 .tikz-app .google-login-btn svg {
   height: var(--icon-md);
   flex-shrink: 0;
+  transition: transform var(--transition-fast);
 }
 
 .tikz-app .google-login-btn:hover {
-  transform: scale(1.02);
+  transform: translateY(-2px);
   background-color: var(--primary-color);
   color: var(--text-white);
+  box-shadow: 0 4px 12px rgb(25 118 210 / 30%);
+}
+
+.tikz-app .google-login-btn:hover svg {
+  transform: scale(1.1);
+}
+
+.tikz-app .google-login-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgb(25 118 210 / 20%);
 }
 
 .tikz-app .google-login-content {
@@ -97,13 +110,29 @@
 }
 
 .tikz-app .btn-cancel {
-  background: #eee;
-  color: #333;
-  padding: 12px 24px;
-  border-radius: 6px;
-  border: none;
-  font-weight: bold;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  padding: var(--spacing-3) var(--spacing-8);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
   margin: 0;
+  transition: all var(--transition-fast);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 8%);
+  min-height: 40px;
+}
+
+.tikz-app .btn-cancel:hover {
+  transform: translateY(-2px);
+  background-color: var(--border-color);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+}
+
+.tikz-app .btn-cancel:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgb(0 0 0 / 10%);
 }
 
 

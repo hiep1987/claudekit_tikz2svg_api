@@ -96,6 +96,7 @@ CREATE TABLE `svg_image` (
   `filename` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `tikz_code` text COLLATE utf8mb4_unicode_ci,
   `keywords` text COLLATE utf8mb4_unicode_ci,
+  `caption` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `user_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -109,8 +110,18 @@ CREATE TABLE `svg_image` (
 - `filename`: Tên file SVG
 - `tikz_code`: Mã TikZ gốc được sử dụng để tạo SVG
 - `keywords`: Từ khóa mô tả hình ảnh (phân cách bằng dấu phẩy)
+- `caption`: Mô tả chi tiết cho ảnh SVG, hỗ trợ LaTeX/MathJax (ví dụ: `$x^2$`, `$\alpha$`)
 - `created_at`: Thời gian tạo
 - `user_id`: ID người dùng tạo (khóa ngoại đến bảng `user`)
+
+#### (Mới) Trường Image Caption với MathJax Support
+- `caption` (TEXT): Mô tả/chú thích cho ảnh SVG
+- Hỗ trợ plain text và công thức toán học LaTeX
+- Sử dụng MathJax để render công thức inline `$...$` và display `$$...$$`
+- Cho phép NULL (ảnh cũ không bắt buộc có caption)
+- Charset `utf8mb4_unicode_ci` để hỗ trợ đầy đủ Unicode
+- Chủ sở hữu ảnh có thể thêm/chỉnh sửa caption qua giao diện trang view_svg
+- Chuẩn bị cho tính năng comments trong tương lai
 
 ### 3. Bảng `keyword` - Quản lý từ khóa
 
@@ -428,13 +439,14 @@ conn = mysql.connector.connect(
 
 ## Các truy vấn chính
 
-### 1. Lấy danh sách hình ảnh với thông tin like:
+### 1. Lấy danh sách hình ảnh với thông tin like và caption:
 ```sql
 SELECT 
     s.id, 
     s.filename, 
     s.tikz_code, 
-    s.keywords, 
+    s.keywords,
+    s.caption,
     s.created_at, 
     u.id as owner_id, 
     u.username, 
@@ -445,7 +457,7 @@ FROM svg_image s
 LEFT JOIN user u ON s.user_id = u.id
 LEFT JOIN svg_like sl ON s.id = sl.svg_image_id
 LEFT JOIN svg_like user_like ON s.id = user_like.svg_image_id AND user_like.user_id = ?
-GROUP BY s.id, s.filename, s.tikz_code, s.keywords, s.created_at, u.id, u.username, u.email, user_like.id
+GROUP BY s.id, s.filename, s.tikz_code, s.keywords, s.caption, s.created_at, u.id, u.username, u.email, user_like.id
 ORDER BY s.created_at DESC
 LIMIT 100
 ```
@@ -460,7 +472,7 @@ LIMIT 10
 ### 3. Lấy hình ảnh của người dùng được follow:
 ```sql
 SELECT 
-    s.id, s.filename, s.tikz_code, s.keywords, s.created_at,
+    s.id, s.filename, s.tikz_code, s.keywords, s.caption, s.created_at,
     u.id as creator_id, u.username as creator_username,
     COUNT(sl.id) as like_count,
     CASE WHEN user_like.id IS NOT NULL THEN 1 ELSE 0 END as is_liked_by_current_user
@@ -470,7 +482,7 @@ JOIN user_follow uf ON u.id = uf.followee_id
 LEFT JOIN svg_like sl ON s.id = sl.svg_image_id
 LEFT JOIN svg_like user_like ON s.id = user_like.svg_image_id AND user_like.user_id = ?
 WHERE uf.follower_id = ?
-GROUP BY s.id, s.filename, s.tikz_code, s.created_at, u.id, u.username, user_like.id
+GROUP BY s.id, s.filename, s.tikz_code, s.caption, s.created_at, u.id, u.username, user_like.id
 ORDER BY s.created_at DESC
 LIMIT 50
 ```
@@ -646,6 +658,69 @@ FROM user
 WHERE id = ? -- Replace with specific user ID
 ```
 
+### 6. Quản lý Image Captions:
+```sql
+-- Lấy thông tin ảnh SVG kèm caption cho view_svg page
+SELECT 
+    s.id,
+    s.filename,
+    s.tikz_code,
+    s.keywords,
+    s.caption,
+    s.created_at,
+    s.user_id,
+    u.username,
+    u.email
+FROM svg_image s
+LEFT JOIN user u ON s.user_id = u.id
+WHERE s.filename = ?
+LIMIT 1
+
+-- Cập nhật caption cho ảnh SVG (chỉ owner)
+UPDATE svg_image 
+SET caption = ?
+WHERE filename = ? AND user_id = ?
+
+-- Lấy danh sách ảnh có caption (để hiển thị trong gallery)
+SELECT 
+    s.id,
+    s.filename,
+    s.caption,
+    u.username,
+    COUNT(sl.id) as like_count
+FROM svg_image s
+LEFT JOIN user u ON s.user_id = u.id
+LEFT JOIN svg_like sl ON s.id = sl.svg_image_id
+WHERE s.caption IS NOT NULL AND s.caption != ''
+GROUP BY s.id, s.filename, s.caption, u.username
+ORDER BY s.created_at DESC
+LIMIT 50
+
+-- Tìm kiếm ảnh theo caption (full-text search)
+SELECT 
+    s.id,
+    s.filename,
+    s.caption,
+    u.username,
+    s.created_at
+FROM svg_image s
+LEFT JOIN user u ON s.user_id = u.id
+WHERE s.caption LIKE ? OR s.keywords LIKE ?
+ORDER BY s.created_at DESC
+LIMIT 20
+
+-- Thống kê ảnh có/không có caption
+SELECT 
+    CASE 
+        WHEN caption IS NULL OR caption = '' THEN 'No Caption'
+        ELSE 'Has Caption'
+    END as caption_status,
+    COUNT(*) as image_count,
+    ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM svg_image), 2) as percentage
+FROM svg_image
+GROUP BY caption_status
+```
+
 ## Backup và Restore
 
 ### Backup database:
@@ -684,9 +759,16 @@ mysql -u hiep1987 -p tikz2svg < tikz2svg_database_backup.sql
 
 ---
 
-*Tài liệu này được cập nhật lần cuối: Tháng 1 năm 2025*
+*Tài liệu này được cập nhật lần cuối: Tháng 10 năm 2025*
 
 ## Changelog
+
+### Tháng 10 2025
+- ✅ **Thêm Image Caption Feature**: Cột `caption` vào bảng `svg_image` để lưu mô tả ảnh
+- ✅ **MathJax Support**: Hỗ trợ hiển thị công thức toán học LaTeX trong caption (inline `$...$` và display `$$...$$`)
+- ✅ **Caption Management Queries**: Thêm các queries để quản lý, tìm kiếm và thống kê caption
+- ✅ **Chuẩn bị Comments Feature**: Thiết kế schema phù hợp cho tính năng bình luận trong tương lai
+- ✅ **UTF8MB4 Support**: Đảm bảo hỗ trợ đầy đủ Unicode và ký tự đặc biệt trong caption
 
 ### Tháng 1 2025
 - ✅ **Thêm Code Usage Limit System**: Field `profile_verification_usage_count` để track số lần sử dụng mã xác thực

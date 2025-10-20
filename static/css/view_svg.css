@@ -1070,3 +1070,290 @@
     text-align: left;
     direction: ltr;
 }
+
+/* ===== IMAGE CAPTION SECTION ===== */
+
+.tikz-app .image-caption-section {
+    background: var(--glass-bg-strong);
+    backdrop-filter: var(--glass-blur-medium);
+    padding: var(--spacing-8);
+    margin-top: var(--spacing-6);
+    margin-bottom: var(--spacing-8);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--glass-shadow);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Add subtle background pattern */
+.tikz-app .image-caption-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, 
+                rgb(255 255 255 / 10%) 0%, 
+                transparent 50%, 
+                rgb(255 255 255 / 10%) 100%);
+    border-radius: inherit;
+    pointer-events: none;
+}
+
+.tikz-app .caption-section-title {
+    position: relative;
+    z-index: 1;
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-4);
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+}
+
+.tikz-app .caption-icon {
+    font-size: 1.2em;
+}
+
+/* Caption Display Mode */
+.tikz-app .caption-content {
+    position: relative;
+    z-index: 1;
+    background: #fff;
+    border-radius: var(--radius-md);
+    padding: var(--spacing-6);
+    margin-bottom: var(--spacing-4);
+    box-shadow: var(--shadow-sm);
+    border: 1.5px solid var(--border-light);
+}
+
+.tikz-app .caption-text {
+    color: var(--text-dark);
+    font-size: var(--font-size-base);
+    line-height: 1.7;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: pre-wrap; /* Preserve whitespace and line breaks */
+}
+
+/* MathJax styling */
+.tikz-app .caption-text mjx-container {
+    margin: var(--spacing-1) 0;
+}
+
+/* Empty State */
+.tikz-app .caption-empty {
+    position: relative;
+    z-index: 1;
+    padding: var(--spacing-6);
+    text-align: center;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.tikz-app .caption-empty-text {
+    margin: 0;
+}
+
+/* Edit Form */
+.tikz-app .caption-edit-form {
+    position: relative;
+    z-index: 1;
+    background: #fff;
+    border-radius: var(--radius-md);
+    padding: var(--spacing-6);
+    margin-bottom: var(--spacing-4);
+    box-shadow: var(--shadow-sm);
+    border: 1.5px solid var(--border-light);
+}
+
+.tikz-app .caption-textarea {
+    width: 100%;
+    min-height: 150px;
+    padding: var(--spacing-4);
+    border: 1.5px solid var(--border-light);
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    font-size: var(--font-size-base);
+    line-height: 1.6;
+    resize: vertical;
+    transition: border-color var(--transition-fast);
+}
+
+.tikz-app .caption-textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgb(25 118 210 / 10%);
+}
+
+.tikz-app .caption-form-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--spacing-3);
+    flex-wrap: wrap;
+    gap: var(--spacing-3);
+}
+
+.tikz-app .caption-char-count {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.tikz-app .caption-actions {
+    display: flex;
+    gap: var(--spacing-3);
+}
+
+.tikz-app .caption-btn {
+    padding: var(--spacing-3) var(--spacing-5);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+}
+
+.tikz-app .caption-btn-save {
+    background: linear-gradient(90deg, #28a745 0%, #218838 100%);
+    color: white;
+}
+
+.tikz-app .caption-btn-save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgb(40 167 69 / 30%);
+}
+
+.tikz-app .caption-btn-cancel {
+    background: var(--bg-secondary);
+    color: var(--text-dark);
+    border: 1px solid var(--border-light);
+}
+
+.tikz-app .caption-btn-cancel:hover {
+    background: var(--bg-tertiary);
+    transform: translateY(-1px);
+}
+
+/* Preview */
+.tikz-app .caption-preview {
+    margin-top: var(--spacing-4);
+    padding-top: var(--spacing-4);
+    border-top: 1px solid var(--border-light);
+}
+
+.tikz-app .caption-preview h4 {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--spacing-2);
+}
+
+.tikz-app .caption-preview-content {
+    background: var(--bg-secondary);
+    padding: var(--spacing-4);
+    border-radius: var(--radius-sm);
+    min-height: 60px;
+    font-size: var(--font-size-base);
+    line-height: 1.7;
+    white-space: pre-wrap; /* Preserve whitespace and line breaks */
+}
+
+/* Edit Button */
+.tikz-app .edit-caption-btn {
+    position: relative;
+    z-index: 1;
+    background: linear-gradient(90deg, #1976d2 0%, #1565c0 100%);
+    color: white;
+    padding: var(--spacing-3) var(--spacing-5);
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    margin: 0 auto;
+}
+
+.tikz-app .edit-caption-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgb(25 118 210 / 30%);
+}
+
+.tikz-app .edit-icon {
+    font-size: 1.1em;
+}
+
+/* Messages */
+.tikz-app .caption-message {
+    position: relative;
+    z-index: 1;
+    margin-top: var(--spacing-3);
+    padding: var(--spacing-3) var(--spacing-4);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    text-align: center;
+    display: none;
+}
+
+.tikz-app .caption-message.success {
+    display: block;
+    background: rgb(40 167 69 / 10%);
+    color: #28a745;
+    border: 1px solid rgb(40 167 69 / 30%);
+}
+
+.tikz-app .caption-message.error {
+    display: block;
+    background: rgb(220 53 69 / 10%);
+    color: #dc3545;
+    border: 1px solid rgb(220 53 69 / 30%);
+}
+
+/* ===== CAPTION RESPONSIVE BREAKPOINTS ===== */
+
+@media (width < 576px) {
+    .tikz-app .image-caption-section {
+        padding: var(--spacing-4);
+    }
+    
+    .tikz-app .caption-section-title {
+        font-size: var(--font-size-lg);
+    }
+    
+    .tikz-app .caption-content,
+    .tikz-app .caption-edit-form {
+        padding: var(--spacing-4);
+    }
+    
+    .tikz-app .caption-textarea {
+        min-height: 120px;
+        font-size: var(--font-size-sm);
+    }
+    
+    .tikz-app .caption-form-footer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .tikz-app .caption-actions {
+        width: 100%;
+        justify-content: stretch;
+    }
+    
+    .tikz-app .caption-btn {
+        flex: 1;
+        justify-content: center;
+    }
+}
+
+@media (width >= 768px) {
+    .tikz-app .caption-textarea {
+        min-height: 180px;
+    }
+}

@@ -1,0 +1,77 @@
+feat: Add image caption feature with MathJax support
+
+Implemented comprehensive image caption functionality allowing image owners
+to add descriptive text with mathematical formulas using MathJax rendering.
+
+## Database Changes
+- Added `caption` column to `svg_image` table (TEXT, utf8mb4_unicode_ci, NULL)
+- Migration script: add_image_caption_column.sql
+
+## Backend Changes (app.py)
+- Updated `/view_svg/<filename>` route to fetch and pass caption to template
+- Added POST `/api/update_caption/<filename>` API endpoint
+  - Owner-only access with @login_required decorator
+  - Input validation (max 5000 chars)
+  - XSS protection (sanitize script tags, event handlers)
+  - Returns JSON response with success/error status
+- Updated `get_svg_files()` helper to include caption in queries
+
+## Frontend Changes
+
+### Templates
+- base.html: Added conditional MathJax CDN support
+- view_svg.html: Added caption section with:
+  - Display mode (read-only for all users)
+  - Edit mode (owner only)
+  - Real-time preview with MathJax
+  - Character counter (0/5000)
+  - Success/error messaging
+
+### Styling (view_svg.css)
+- Added ~285 lines of CSS for caption section
+- Glass morphism design matching site theme
+- Responsive breakpoints for mobile/tablet/desktop
+- Smooth transitions and loading states
+
+### JavaScript (view_svg.js)
+- Added ~245 lines of modular JavaScript
+- Functions: initCaptionFeature, enableCaptionEdit, cancelCaptionEdit,
+  saveCaptionHandler, showMessage, hideMessage
+- Real-time MathJax rendering in preview
+- AJAX save with loading states
+- Auto-hide messages after 5 seconds
+
+## Features
+- ✅ Display captions with LaTeX/MathJax formulas ($x^2$, $$\int...$$)
+- ✅ Owner-only edit capability
+- ✅ Real-time preview before saving
+- ✅ Character counter
+- ✅ XSS protection
+- ✅ Responsive design
+- ✅ Accessible UI (ARIA labels, keyboard navigation)
+
+## Documentation
+- Added IMAGE_CAPTION_FEATURE_GUIDE.md (980 lines)
+- Added IMAGE_CAPTION_SUMMARY.md (258 lines)
+- Added IMAGE_CAPTION_IMPLEMENTATION_COMPLETE.md
+- Updated DATABASE_DOCUMENTATION.md with schema changes and queries
+
+## Security
+- Owner validation on backend
+- Input sanitization (remove <script>, <iframe>, onclick, etc.)
+- Max length validation (5000 characters)
+- @login_required protection
+
+## Testing
+- Manual testing completed for all CRUD operations
+- MathJax rendering verified
+- Responsive design tested
+- Security validation confirmed
+
+## Future Ready
+- Architecture prepared for comments feature
+- Modular code structure
+- Scalable database schema
+
+Closes: #[issue-number] (if applicable)
+

@@ -6,6 +6,7 @@
 {% set include_navigation = true %}
 {% set include_login_modal = true %}
 {% set include_navbar = true %}
+{% set include_mathjax = true %}
 
 {# Page-specific meta tags #}
 {% block meta %}
@@ -86,8 +87,78 @@
     </div>
 </div>
 
+<!-- Image Caption Section -->
+<div class="image-caption-section">
+    <h3 class="caption-section-title">
+        <span class="caption-icon">📝</span> Mô tả ảnh
+    </h3>
+    
+    <!-- Caption Display Mode -->
+    <div id="caption-display" class="caption-content" {% if not caption or not caption.strip() %}style="display: none;"{% endif %}>
+        <div class="caption-text">{{ caption|safe if caption else '' }}</div>
+    </div>
+    
+    <!-- Empty State (when no caption) -->
+    <div id="caption-empty" class="caption-empty" {% if caption and caption.strip() %}style="display: none;"{% endif %}>
+        <p class="caption-empty-text">
+            {% if user_email and user_id and current_user.is_authenticated and user_id == current_user.id %}
+                Chưa có mô tả. Nhấn nút bên dưới để thêm mô tả cho ảnh.
+            {% else %}
+                Ảnh này chưa có mô tả.
+            {% endif %}
+        </p>
+    </div>
+    
+    <!-- Edit Form (only visible when editing) -->
+    <div id="caption-edit-form" class="caption-edit-form" style="display: none;">
+        <textarea 
+            id="caption-input" 
+            class="caption-textarea"
+            placeholder="Thêm mô tả cho ảnh của bạn. Hỗ trợ công thức toán: $x^2$, $$\int_{0}^{1} x dx$$"
+            maxlength="5000"
+        >{{ caption if caption else '' }}</textarea>
+        <div class="caption-form-footer">
+            <div class="caption-char-count">
+                <span id="caption-char-current">{{ caption|length if caption else 0 }}</span>/5000 ký tự
+            </div>
+            <div class="caption-actions">
+                <button id="cancel-caption-btn" class="caption-btn caption-btn-cancel">
+                    ❌ Hủy
+                </button>
+                <button id="save-caption-btn" class="caption-btn caption-btn-save">
+                    ✅ Lưu
+                </button>
+            </div>
+        </div>
+        <div class="caption-preview">
+            <h4>Preview (với MathJax):</h4>
+            <div id="caption-preview-content" class="caption-preview-content"></div>
+        </div>
+    </div>
+    
+    <!-- Edit Button (only for owner) -->
+    {% if user_email and user_id and current_user.is_authenticated and user_id == current_user.id %}
+    <button id="edit-caption-btn" class="edit-caption-btn">
+        <span class="edit-icon">✏️</span> 
+        <span class="edit-text">{{ 'Chỉnh sửa mô tả' if caption else 'Thêm mô tả' }}</span>
+    </button>
+    {% endif %}
+    
+    <!-- Messages -->
+    <div id="caption-message" class="caption-message"></div>
+</div>
+
 <!-- Inject TikZ code as JSON to avoid inline Jinja inside JS -->
 <script id="tikz-code-json" type="application/json">{{ tikz_code|default("")|tojson|safe }}</script>
+
+<!-- Inject caption data for JavaScript -->
+<script id="caption-data-json" type="application/json">
+{
+    "filename": {{ filename|tojson|safe }},
+    "caption": {{ caption|tojson|safe }},
+    "isOwner": {% if user_email and user_id and current_user.is_authenticated and user_id == current_user.id %}true{% else %}false{% endif %}
+}
+</script>
 {% endblock %}
 
 {# Additional JavaScript #}

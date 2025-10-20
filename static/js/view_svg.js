@@ -323,7 +323,306 @@
       window.hljs.highlightAll();
       if (window.hljs.initLineNumbersOnLoad) window.hljs.initLineNumbersOnLoad();
     }
+
+    // Initialize Caption Feature
+    initCaptionFeature();
   });
+
+  // ===== CAPTION MANAGEMENT =====
+  
+  function initCaptionFeature() {
+    const captionData = getCaptionData();
+    if (!captionData) return;
+    
+    const editBtn = document.getElementById('edit-caption-btn');
+    const saveBtn = document.getElementById('save-caption-btn');
+    const cancelBtn = document.getElementById('cancel-caption-btn');
+    const captionInput = document.getElementById('caption-input');
+    const captionDisplay = document.getElementById('caption-display');
+    const captionEmpty = document.getElementById('caption-empty');
+    const captionEditForm = document.getElementById('caption-edit-form');
+    const charCurrent = document.getElementById('caption-char-current');
+    const previewContent = document.getElementById('caption-preview-content');
+    
+    // Render MathJax for initial caption display (for both owner and non-owner)
+    if (captionData.caption && captionData.caption.trim()) {
+      const captionText = document.querySelector('.caption-text');
+      if (captionText && captionText.textContent.trim()) {
+        // Wait for MathJax to be ready
+        if (window.MathJax && window.MathJax.typesetPromise) {
+          window.MathJax.typesetPromise([captionText]).catch(err => {
+            console.error('MathJax typeset error:', err);
+          });
+        } else {
+          // MathJax not ready yet, wait a bit
+          setTimeout(() => {
+            if (window.MathJax && window.MathJax.typesetPromise) {
+              window.MathJax.typesetPromise([captionText]).catch(err => {
+                console.error('MathJax typeset error:', err);
+              });
+            }
+          }, 500);
+        }
+      }
+    }
+    
+    // If not owner, only render MathJax and return
+    if (!captionData.isOwner) {
+      return;
+    }
+    
+    // Edit button click
+    if (editBtn) {
+      console.log('Edit button found, adding click listener');
+      editBtn.addEventListener('click', function(e) {
+        console.log('Edit button clicked!', e);
+        enableCaptionEdit();
+      });
+    } else {
+      console.log('Edit button NOT found!');
+    }
+    
+    // Save button click
+    if (saveBtn) {
+      saveBtn.addEventListener('click', function() {
+        saveCaptionHandler();
+      });
+    }
+    
+    // Cancel button click
+    if (cancelBtn) {
+      cancelBtn.addEventListener('click', function() {
+        cancelCaptionEdit();
+      });
+    }
+    
+    // Character counter and preview
+    if (captionInput && charCurrent) {
+      captionInput.addEventListener('input', function() {
+        const length = this.value.length;
+        charCurrent.textContent = length;
+        
+        // Update preview
+        if (previewContent) {
+          const text = this.value || '(Preview sẽ hiển thị ở đây)';
+          // Convert line breaks to <br> tags for preview
+          // Use textContent first to escape HTML, then replace \n with <br>
+          const tempDiv = document.createElement('div');
+          tempDiv.textContent = text;
+          const escapedText = tempDiv.innerHTML;
+          previewContent.innerHTML = escapedText.replace(/\n/g, '<br>');
+          
+          if (window.MathJax) {
+            window.MathJax.typesetPromise([previewContent]).catch(err => {
+              console.error('MathJax typeset error:', err);
+            });
+          }
+        }
+      });
+    }
+  }
+  
+  function getCaptionData() {
+    const dataEl = document.getElementById('caption-data-json');
+    if (!dataEl) return null;
+    try {
+      return JSON.parse(dataEl.textContent);
+    } catch (e) {
+      console.error('Error parsing caption data:', e);
+      return null;
+    }
+  }
+  
+  function enableCaptionEdit() {
+    console.log('enableCaptionEdit called');
+    const captionDisplay = document.getElementById('caption-display');
+    const captionEmpty = document.getElementById('caption-empty');
+    const captionEditForm = document.getElementById('caption-edit-form');
+    const editBtn = document.getElementById('edit-caption-btn');
+    
+    console.log('Elements found:', {
+      captionDisplay: !!captionDisplay,
+      captionEmpty: !!captionEmpty,
+      captionEditForm: !!captionEditForm,
+      editBtn: !!editBtn
+    });
+    
+    if (captionDisplay) captionDisplay.style.display = 'none';
+    if (captionEmpty) captionEmpty.style.display = 'none';
+    if (captionEditForm) captionEditForm.style.display = 'block';
+    if (editBtn) editBtn.style.display = 'none';
+    
+    // Focus on textarea
+    const captionInput = document.getElementById('caption-input');
+    if (captionInput) {
+      captionInput.focus();
+      
+      // Initialize preview
+      const previewContent = document.getElementById('caption-preview-content');
+      if (previewContent) {
+        const text = captionInput.value || '(Preview sẽ hiển thị ở đây)';
+        // Convert line breaks to <br> tags for preview
+        const tempDiv = document.createElement('div');
+        tempDiv.textContent = text;
+        const escapedText = tempDiv.innerHTML;
+        previewContent.innerHTML = escapedText.replace(/\n/g, '<br>');
+        
+        if (window.MathJax) {
+          window.MathJax.typesetPromise([previewContent]).catch(err => {
+            console.error('MathJax typeset error:', err);
+          });
+        }
+      }
+    }
+  }
+  
+  function cancelCaptionEdit() {
+    const captionData = getCaptionData();
+    const captionDisplay = document.getElementById('caption-display');
+    const captionEmpty = document.getElementById('caption-empty');
+    const captionEditForm = document.getElementById('caption-edit-form');
+    const editBtn = document.getElementById('edit-caption-btn');
+    const captionInput = document.getElementById('caption-input');
+    
+    // Reset form to original value
+    if (captionInput && captionData) {
+      captionInput.value = captionData.caption || '';
+      const charCurrent = document.getElementById('caption-char-current');
+      if (charCurrent) {
+        charCurrent.textContent = captionInput.value.length;
+      }
+    }
+    
+    // Hide edit form, show edit button
+    if (captionEditForm) captionEditForm.style.display = 'none';
+    if (editBtn) editBtn.style.display = 'flex';
+    
+    // Show appropriate display mode based on whether caption exists
+    if (captionData && captionData.caption && captionData.caption.trim()) {
+      // Has caption - show display, hide empty
+      if (captionDisplay) captionDisplay.style.display = 'block';
+      if (captionEmpty) captionEmpty.style.display = 'none';
+    } else {
+      // No caption - hide display, show empty
+      if (captionDisplay) captionDisplay.style.display = 'none';
+      if (captionEmpty) captionEmpty.style.display = 'block';
+    }
+    
+    hideMessage();
+  }
+  
+  async function saveCaptionHandler() {
+    const captionData = getCaptionData();
+    if (!captionData) return;
+    
+    const captionInput = document.getElementById('caption-input');
+    const saveBtn = document.getElementById('save-caption-btn');
+    
+    if (!captionInput || !saveBtn) return;
+    
+    const newCaption = captionInput.value.trim();
+    
+    // Disable button
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '⏳ Đang lưu...';
+    
+    try {
+      const response = await fetch(`/api/update_caption/${captionData.filename}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ caption: newCaption })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        // Update caption data first
+        captionData.caption = newCaption;
+        
+        // Update display elements
+        const captionText = document.querySelector('.caption-text');
+        const captionDisplay = document.getElementById('caption-display');
+        const captionEmpty = document.getElementById('caption-empty');
+        const captionEditForm = document.getElementById('caption-edit-form');
+        const editBtn = document.getElementById('edit-caption-btn');
+        
+        // Update caption text content
+        if (captionText) {
+          // Convert line breaks to <br> tags for display
+          const tempDiv = document.createElement('div');
+          tempDiv.textContent = newCaption;
+          const escapedText = tempDiv.innerHTML;
+          captionText.innerHTML = escapedText.replace(/\n/g, '<br>');
+          
+          // Trigger MathJax rendering
+          if (window.MathJax) {
+            window.MathJax.typesetPromise([captionText]).catch(err => {
+              console.error('MathJax typeset error:', err);
+            });
+          }
+        }
+        
+        // Update edit button text
+        if (editBtn) {
+          const editText = editBtn.querySelector('.edit-text');
+          if (editText) {
+            editText.textContent = newCaption ? 'Chỉnh sửa mô tả' : 'Thêm mô tả';
+          }
+        }
+        
+        // Hide edit form
+        if (captionEditForm) captionEditForm.style.display = 'none';
+        if (editBtn) editBtn.style.display = 'flex';
+        
+        // Show appropriate display mode
+        if (newCaption && newCaption.trim()) {
+          // Has caption - show display, hide empty
+          if (captionDisplay) captionDisplay.style.display = 'block';
+          if (captionEmpty) captionEmpty.style.display = 'none';
+        } else {
+          // No caption - hide display, show empty
+          if (captionDisplay) captionDisplay.style.display = 'none';
+          if (captionEmpty) captionEmpty.style.display = 'block';
+        }
+        
+        // Show success message
+        showMessage(result.message, 'success');
+      } else {
+        showMessage(result.error || 'Có lỗi xảy ra', 'error');
+      }
+    } catch (error) {
+      console.error('Error saving caption:', error);
+      showMessage('Lỗi kết nối. Vui lòng thử lại.', 'error');
+    } finally {
+      // Re-enable button
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = '✅ Lưu';
+    }
+  }
+  
+  function showMessage(text, type = 'success') {
+    const messageEl = document.getElementById('caption-message');
+    if (!messageEl) return;
+    
+    messageEl.textContent = text;
+    messageEl.className = 'caption-message ' + type;
+    
+    // Auto hide after 5 seconds
+    setTimeout(() => {
+      hideMessage();
+    }, 5000);
+  }
+  
+  function hideMessage() {
+    const messageEl = document.getElementById('caption-message');
+    if (messageEl) {
+      messageEl.style.display = 'none';
+      messageEl.className = 'caption-message';
+    }
+  }
+  
 })();
 
 

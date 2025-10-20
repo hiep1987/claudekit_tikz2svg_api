@@ -531,7 +531,8 @@ def get_svg_files():
                 s.id, 
                 s.filename, 
                 s.tikz_code, 
-                s.keywords, 
+                s.keywords,
+                s.caption,
                 s.created_at, 
                 u.id as owner_id, 
                 u.username, 
@@ -542,7 +543,7 @@ def get_svg_files():
             LEFT JOIN user u ON s.user_id = u.id
             LEFT JOIN svg_like sl ON s.id = sl.svg_image_id
             LEFT JOIN svg_like user_like ON s.id = user_like.svg_image_id AND user_like.user_id = %s
-            GROUP BY s.id, s.filename, s.tikz_code, s.keywords, s.created_at, u.id, u.username, u.email, user_like.id
+            GROUP BY s.id, s.filename, s.tikz_code, s.keywords, s.caption, s.created_at, u.id, u.username, u.email, user_like.id
             ORDER BY s.created_at DESC
             LIMIT 100
         """, (current_user_id,))
@@ -573,6 +574,7 @@ def get_svg_files():
                 'created_time': format_time_vn(row['created_at']),
                 'file_time': row['created_at'] if row['created_at'] else datetime.now(),
                 'tikz_code': row['tikz_code'] or "",
+                'caption': row.get('caption', ''),
                 'owner_id': row.get('owner_id'),
                 'owner_email': row.get('owner_email'),
                 'like_count': row['like_count'] or 0,
@@ -1967,6 +1969,8 @@ def view_svg(filename):
 
     tikz_code = None
     display_name = filename
+    caption = None
+    owner_user_id = None
 
     try:
         conn = mysql.connector.connect(
@@ -1978,7 +1982,7 @@ def view_svg(filename):
         cursor = conn.cursor(dictionary=True)
 
         cursor.execute("""
-            SELECT tikz_code, user_id 
+            SELECT tikz_code, user_id, caption
             FROM svg_image 
             WHERE filename = %s 
             LIMIT 1
@@ -1987,10 +1991,11 @@ def view_svg(filename):
 
         if row:
             tikz_code = row['tikz_code']
-            user_id = row['user_id']
+            owner_user_id = row['user_id']
+            caption = row.get('caption', '')
 
-            if user_id:
-                cursor.execute("SELECT username FROM user WHERE id = %s", (user_id,))
+            if owner_user_id:
+                cursor.execute("SELECT username FROM user WHERE id = %s", (owner_user_id,))
                 user_row = cursor.fetchone()
                 if user_row and user_row['username']:
                     display_name = f"Người tạo: {user_row['username']}"
@@ -2012,10 +2017,98 @@ def view_svg(filename):
         tikz_code=tikz_code,
         filename=filename,
         display_name=display_name,
+        caption=caption,
+        user_id=owner_user_id,
         user_email=user_email,
         username=username,
         avatar=avatar
     )
+
+@app.route('/api/update_caption/<filename>', methods=['POST'])
+@login_required
+def update_caption(filename):
+    """
+    Update caption for an SVG image.
+    Only the owner can update the caption.
+    """
+    try:
+        data = request.get_json()
+        new_caption = data.get('caption', '').strip()
+        
+        # Validate caption length (max 5000 characters)
+        if len(new_caption) > 5000:
+            return jsonify({
+                'success': False,
+                'error': 'Caption quá dài. Tối đa 5000 ký tự.'
+            }), 400
+        
+        # Sanitize input (remove dangerous HTML tags, keep LaTeX)
+        import re
+        # Remove script tags, iframes, and event handlers
+        dangerous_patterns = [
+            r'<script[^>]*>.*?</script>',
+            r'<iframe[^>]*>.*?</iframe>',
+            r'on\w+\s*=',  # onclick, onload, etc.
+        ]
+        for pattern in dangerous_patterns:
+            new_caption = re.sub(pattern, '', new_caption, flags=re.IGNORECASE | re.DOTALL)
+        
+        conn = mysql.connector.connect(
+            host=os.environ.get('DB_HOST', 'localhost'),
+            user=os.environ.get('DB_USER', 'hiep1987'),
+            password=os.environ.get('DB_PASSWORD', ''),
+            database=os.environ.get('DB_NAME', 'tikz2svg')
+        )
+        cursor = conn.cursor(dictionary=True)
+        
+        # Check ownership
+        cursor.execute("""
+            SELECT user_id 
+            FROM svg_image 
+            WHERE filename = %s
+        """, (filename,))
+        
+        row = cursor.fetchone()
+        
+        if not row:
+            cursor.close()
+            conn.close()
+            return jsonify({
+                'success': False,
+                'error': 'Không tìm thấy ảnh.'
+            }), 404
+        
+        if row['user_id'] != current_user.id:
+            cursor.close()
+            conn.close()
+            return jsonify({
+                'success': False,
+                'error': 'Bạn không có quyền chỉnh sửa caption của ảnh này.'
+            }), 403
+        
+        # Update caption
+        cursor.execute("""
+            UPDATE svg_image 
+            SET caption = %s 
+            WHERE filename = %s AND user_id = %s
+        """, (new_caption, filename, current_user.id))
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Caption đã được cập nhật thành công!',
+            'caption': new_caption
+        })
+        
+    except Exception as e:
+        print(f"[ERROR] update_caption: {e}", flush=True)
+        return jsonify({
+            'success': False,
+            'error': 'Lỗi server. Vui lòng thử lại.'
+        }), 500
 
 @app.route('/logout')
 def logout():

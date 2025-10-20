@@ -150,12 +150,8 @@
             }
         }
         
-        // Thêm sự kiện click vào CodeMirror để hiện modal đăng nhập nếu chưa đăng nhập
-        if (!window.appState.loggedIn) {
-            cm.on('mousedown', function() {
-                showLoginModal();
-            });
-        }
+        // Cho phép nhập code tự do, chỉ yêu cầu đăng nhập khi submit form (biên dịch hoặc lưu)
+        // Đã loại bỏ event mousedown để cải thiện UX
         
         // Thêm sự kiện real-time preview cho form nhập code
         cm.on('change', function() {
@@ -668,13 +664,19 @@
                     previewContainer.innerHTML = '<div class="preview-placeholder"><p>Chưa có preview</p></div>';
                 }
             } else {
+                // HTTP error response
                 if (previewContainer) {
-                    previewContainer.innerHTML = '<div class="preview-placeholder"><p>Lỗi khi tạo preview</p></div>';
+                    // Check if redirect to login (302 or 401)
+                    if (response.status === 302 || response.status === 401) {
+                        previewContainer.innerHTML = '<div class="preview-placeholder"><p>Vui lòng đăng nhập để tiếp tục</p></div>';
+                    } else {
+                        previewContainer.innerHTML = '<div class="preview-placeholder"><p>Lỗi khi tạo preview</p></div>';
+                    }
                 }
             }
         } catch (error) {
             if (previewContainer) {
-                previewContainer.innerHTML = '<div class="preview-placeholder"><p>Lỗi kết nối</p></div>';
+                previewContainer.innerHTML = '<div class="preview-placeholder"><p>Lỗi kết nối - vui lòng thử lại</p></div>';
             }
         }
     }

@@ -877,9 +877,8 @@ def index():
     tikz_code = ""
     error_log_full = None
     
-    # Chặn biên dịch nếu chưa đăng nhập
-    if request.method == "POST" and not logged_in:
-        return redirect(url_for("google.login"))
+    # Cho phép preview khi chưa đăng nhập
+    # Chỉ yêu cầu đăng nhập khi lưu server (xử lý ở route /save_svg)
         
     if request.method == "POST":
         tikz_code = request.form.get("code", "")

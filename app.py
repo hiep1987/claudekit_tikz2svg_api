@@ -24,6 +24,7 @@ import base64
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email_service import init_email_service, get_email_service
+from comments_helpers import add_security_headers
 
 load_dotenv()
 
@@ -4510,6 +4511,14 @@ except Exception as e:
     print(f"❌ Failed to initialize email service: {e}", flush=True)
     import traceback
     print(f"❌ Email service init error: {traceback.format_exc()}", flush=True)
+
+# =====================================================
+# SECURITY HEADERS - Comments System Enhancement
+# =====================================================
+@app.after_request
+def apply_security_headers(response):
+    """Apply OWASP recommended security headers to all responses"""
+    return add_security_headers(response)
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)

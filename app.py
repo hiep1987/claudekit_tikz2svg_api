@@ -25,6 +25,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email_service import init_email_service, get_email_service
 from comments_helpers import add_security_headers
+from comments_routes import comments_bp
 
 load_dotenv()
 
@@ -4519,6 +4520,12 @@ except Exception as e:
 def apply_security_headers(response):
     """Apply OWASP recommended security headers to all responses"""
     return add_security_headers(response)
+
+# =====================================================
+# REGISTER COMMENTS BLUEPRINT
+# =====================================================
+app.register_blueprint(comments_bp)
+print("✅ Comments API blueprint registered at /api/comments", flush=True)
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)

@@ -435,6 +435,7 @@
   
   function enableCaptionEdit() {
     console.log('enableCaptionEdit called');
+    const captionData = getCaptionData();
     const captionDisplay = document.getElementById('caption-display');
     const captionEmpty = document.getElementById('caption-empty');
     const captionEditForm = document.getElementById('caption-edit-form');
@@ -455,6 +456,8 @@
     // Focus on textarea
     const captionInput = document.getElementById('caption-input');
     if (captionInput) {
+      // ✅ Update textarea value from current caption data
+      captionInput.value = captionData.caption || '';
       captionInput.focus();
       
       // Initialize preview
@@ -538,7 +541,19 @@
       const result = await response.json();
       
       if (result.success) {
-        // Update caption data first
+        // ✅ Update caption data in DOM (so next getCaptionData() returns updated value)
+        const captionDataElement = document.getElementById('caption-data-json');
+        if (captionDataElement) {
+          try {
+            const data = JSON.parse(captionDataElement.textContent);
+            data.caption = newCaption;
+            captionDataElement.textContent = JSON.stringify(data);
+          } catch (e) {
+            console.error('Error updating caption data:', e);
+          }
+        }
+        
+        // Update local reference
         captionData.caption = newCaption;
         
         // Update display elements

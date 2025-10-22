@@ -761,14 +761,209 @@ mysql -u hiep1987 -p tikz2svg < tikz2svg_database_backup.sql
 
 *Tài liệu này được cập nhật lần cuối: Tháng 10 năm 2025*
 
+---
+
+## 7. Hệ thống Bình luận (Comments System)
+
+### 7.1. Bảng `svg_comments`
+
+**Mô tả:** Lưu trữ bình luận của người dùng trên các hình ảnh SVG.
+
+**Cấu trúc:**
+```sql
+CREATE TABLE `svg_comments` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `svg_filename` VARCHAR(255) NOT NULL,
+  `user_id` INT NOT NULL,
+  `comment_text` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `parent_comment_id` INT DEFAULT NULL,
+  `likes_count` INT DEFAULT 0,
+  `user_ip` VARCHAR(45) DEFAULT NULL COMMENT 'IP address for spam tracking',
+  `content_hash` VARCHAR(64) DEFAULT NULL COMMENT 'SHA256 hash for duplicate detection',
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  
+  INDEX idx_svg_filename (svg_filename),
+  INDEX idx_user_id (user_id),
+  INDEX idx_parent_comment_id (parent_comment_id),
+  INDEX idx_created_at_desc (created_at DESC),
+  INDEX idx_filename_created_desc (svg_filename, created_at DESC),
+  
+  CONSTRAINT fk_comments_user FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
+  CONSTRAINT fk_comments_svg_image FOREIGN KEY (svg_filename) REFERENCES svg_image(filename) ON DELETE CASCADE,
+  CONSTRAINT fk_comments_parent FOREIGN KEY (parent_comment_id) REFERENCES svg_comments(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
+
+**Các trường:**
+- `id`: Khóa chính
+- `svg_filename`: Tên file SVG (foreign key)
+- `user_id`: ID người dùng (foreign key)
+- `comment_text`: Nội dung bình luận (hỗ trợ LaTeX)
+- `parent_comment_id`: ID bình luận cha (cho nested comments)
+- `likes_count`: Số lượt thích (denormalized)
+- `user_ip`: IP address (theo dõi spam)
+- `content_hash`: Hash SHA256 (phát hiện duplicate)
+- `created_at`: Thời gian tạo
+- `updated_at`: Thời gian cập nhật cuối
+
+### 7.2. Bảng `svg_comment_likes`
+
+**Mô tả:** Lưu trữ lượt thích bình luận.
+
+**Cấu trúc:**
+```sql
+CREATE TABLE `svg_comment_likes` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `comment_id` INT NOT NULL,
+  `user_id` INT NOT NULL,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  
+  UNIQUE KEY unique_comment_like (comment_id, user_id),
+  INDEX idx_comment_id (comment_id),
+  INDEX idx_user_id (user_id),
+  
+  CONSTRAINT fk_comment_likes_comment FOREIGN KEY (comment_id) REFERENCES svg_comments(id) ON DELETE CASCADE,
+  CONSTRAINT fk_comment_likes_user FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
+
+**Các trường:**
+- `id`: Khóa chính
+- `comment_id`: ID bình luận (foreign key)
+- `user_id`: ID người dùng (foreign key)
+- `created_at`: Thời gian thích
+
+### 7.3. Cột mới trong `svg_image`
+
+```sql
+ALTER TABLE svg_image ADD COLUMN comments_count INT DEFAULT 0 
+COMMENT 'Denormalized count for performance';
+```
+
+**Lý do:** Tránh COUNT(*) query chậm khi load danh sách SVG.
+
+### 7.4. Queries phổ biến
+
+**Lấy tất cả bình luận cho một SVG (có phân trang):**
+```sql
+SELECT 
+    c.id,
+    c.comment_text,
+    c.created_at,
+    c.updated_at,
+    c.likes_count,
+    c.parent_comment_id,
+    u.id as user_id,
+    u.username,
+    u.avatar,
+    u.identity_verified
+FROM svg_comments c
+JOIN user u ON c.user_id = u.id
+WHERE c.svg_filename = ?
+  AND c.parent_comment_id IS NULL
+ORDER BY c.created_at DESC
+LIMIT 20 OFFSET 0;
+```
+
+**Lấy câu trả lời của một bình luận:**
+```sql
+SELECT 
+    c.id,
+    c.comment_text,
+    c.created_at,
+    c.updated_at,
+    c.likes_count,
+    u.id as user_id,
+    u.username,
+    u.avatar,
+    u.identity_verified
+FROM svg_comments c
+JOIN user u ON c.user_id = u.id
+WHERE c.parent_comment_id = ?
+ORDER BY c.created_at ASC;
+```
+
+**Tạo bình luận mới:**
+```sql
+INSERT INTO svg_comments 
+(svg_filename, user_id, comment_text, parent_comment_id, user_ip, content_hash)
+VALUES (?, ?, ?, ?, ?, ?);
+```
+
+**Cập nhật bình luận:**
+```sql
+UPDATE svg_comments 
+SET comment_text = ?, updated_at = NOW()
+WHERE id = ? AND user_id = ?;
+```
+
+**Xóa bình luận:**
+```sql
+DELETE FROM svg_comments WHERE id = ? AND user_id = ?;
+-- Cascade sẽ tự động xóa replies và likes
+```
+
+**Thích/bỏ thích bình luận:**
+```sql
+-- Thích
+INSERT INTO svg_comment_likes (comment_id, user_id) VALUES (?, ?);
+UPDATE svg_comments SET likes_count = likes_count + 1 WHERE id = ?;
+
+-- Bỏ thích
+DELETE FROM svg_comment_likes WHERE comment_id = ? AND user_id = ?;
+UPDATE svg_comments SET likes_count = GREATEST(likes_count - 1, 0) WHERE id = ?;
+```
+
+**Kiểm tra duplicate comment:**
+```sql
+SELECT id FROM svg_comments
+WHERE content_hash = ? 
+  AND user_id = ? 
+  AND created_at > DATE_SUB(NOW(), INTERVAL 1 MINUTE);
+```
+
+**Thống kê bình luận:**
+```sql
+-- Tổng số bình luận
+SELECT COUNT(*) as total_comments FROM svg_comments;
+
+-- Top SVG có nhiều bình luận nhất
+SELECT 
+    svg_filename,
+    COUNT(*) as comment_count
+FROM svg_comments
+WHERE parent_comment_id IS NULL
+GROUP BY svg_filename
+ORDER BY comment_count DESC
+LIMIT 10;
+
+-- Top người dùng comment nhiều nhất
+SELECT 
+    u.username,
+    COUNT(c.id) as comment_count
+FROM svg_comments c
+JOIN user u ON c.user_id = u.id
+GROUP BY u.username
+ORDER BY comment_count DESC
+LIMIT 10;
+```
+
+---
+
 ## Changelog
 
 ### Tháng 10 2025
-- ✅ **Thêm Image Caption Feature**: Cột `caption` vào bảng `svg_image` để lưu mô tả ảnh
-- ✅ **MathJax Support**: Hỗ trợ hiển thị công thức toán học LaTeX trong caption (inline `$...$` và display `$$...$$`)
-- ✅ **Caption Management Queries**: Thêm các queries để quản lý, tìm kiếm và thống kê caption
-- ✅ **Chuẩn bị Comments Feature**: Thiết kế schema phù hợp cho tính năng bình luận trong tương lai
-- ✅ **UTF8MB4 Support**: Đảm bảo hỗ trợ đầy đủ Unicode và ký tự đặc biệt trong caption
+- ✅ **Comments System**: Thêm 2 bảng mới (`svg_comments`, `svg_comment_likes`) cho hệ thống bình luận
+- ✅ **Nested Comments**: Hỗ trợ trả lời bình luận (parent_comment_id)
+- ✅ **Like Comments**: Hệ thống thích bình luận với denormalized counter
+- ✅ **Spam Prevention**: IP tracking, content hashing, duplicate detection
+- ✅ **Performance Indexes**: 8 indexes mới cho query optimization
+- ✅ **Foreign Keys**: 5 foreign keys đảm bảo data integrity
+- ✅ **Cascade Delete**: Xóa SVG/user tự động xóa comments liên quan
+- ✅ **Image Caption Feature**: Cột `caption` vào bảng `svg_image` để lưu mô tả ảnh
+- ✅ **MathJax Support**: Hỗ trợ hiển thị công thức toán học LaTeX trong caption và comments
+- ✅ **UTF8MB4 Support**: Đảm bảo hỗ trợ đầy đủ Unicode và ký tự đặc biệt
 
 ### Tháng 1 2025
 - ✅ **Thêm Code Usage Limit System**: Field `profile_verification_usage_count` để track số lần sử dụng mã xác thực

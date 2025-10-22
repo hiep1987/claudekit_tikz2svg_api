@@ -4,6 +4,17 @@
 # Hướng dẫn thiết lập & chạy môi trường DEV Tikz2SVG trên Mac  
 **Thư mục dự án:** `/Users/hieplequoc/web/work/tikz2svg_api`  
 
+## 🚀 Quick Start (Cách nhanh nhất)
+
+**Chỉ cần 1 lệnh duy nhất:**
+```bash
+tikz2svg-dev-local
+```
+
+**Kết quả:** Tự động khởi động tất cả services và có thể truy cập:
+- 📱 **App:** http://127.0.0.1:5173/
+- 🗄️ **phpMyAdmin:** http://localhost:8080/phpmyadmin/
+
 ---
 
 ## 1. Chuẩn bị trước
@@ -97,7 +108,7 @@ cd /Users/hieplequoc/web/work/tikz2svg_api
 tikz2svg-dev-proxy
 ```
 
-### 5.3. Chạy nhanh local dev với alias (không cần tunnel, dùng DB local)
+### 5.3. Chạy nhanh local dev với alias (tự động khởi động tất cả services)
 
 **Bước 1:** Thêm alias vào cuối file `~/.zshrc`:
 ```sh
@@ -115,14 +126,55 @@ tikz2svg-dev-local
 ```
 
 Script sẽ tự động:
-- Load biến môi trường từ `.env`
-- Kích hoạt virtualenv
-- Kiểm tra kết nối database local
-- Khởi động Flask server ở http://127.0.0.1:5173/
+- 🚀 **Khởi động MySQL** (nếu chưa chạy)
+- 🌐 **Khởi động Apache** (nếu chưa chạy) 
+- 📁 Load biến môi trường từ `.env`
+- 🐍 Kích hoạt virtualenv
+- 🔗 Kiểm tra kết nối database local
+- 🚀 Khởi động Flask server ở http://127.0.0.1:5173/
+
+**Kết quả:** Sau khi chạy lệnh, bạn có thể truy cập:
+- 📱 **App:** http://127.0.0.1:5173/
+- 🗄️ **phpMyAdmin:** http://localhost:8080/phpmyadmin/
+- 📊 **Database:** tikz2svg (user: hiep1987, password: trống)
 
 ---
 
-## 6. Kiểm tra tunnel đang chạy
+## 6. Truy cập Database Local với phpMyAdmin
+
+### 6.1. Tự động với tikz2svg-dev-local
+Khi chạy `tikz2svg-dev-local`, phpMyAdmin sẽ tự động khả dụng tại:
+```
+http://localhost:8080/phpmyadmin/
+```
+
+**Thông tin đăng nhập:**
+- **Username:** `hiep1987`
+- **Password:** (để trống)
+- **Database:** `tikz2svg`
+
+### 6.2. Khởi động thủ công (nếu cần)
+```bash
+# Khởi động MySQL
+brew services start mysql
+
+# Khởi động Apache
+brew services start httpd
+
+# Kiểm tra trạng thái
+brew services list | grep mysql
+brew services list | grep httpd
+```
+
+### 6.3. So sánh VPS vs Local
+| Môi trường | URL | Database |
+|------------|-----|----------|
+| **VPS** | https://tikz2svg.com/phpmyadmin | Production DB |
+| **Local** | http://localhost:8080/phpmyadmin | Local DB |
+
+---
+
+## 7. Kiểm tra tunnel đang chạy
 
 ```bash
 lsof -iTCP:3306 -sTCP:LISTEN
@@ -130,7 +182,7 @@ lsof -iTCP:3306 -sTCP:LISTEN
 
 ---
 
-## 7. Ngắt & mở lại tunnel
+## 8. Ngắt & mở lại tunnel
 
 ```bash
 kill -9 $(lsof -ti tcp:3306) 2>/dev/null || true
@@ -139,7 +191,7 @@ ssh -fN -L 3306:127.0.0.1:3306 h2cloud-hiep1987
 
 ---
 
-## 8. Lưu ý
+## 9. Lưu ý
 
 - **Không chỉnh code kết nối DB trong app** để tránh xung đột khi push lên PROD.  
 - Đảm bảo SSH key hoạt động tốt:

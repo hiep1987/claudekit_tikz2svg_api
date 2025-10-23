@@ -952,3 +952,136 @@
     }
 }
 
+/* =====================================================
+   TIKZ CODE BLOCKS (Synchronized with file_card.css)
+   ===================================================== */
+
+.tikz-app .tikz-code-block {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: var(--radius-md);
+    margin: var(--spacing-4) 0;
+    overflow: hidden;
+    transition: var(--transition-normal);
+}
+
+.tikz-app .tikz-code-block:hover {
+    border-color: var(--primary-color);
+}
+
+/* Code Header - synchronized with file_card.css */
+.tikz-app .code-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.tikz-app .code-label {
+    font-weight: var(--font-weight-bold);
+    color: #333;
+    font-size: 0.875rem;
+}
+
+/* Copy Button - synchronized with index.css main action buttons */
+.tikz-app .code-copy-btn {
+    background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-light) 100%);
+    color: var(--text-white);
+    padding: 8px 16px;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: var(--font-weight-semibold);
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    box-shadow: var(--shadow-sm);
+}
+
+.tikz-app .code-copy-btn:hover {
+    background: linear-gradient(90deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+    color: var(--text-white);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px) scale(1.02);
+    outline: none;
+    text-decoration: none;
+}
+
+.tikz-app .code-copy-btn:active {
+    transform: translateY(0) scale(1);
+}
+
+.tikz-app .copy-icon {
+    font-size: 0.875rem;
+}
+
+/* Code Content */
+.tikz-app .tikz-code {
+    margin: 0;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+    overflow-x: auto;
+    font-family: var(--font-family-mono);
+    font-size: 12px;
+    line-height: 1.6;
+    color: #333;
+    max-height: 400px;
+}
+
+.tikz-app .tikz-code code {
+    font-family: inherit;
+    color: inherit;
+    background: none;
+    padding: 0;
+    display: block;
+    white-space: pre;
+    word-wrap: normal;
+}
+
+/* Scrollbar styling - synchronized with file_card.css */
+.tikz-app .tikz-code::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+}
+
+.tikz-app .tikz-code::-webkit-scrollbar-track {
+    background: #e9ecef;
+    border-radius: var(--radius-sm);
+}
+
+.tikz-app .tikz-code::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+.tikz-app .tikz-code::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .tikz-app .tikz-code {
+        font-size: 11px;
+        padding: 12px;
+    }
+    
+    .tikz-app .code-header {
+        padding: 8px 12px;
+    }
+    
+    .tikz-app .code-label {
+        font-size: 0.75rem;
+    }
+    
+    .tikz-app .code-copy-btn {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+}
+

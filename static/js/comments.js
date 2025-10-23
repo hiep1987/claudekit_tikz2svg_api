@@ -110,6 +110,108 @@
         return div.innerHTML;
     }
     
+    /**
+     * Render comment text with TikZ code block support
+     * Syntax: \code{...TikZ code...}
+     * Also supports MathJax: $inline$ and $$display$$
+     * Handles nested braces correctly by counting { and }
+     */
+    function renderCommentText(text) {
+        if (!text) return '';
+        
+        // First, escape HTML to prevent XSS
+        let escaped = escapeHtml(text);
+        
+        // Process TikZ code blocks: \code{...}
+        // Use custom parser to handle nested braces
+        let result = '';
+        let i = 0;
+        
+        while (i < escaped.length) {
+            // Look for \code{
+            const codeStart = escaped.indexOf('\\code{', i);
+            
+            if (codeStart === -1) {
+                // No more code blocks, append rest and convert line breaks
+                const remaining = escaped.substring(i);
+                result += remaining.replace(/\n/g, '<br>');
+                break;
+            }
+            
+            // Append text before \code{ and convert line breaks
+            const textBefore = escaped.substring(i, codeStart);
+            result += textBefore.replace(/\n/g, '<br>');
+            
+            // Find matching closing brace by counting
+            let braceCount = 1;
+            let codeEnd = codeStart + 6; // Start after \code{
+            
+            while (codeEnd < escaped.length && braceCount > 0) {
+                if (escaped[codeEnd] === '{' && escaped[codeEnd - 1] !== '\\') {
+                    braceCount++;
+                } else if (escaped[codeEnd] === '}' && escaped[codeEnd - 1] !== '\\') {
+                    braceCount--;
+                }
+                codeEnd++;
+            }
+            
+            if (braceCount === 0) {
+                // Found matching brace
+                const code = escaped.substring(codeStart + 6, codeEnd - 1);
+                
+                // Unescape the code content for proper display
+                const unescapedCode = code
+                    .replace(/&lt;/g, '<')
+                    .replace(/&gt;/g, '>')
+                    .replace(/&quot;/g, '"')
+                    .replace(/&#039;/g, "'")
+                    .replace(/&amp;/g, '&');
+                
+                // Trim leading/trailing whitespace to prevent gap at top/bottom
+                const trimmedCode = unescapedCode.trim();
+                
+                // Re-escape for safe HTML display (preserve \n for <pre>)
+                const safeCode = trimmedCode
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+                
+                // Append code block (DON'T convert \n to <br> inside code!)
+                result += `<div class="tikz-code-block"><div class="code-header"><span class="code-label">TikZ Code</span><button class="code-copy-btn" onclick="copyTikzCode(this)" title="Copy code"><span class="copy-icon">📋</span></button></div><pre class="tikz-code"><code>${safeCode}</code></pre></div>`;
+                
+                i = codeEnd;
+            } else {
+                // Unmatched braces, treat as plain text
+                result += '\\code{';
+                i = codeStart + 6;
+            }
+        }
+        
+        return result;
+    }
+    
+    /**
+     * Copy TikZ code to clipboard
+     */
+    window.copyTikzCode = function(button) {
+        const codeBlock = button.closest('.tikz-code-block');
+        const codeElement = codeBlock.querySelector('code');
+        const code = codeElement.textContent;
+        
+        navigator.clipboard.writeText(code).then(() => {
+            const icon = button.querySelector('.copy-icon');
+            const originalText = icon.textContent;
+            icon.textContent = '✅';
+            
+            setTimeout(() => {
+                icon.textContent = originalText;
+            }, 2000);
+        }).catch(err => {
+            console.error('Failed to copy:', err);
+            alert('Không thể copy code');
+        });
+    };
+    
     function formatTimeAgo(isoString) {
         const date = new Date(isoString);
         const now = new Date();
@@ -382,10 +484,9 @@
         const timestamp = commentDiv.querySelector('.comment-timestamp');
         timestamp.textContent = formatTimeAgo(comment.created_at);
         
-        // Comment text
+        // Comment text with TikZ code block support
         const commentText = commentDiv.querySelector('.comment-text');
-        const escapedText = escapeHtml(comment.comment_text);
-        commentText.innerHTML = escapedText.replace(/\n/g, '<br>');
+        commentText.innerHTML = renderCommentText(comment.comment_text);
         
         // Edited label
         if (comment.updated_at && comment.updated_at !== comment.created_at) {
@@ -618,9 +719,8 @@
             const result = await updateComment(comment.id, newText);
             
             if (result.success) {
-                // Update comment text
-                const escapedText = escapeHtml(newText);
-                commentTextEl.innerHTML = escapedText.replace(/\n/g, '<br>');
+                // Update comment text with TikZ code block support
+                commentTextEl.innerHTML = renderCommentText(newText);
                 
                 // Update state
                 comment.comment_text = newText;
@@ -737,18 +837,8 @@
                 return;
             }
             
-            // Escape HTML để tránh XSS
-            const escapedText = text
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#039;');
-            
-            // Convert line breaks to <br>
-            const htmlText = escapedText.replace(/\n/g, '<br>');
-            
-            replyPreview.innerHTML = htmlText;
+            // Render with TikZ code block support
+            replyPreview.innerHTML = renderCommentText(text);
             replyPreview.style.color = '#1a202c';
             
             // Render MathJax if available
@@ -850,18 +940,8 @@
             return;
         }
         
-        // Escape HTML để tránh XSS
-        const escapedText = text
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
-        
-        // Convert line breaks to <br>
-        const htmlText = escapedText.replace(/\n/g, '<br>');
-        
-        previewContent.innerHTML = htmlText;
+        // Render with TikZ code block support
+        previewContent.innerHTML = renderCommentText(text);
         previewContent.style.color = '#1a202c';
         
         // Render MathJax if available

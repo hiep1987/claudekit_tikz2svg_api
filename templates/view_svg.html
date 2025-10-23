@@ -162,13 +162,26 @@
     {% if current_user.is_authenticated %}
     <div class="comment-form-container">
         <div class="comment-form-header">
-            <img src="{{ current_user.avatar or url_for('static', filename='images/default-avatar.png') }}" 
-                 alt="{{ current_user.username or 'User' }}" 
-                 class="comment-user-avatar">
-            <span class="comment-user-name">{{ current_user.username or current_user.email }}</span>
-            {% if current_user.identity_verified %}
-            <span class="verified-badge" title="Tài khoản đã xác thực">✓</span>
+            {% if current_avatar %}
+                <img src="{{ url_for('static', filename='avatars/' ~ current_avatar) }}" 
+                     alt="Avatar" 
+                     class="comment-user-avatar"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
             {% endif %}
+            {% if not current_avatar %}
+                <div class="comment-user-avatar comment-user-avatar-fallback">
+                    {{ current_user_email[0].upper() if current_user_email else 'U' }}
+                </div>
+            {% endif %}
+            <span class="comment-user-name">
+                {{ current_username or (current_user_email.split('@')[0] if current_user_email) }}
+                {% if current_identity_verified %}
+                    <img src="{{ url_for('static', filename='identity-verification-icon.svg') }}" 
+                         alt="Verified" 
+                         class="verified-icon"
+                         title="Tài khoản đã xác thực">
+                {% endif %}
+            </span>
         </div>
         <textarea 
             id="new-comment-input" 
@@ -183,6 +196,12 @@
             <button id="submit-comment-btn" class="comment-btn comment-btn-submit">
                 <span class="btn-icon">📨</span> Gửi bình luận
             </button>
+        </div>
+        <div class="comment-preview">
+            <h4>Preview (với MathJax):</h4>
+            <div id="comment-preview-content" class="comment-preview-content">
+                Nhập bình luận để xem preview...
+            </div>
         </div>
         <div id="comment-form-message" class="comment-message"></div>
     </div>
@@ -261,10 +280,15 @@
 <template id="comment-template">
     <div class="comment" data-comment-id="">
         <div class="comment-header">
-            <img src="" alt="" class="comment-avatar">
+            <div class="comment-avatar-wrapper">
+                <img src="" alt="" class="comment-avatar" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="comment-avatar comment-user-avatar-fallback" style="display: none;"></div>
+            </div>
             <div class="comment-meta">
-                <span class="comment-author"></span>
-                <span class="verified-badge" style="display: none;">✓</span>
+                <span class="comment-author-wrapper">
+                    <span class="comment-author"></span>
+                    <img src="" alt="Verified" class="verified-icon" style="display: none;">
+                </span>
                 <span class="comment-timestamp"></span>
             </div>
             <div class="comment-actions-menu">
@@ -299,6 +323,12 @@
         <!-- Reply Form (hidden by default) -->
         <div class="comment-reply-form" style="display: none;">
             <textarea class="reply-textarea" placeholder="Viết câu trả lời..." maxlength="5000"></textarea>
+            <div class="comment-preview">
+                <h4>Preview (với MathJax):</h4>
+                <div class="reply-preview-content">
+                    Nhập câu trả lời để xem preview...
+                </div>
+            </div>
             <div class="reply-form-actions">
                 <button class="comment-btn comment-btn-cancel">Hủy</button>
                 <button class="comment-btn comment-btn-submit">Gửi</button>
@@ -330,9 +360,11 @@
     "filename": {{ filename|tojson|safe }},
     "isLoggedIn": {% if current_user.is_authenticated %}true{% else %}false{% endif %},
     "currentUserId": {% if current_user.is_authenticated %}{{ current_user.id }}{% else %}null{% endif %},
-    "currentUserAvatar": {% if current_user.is_authenticated %}{{ (current_user.avatar or url_for('static', filename='images/default-avatar.png'))|tojson|safe }}{% else %}null{% endif %},
-    "currentUserName": {% if current_user.is_authenticated %}{{ (current_user.username or current_user.email)|tojson|safe }}{% else %}null{% endif %},
-    "currentUserVerified": {% if current_user.is_authenticated %}{{ current_user.identity_verified|tojson|safe }}{% else %}false{% endif %},
+    "currentUserAvatar": {% if current_user.is_authenticated %}{% if current_avatar %}{{ url_for('static', filename='avatars/' ~ current_avatar)|tojson|safe }}{% else %}null{% endif %}{% else %}null{% endif %},
+    "currentUserAvatarFallback": {% if current_user.is_authenticated %}{% if not current_avatar %}{{ (current_user_email[0].upper() if current_user_email else 'U')|tojson|safe }}{% else %}null{% endif %}{% else %}null{% endif %},
+    "currentUserName": {% if current_user.is_authenticated %}{{ (current_username or (current_user_email.split('@')[0] if current_user_email))|tojson|safe }}{% else %}null{% endif %},
+    "currentUserVerified": {% if current_user.is_authenticated %}{{ current_identity_verified|tojson|safe }}{% else %}false{% endif %},
+    "verifiedIconUrl": {{ url_for('static', filename='identity-verification-icon.svg')|tojson|safe }},
     "apiBasePath": "/api/comments"
 }
 </script>

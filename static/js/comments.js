@@ -29,8 +29,10 @@
         isLoggedIn: false,
         currentUserId: null,
         currentUserAvatar: null,
+        currentUserAvatarFallback: null,
         currentUserName: null,
         currentUserVerified: false,
+        verifiedIconUrl: '/static/identity-verification-icon.svg',
         apiBasePath: '/api/comments',
         comments: [],
         userLikes: [],
@@ -180,9 +182,15 @@
             if (result.success && result.data) {
                 CommentsState.comments = result.data.comments || [];
                 CommentsState.userLikes = result.data.user_likes || [];
+                
+                // Normalize pagination (handle both snake_case and camelCase)
+                const paginationData = result.data.pagination || {};
                 CommentsState.pagination = {
                     ...CommentsState.pagination,
-                    ...result.data.pagination
+                    currentPage: paginationData.current_page || paginationData.currentPage || 1,
+                    perPage: paginationData.per_page || paginationData.perPage || 20,
+                    totalPages: paginationData.total_pages || paginationData.totalPages || 1,
+                    totalComments: paginationData.total_comments || paginationData.totalComments || 0
                 };
                 
                 renderComments();
@@ -337,18 +345,37 @@
         commentDiv.dataset.commentId = comment.id;
         
         // Avatar
-        const avatar = commentDiv.querySelector('.comment-avatar');
-        avatar.src = comment.avatar || '/static/images/default-avatar.png';
-        avatar.alt = comment.username || 'User';
+        const avatarImg = commentDiv.querySelector('.comment-avatar');
+        const avatarFallback = commentDiv.querySelector('.comment-user-avatar-fallback');
+        
+        // Check if avatar exists and is not empty
+        const hasValidAvatar = comment.avatar && comment.avatar.trim() !== '' && comment.avatar !== 'None';
+        
+        if (hasValidAvatar) {
+            // Use avatar image
+            const avatarPath = comment.avatar.startsWith('/static/') ? comment.avatar : `/static/avatars/${comment.avatar}`;
+            avatarImg.src = avatarPath;
+            avatarImg.alt = comment.username || 'User';
+            avatarImg.style.display = 'block';
+            avatarFallback.style.display = 'none';
+        } else {
+            // Use fallback with first letter
+            avatarImg.style.display = 'none';
+            avatarFallback.textContent = (comment.username || comment.email || 'U')[0].toUpperCase();
+            avatarFallback.style.display = 'flex';
+        }
         
         // Author
         const author = commentDiv.querySelector('.comment-author');
         author.textContent = comment.username || 'Anonymous';
         
-        // Verified badge
+        // Verified icon
         if (comment.identity_verified) {
-            const verifiedBadge = commentDiv.querySelector('.verified-badge');
-            verifiedBadge.style.display = 'inline-flex';
+            const verifiedIcon = commentDiv.querySelector('.verified-icon');
+            if (verifiedIcon) {
+                verifiedIcon.src = CommentsState.verifiedIconUrl || '/static/identity-verification-icon.svg';
+                verifiedIcon.style.display = 'inline-block';
+            }
         }
         
         // Timestamp
@@ -530,6 +557,13 @@
             elements.newCommentInput.value = '';
             elements.commentCharCurrent.textContent = '0';
             
+            // Clear preview
+            const previewContent = document.getElementById('comment-preview-content');
+            if (previewContent) {
+                previewContent.textContent = 'Nhập bình luận để xem preview...';
+                previewContent.style.color = '#a0aec0';
+            }
+            
             // Show success message
             showMessage(elements.commentFormMessage, '✅ Đã gửi bình luận thành công!', 'success');
             
@@ -687,17 +721,60 @@
         
         const replyForm = commentDiv.querySelector('.comment-reply-form');
         const replyTextarea = replyForm.querySelector('.reply-textarea');
+        const replyPreview = replyForm.querySelector('.reply-preview-content');
         const cancelBtn = replyForm.querySelector('.comment-btn-cancel');
         const submitBtn = replyForm.querySelector('.comment-btn-submit');
+        
+        // Update reply preview function
+        const updateReplyPreview = debounce(() => {
+            if (!replyPreview) return;
+            
+            const text = replyTextarea.value.trim();
+            
+            if (!text) {
+                replyPreview.textContent = 'Nhập câu trả lời để xem preview...';
+                replyPreview.style.color = '#a0aec0';
+                return;
+            }
+            
+            // Escape HTML để tránh XSS
+            const escapedText = text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+            
+            // Convert line breaks to <br>
+            const htmlText = escapedText.replace(/\n/g, '<br>');
+            
+            replyPreview.innerHTML = htmlText;
+            replyPreview.style.color = '#1a202c';
+            
+            // Render MathJax if available
+            if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+                MathJax.typesetPromise([replyPreview]).catch((err) => {
+                    console.warn('MathJax rendering error:', err);
+                });
+            }
+        }, 300);
         
         // Show form
         replyForm.style.display = 'block';
         replyTextarea.focus();
         
+        // Add preview listener
+        replyTextarea.addEventListener('input', updateReplyPreview);
+        
         // Cancel handler
         cancelBtn.onclick = () => {
             replyForm.style.display = 'none';
             replyTextarea.value = '';
+            if (replyPreview) {
+                replyPreview.textContent = 'Nhập câu trả lời để xem preview...';
+                replyPreview.style.color = '#a0aec0';
+            }
+            replyTextarea.removeEventListener('input', updateReplyPreview);
         };
         
         // Submit handler
@@ -723,9 +800,14 @@
                 // Reload comments
                 await fetchComments(CommentsState.pagination.currentPage);
                 
-                // Hide form
+                // Hide form and clear preview
                 replyForm.style.display = 'none';
                 replyTextarea.value = '';
+                if (replyPreview) {
+                    replyPreview.textContent = 'Nhập câu trả lời để xem preview...';
+                    replyPreview.style.color = '#a0aec0';
+                }
+                replyTextarea.removeEventListener('input', updateReplyPreview);
             } else {
                 alert(result.message);
             }
@@ -750,6 +832,43 @@
             elements.commentCharCurrent.style.color = 'var(--error-text)';
         } else {
             elements.commentCharCurrent.style.color = 'var(--text-primary)';
+        }
+        
+        // Update preview
+        updateCommentPreview();
+    }
+    
+    function updateCommentPreview() {
+        const previewContent = document.getElementById('comment-preview-content');
+        if (!previewContent || !elements.newCommentInput) return;
+        
+        const text = elements.newCommentInput.value.trim();
+        
+        if (!text) {
+            previewContent.textContent = 'Nhập bình luận để xem preview...';
+            previewContent.style.color = '#a0aec0';
+            return;
+        }
+        
+        // Escape HTML để tránh XSS
+        const escapedText = text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+        
+        // Convert line breaks to <br>
+        const htmlText = escapedText.replace(/\n/g, '<br>');
+        
+        previewContent.innerHTML = htmlText;
+        previewContent.style.color = '#1a202c';
+        
+        // Render MathJax if available
+        if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+            MathJax.typesetPromise([previewContent]).catch((err) => {
+                console.warn('MathJax rendering error:', err);
+            });
         }
     }
     

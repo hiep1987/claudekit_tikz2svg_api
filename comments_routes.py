@@ -74,11 +74,11 @@ def get_comments(filename):
     cursor = conn.cursor(dictionary=True)
     
     try:
-        # Get total count
+        # Get total count (including replies for better engagement metrics)
         cursor.execute("""
             SELECT COUNT(*) as total
             FROM svg_comments
-            WHERE svg_filename = %s AND parent_comment_id IS NULL
+            WHERE svg_filename = %s
         """, (filename,))
         total_comments = cursor.fetchone()['total']
         

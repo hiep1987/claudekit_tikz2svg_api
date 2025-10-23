@@ -13,6 +13,7 @@ Production-ready helper functions for Comments feature including:
 """
 
 import os
+import re
 import hashlib
 import time
 import logging

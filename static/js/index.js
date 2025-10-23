@@ -609,13 +609,19 @@
         }
         
         const previewContainer = document.querySelector('.col:last-child');
+        let hasExistingImage = false;
+        
         if (previewContainer) {
-            // Nếu đang có ảnh SVG preview, làm mờ ảnh thay vì ẩn
+            // Kiểm tra xem có ảnh SVG hiện tại không
             const previewImg = previewContainer.querySelector('img');
             if (previewImg) {
-                previewImg.style.opacity = '0.5';
-                previewImg.alt = 'Đang cập nhật preview...';
+                hasExistingImage = true;
+                // Làm mờ ảnh cũ nhẹ để người dùng vẫn quan sát được
+                previewImg.style.opacity = '0.7';
+                previewImg.style.filter = 'blur(1px)';
+                // Không hiện overlay "Đang cập nhật" để không che khuất ảnh
             } else {
+                // Nếu chưa có ảnh, hiện placeholder thông thường
                 previewContainer.innerHTML = '<div class="preview-placeholder"><p>Đang cập nhật preview...</p></div>';
             }
         }
@@ -641,7 +647,22 @@
                 
                 const errorElement = previewColError || resultSectionError || standaloneError;
                 if (errorElement) {
-                    if (previewContainer) {
+                    if (previewContainer && hasExistingImage) {
+                        // Giữ lại ảnh cũ nhưng làm mờ và cập nhật overlay
+                        const previewImg = previewContainer.querySelector('img');
+                        if (previewImg) {
+                            previewImg.style.opacity = '0.7';
+                            previewImg.style.filter = 'blur(1px)';
+                        }
+                        
+                        let overlay = previewContainer.querySelector('.preview-updating-overlay');
+                        if (overlay) {
+                            overlay.style.background = 'rgba(254, 226, 226, 0.95)';
+                            overlay.style.color = '#dc2626';
+                            overlay.textContent = 'Code có lỗi - vui lòng sửa';
+                        }
+                    } else if (previewContainer) {
+                        // Nếu chưa có ảnh, hiện thông báo lỗi thông thường
                         previewContainer.innerHTML = '<div class="preview-placeholder"><p>Code có lỗi - vui lòng sửa</p></div>';
                     }
                     return;
@@ -651,11 +672,18 @@
                 const newSvgUrl = doc.querySelector('.col:last-child img')?.src;
                 
                 if (newSvgUrl && previewContainer) {
-                    // Nếu đã có img, chỉ cập nhật src và opacity
+                    // Xóa overlay nếu có
+                    const overlay = previewContainer.querySelector('.preview-updating-overlay');
+                    if (overlay) {
+                        overlay.remove();
+                    }
+                    
+                    // Nếu đã có img, chỉ cập nhật src và khôi phục style
                     let previewImg = previewContainer.querySelector('img');
                     if (previewImg) {
                         previewImg.src = newSvgUrl;
                         previewImg.style.opacity = '1';
+                        previewImg.style.filter = 'none';
                         previewImg.alt = 'SVG Preview (Real-time)';
                     } else {
                         previewContainer.innerHTML = `<img src="${newSvgUrl}" alt="SVG Preview (Real-time)" style="width:100%;height:100%;object-fit:contain;display:block;">`;
@@ -665,7 +693,25 @@
                 }
             } else {
                 // HTTP error response
-                if (previewContainer) {
+                if (previewContainer && hasExistingImage) {
+                    // Giữ lại ảnh cũ và cập nhật overlay
+                    const previewImg = previewContainer.querySelector('img');
+                    if (previewImg) {
+                        previewImg.style.opacity = '0.7';
+                        previewImg.style.filter = 'blur(1px)';
+                    }
+                    
+                    let overlay = previewContainer.querySelector('.preview-updating-overlay');
+                    if (overlay) {
+                        overlay.style.background = 'rgba(254, 226, 226, 0.95)';
+                        overlay.style.color = '#dc2626';
+                        if (response.status === 302 || response.status === 401) {
+                            overlay.textContent = 'Vui lòng đăng nhập để tiếp tục';
+                        } else {
+                            overlay.textContent = 'Lỗi khi tạo preview';
+                        }
+                    }
+                } else if (previewContainer) {
                     // Check if redirect to login (302 or 401)
                     if (response.status === 302 || response.status === 401) {
                         previewContainer.innerHTML = '<div class="preview-placeholder"><p>Vui lòng đăng nhập để tiếp tục</p></div>';
@@ -675,7 +721,21 @@
                 }
             }
         } catch (error) {
-            if (previewContainer) {
+            if (previewContainer && hasExistingImage) {
+                // Giữ lại ảnh cũ và cập nhật overlay
+                const previewImg = previewContainer.querySelector('img');
+                if (previewImg) {
+                    previewImg.style.opacity = '0.7';
+                    previewImg.style.filter = 'blur(1px)';
+                }
+                
+                let overlay = previewContainer.querySelector('.preview-updating-overlay');
+                if (overlay) {
+                    overlay.style.background = 'rgba(254, 226, 226, 0.95)';
+                    overlay.style.color = '#dc2626';
+                    overlay.textContent = 'Lỗi kết nối - vui lòng thử lại';
+                }
+            } else if (previewContainer) {
                 previewContainer.innerHTML = '<div class="preview-placeholder"><p>Lỗi kết nối - vui lòng thử lại</p></div>';
             }
         }

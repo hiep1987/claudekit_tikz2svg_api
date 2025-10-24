@@ -71,7 +71,7 @@
     
     <!-- Notifications CSS (always load for logged-in users) -->
     {% if current_user.is_authenticated %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/notifications.css', v='1.0') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/notifications.css', v='1.1') }}">
     {% endif %}
     
     <!-- Page-specific CSS -->

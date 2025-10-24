@@ -41,12 +41,11 @@ html body .container .tikz-app.notifications-container,
     z-index: 2147483647; /* Maximum possible z-index value */
 
     /* Visual - Use foundation variables */
-    background: var(--glass-bg-strong, rgba(248, 249, 250, 0.92));
+    background: var(--glass-bg-strong, rgb(248 249 250 / 92%));
     backdrop-filter: var(--glass-blur-medium, blur(12px));
-    -webkit-backdrop-filter: var(--glass-blur-medium, blur(12px));
     border-radius: var(--radius-lg, 12px);
-    box-shadow: var(--glass-shadow, 0 8px 32px rgba(31, 38, 135, 0.15));
-    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.18));
+    box-shadow: var(--glass-shadow, 0 8px 32px rgb(31 38 135 / 15%));
+    border: 1px solid var(--glass-border, rgb(255 255 255 / 18%));
     overflow: visible;
 
     /* Animation */
@@ -64,27 +63,13 @@ html body .container .tikz-app.notifications-container,
     visibility: visible;
     opacity: 1;
     pointer-events: auto;
-
+    
     /* Force rendering in new stacking context */
     transform: translateZ(0);
     isolation: isolate;
-}
-
-/* Emergency override - highest specificity and z-index */
-html body .tikz-app .notifications-dropdown.open,
-body .tikz-app .notifications-dropdown.open,
-.tikz-app .notifications-dropdown.open {
-    z-index: 99999999 !important;
-    position: fixed !important;
-    clip: auto !important;
-    clip-path: none !important;
-    overflow: visible !important;
-    transform: none !important;
-}
-
-/* Clean styling for production */
-.tikz-app .notifications-dropdown.open {
-    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.18));
+    
+    /* Clean styling */
+    border: 1px solid var(--glass-border, rgb(255 255 255 / 18%));
 }
 
 /* =================================================================
@@ -92,8 +77,15 @@ body .tikz-app .notifications-dropdown.open,
    ================================================================= */
 
 .tikz-app .notifications-bell:hover {
-    background: rgba(59, 130, 246, 0.1);
+    background: rgb(59 130 246 / 10%);
     border-radius: var(--radius-md, 8px);
+}
+
+.tikz-app .notifications-empty i {
+    font-size: 48px;
+    color: #dfe6e9;
+    margin-bottom: 12px;
+    display: block;
 }
 
 .tikz-app .notifications-bell:hover i {
@@ -102,7 +94,7 @@ body .tikz-app .notifications-dropdown.open,
 
 /* Hover effect for mark all read button */
 .tikz-app .mark-all-read-btn:hover {
-    background: var(--primary-bg, rgba(25, 118, 210, 0.1));
+    background: var(--primary-bg, rgb(25 118 210 / 10%));
 }
 
 /* =================================================================
@@ -131,12 +123,18 @@ body .tikz-app .notifications-dropdown.open,
     background: #e3f2fd;
 }
 
-.tikz-app .notification-avatar {
+/* High specificity to override any other avatar styles */
+.tikz-app .notifications-dropdown .notification-item .notification-avatar {
     width: 24px;
     height: 24px;
+    max-width: 24px;
+    max-height: 24px;
+    min-width: 24px;
+    min-height: 24px;
     border-radius: 50%;
     object-fit: cover;
     flex-shrink: 0;
+    box-sizing: border-box;
 }
 
 .tikz-app .notification-content {
@@ -147,7 +145,7 @@ body .tikz-app .notifications-dropdown.open,
 .tikz-app .notification-text {
     font-size: 14px;
     color: #2d3436;
-    margin: 0 0 4px 0;
+    margin: 0 0 4px;
     line-height: 1.4;
 }
 
@@ -180,15 +178,8 @@ body .tikz-app .notifications-dropdown.open,
     color: #95a5a6;
 }
 
-.tikz-app .notifications-empty i {
-    font-size: 48px;
-    color: #dfe6e9;
-    margin-bottom: 12px;
-    display: block;
-}
-
 .tikz-app .notifications-empty p {
-    margin: 8px 0 0 0;
+    margin: 8px 0 0;
     font-size: 14px;
 }
 
@@ -196,7 +187,7 @@ body .tikz-app .notifications-dropdown.open,
    RESPONSIVE - MOBILE
    ================================================================= */
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
     .tikz-app .notifications-dropdown {
         width: calc(100vw - 32px);
         max-width: 360px;
@@ -207,9 +198,13 @@ body .tikz-app .notifications-dropdown.open,
         padding: 12px;
     }
 
-    .tikz-app .notification-avatar {
+    .tikz-app .notifications-dropdown .notification-item .notification-avatar {
         width: 20px;
         height: 20px;
+        max-width: 20px;
+        max-height: 20px;
+        min-width: 20px;
+        min-height: 20px;
     }
 
     .tikz-app .notification-text {
@@ -221,7 +216,7 @@ body .tikz-app .notifications-dropdown.open,
     }
 }
 
-@media (max-width: 480px) {
+@media (width <= 480px) {
     .tikz-app .notifications-dropdown {
         width: calc(100vw - 16px);
         left: 8px;

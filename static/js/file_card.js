@@ -9,6 +9,42 @@ function initializeFileCardActions() {
         return;
     }
     
+    // Handle clicks on image container to view/download image
+    document.addEventListener('click', function(e) {
+        const imgContainer = e.target.closest('.file-img-container');
+        if (imgContainer) {
+            // Don't trigger if clicking on like button or its children
+            if (e.target.closest('.like-button-wrapper-overlay')) {
+                return;
+            }
+            
+            const filename = imgContainer.getAttribute('data-filename');
+            if (filename) {
+                // Track SVG file view from image click
+                if (window.analytics && window.location.pathname.includes('/search')) {
+                    const searchQuery = document.body.getAttribute('data-search-query');
+                    window.analytics.trackUserAction('search_result_click', {
+                        'query': searchQuery,
+                        'filename': filename,
+                        'action': 'view_svg',
+                        'source': 'image_click'
+                    });
+                }
+                
+                // Track general file view from image click
+                if (window.analytics) {
+                    window.analytics.trackUserAction('file_view', {
+                        'filename': filename,
+                        'source': window.location.pathname.includes('/search') ? 'search_image' : 'browse_image'
+                    });
+                }
+                
+                window.location.href = `/view_svg/${filename}`;
+            }
+            return;
+        }
+    });
+    
     // Handle all action buttons using data-action
     document.addEventListener('click', function(e) {
         const btn = e.target.closest('.Btn[data-action]');
@@ -123,6 +159,51 @@ function initializeFileCardTouchEvents() {
 
     // Use capture phase to ensure this handler runs first
     document.addEventListener('click', function(e) {
+        // ==== Xử lý click vào image container (mobile) ====
+        const imgContainer = e.target.closest('.file-img-container');
+        if (imgContainer) {
+            // Don't trigger if clicking on like button or its children
+            if (e.target.closest('.like-button-wrapper-overlay')) {
+                return;
+            }
+            
+            // Don't trigger if menu is open (user might be trying to close it)
+            const card = imgContainer.closest('.file-card');
+            if (card && card.classList.contains('menu-open')) {
+                return;
+            }
+            
+            const filename = imgContainer.getAttribute('data-filename');
+            if (filename) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Track SVG file view from image click (mobile)
+                if (window.analytics && window.location.pathname.includes('/search')) {
+                    const searchQuery = document.body.getAttribute('data-search-query');
+                    window.analytics.trackUserAction('search_result_click', {
+                        'query': searchQuery,
+                        'filename': filename,
+                        'action': 'view_svg',
+                        'source': 'image_click',
+                        'device': 'mobile'
+                    });
+                }
+                
+                // Track general file view from image click (mobile)
+                if (window.analytics) {
+                    window.analytics.trackUserAction('file_view', {
+                        'filename': filename,
+                        'source': window.location.pathname.includes('/search') ? 'search_image' : 'browse_image',
+                        'device': 'mobile'
+                    });
+                }
+                
+                window.location.href = `/view_svg/${filename}`;
+            }
+            return;
+        }
+        
         // ==== Xử lý action-toggle-btn (nút ...) ====
         const toggle = e.target.closest('.action-toggle-btn');
         if (toggle) {

@@ -17,6 +17,7 @@ class NotificationsManager {
         this.isOpen = false;
         this.pollInterval = null;
         this.currentNotifications = [];
+        this.blurOverlay = null;
         
         if (this.bell) {
             this.init();
@@ -26,7 +27,9 @@ class NotificationsManager {
     init() {
         // Toggle dropdown on bell click
         this.bell.addEventListener('click', (e) => {
+            e.preventDefault();
             e.stopPropagation();
+            console.log('[Notifications] Bell clicked');
             this.toggleDropdown();
         });
 
@@ -38,10 +41,15 @@ class NotificationsManager {
             });
         }
 
-        // Close dropdown when clicking outside
+        // Close dropdown when clicking outside (with delay to prevent immediate close)
         document.addEventListener('click', (e) => {
-            if (this.isOpen && this.dropdown && !this.dropdown.contains(e.target)) {
-                this.closeDropdown();
+            if (this.isOpen && this.dropdown && !this.dropdown.contains(e.target) && !this.bell.contains(e.target)) {
+                // Small delay to prevent immediate close after opening
+                setTimeout(() => {
+                    if (this.isOpen) {
+                        this.closeDropdown();
+                    }
+                }, 10);
             }
         });
 
@@ -70,6 +78,7 @@ class NotificationsManager {
     }
     
     toggleDropdown() {
+        console.log('[Notifications] Toggle dropdown - current state:', this.isOpen);
         if (this.isOpen) {
             this.closeDropdown();
         } else {
@@ -78,8 +87,12 @@ class NotificationsManager {
     }
     
     openDropdown() {
+        console.log('[Notifications] Opening dropdown');
         this.isOpen = true;
         if (this.dropdown) {
+            // Create and show blur overlay
+            this.createBlurOverlay();
+            
             // Move dropdown to body to escape all stacking contexts
             if (this.dropdown.parentElement !== document.body) {
                 document.body.appendChild(this.dropdown);
@@ -88,12 +101,79 @@ class NotificationsManager {
             // Position dropdown relative to bell icon
             this.positionDropdown();
             
-            // Add 'open' class to trigger CSS transition
+            // Reset any forced styles and add 'open' class
+            this.dropdown.style.display = '';
+            this.dropdown.style.visibility = '';
+            this.dropdown.style.opacity = '';
             this.dropdown.classList.add('open');
         } else {
             console.error('[Notifications] Dropdown element not found!');
         }
         this.loadNotifications();
+        
+        // Force apply enhanced styling to override cached CSS
+        this.applyEnhancedStyling();
+    }
+    
+    applyEnhancedStyling() {
+        if (!this.dropdown) return;
+        
+        // Apply styles to all notification items
+        const items = this.dropdown.querySelectorAll('.notification-item');
+        items.forEach(item => {
+            // Enhanced item styling
+            item.style.borderBottom = '1px solid #e5e7eb';
+            item.style.transition = 'all 0.2s ease';
+            item.style.position = 'relative';
+            
+            // Add hover effects
+            item.addEventListener('mouseenter', () => {
+                item.style.background = '#f8fafc';
+                item.style.borderLeft = '3px solid #1976d2';
+                item.style.paddingLeft = '13px';
+                item.style.transform = 'translateX(2px)';
+            });
+            
+            item.addEventListener('mouseleave', () => {
+                if (item.classList.contains('unread')) {
+                    item.style.background = '#f0f7ff';
+                    item.style.borderLeft = '3px solid #3b82f6';
+                    item.style.paddingLeft = '13px';
+                } else {
+                    item.style.background = '';
+                    item.style.borderLeft = '';
+                    item.style.paddingLeft = '16px';
+                }
+                item.style.transform = '';
+            });
+            
+            // Apply unread styling
+            if (item.classList.contains('unread')) {
+                item.style.background = '#f0f7ff';
+                item.style.borderLeft = '3px solid #3b82f6';
+                item.style.paddingLeft = '13px';
+            }
+            
+            // Smaller font sizes
+            const textElement = item.querySelector('.notification-text');
+            if (textElement) {
+                textElement.style.fontSize = '13px';
+                textElement.style.color = '#374151';
+            }
+            
+            const previewElement = item.querySelector('.notification-preview');
+            if (previewElement) {
+                previewElement.style.fontSize = '12px';
+                previewElement.style.color = '#6b7280';
+                previewElement.style.fontStyle = 'italic';
+            }
+            
+            const timeElement = item.querySelector('.notification-time');
+            if (timeElement) {
+                timeElement.style.fontSize = '11px';
+                timeElement.style.color = '#9ca3af';
+            }
+        });
     }
     
     positionDropdown() {
@@ -115,14 +195,92 @@ class NotificationsManager {
         this.dropdown.style.isolation = 'isolate';
         this.dropdown.style.transform = 'translateZ(0)';
         
+        // Force solid background and enhanced styling
+        this.dropdown.style.backgroundColor = 'rgb(248, 249, 250)';
+        this.dropdown.style.backdropFilter = 'none';
+        this.dropdown.style.borderRadius = '12px';
+        this.dropdown.style.border = '2px solid rgb(59, 130, 246, 0.3)';
+        this.dropdown.style.boxShadow = '0 8px 32px rgb(31 38 135 / 15%), 0 2px 8px rgb(0 0 0 / 10%)';
+        
     }
 
     
     closeDropdown() {
+        console.log('[Notifications] Closing dropdown');
         this.isOpen = false;
         if (this.dropdown) {
+            // Hide blur overlay
+            this.hideBlurOverlay();
+            
             // Remove 'open' class to trigger CSS transition
             this.dropdown.classList.remove('open');
+            
+            // Force hide if CSS transition fails
+            setTimeout(() => {
+                if (!this.isOpen) {
+                    this.dropdown.style.display = 'none';
+                    this.dropdown.style.visibility = 'hidden';
+                    this.dropdown.style.opacity = '0';
+                    console.log('[Notifications] Force hidden dropdown');
+                }
+            }, 300); // Wait for CSS transition
+        }
+    }
+    
+    createBlurOverlay() {
+        console.log('[Notifications] Creating blur overlay');
+        
+        // Remove existing overlay if any
+        this.removeBlurOverlay();
+        
+        // Create new overlay
+        this.blurOverlay = document.createElement('div');
+        this.blurOverlay.className = 'tikz-app notifications-blur-overlay';
+        
+        // Force inline styles to ensure visibility
+        this.blurOverlay.style.position = 'fixed';
+        this.blurOverlay.style.inset = '0';
+        this.blurOverlay.style.background = 'rgba(0, 0, 0, 0.1)';
+        this.blurOverlay.style.backdropFilter = 'blur(3px)';
+        this.blurOverlay.style.zIndex = '2147483646';
+        this.blurOverlay.style.opacity = '0';
+        this.blurOverlay.style.visibility = 'hidden';
+        this.blurOverlay.style.transition = 'opacity 0.2s ease, visibility 0.2s ease';
+        
+        // Add click handler to close dropdown when clicking overlay
+        this.blurOverlay.addEventListener('click', () => {
+            console.log('[Notifications] Blur overlay clicked');
+            this.closeDropdown();
+        });
+        
+        // Append to body and activate
+        document.body.appendChild(this.blurOverlay);
+        console.log('[Notifications] Blur overlay appended to body');
+        
+        // Force reflow then activate
+        requestAnimationFrame(() => {
+            this.blurOverlay.style.opacity = '1';
+            this.blurOverlay.style.visibility = 'visible';
+            this.blurOverlay.classList.add('active');
+            console.log('[Notifications] Blur overlay activated');
+        });
+    }
+    
+    hideBlurOverlay() {
+        if (this.blurOverlay) {
+            this.blurOverlay.classList.remove('active');
+            
+            // Remove after transition
+            setTimeout(() => {
+                this.removeBlurOverlay();
+            }, 200);
+        }
+    }
+    
+    removeBlurOverlay() {
+        if (this.blurOverlay && this.blurOverlay.parentElement) {
+            this.blurOverlay.parentElement.removeChild(this.blurOverlay);
+            this.blurOverlay = null;
         }
     }
     

@@ -6,7 +6,11 @@
   "scripts": {
     "lint:css": "stylelint \"static/css/**/*.css\"",
     "lint:css:fix": "stylelint \"static/css/**/*.css\" --fix",
-    "lint:css:report": "stylelint \"static/css/**/*.css\" --formatter json > stylelint-report.json"
+    "lint:css:report": "stylelint \"static/css/**/*.css\" --formatter json > stylelint-report.json",
+    "lint:js": "npx eslint static/js/**/*.js",
+    "lint:js:fix": "npx eslint static/js/**/*.js --fix",
+    "lint:template-js": "node lint-template-js.js templates/base.html",
+    "lint:all": "npm run lint:css && npm run lint:js && npm run lint:template-js"
   },
   "devDependencies": {
     "stylelint": "^16.24.0",

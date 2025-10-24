@@ -386,6 +386,173 @@ CREATE TABLE `email_notifications` (
 - `sent_at`: Thời gian gửi
 - `created_at`: Thời gian tạo thông báo
 
+### 13. Bảng `notifications` - Thông báo trong ứng dụng
+
+**Mô tả:** Lưu trữ thông báo in-app cho người dùng về các tương tác (like, comment, reply, follow).
+
+**Cấu trúc:**
+```sql
+CREATE TABLE `notifications` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `user_id` INT NOT NULL COMMENT 'User receiving the notification',
+  `actor_id` INT NOT NULL COMMENT 'User who performed the action',
+  `notification_type` ENUM('comment', 'like', 'reply', 'follow') NOT NULL,
+  `target_type` ENUM('svg_image', 'comment', 'user') NOT NULL,
+  `target_id` VARCHAR(255) NOT NULL,
+  `content` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `action_url` VARCHAR(500) DEFAULT NULL,
+  `is_read` BOOLEAN DEFAULT FALSE,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `read_at` TIMESTAMP NULL DEFAULT NULL,
+  
+  FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`actor_id`) REFERENCES `user` (`id`) ON DELETE CASCADE,
+  
+  INDEX `idx_user_id` (`user_id`),
+  INDEX `idx_is_read` (`is_read`),
+  INDEX `idx_created_at` (`created_at`),
+  INDEX `idx_user_unread` (`user_id`, `is_read`, `created_at`),
+  INDEX `idx_actor_type` (`actor_id`, `notification_type`, `created_at`),
+  
+  CONSTRAINT `chk_target_type_id` CHECK (
+    (target_type = 'svg_image' AND target_id REGEXP '^[a-zA-Z0-9_\\-]+\\.svg$') OR
+    (target_type = 'comment' AND target_id REGEXP '^[0-9]+$') OR
+    (target_type = 'user' AND target_id REGEXP '^[0-9]+$')
+  )
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
+
+**Các trường:**
+- `id`: Khóa chính, tự động tăng
+- `user_id`: ID người nhận thông báo (owner của SVG/comment)
+- `actor_id`: ID người thực hiện hành động (người like, comment, follow)
+- `notification_type`: Loại thông báo
+  - `comment`: Bình luận vào SVG
+  - `like`: Thích SVG
+  - `reply`: Trả lời bình luận
+  - `follow`: Theo dõi user
+- `target_type`: Loại đối tượng
+  - `svg_image`: Target là SVG file
+  - `comment`: Target là comment
+  - `user`: Target là user profile
+- `target_id`: ID của đối tượng (svg_filename, comment_id, hoặc user_id)
+- `content`: Nội dung preview (tối đa 200 ký tự, sanitized HTML)
+- `action_url`: URL để navigate khi click notification
+- `is_read`: Trạng thái đã đọc (TRUE/FALSE)
+- `created_at`: Thời gian tạo thông báo
+- `read_at`: Thời gian đánh dấu đã đọc
+
+**Indexes & Performance:**
+- `idx_user_id`: Tìm notifications của một user
+- `idx_is_read`: Filter theo trạng thái đã đọc
+- `idx_created_at`: Sort theo thời gian tạo
+- `idx_user_unread`: Composite index cho query "unread notifications" (tối ưu nhất)
+- `idx_actor_type`: Analytics queries (ai tạo notification gì)
+
+**Security Features:**
+- `chk_target_type_id`: Database-level validation cho target ID format
+- Foreign key CASCADE: Tự động xóa notifications khi user bị xóa
+- UTF8MB4 charset: Hỗ trợ emoji và Vietnamese characters
+
+**Business Logic:**
+- Không tạo notification nếu `user_id == actor_id` (self-notification)
+- Content được sanitize để loại bỏ HTML tags
+- Action URL phải là internal path (bắt đầu bằng `/`)
+- Notifications cũ (>90 ngày và đã đọc) có thể được cleanup tự động
+
+**Migration File:** `migrations/create_notifications_table.sql`
+
+### 14. Bảng `svg_comments` - Hệ thống bình luận
+
+**Mô tả:** Lưu trữ bình luận của người dùng trên các hình ảnh SVG.
+
+**Cấu trúc:**
+```sql
+CREATE TABLE `svg_comments` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `svg_filename` VARCHAR(255) NOT NULL,
+  `user_id` INT NOT NULL,
+  `comment_text` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `parent_comment_id` INT DEFAULT NULL,
+  `likes_count` INT DEFAULT 0,
+  `replies_count` INT DEFAULT 0,
+  `user_ip` VARCHAR(45) DEFAULT NULL COMMENT 'IP address for spam tracking',
+  `content_hash` VARCHAR(64) DEFAULT NULL COMMENT 'SHA256 hash for duplicate detection',
+  `is_edited` TINYINT(1) DEFAULT 0,
+  `edited_at` DATETIME DEFAULT NULL,
+  `deleted_at` DATETIME DEFAULT NULL,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  
+  INDEX idx_svg_filename (svg_filename),
+  INDEX idx_user_id (user_id),
+  INDEX idx_parent_comment_id (parent_comment_id),
+  INDEX idx_created_at_desc (created_at DESC),
+  INDEX idx_filename_created_desc (svg_filename, created_at DESC),
+  INDEX idx_user_ip (user_ip),
+  INDEX idx_content_hash (content_hash),
+  
+  CONSTRAINT fk_comments_user FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
+  CONSTRAINT fk_comments_svg_image FOREIGN KEY (svg_filename) REFERENCES svg_image(filename) ON DELETE CASCADE,
+  CONSTRAINT fk_comments_parent FOREIGN KEY (parent_comment_id) REFERENCES svg_comments(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
+
+**Các trường:**
+- `id`: Khóa chính
+- `svg_filename`: Tên file SVG (foreign key)
+- `user_id`: ID người dùng (foreign key)
+- `comment_text`: Nội dung bình luận (hỗ trợ LaTeX)
+- `parent_comment_id`: ID bình luận cha (cho nested comments, 1 level)
+- `likes_count`: Số lượt thích (denormalized counter)
+- `replies_count`: Số câu trả lời (denormalized counter)
+- `user_ip`: IP address (theo dõi spam)
+- `content_hash`: Hash SHA256 (phát hiện duplicate)
+- `is_edited`: Đã chỉnh sửa hay chưa
+- `edited_at`: Thời gian chỉnh sửa cuối
+- `deleted_at`: Thời gian xóa (soft delete)
+- `created_at`: Thời gian tạo
+- `updated_at`: Thời gian cập nhật cuối
+
+**Indexes:**
+- `idx_svg_filename`: Tìm comments theo SVG file
+- `idx_user_id`: Tìm comments theo user
+- `idx_parent_comment_id`: Tìm replies của comment
+- `idx_created_at_desc`: Sắp xếp theo thời gian (DESC)
+- `idx_filename_created_desc`: Composite index cho pagination
+- `idx_user_ip`: Theo dõi spam theo IP
+- `idx_content_hash`: Phát hiện duplicate
+
+### 14. Bảng `svg_comment_likes` - Lượt thích bình luận
+
+**Mô tả:** Lưu trữ lượt thích bình luận.
+
+**Cấu trúc:**
+```sql
+CREATE TABLE `svg_comment_likes` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `comment_id` INT NOT NULL,
+  `user_id` INT NOT NULL,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  
+  UNIQUE KEY unique_comment_like (comment_id, user_id),
+  INDEX idx_comment_id (comment_id),
+  INDEX idx_user_id (user_id),
+  
+  CONSTRAINT fk_comment_likes_comment FOREIGN KEY (comment_id) REFERENCES svg_comments(id) ON DELETE CASCADE,
+  CONSTRAINT fk_comment_likes_user FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
+
+**Các trường:**
+- `id`: Khóa chính
+- `comment_id`: ID bình luận (foreign key)
+- `user_id`: ID người dùng (foreign key)
+- `created_at`: Thời gian thích
+
+**Constraints:**
+- `unique_comment_like`: Đảm bảo mỗi user chỉ like 1 lần mỗi comment
+
 ## Mối quan hệ giữa các bảng
 
 ### Sơ đồ quan hệ:
@@ -401,10 +568,17 @@ user (1) ←→ (N) user_action_log (target)
 user (1) ←→ (N) verification_tokens
 user (1) ←→ (N) password_reset_tokens (DEPRECATED)
 user (1) ←→ (N) email_notifications
+user (1) ←→ (N) notifications (recipient)
+user (1) ←→ (N) notifications (actor)
+user (1) ←→ (N) svg_comments
+user (1) ←→ (N) svg_comment_likes
 svg_image (1) ←→ (N) svg_like
 svg_image (1) ←→ (N) svg_action_log
 svg_image (1) ←→ (N) user_action_log
+svg_image (1) ←→ (N) svg_comments
 svg_image (N) ←→ (N) keyword (thông qua svg_image_keyword)
+svg_comments (1) ←→ (N) svg_comments (parent-child, self-referencing)
+svg_comments (1) ←→ (N) svg_comment_likes
 ```
 
 ### Chi tiết quan hệ:
@@ -417,7 +591,14 @@ svg_image (N) ←→ (N) keyword (thông qua svg_image_keyword)
 6. **user → verification_tokens**: Một người dùng có thể có nhiều token xác thực
 7. **user → password_reset_tokens**: (DEPRECATED) Không cần thiết với Google OAuth
 8. **user → email_notifications**: Một người dùng có thể có nhiều thông báo email
-9. **svg_image → keyword**: Quan hệ nhiều-nhiều thông qua bảng trung gian
+9. **user → notifications (recipient)**: Một người dùng có thể nhận nhiều thông báo in-app
+10. **user → notifications (actor)**: Một người dùng có thể là actor của nhiều thông báo (người thực hiện hành động)
+11. **user → svg_comments**: Một người dùng có thể viết nhiều bình luận
+12. **user → svg_comment_likes**: Một người dùng có thể like nhiều bình luận
+13. **svg_image → svg_comments**: Một SVG có thể có nhiều bình luận
+14. **svg_image → keyword**: Quan hệ nhiều-nhiều thông qua bảng trung gian
+15. **svg_comments → svg_comments**: Quan hệ parent-child (self-referencing) cho nested comments (1 level)
+16. **svg_comments → svg_comment_likes**: Một bình luận có thể có nhiều lượt thích
 
 ## Cấu hình kết nối
 
@@ -658,7 +839,137 @@ FROM user
 WHERE id = ? -- Replace with specific user ID
 ```
 
-### 6. Quản lý Image Captions:
+### 6. Quản lý Comments System:
+```sql
+-- Lấy tất cả bình luận cho một SVG (có phân trang)
+SELECT 
+    c.id,
+    c.comment_text,
+    c.created_at,
+    c.updated_at,
+    c.likes_count,
+    c.replies_count,
+    c.is_edited,
+    c.parent_comment_id,
+    u.id as user_id,
+    u.username,
+    u.avatar,
+    u.identity_verified
+FROM svg_comments c
+JOIN user u ON c.user_id = u.id
+WHERE c.svg_filename = ?
+  AND c.parent_comment_id IS NULL
+  AND c.deleted_at IS NULL
+ORDER BY c.created_at DESC
+LIMIT 20 OFFSET 0;
+
+-- Lấy câu trả lời của một bình luận
+SELECT 
+    c.id,
+    c.comment_text,
+    c.created_at,
+    c.updated_at,
+    c.likes_count,
+    c.is_edited,
+    u.id as user_id,
+    u.username,
+    u.avatar,
+    u.identity_verified
+FROM svg_comments c
+JOIN user u ON c.user_id = u.id
+WHERE c.parent_comment_id = ?
+  AND c.deleted_at IS NULL
+ORDER BY c.created_at ASC;
+
+-- Tạo bình luận mới
+INSERT INTO svg_comments 
+(svg_filename, user_id, comment_text, parent_comment_id, user_ip, content_hash)
+VALUES (?, ?, ?, ?, ?, ?);
+
+-- Cập nhật denormalized counters
+UPDATE svg_image SET comments_count = comments_count + 1 WHERE filename = ?;
+UPDATE svg_comments SET replies_count = replies_count + 1 WHERE id = ?; -- nếu là reply
+
+-- Cập nhật bình luận
+UPDATE svg_comments 
+SET comment_text = ?, is_edited = 1, edited_at = NOW(), updated_at = NOW()
+WHERE id = ? AND user_id = ?;
+
+-- Xóa bình luận (soft delete)
+UPDATE svg_comments 
+SET deleted_at = NOW()
+WHERE id = ? AND user_id = ?;
+
+-- Cập nhật counters khi xóa
+UPDATE svg_image SET comments_count = GREATEST(comments_count - 1, 0) WHERE filename = ?;
+UPDATE svg_comments SET replies_count = GREATEST(replies_count - 1, 0) WHERE id = ?; -- nếu là reply
+
+-- Thích bình luận
+INSERT INTO svg_comment_likes (comment_id, user_id) VALUES (?, ?);
+UPDATE svg_comments SET likes_count = likes_count + 1 WHERE id = ?;
+
+-- Bỏ thích bình luận
+DELETE FROM svg_comment_likes WHERE comment_id = ? AND user_id = ?;
+UPDATE svg_comments SET likes_count = GREATEST(likes_count - 1, 0) WHERE id = ?;
+
+-- Kiểm tra user đã like comment chưa
+SELECT id FROM svg_comment_likes 
+WHERE comment_id = ? AND user_id = ?;
+
+-- Kiểm tra duplicate comment (trong 1 phút)
+SELECT id FROM svg_comments
+WHERE content_hash = ? 
+  AND user_id = ? 
+  AND created_at > DATE_SUB(NOW(), INTERVAL 1 MINUTE)
+  AND deleted_at IS NULL;
+
+-- Thống kê comments
+SELECT 
+    COUNT(*) as total_comments,
+    COUNT(DISTINCT svg_filename) as svgs_with_comments,
+    COUNT(DISTINCT user_id) as unique_commenters,
+    AVG(likes_count) as avg_likes_per_comment
+FROM svg_comments
+WHERE deleted_at IS NULL;
+
+-- Top SVG có nhiều comments nhất
+SELECT 
+    svg_filename,
+    COUNT(*) as comment_count
+FROM svg_comments
+WHERE parent_comment_id IS NULL
+  AND deleted_at IS NULL
+GROUP BY svg_filename
+ORDER BY comment_count DESC
+LIMIT 10;
+
+-- Top người dùng comment nhiều nhất
+SELECT 
+    u.username,
+    COUNT(c.id) as comment_count
+FROM svg_comments c
+JOIN user u ON c.user_id = u.id
+WHERE c.deleted_at IS NULL
+GROUP BY u.username
+ORDER BY comment_count DESC
+LIMIT 10;
+
+-- Comments được like nhiều nhất
+SELECT 
+    c.id,
+    c.comment_text,
+    c.likes_count,
+    u.username,
+    s.filename as svg_filename
+FROM svg_comments c
+JOIN user u ON c.user_id = u.id
+JOIN svg_image s ON c.svg_filename = s.filename
+WHERE c.deleted_at IS NULL
+ORDER BY c.likes_count DESC
+LIMIT 10;
+```
+
+### 7. Quản lý Image Captions:
 ```sql
 -- Lấy thông tin ảnh SVG kèm caption cho view_svg page
 SELECT 
@@ -759,195 +1070,121 @@ mysql -u hiep1987 -p tikz2svg < tikz2svg_database_backup.sql
 
 ---
 
-*Tài liệu này được cập nhật lần cuối: Tháng 10 năm 2025*
+## 📊 Báo cáo Dữ liệu Thực tế (Database Report)
+
+**Ngày cập nhật:** 2025-10-24 12:10:08  
+**Database:** tikz2svg_local  
+**Trạng thái:** ✓ HEALTHY
+
+### Tổng quan Hệ thống
+
+| Metric | Count |
+|--------|-------|
+| Tổng số người dùng | 10 |
+| Tổng số SVG images | 48 |
+| Tổng số comments | 10 |
+| Tổng số comment likes | 4 |
+| Tổng số SVG likes | 73 |
+| Tổng số user follows | 12 |
+
+### Comments System Statistics
+
+**Phân loại Comments:**
+- Top-level comments: 5
+- Reply comments: 5
+- Trung bình comments per SVG: 1.67
+
+**Top 3 SVGs có nhiều comments nhất:**
+1. `114753059215672971959_173220070925.svg` - 2 comments
+2. `106711555120517947693_140859260925.svg` - 2 comments
+3. `115852900894156127858_051555051025.svg` - 1 comment
+
+**Top 2 người dùng comment nhiều nhất:**
+1. quochiep0504 - 8 comments
+2. Hiệp-54 - 2 comments
+
+**Top 5 comments được like nhiều nhất:**
+1. quochiep0504: 1 like - "Hàm số $y=x^2-3x+2$. Xin chào"
+2. Hiệp-54: 1 like - "OK rẫy hay!"
+3. quochiep0504: 1 like - "ABX"
+4. Hiệp-54: 1 like - "Hình rất đẹp! Cám ơn bạn..."
+5. quochiep0504: 0 likes - "Xin $y=x^3$ và"
+
+### User Statistics
+
+**Identity Verification:**
+- Verified users: 5 (50%)
+- Not verified users: 5 (50%)
+
+**Top 5 Active Users:**
+1. Hiệp-54: 26 SVGs, 35 likes given, 2 following, 4 followers
+2. Hiepnig04: 7 SVGs, 10 likes given, 2 following, 2 followers
+3. Hiệp1987: 6 SVGs, 16 likes given, 2 following, 3 followers
+4. Quávui🐱: 5 SVGs, 3 likes given, 2 following, 2 followers
+5. lucdo🍙: 2 SVGs, 3 likes given, 2 following, 0 followers
+
+### SVG Image Statistics
+
+**Caption Status:**
+- Images with caption: 3 (6.25%)
+- Images without caption: 45 (93.75%)
+
+**Top 5 Most Liked SVGs:**
+1. `106711555120517947693_140859260925.svg` by lucdo🍙 - 5 likes
+2. `110078638093684817345_181311240925.svg` by hiepnig2 - 4 likes
+3. `116896879463870011935_230700250725.svg` by Hiepnig04 - 3 likes
+4. `115852900894156127858_104500230725.svg` by Hiệp-54 - 3 likes
+5. `anonymous_124132030825.svg` by Hiệp1987 - 3 likes
+
+### Database Schema Validation
+
+**Tables Status:**
+- ✓ `svg_comments` - 10 records
+- ✓ `svg_comment_likes` - 4 records
+
+**Indexes (svg_comments):** 6/5 ✓
+- idx_svg_filename
+- idx_user_id
+- idx_parent_comment_id
+- idx_created_at_desc
+- idx_filename_created_desc (duplicate entry noted)
+
+**Foreign Keys:** 5/5 ✓
+- fk_comment_likes_comment: svg_comment_likes → svg_comments
+- fk_comment_likes_user: svg_comment_likes → user
+- fk_comments_parent: svg_comments → svg_comments
+- fk_comments_svg_image: svg_comments → svg_image
+- fk_comments_user: svg_comments → user
+
+### Recent Activity (Last 7 Days)
+
+**Comments per day:**
+- 2025-10-23: 9 comments
+- 2025-10-22: 1 comment
+
+**SVGs created:** No new SVGs in last 7 days
+
+### Comments System Implementation Progress
+
+| Phase | Status |
+|-------|--------|
+| Step 1-2 (Database) | ✓ COMPLETE |
+| Step 3-4 (Backend API) | ⏳ IN PROGRESS |
+| Step 5-7 (Frontend) | ⏳ PENDING |
+| Step 8 (Testing) | ⏳ PENDING |
+| Step 9 (Documentation) | ⏳ PENDING |
+| Step 10 (Deployment) | ⏳ PENDING |
+
+**Ghi chú:** Để chạy lại báo cáo này, sử dụng:
+```bash
+cd /Users/hieplequoc/web/work/tikz2svg_api
+source venv/bin/activate
+python3 run_database_report.py
+```
 
 ---
 
-## 7. Hệ thống Bình luận (Comments System)
-
-### 7.1. Bảng `svg_comments`
-
-**Mô tả:** Lưu trữ bình luận của người dùng trên các hình ảnh SVG.
-
-**Cấu trúc:**
-```sql
-CREATE TABLE `svg_comments` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `svg_filename` VARCHAR(255) NOT NULL,
-  `user_id` INT NOT NULL,
-  `comment_text` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `parent_comment_id` INT DEFAULT NULL,
-  `likes_count` INT DEFAULT 0,
-  `user_ip` VARCHAR(45) DEFAULT NULL COMMENT 'IP address for spam tracking',
-  `content_hash` VARCHAR(64) DEFAULT NULL COMMENT 'SHA256 hash for duplicate detection',
-  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  
-  INDEX idx_svg_filename (svg_filename),
-  INDEX idx_user_id (user_id),
-  INDEX idx_parent_comment_id (parent_comment_id),
-  INDEX idx_created_at_desc (created_at DESC),
-  INDEX idx_filename_created_desc (svg_filename, created_at DESC),
-  
-  CONSTRAINT fk_comments_user FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
-  CONSTRAINT fk_comments_svg_image FOREIGN KEY (svg_filename) REFERENCES svg_image(filename) ON DELETE CASCADE,
-  CONSTRAINT fk_comments_parent FOREIGN KEY (parent_comment_id) REFERENCES svg_comments(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-```
-
-**Các trường:**
-- `id`: Khóa chính
-- `svg_filename`: Tên file SVG (foreign key)
-- `user_id`: ID người dùng (foreign key)
-- `comment_text`: Nội dung bình luận (hỗ trợ LaTeX)
-- `parent_comment_id`: ID bình luận cha (cho nested comments)
-- `likes_count`: Số lượt thích (denormalized)
-- `user_ip`: IP address (theo dõi spam)
-- `content_hash`: Hash SHA256 (phát hiện duplicate)
-- `created_at`: Thời gian tạo
-- `updated_at`: Thời gian cập nhật cuối
-
-### 7.2. Bảng `svg_comment_likes`
-
-**Mô tả:** Lưu trữ lượt thích bình luận.
-
-**Cấu trúc:**
-```sql
-CREATE TABLE `svg_comment_likes` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `comment_id` INT NOT NULL,
-  `user_id` INT NOT NULL,
-  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-  
-  UNIQUE KEY unique_comment_like (comment_id, user_id),
-  INDEX idx_comment_id (comment_id),
-  INDEX idx_user_id (user_id),
-  
-  CONSTRAINT fk_comment_likes_comment FOREIGN KEY (comment_id) REFERENCES svg_comments(id) ON DELETE CASCADE,
-  CONSTRAINT fk_comment_likes_user FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-```
-
-**Các trường:**
-- `id`: Khóa chính
-- `comment_id`: ID bình luận (foreign key)
-- `user_id`: ID người dùng (foreign key)
-- `created_at`: Thời gian thích
-
-### 7.3. Cột mới trong `svg_image`
-
-```sql
-ALTER TABLE svg_image ADD COLUMN comments_count INT DEFAULT 0 
-COMMENT 'Denormalized count for performance';
-```
-
-**Lý do:** Tránh COUNT(*) query chậm khi load danh sách SVG.
-
-### 7.4. Queries phổ biến
-
-**Lấy tất cả bình luận cho một SVG (có phân trang):**
-```sql
-SELECT 
-    c.id,
-    c.comment_text,
-    c.created_at,
-    c.updated_at,
-    c.likes_count,
-    c.parent_comment_id,
-    u.id as user_id,
-    u.username,
-    u.avatar,
-    u.identity_verified
-FROM svg_comments c
-JOIN user u ON c.user_id = u.id
-WHERE c.svg_filename = ?
-  AND c.parent_comment_id IS NULL
-ORDER BY c.created_at DESC
-LIMIT 20 OFFSET 0;
-```
-
-**Lấy câu trả lời của một bình luận:**
-```sql
-SELECT 
-    c.id,
-    c.comment_text,
-    c.created_at,
-    c.updated_at,
-    c.likes_count,
-    u.id as user_id,
-    u.username,
-    u.avatar,
-    u.identity_verified
-FROM svg_comments c
-JOIN user u ON c.user_id = u.id
-WHERE c.parent_comment_id = ?
-ORDER BY c.created_at ASC;
-```
-
-**Tạo bình luận mới:**
-```sql
-INSERT INTO svg_comments 
-(svg_filename, user_id, comment_text, parent_comment_id, user_ip, content_hash)
-VALUES (?, ?, ?, ?, ?, ?);
-```
-
-**Cập nhật bình luận:**
-```sql
-UPDATE svg_comments 
-SET comment_text = ?, updated_at = NOW()
-WHERE id = ? AND user_id = ?;
-```
-
-**Xóa bình luận:**
-```sql
-DELETE FROM svg_comments WHERE id = ? AND user_id = ?;
--- Cascade sẽ tự động xóa replies và likes
-```
-
-**Thích/bỏ thích bình luận:**
-```sql
--- Thích
-INSERT INTO svg_comment_likes (comment_id, user_id) VALUES (?, ?);
-UPDATE svg_comments SET likes_count = likes_count + 1 WHERE id = ?;
-
--- Bỏ thích
-DELETE FROM svg_comment_likes WHERE comment_id = ? AND user_id = ?;
-UPDATE svg_comments SET likes_count = GREATEST(likes_count - 1, 0) WHERE id = ?;
-```
-
-**Kiểm tra duplicate comment:**
-```sql
-SELECT id FROM svg_comments
-WHERE content_hash = ? 
-  AND user_id = ? 
-  AND created_at > DATE_SUB(NOW(), INTERVAL 1 MINUTE);
-```
-
-**Thống kê bình luận:**
-```sql
--- Tổng số bình luận
-SELECT COUNT(*) as total_comments FROM svg_comments;
-
--- Top SVG có nhiều bình luận nhất
-SELECT 
-    svg_filename,
-    COUNT(*) as comment_count
-FROM svg_comments
-WHERE parent_comment_id IS NULL
-GROUP BY svg_filename
-ORDER BY comment_count DESC
-LIMIT 10;
-
--- Top người dùng comment nhiều nhất
-SELECT 
-    u.username,
-    COUNT(c.id) as comment_count
-FROM svg_comments c
-JOIN user u ON c.user_id = u.id
-GROUP BY u.username
-ORDER BY comment_count DESC
-LIMIT 10;
-```
+*Tài liệu này được cập nhật lần cuối: 2025-10-24 (với dữ liệu thực tế)*
 
 ---
 

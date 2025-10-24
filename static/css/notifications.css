@@ -1,0 +1,221 @@
+/**
+ * NOTIFICATIONS SYSTEM - CSS
+ * Version: 1.0.0
+ * Date: 2025-10-24
+ * 
+ * Styling for in-app notifications bell icon and dropdown
+ */
+
+/* =================================================================
+   BELL ICON & BADGE
+   ================================================================= */
+
+.tikz-app .notifications-bell:hover {
+    background: rgba(59, 130, 246, 0.1) !important;
+    border-radius: 8px;
+}
+
+.tikz-app .notifications-bell:hover i {
+    color: #1976d2 !important;
+}
+
+/* Hover effect for mark all read button */
+.tikz-app .mark-all-read-btn:hover {
+    background: rgba(25, 118, 210, 0.1) !important;
+}
+
+/* =================================================================
+   NOTIFICATION ITEMS
+   ================================================================= */
+
+.tikz-app .notification-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid #f5f5f5;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.tikz-app .notification-item:hover {
+    background: #f9f9f9;
+}
+
+.tikz-app .notification-item.unread {
+    background: #f0f7ff;
+}
+
+.tikz-app .notification-item.unread:hover {
+    background: #e3f2fd;
+}
+
+.tikz-app .notification-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.tikz-app .notification-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.tikz-app .notification-text {
+    font-size: 14px;
+    color: #2d3436;
+    margin: 0 0 4px 0;
+    line-height: 1.4;
+}
+
+.tikz-app .notification-text strong {
+    font-weight: 600;
+    color: #1976d2;
+}
+
+.tikz-app .notification-preview {
+    font-size: 13px;
+    color: #636e72;
+    margin: 4px 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tikz-app .notification-time {
+    font-size: 12px;
+    color: #95a5a6;
+}
+
+/* =================================================================
+   EMPTY STATE
+   ================================================================= */
+
+.tikz-app .notifications-empty {
+    padding: 60px 20px;
+    text-align: center;
+    color: #95a5a6;
+}
+
+.tikz-app .notifications-empty i {
+    font-size: 48px;
+    color: #dfe6e9;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.tikz-app .notifications-empty p {
+    margin: 8px 0 0 0;
+    font-size: 14px;
+}
+
+/* =================================================================
+   RESPONSIVE - MOBILE
+   ================================================================= */
+
+@media (max-width: 768px) {
+    .tikz-app .notifications-dropdown {
+        width: calc(100vw - 32px) !important;
+        max-width: 360px !important;
+        right: 8px !important;
+    }
+
+    .tikz-app .notification-item {
+        padding: 12px !important;
+    }
+
+    .tikz-app .notification-avatar {
+        width: 36px !important;
+        height: 36px !important;
+    }
+
+    .tikz-app .notification-text {
+        font-size: 13px !important;
+    }
+
+    .tikz-app .notification-preview {
+        font-size: 12px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .tikz-app .notifications-dropdown {
+        width: calc(100vw - 16px) !important;
+        left: 8px !important;
+        right: 8px !important;
+    }
+
+    .tikz-app .notifications-header {
+        padding: 12px 16px !important;
+    }
+
+    .tikz-app .notifications-header h3 {
+        font-size: 15px !important;
+    }
+
+    .tikz-app .mark-all-read-btn {
+        font-size: 12px !important;
+        padding: 4px !important;
+    }
+}
+
+/* =================================================================
+   ACCESSIBILITY
+   ================================================================= */
+
+.tikz-app .notifications-bell:focus {
+    outline: 2px solid #1976d2;
+    outline-offset: 2px;
+    border-radius: 8px;
+}
+
+.tikz-app .notification-item:focus {
+    outline: 2px solid #1976d2;
+    outline-offset: -2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .tikz-app .notifications-dropdown {
+        border: 2px solid #000 !important;
+    }
+
+    .tikz-app .notification-badge {
+        background: #000 !important;
+        color: #fff !important;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .tikz-app .notifications-bell,
+    .tikz-app .notification-item,
+    .tikz-app .mark-all-read-btn {
+        transition: none !important;
+    }
+}
+
+/* =================================================================
+   SCROLLBAR STYLING (for dropdown)
+   ================================================================= */
+
+.tikz-app .notifications-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.tikz-app .notifications-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.tikz-app .notifications-list::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+.tikz-app .notifications-list::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+

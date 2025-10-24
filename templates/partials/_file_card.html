@@ -31,6 +31,14 @@
                 </label>
             </div>
         </div>
+
+        <!-- Comment Count - Below like button -->
+        <div class="comment-count-wrapper-overlay">
+            <a href="/view_svg/{{ file.filename }}#comments-section" class="comment-count-link">
+                <i class="fas fa-comment"></i>
+                <span class="comment-count">{{ file.comment_count|default(0) }}</span>
+            </a>
+        </div>
     </div>
 
     <!-- Likes Preview Text - Moved to replace old like button position -->

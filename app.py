@@ -603,15 +603,34 @@ def get_svg_files_with_likes(user_id=None):
         cursor = conn.cursor(dictionary=True)
         
         # Query tương tự như search_results nhưng cho tất cả files
-        cursor.execute("""
-            SELECT DISTINCT s.*, u.username as creator_username, u.id as creator_id,
-                   (SELECT COUNT(*) FROM svg_like WHERE svg_image_id = s.id) as like_count,
-                   (SELECT COUNT(*) FROM svg_like WHERE svg_image_id = s.id AND user_id = %s) as is_liked_by_current_user
-            FROM svg_image s
-            JOIN user u ON s.user_id = u.id
-            ORDER BY s.created_at DESC
-            LIMIT 100
-        """, (current_user_id or 0,))
+        # Try with comment_count first, fallback if table doesn't exist
+        try:
+            cursor.execute("""
+                SELECT DISTINCT s.*, u.username as creator_username, u.id as creator_id,
+                       (SELECT COUNT(*) FROM svg_like WHERE svg_image_id = s.id) as like_count,
+                       (SELECT COUNT(*) FROM svg_like WHERE svg_image_id = s.id AND user_id = %s) as is_liked_by_current_user,
+                       COALESCE((SELECT COUNT(*) FROM svg_comments WHERE svg_filename = s.filename), 0) as comment_count
+                FROM svg_image s
+                JOIN user u ON s.user_id = u.id
+                ORDER BY s.created_at DESC
+                LIMIT 100
+            """, (current_user_id or 0,))
+        except mysql.connector.errors.ProgrammingError as e:
+            if 'svg_comments' in str(e) and "doesn't exist" in str(e):
+                # Fallback: Query without comment_count if table doesn't exist
+                print(f"[WARN] svg_comments table doesn't exist, using fallback query", flush=True)
+                cursor.execute("""
+                    SELECT DISTINCT s.*, u.username as creator_username, u.id as creator_id,
+                           (SELECT COUNT(*) FROM svg_like WHERE svg_image_id = s.id) as like_count,
+                           (SELECT COUNT(*) FROM svg_like WHERE svg_image_id = s.id AND user_id = %s) as is_liked_by_current_user,
+                           0 as comment_count
+                    FROM svg_image s
+                    JOIN user u ON s.user_id = u.id
+                    ORDER BY s.created_at DESC
+                    LIMIT 100
+                """, (current_user_id or 0,))
+            else:
+                raise
         
         rows = cursor.fetchall()
         
@@ -626,6 +645,8 @@ def get_svg_files_with_likes(user_id=None):
         conn.close()
     except Exception as e:
         print(f"[ERROR] get_svg_files_with_likes(): {e}", flush=True)
+        import traceback
+        traceback.print_exc()
     
     return svg_files
 
@@ -643,15 +664,34 @@ def get_public_svg_files():
         cursor = conn.cursor(dictionary=True)
         
         # Query cho public files (không có like info)
-        cursor.execute("""
-            SELECT DISTINCT s.*, u.username as creator_username, u.id as creator_id,
-                   (SELECT COUNT(*) FROM svg_like WHERE svg_image_id = s.id) as like_count,
-                   0 as is_liked_by_current_user
-            FROM svg_image s
-            JOIN user u ON s.user_id = u.id
-            ORDER BY s.created_at DESC
-            LIMIT 100
-        """)
+        # Try with comment_count first, fallback if table doesn't exist
+        try:
+            cursor.execute("""
+                SELECT DISTINCT s.*, u.username as creator_username, u.id as creator_id,
+                       (SELECT COUNT(*) FROM svg_like WHERE svg_image_id = s.id) as like_count,
+                       0 as is_liked_by_current_user,
+                       COALESCE((SELECT COUNT(*) FROM svg_comments WHERE svg_filename = s.filename), 0) as comment_count
+                FROM svg_image s
+                JOIN user u ON s.user_id = u.id
+                ORDER BY s.created_at DESC
+                LIMIT 100
+            """)
+        except mysql.connector.errors.ProgrammingError as e:
+            if 'svg_comments' in str(e) and "doesn't exist" in str(e):
+                # Fallback: Query without comment_count if table doesn't exist
+                print(f"[WARN] svg_comments table doesn't exist, using fallback query", flush=True)
+                cursor.execute("""
+                    SELECT DISTINCT s.*, u.username as creator_username, u.id as creator_id,
+                           (SELECT COUNT(*) FROM svg_like WHERE svg_image_id = s.id) as like_count,
+                           0 as is_liked_by_current_user,
+                           0 as comment_count
+                    FROM svg_image s
+                    JOIN user u ON s.user_id = u.id
+                    ORDER BY s.created_at DESC
+                    LIMIT 100
+                """)
+            else:
+                raise
         
         rows = cursor.fetchall()
         
@@ -666,6 +706,8 @@ def get_public_svg_files():
         conn.close()
     except Exception as e:
         print(f"[ERROR] get_public_svg_files(): {e}", flush=True)
+        import traceback
+        traceback.print_exc()
     
     return svg_files
 

@@ -13,8 +13,9 @@ function initializeFileCardActions() {
     document.addEventListener('click', function(e) {
         const imgContainer = e.target.closest('.file-img-container');
         if (imgContainer) {
-            // Don't trigger if clicking on like button or its children
-            if (e.target.closest('.like-button-wrapper-overlay')) {
+            // Don't trigger if clicking on like button or comment count
+            if (e.target.closest('.like-button-wrapper-overlay') || 
+                e.target.closest('.comment-count-wrapper-overlay')) {
                 return;
             }
             
@@ -162,8 +163,9 @@ function initializeFileCardTouchEvents() {
         // ==== Xử lý click vào image container (mobile) ====
         const imgContainer = e.target.closest('.file-img-container');
         if (imgContainer) {
-            // Don't trigger if clicking on like button or its children
-            if (e.target.closest('.like-button-wrapper-overlay')) {
+            // Don't trigger if clicking on like button or comment count
+            if (e.target.closest('.like-button-wrapper-overlay') || 
+                e.target.closest('.comment-count-wrapper-overlay')) {
                 return;
             }
             

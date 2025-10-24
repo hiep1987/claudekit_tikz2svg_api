@@ -205,7 +205,9 @@
   --z-modal: 1050;
   --z-popover: 1060;
   --z-tooltip: 1070;
-  --z-highest: 9999;
+  --z-notifications: 1080;  /* Higher than search container (z-modal: 1050) and navigation (z-popover: 1060) */
+  --z-always-on-top: 99999;   /* Maximum z-index for critical UI elements that must always be visible */
+  --z-highest: 999999; /* Emergency z-index for debugging */
   
   /* ===== MODAL SYSTEM ===== */
   --modal-overlay: rgb(0 0 0 / 50%);

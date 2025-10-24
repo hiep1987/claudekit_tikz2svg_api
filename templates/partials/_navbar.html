@@ -1,4 +1,4 @@
-<nav class="container bg-white/80 backdrop-blur nv-shadow rounded-2xl p-3 flex items-center justify-between mb-8 border border-white/20 hover:shadow-xl transition-all duration-300">
+<nav class="container bg-white/80 backdrop-blur nv-shadow rounded-2xl p-3 flex items-center justify-between mb-8 border border-white/20 hover:shadow-xl transition-all duration-300" style="min-height: auto; height: auto;">
     <!-- Logo -->
     <div class="flex items-center gap-2 flex-shrink-0">
         <a href="/" class="flex items-center gap-2 hover:opacity-80 transition-opacity" style="text-decoration: none;">
@@ -39,14 +39,14 @@
         {% if current_user.is_authenticated %}
             <div class="flex items-center gap-2">
                 <!-- Notifications Bell -->
-                <div class="tikz-app notifications-container" style="position: relative;">
-                    <button class="notifications-bell" id="notificationsBell" aria-label="Thông báo" style="position: relative; background: transparent; border: none; cursor: pointer; padding: 8px;">
+                <div class="tikz-app notifications-container" style="position: relative; display: inline-block; height: auto; min-height: auto; width: auto;">
+                    <button class="notifications-bell" id="notificationsBell" aria-label="Thông báo" style="position: relative; background: transparent; border: none; cursor: pointer; padding: 8px; display: flex; align-items: center; justify-content: center;">
                         <i class="fas fa-bell" style="font-size: 18px; color: #4b5563;"></i>
                         <span class="notification-badge" id="notificationBadge" style="display: none; position: absolute; top: 4px; right: 4px; background: #ef4444; color: white; font-size: 10px; font-weight: 600; padding: 2px 5px; border-radius: 10px; min-width: 16px; text-align: center;">0</span>
                     </button>
                     
-                    <!-- Notifications Dropdown -->
-                    <div class="notifications-dropdown" id="notificationsDropdown" style="display: none; position: absolute; top: calc(100% + 8px); right: 0; width: 360px; max-height: 500px; background: rgba(248, 249, 250, 0.95); backdrop-filter: blur(12px); border-radius: 12px; box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15); border: 1px solid rgba(255, 255, 255, 0.18); overflow: hidden; z-index: 1000;">
+                    <!-- Notifications Dropdown (hidden by default, positioned absolutely) -->
+                    <div class="notifications-dropdown" id="notificationsDropdown">
                         <div class="notifications-header" style="display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #eee;">
                             <h3 style="margin: 0; font-size: 16px; font-weight: 600;">Thông báo</h3>
                             <button class="mark-all-read-btn" id="markAllReadBtn" style="background: none; border: none; color: #1976d2; font-size: 13px; cursor: pointer; padding: 4px 8px; border-radius: 4px;">

@@ -7,21 +7,101 @@
  */
 
 /* =================================================================
+   NOTIFICATIONS CONTAINER & DROPDOWN POSITIONING
+   ================================================================= */
+
+/* Higher specificity to override global .tikz-app styles without !important */
+html body .container .tikz-app.notifications-container,
+.tikz-app .page-container .notifications-container {
+    position: relative;
+    display: inline-block;
+    height: auto;
+    min-height: 0; /* Override global min-height: 100vh */
+    width: auto;
+    max-width: none;
+}
+
+.tikz-app .notifications-dropdown {
+    /* Positioning - Use fixed to escape all stacking contexts */
+    position: fixed;
+    top: 80px; /* Will be dynamically positioned by JavaScript */
+    right: 20px; /* Will be dynamically positioned by JavaScript */
+
+    /* Size */
+    width: 360px;
+    max-height: 500px;
+
+    /* Display - Hidden by default */
+    display: none;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+
+    /* Z-index - Use absolute highest to overcome search container stacking context */
+    z-index: var(--z-always-on-top, 99999);
+
+    /* Visual - Use foundation variables */
+    background: var(--glass-bg-strong, rgba(248, 249, 250, 0.92));
+    backdrop-filter: var(--glass-blur-medium, blur(12px));
+    -webkit-backdrop-filter: var(--glass-blur-medium, blur(12px));
+    border-radius: var(--radius-lg, 12px);
+    box-shadow: var(--glass-shadow, 0 8px 32px rgba(31, 38, 135, 0.15));
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.18));
+    overflow: hidden;
+
+    /* Animation */
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+
+    /* Ensure proper positioning context */
+    transform: translateZ(0);
+    will-change: transform, opacity;
+}
+
+/* When dropdown is open (controlled by JavaScript) */
+.tikz-app .notifications-dropdown.open {
+    display: block;
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+
+    /* Force rendering in new stacking context */
+    transform: translateZ(0);
+    isolation: isolate;
+}
+
+/* Emergency override - highest specificity and z-index */
+html body .tikz-app .notifications-dropdown.open,
+body .tikz-app .notifications-dropdown.open,
+.tikz-app .notifications-dropdown.open {
+    z-index: 99999999 !important;
+    position: fixed !important;
+    clip: auto !important;
+    clip-path: none !important;
+    overflow: visible !important;
+    transform: none !important;
+}
+
+/* Clean styling for production */
+.tikz-app .notifications-dropdown.open {
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.18));
+}
+
+/* =================================================================
    BELL ICON & BADGE
    ================================================================= */
 
 .tikz-app .notifications-bell:hover {
-    background: rgba(59, 130, 246, 0.1) !important;
-    border-radius: 8px;
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: var(--radius-md, 8px);
 }
 
 .tikz-app .notifications-bell:hover i {
-    color: #1976d2 !important;
+    color: var(--primary-color, #1976d2);
 }
 
 /* Hover effect for mark all read button */
 .tikz-app .mark-all-read-btn:hover {
-    background: rgba(25, 118, 210, 0.1) !important;
+    background: var(--primary-bg, rgba(25, 118, 210, 0.1));
 }
 
 /* =================================================================
@@ -51,8 +131,8 @@
 }
 
 .tikz-app .notification-avatar {
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     object-fit: cover;
     flex-shrink: 0;
@@ -117,48 +197,60 @@
 
 @media (max-width: 768px) {
     .tikz-app .notifications-dropdown {
-        width: calc(100vw - 32px) !important;
-        max-width: 360px !important;
-        right: 8px !important;
+        width: calc(100vw - 32px);
+        max-width: 360px;
+        right: 8px;
     }
 
     .tikz-app .notification-item {
-        padding: 12px !important;
+        padding: 12px;
     }
 
     .tikz-app .notification-avatar {
-        width: 36px !important;
-        height: 36px !important;
+        width: 28px;
+        height: 28px;
     }
 
     .tikz-app .notification-text {
-        font-size: 13px !important;
+        font-size: 13px;
     }
 
     .tikz-app .notification-preview {
-        font-size: 12px !important;
+        font-size: 12px;
     }
 }
 
 @media (max-width: 480px) {
     .tikz-app .notifications-dropdown {
-        width: calc(100vw - 16px) !important;
-        left: 8px !important;
-        right: 8px !important;
+        width: calc(100vw - 16px);
+        left: 8px;
+        right: 8px;
     }
 
     .tikz-app .notifications-header {
-        padding: 12px 16px !important;
+        padding: 12px 16px;
     }
 
     .tikz-app .notifications-header h3 {
-        font-size: 15px !important;
+        font-size: 15px;
     }
 
     .tikz-app .mark-all-read-btn {
-        font-size: 12px !important;
-        padding: 4px !important;
+        font-size: 12px;
+        padding: 4px;
     }
+}
+
+/* =================================================================
+   ALTERNATIVE POSITIONING (Fallback)
+   ================================================================= */
+
+/* Fixed positioning fallback for edge cases */
+.tikz-app .notifications-dropdown.open.fixed-position {
+    position: fixed;
+    top: 80px; /* Adjust based on navbar height */
+    right: 20px;
+    z-index: var(--z-always-on-top, 9999);
 }
 
 /* =================================================================
@@ -179,12 +271,12 @@
 /* High contrast mode support */
 @media (prefers-contrast: high) {
     .tikz-app .notifications-dropdown {
-        border: 2px solid #000 !important;
+        border: 2px solid var(--text-primary, #000);
     }
 
     .tikz-app .notification-badge {
-        background: #000 !important;
-        color: #fff !important;
+        background: var(--text-primary, #000);
+        color: var(--text-white, #fff);
     }
 }
 
@@ -192,8 +284,9 @@
 @media (prefers-reduced-motion: reduce) {
     .tikz-app .notifications-bell,
     .tikz-app .notification-item,
-    .tikz-app .mark-all-read-btn {
-        transition: none !important;
+    .tikz-app .mark-all-read-btn,
+    .tikz-app .notifications-dropdown {
+        transition: none;
     }
 }
 

@@ -24,14 +24,12 @@ class NotificationsManager {
     }
     
     init() {
-        console.log('[Notifications] Initializing NotificationsManager');
-        
         // Toggle dropdown on bell click
         this.bell.addEventListener('click', (e) => {
             e.stopPropagation();
             this.toggleDropdown();
         });
-        
+
         // Mark all as read
         if (this.markAllReadBtn) {
             this.markAllReadBtn.addEventListener('click', (e) => {
@@ -39,21 +37,30 @@ class NotificationsManager {
                 this.markAllAsRead();
             });
         }
-        
+
         // Close dropdown when clicking outside
         document.addEventListener('click', (e) => {
             if (this.isOpen && this.dropdown && !this.dropdown.contains(e.target)) {
                 this.closeDropdown();
             }
         });
-        
+
+        // Reposition dropdown on window resize (when open)
+        window.addEventListener('resize', () => {
+            if (this.isOpen) {
+                this.positionDropdown();
+            }
+        });
+
         // Initial load
         this.updateBadge();
-        
+
         // Start polling for new notifications (every 30 seconds)
         this.startPolling();
-        
-        console.log('[Notifications] ✅ Initialized successfully');
+
+        if (window.location.search.includes('debug-notifications=true')) {
+            console.log('[Notifications] ✅ Initialized successfully');
+        }
     }
     
     toggleDropdown() {
@@ -65,19 +72,221 @@ class NotificationsManager {
     }
     
     openDropdown() {
-        console.log('[Notifications] Opening dropdown');
         this.isOpen = true;
         if (this.dropdown) {
-            this.dropdown.style.display = 'block';
+            // Add 'open' class to trigger CSS transition
+            this.dropdown.classList.add('open');
+
+            // Position dropdown relative to bell icon (for fixed positioning)
+            this.positionDropdown();
+
+            // Apply emergency fixes immediately for search container conflict
+            setTimeout(() => {
+                this.applyEmergencyFixes();
+            }, 50);
+
+            // Debug dropdown visibility (only in debug mode)
+            if (window.location.search.includes('debug-notifications=true')) {
+                setTimeout(() => {
+                    this.debugDropdownPosition();
+                }, 100);
+            }
+
+        } else {
+            console.error('[Notifications] Dropdown element not found!');
         }
         this.loadNotifications();
     }
+
+    positionDropdown() {
+        if (!this.bell || !this.dropdown) return;
+
+        const bellRect = this.bell.getBoundingClientRect();
+        const dropdownWidth = 360; // Match CSS width
+        const viewportWidth = window.innerWidth;
+
+        // Calculate position
+        let top = bellRect.bottom + 8; // 8px below bell
+        let right = viewportWidth - bellRect.right; // Distance from right edge
+
+        // Ensure dropdown doesn't go off-screen on mobile
+        if (bellRect.right + dropdownWidth > viewportWidth) {
+            right = 8; // Minimum margin from right edge
+        }
+
+        // Apply position
+        this.dropdown.style.top = `${top}px`;
+        this.dropdown.style.right = `${right}px`;
+
+        if (window.location.search.includes('debug-notifications=true')) {
+            console.log('[Notifications] Dropdown positioned:', { top, right });
+        }
+    }
+
+    debugDropdownPosition() {
+        if (!this.dropdown) return;
+
+        const rect = this.dropdown.getBoundingClientRect();
+        const computedStyle = window.getComputedStyle(this.dropdown);
+
+        console.log('[Notifications] 🐛 Dropdown Debug Info:');
+        console.log('- Position:', { top: rect.top, left: rect.left, width: rect.width, height: rect.height });
+        console.log('- Display:', computedStyle.display);
+        console.log('- Visibility:', computedStyle.visibility);
+        console.log('- Opacity:', computedStyle.opacity);
+        console.log('- Z-index:', computedStyle.zIndex);
+        console.log('- Position type:', computedStyle.position);
+        console.log('- Transform:', computedStyle.transform);
+        console.log('- Clip:', computedStyle.clip);
+        console.log('- Clip path:', computedStyle.clipPath);
+        console.log('- Overflow:', computedStyle.overflow);
+        console.log('- Classes:', this.dropdown.className);
+
+        // Check if dropdown is in viewport
+        const isInViewport = rect.top >= 0 && rect.left >= 0 &&
+                           rect.bottom <= window.innerHeight &&
+                           rect.right <= window.innerWidth;
+        console.log('- In viewport:', isInViewport);
+
+        // Check parent elements for overflow issues
+        let parent = this.dropdown.parentElement;
+        let level = 0;
+        while (parent && level < 5) {
+            const parentStyle = window.getComputedStyle(parent);
+            console.log(`- Parent ${level} (${parent.tagName}):`, {
+                overflow: parentStyle.overflow,
+                overflowX: parentStyle.overflowX,
+                overflowY: parentStyle.overflowY,
+                position: parentStyle.position,
+                zIndex: parentStyle.zIndex
+            });
+            parent = parent.parentElement;
+            level++;
+        }
+
+        // Check if actually visible
+        if (rect.width > 0 && rect.height > 0) {
+            const elementAtPoint = document.elementFromPoint(rect.left + rect.width/2, rect.top + rect.height/2);
+            console.log('- Element at center:', elementAtPoint ? elementAtPoint.tagName : 'none');
+
+            if (elementAtPoint && elementAtPoint !== this.dropdown && !this.dropdown.contains(elementAtPoint)) {
+                console.warn('[Notifications] 🚨 Dropdown is being covered by:', elementAtPoint);
+                this.applyEmergencyFixes();
+            }
+        }
+
+        // Try alternative positioning if not visible
+        if (!isInViewport || rect.width === 0 || rect.height === 0) {
+            console.log('[Notifications] Applying fallback positioning');
+            this.applyFallbackPositioning();
+        }
+    }
+
+    checkDropdownVisibility() {
+        if (!this.dropdown) return;
+
+        const rect = this.dropdown.getBoundingClientRect();
+        const isVisible = rect.width > 0 && rect.height > 0 &&
+                         this.dropdown.offsetParent !== null;
+
+        console.log('[Notifications] Visibility check - Is visible:', isVisible);
+
+        if (!isVisible) {
+            console.warn('[Notifications] Dropdown still not visible, applying emergency fixes');
+            this.applyEmergencyFixes();
+        }
+    }
+
+    applyFallbackPositioning() {
+        if (!this.dropdown) return;
+
+        // Get bell position
+        const bellRect = this.bell.getBoundingClientRect();
+
+        // Apply fixed positioning relative to viewport
+        this.dropdown.style.position = 'fixed';
+        this.dropdown.style.top = (bellRect.bottom + 8) + 'px';
+        this.dropdown.style.right = (window.innerWidth - bellRect.right) + 'px';
+        this.dropdown.style.left = 'auto';
+        this.dropdown.style.zIndex = '999999';
+
+        console.log('[Notifications] Applied fixed positioning:', {
+            top: this.dropdown.style.top,
+            right: this.dropdown.style.right
+        });
+    }
+
+    applyEmergencyFixes() {
+        if (!this.dropdown) return;
+
+        // Apply emergency fixes for dropdown visibility
+        if (window.location.search.includes('debug-notifications=true')) {
+            console.log('[Notifications] 🚨 Applying ULTIMATE emergency fixes');
+        }
+
+        // Move dropdown to body to escape all stacking contexts
+        document.body.appendChild(this.dropdown);
+
+        // Force all visibility properties with absolute highest z-index
+        this.dropdown.style.cssText = `
+            position: fixed !important;
+            top: 80px !important;
+            right: 20px !important;
+            left: auto !important;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            z-index: 99999999 !important;
+            width: 360px !important;
+            max-height: 500px !important;
+            background: rgba(248, 249, 250, 0.95) !important;
+            backdrop-filter: blur(12px) !important;
+            -webkit-backdrop-filter: blur(12px) !important;
+            border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.18)) !important;
+            border-radius: 12px !important;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15) !important;
+            transform: none !important;
+            clip: auto !important;
+            clip-path: none !important;
+            overflow: visible !important;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        `;
+
+        // Force reposition relative to bell
+        setTimeout(() => {
+            if (this.bell) {
+                const bellRect = this.bell.getBoundingClientRect();
+                this.dropdown.style.top = `${bellRect.bottom + 8}px`;
+                this.dropdown.style.right = `${window.innerWidth - bellRect.right}px`;
+
+                // Verify positioning
+                setTimeout(() => {
+                    const finalRect = this.dropdown.getBoundingClientRect();
+                    const elementAtTop = document.elementFromPoint(
+                        finalRect.left + finalRect.width/2,
+                        finalRect.top + 10
+                    );
+                    console.log('[Notifications] 🎯 ULTIMATE FIX - Element at top after move:', elementAtTop?.tagName);
+                    console.log('[Notifications] 📐 Final position:', {
+                        top: finalRect.top,
+                        left: finalRect.left,
+                        width: finalRect.width,
+                        height: finalRect.height
+                    });
+                }, 50);
+            }
+        }, 50);
+
+        if (window.location.search.includes('debug-notifications=true')) {
+            console.log('[Notifications] 🚨 ULTIMATE FIX applied - dropdown moved to body with maximum z-index');
+        }
+    }
     
     closeDropdown() {
-        console.log('[Notifications] Closing dropdown');
         this.isOpen = false;
         if (this.dropdown) {
-            this.dropdown.style.display = 'none';
+            // Remove 'open' class to trigger CSS transition
+            this.dropdown.classList.remove('open');
         }
     }
     
@@ -102,7 +311,9 @@ class NotificationsManager {
                 }
             }
             
-            console.log(`[Notifications] Badge updated: ${count} unread`);
+            if (window.location.search.includes('debug-notifications=true')) {
+                console.log(`[Notifications] Badge updated: ${count} unread`);
+            }
             
         } catch (error) {
             console.error('[Notifications] Error updating badge:', error);
@@ -126,7 +337,9 @@ class NotificationsManager {
             
             this.renderNotifications(this.currentNotifications);
             
-            console.log(`[Notifications] Loaded ${this.currentNotifications.length} notifications`);
+                if (window.location.search.includes('debug-notifications=true')) {
+                console.log(`[Notifications] Loaded ${this.currentNotifications.length} notifications`);
+            }
             
         } catch (error) {
             console.error('[Notifications] Error loading notifications:', error);
@@ -175,7 +388,18 @@ class NotificationsManager {
         
         const timeAgo = this.formatTimeAgo(notif.created_at);
         const unreadClass = notif.is_read ? '' : 'unread';
-        const avatar = notif.actor_avatar || '/static/default-avatar.png';
+        
+        // Handle avatar path
+        let avatar = '/static/default-avatar.png';
+        if (notif.actor_avatar) {
+            // If avatar already has /static/ prefix, use as is
+            if (notif.actor_avatar.startsWith('/static/')) {
+                avatar = notif.actor_avatar;
+            } else {
+                // Otherwise, add /static/avatars/ prefix
+                avatar = `/static/avatars/${notif.actor_avatar}`;
+            }
+        }
         
         return `
             <div class="notification-item ${unreadClass}" 
@@ -184,7 +408,7 @@ class NotificationsManager {
                 <img src="${avatar}" 
                      alt="${notif.actor_username}" 
                      class="notification-avatar"
-                     onerror="this.src='/static/default-avatar.png'">
+                     onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%23ccc%22%3E%3Cpath d=%22M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z%22/%3E%3C/svg%3E';">
                 <div class="notification-content">
                     <p class="notification-text">
                         <strong>${notif.actor_username}</strong> ${messageMap[notif.notification_type]}
@@ -197,7 +421,6 @@ class NotificationsManager {
     }
     
     async handleNotificationClick(notificationId, actionUrl) {
-        console.log(`[Notifications] Clicked notification ${notificationId}`);
         
         // Mark as read
         try {
@@ -209,7 +432,9 @@ class NotificationsManager {
             });
             
             if (response.ok) {
-                console.log(`[Notifications] Marked ${notificationId} as read`);
+                if (window.location.search.includes('debug-notifications=true')) {
+                    console.log(`[Notifications] Marked ${notificationId} as read`);
+                }
                 
                 // Update badge
                 this.updateBadge();
@@ -237,7 +462,6 @@ class NotificationsManager {
     }
     
     async markAllAsRead() {
-        console.log('[Notifications] Marking all as read');
         
         try {
             const response = await fetch('/api/notifications/mark-all-read', {
@@ -249,7 +473,9 @@ class NotificationsManager {
             
             if (response.ok) {
                 const data = await response.json();
-                console.log(`[Notifications] Marked ${data.count} notifications as read`);
+                if (window.location.search.includes('debug-notifications=true')) {
+                    console.log(`[Notifications] Marked ${data.count} notifications as read`);
+                }
                 
                 // Reload notifications
                 this.loadNotifications();
@@ -287,7 +513,6 @@ class NotificationsManager {
     }
     
     startPolling() {
-        console.log('[Notifications] Starting polling (30s interval)');
         
         // Poll every 30 seconds
         this.pollInterval = setInterval(() => {
@@ -297,14 +522,12 @@ class NotificationsManager {
     
     stopPolling() {
         if (this.pollInterval) {
-            console.log('[Notifications] Stopping polling');
             clearInterval(this.pollInterval);
             this.pollInterval = null;
         }
     }
     
     destroy() {
-        console.log('[Notifications] Destroying NotificationsManager');
         this.stopPolling();
         
         // Remove event listeners
@@ -322,9 +545,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // Only initialize if notifications bell exists (user is logged in)
     if (document.getElementById('notificationsBell')) {
         window.notificationsManager = new NotificationsManager();
-        console.log('[Notifications] ✅ NotificationsManager ready');
-    } else {
-        console.log('[Notifications] Bell not found, skipping initialization (user not logged in)');
+        if (window.location.search.includes('debug-notifications=true')) {
+            console.log('[Notifications] ✅ NotificationsManager ready');
+        }
+
+        // Debug functionality (only when explicitly requested)
+        if (window.location.search.includes('debug-notifications=true')) {
+            setTimeout(() => {
+                console.log('[Notifications] 🔧 Debug mode: Opening dropdown automatically');
+                window.notificationsManager.openDropdown();
+            }, 1000);
+        }
     }
 });
 

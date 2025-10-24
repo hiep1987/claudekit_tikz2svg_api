@@ -44,10 +44,10 @@ html body .container .tikz-app.notifications-container,
     background: rgb(248 249 250);
 
     /* backdrop-filter: blur(8px); */
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgb(31 38 135 / 15%), 0 2px 8px rgb(0 0 0 / 10%);
-    border: 2px solid rgb(229 231 235);
-    overflow: visible;
+   border-radius: 12px;
+   box-shadow: 0 8px 32px rgb(31 38 135 / 15%), 0 2px 8px rgb(0 0 0 / 10%);
+   border: 2px solid rgb(229 231 235);
+   overflow: hidden; /* Hide overflow to respect border-radius */
 
     /* Animation */
     transition: opacity 0.2s ease, visibility 0.2s ease;
@@ -133,6 +133,19 @@ html body .container .tikz-app.notifications-container,
     position: relative;
 }
 
+/* First notification item - rounded top corners */
+.tikz-app .notification-item:first-child {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+/* Last notification item - rounded bottom corners, no border */
+.tikz-app .notification-item:last-child {
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border-bottom: none;
+}
+
 .tikz-app .notification-item:hover {
     background: #f8fafc;
     border-left: 3px solid #1976d2;
@@ -149,6 +162,20 @@ html body .container .tikz-app.notifications-container,
 .tikz-app .notification-item.unread:hover {
     background: #e3f2fd;
     border-left: 3px solid #1976d2;
+    transform: translateX(2px);
+}
+
+/* Read notifications - subtle styling */
+.tikz-app .notification-item:not(.unread) {
+    opacity: 0.7; /* Slightly faded */
+    background: #fafafa; /* Very light gray */
+}
+
+.tikz-app .notification-item:not(.unread):hover {
+    opacity: 0.9; /* Less faded on hover */
+    background: #f5f5f5; /* Slightly darker gray on hover */
+    border-left: 3px solid #e0e0e0; /* Light gray accent */
+    padding-left: 13px;
     transform: translateX(2px);
 }
 
@@ -314,6 +341,16 @@ html body .container .tikz-app.notifications-container,
     .tikz-app .notifications-dropdown {
         transition: none;
     }
+}
+
+/* =================================================================
+   NOTIFICATIONS LIST CONTAINER
+   ================================================================= */
+
+.tikz-app .notifications-list {
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    overflow-y: auto;
 }
 
 /* =================================================================

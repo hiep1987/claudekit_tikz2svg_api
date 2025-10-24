@@ -42,16 +42,21 @@
                 <div class="tikz-app notifications-container" style="position: relative; display: inline-block; height: auto; min-height: auto; width: auto;">
                     <button class="notifications-bell" id="notificationsBell" aria-label="Thông báo" style="position: relative; background: transparent; border: none; cursor: pointer; padding: 8px; display: flex; align-items: center; justify-content: center;">
                         <i class="fas fa-bell" style="font-size: 18px; color: #4b5563;"></i>
-                        <span class="notification-badge" id="notificationBadge" style="display: none; position: absolute; top: 4px; right: 4px; background: #ef4444; color: white; font-size: 10px; font-weight: 600; padding: 2px 5px; border-radius: 10px; min-width: 16px; text-align: center;">0</span>
+                        <span class="notification-badge" id="notificationBadge" style="display: none; position: absolute; top: 0px; right: -2px; background: #ef4444; color: white; font-size: 10px; font-weight: 600; padding: 2px 5px; border-radius: 10px; min-width: 16px; text-align: center;">0</span>
                     </button>
                     
                     <!-- Notifications Dropdown (hidden by default, positioned absolutely) -->
                     <div class="notifications-dropdown" id="notificationsDropdown">
                         <div class="notifications-header" style="display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #eee;">
                             <h3 style="margin: 0; font-size: 16px; font-weight: 600;">Thông báo</h3>
-                            <button class="mark-all-read-btn" id="markAllReadBtn" style="background: none; border: none; color: #1976d2; font-size: 13px; cursor: pointer; padding: 4px 8px; border-radius: 4px;">
-                                Đánh dấu tất cả đã đọc
-                            </button>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <button class="toggle-view-btn" id="toggleViewBtn" style="background: none; border: 1px solid #e5e7eb; color: #6b7280; font-size: 12px; cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: all 0.2s;">
+                                    Xem tất cả
+                                </button>
+                                <button class="mark-all-read-btn" id="markAllReadBtn" style="background: none; border: none; color: #1976d2; font-size: 13px; cursor: pointer; padding: 4px 8px; border-radius: 4px;">
+                                    Đánh dấu tất cả đã đọc
+                                </button>
+                            </div>
                         </div>
                         
                         <div class="notifications-list" id="notificationsList" style="max-height: 400px; overflow-y: auto;">

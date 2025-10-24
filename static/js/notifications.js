@@ -13,11 +13,13 @@ class NotificationsManager {
         this.dropdown = document.getElementById('notificationsDropdown');
         this.list = document.getElementById('notificationsList');
         this.markAllReadBtn = document.getElementById('markAllReadBtn');
+        this.toggleViewBtn = document.getElementById('toggleViewBtn');
         
         this.isOpen = false;
         this.pollInterval = null;
         this.currentNotifications = [];
         this.blurOverlay = null;
+        this.showOnlyUnread = true; // Default: chỉ hiển thị unread
         
         if (this.bell) {
             this.init();
@@ -29,7 +31,6 @@ class NotificationsManager {
         this.bell.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            console.log('[Notifications] Bell clicked');
             this.toggleDropdown();
         });
 
@@ -38,6 +39,14 @@ class NotificationsManager {
             this.markAllReadBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 this.markAllAsRead();
+            });
+        }
+
+        // Toggle view (unread only / all)
+        if (this.toggleViewBtn) {
+            this.toggleViewBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.toggleView();
             });
         }
 
@@ -78,7 +87,6 @@ class NotificationsManager {
     }
     
     toggleDropdown() {
-        console.log('[Notifications] Toggle dropdown - current state:', this.isOpen);
         if (this.isOpen) {
             this.closeDropdown();
         } else {
@@ -87,7 +95,6 @@ class NotificationsManager {
     }
     
     openDropdown() {
-        console.log('[Notifications] Opening dropdown');
         this.isOpen = true;
         if (this.dropdown) {
             // Create and show blur overlay
@@ -110,9 +117,6 @@ class NotificationsManager {
             console.error('[Notifications] Dropdown element not found!');
         }
         this.loadNotifications();
-        
-        // Force apply enhanced styling to override cached CSS
-        this.applyEnhancedStyling();
     }
     
     applyEnhancedStyling() {
@@ -120,11 +124,24 @@ class NotificationsManager {
         
         // Apply styles to all notification items
         const items = this.dropdown.querySelectorAll('.notification-item');
-        items.forEach(item => {
+        items.forEach((item, index) => {
             // Enhanced item styling
             item.style.borderBottom = '1px solid #e5e7eb';
             item.style.transition = 'all 0.2s ease';
             item.style.position = 'relative';
+            
+            // Force border-radius for first and last items
+            if (index === 0) {
+                // First item - rounded top corners
+                item.style.borderTopLeftRadius = '10px';
+                item.style.borderTopRightRadius = '10px';
+            }
+            if (index === items.length - 1) {
+                // Last item - rounded bottom corners, no border
+                item.style.borderBottomLeftRadius = '10px';
+                item.style.borderBottomRightRadius = '10px';
+                item.style.borderBottom = 'none';
+            }
             
             // Add hover effects
             item.addEventListener('mouseenter', () => {
@@ -139,19 +156,29 @@ class NotificationsManager {
                     item.style.background = '#f0f7ff';
                     item.style.borderLeft = '3px solid #3b82f6';
                     item.style.paddingLeft = '13px';
+                    item.style.opacity = '1';
                 } else {
-                    item.style.background = '';
+                    // Read notifications - restore subtle styling
+                    item.style.background = '#fafafa';
                     item.style.borderLeft = '';
                     item.style.paddingLeft = '16px';
+                    item.style.opacity = '0.7';
                 }
                 item.style.transform = '';
             });
             
-            // Apply unread styling
+            // Apply unread/read styling
             if (item.classList.contains('unread')) {
                 item.style.background = '#f0f7ff';
                 item.style.borderLeft = '3px solid #3b82f6';
                 item.style.paddingLeft = '13px';
+                item.style.opacity = '1';
+            } else {
+                // Read notifications - subtle styling
+                item.style.background = '#fafafa';
+                item.style.opacity = '0.7';
+                item.style.borderLeft = '';
+                item.style.paddingLeft = '16px';
             }
             
             // Smaller font sizes
@@ -201,12 +228,12 @@ class NotificationsManager {
         this.dropdown.style.borderRadius = '12px';
         this.dropdown.style.border = '2px solid rgb(59, 130, 246, 0.3)';
         this.dropdown.style.boxShadow = '0 8px 32px rgb(31 38 135 / 15%), 0 2px 8px rgb(0 0 0 / 10%)';
+        this.dropdown.style.overflow = 'hidden'; // Force hide overflow to respect border-radius
         
     }
 
     
     closeDropdown() {
-        console.log('[Notifications] Closing dropdown');
         this.isOpen = false;
         if (this.dropdown) {
             // Hide blur overlay
@@ -221,14 +248,12 @@ class NotificationsManager {
                     this.dropdown.style.display = 'none';
                     this.dropdown.style.visibility = 'hidden';
                     this.dropdown.style.opacity = '0';
-                    console.log('[Notifications] Force hidden dropdown');
                 }
             }, 300); // Wait for CSS transition
         }
     }
     
     createBlurOverlay() {
-        console.log('[Notifications] Creating blur overlay');
         
         // Remove existing overlay if any
         this.removeBlurOverlay();
@@ -249,20 +274,17 @@ class NotificationsManager {
         
         // Add click handler to close dropdown when clicking overlay
         this.blurOverlay.addEventListener('click', () => {
-            console.log('[Notifications] Blur overlay clicked');
             this.closeDropdown();
         });
         
         // Append to body and activate
         document.body.appendChild(this.blurOverlay);
-        console.log('[Notifications] Blur overlay appended to body');
         
         // Force reflow then activate
         requestAnimationFrame(() => {
             this.blurOverlay.style.opacity = '1';
             this.blurOverlay.style.visibility = 'visible';
             this.blurOverlay.classList.add('active');
-            console.log('[Notifications] Blur overlay activated');
         });
     }
     
@@ -284,6 +306,28 @@ class NotificationsManager {
         }
     }
     
+    toggleView() {
+        this.showOnlyUnread = !this.showOnlyUnread;
+        
+        // Update button text and style
+        if (this.toggleViewBtn) {
+            if (this.showOnlyUnread) {
+                this.toggleViewBtn.textContent = 'Xem tất cả';
+                this.toggleViewBtn.style.background = 'none';
+                this.toggleViewBtn.style.color = '#6b7280';
+                this.toggleViewBtn.style.border = '1px solid #e5e7eb';
+            } else {
+                this.toggleViewBtn.textContent = 'Chỉ chưa đọc';
+                this.toggleViewBtn.style.background = '#1976d2';
+                this.toggleViewBtn.style.color = 'white';
+                this.toggleViewBtn.style.border = '1px solid #1976d2';
+            }
+        }
+        
+        // Reload notifications with new filter
+        this.loadNotifications();
+    }
+    
     async updateBadge() {
         try {
             const response = await fetch('/api/notifications/unread-count');
@@ -295,6 +339,7 @@ class NotificationsManager {
             
             const data = await response.json();
             const count = data.count || 0;
+            
             
             if (this.badge) {
                 if (count > 0) {
@@ -320,7 +365,8 @@ class NotificationsManager {
         this.list.innerHTML = '<div class="notifications-loading" style="padding: 40px 20px; text-align: center; color: #6c757d;"><i class="fas fa-spinner fa-spin"></i> Đang tải...</div>';
         
         try {
-            const response = await fetch('/api/notifications?limit=20');
+            const onlyUnreadParam = this.showOnlyUnread ? '&only_unread=true' : '';
+            const response = await fetch(`/api/notifications?limit=20${onlyUnreadParam}`);
             
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);
@@ -331,9 +377,6 @@ class NotificationsManager {
             
             this.renderNotifications(this.currentNotifications);
             
-                if (window.location.search.includes('debug-notifications=true')) {
-                console.log(`[Notifications] Loaded ${this.currentNotifications.length} notifications`);
-            }
             
         } catch (error) {
             console.error('[Notifications] Error loading notifications:', error);
@@ -363,6 +406,11 @@ class NotificationsManager {
                 this.handleNotificationClick(notifId, actionUrl);
             });
         });
+        
+        // Apply enhanced styling after rendering
+        setTimeout(() => {
+            this.applyEnhancedStyling();
+        }, 100);
     }
     
     renderNotificationItem(notif) {
@@ -427,16 +475,17 @@ class NotificationsManager {
             });
             
             if (response.ok) {
-                if (window.location.search.includes('debug-notifications=true')) {
-                    console.log(`[Notifications] Marked ${notificationId} as read`);
-                }
                 
                 // Update badge
                 this.updateBadge();
                 
-                // Navigate
+                // Navigate or reload notifications
                 if (actionUrl) {
+                    // If navigating away, no need to reload dropdown
                     window.location.href = actionUrl;
+                } else {
+                    // If staying on page, reload dropdown to show updated read status
+                    this.loadNotifications();
                 }
             } else {
                 console.error('[Notifications] Failed to mark as read:', response.status);
@@ -468,9 +517,6 @@ class NotificationsManager {
             
             if (response.ok) {
                 const data = await response.json();
-                if (window.location.search.includes('debug-notifications=true')) {
-                    console.log(`[Notifications] Marked ${data.count} notifications as read`);
-                }
                 
                 // Reload notifications
                 this.loadNotifications();

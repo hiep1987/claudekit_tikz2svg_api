@@ -86,22 +86,23 @@
   pointer-events: none; /* Prevent img from being the target, always use container */
 }
 
-/* Like Button Overlay - NEW position on image - Rounded pill style */
-.tikz-app .like-button-wrapper-overlay {
-    position: absolute;
-    bottom: 8px;
-    right: 8px;
-    z-index: 200;
+/* Interaction Buttons Row - Below image */
+.tikz-app .interaction-buttons-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+/* Like Button Wrapper */
+.tikz-app .like-button-wrapper {
     display: flex;
     align-items: center;
 }
 
-/* Comment Count Overlay - Below like button */
-.tikz-app .comment-count-wrapper-overlay {
-    position: absolute;
-    bottom: 8px;
-    right: 60px;
-    z-index: 200;
+/* Comment Count Wrapper */
+.tikz-app .comment-count-wrapper {
     display: flex;
     align-items: center;
 }

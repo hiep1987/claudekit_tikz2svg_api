@@ -13,11 +13,8 @@ function initializeFileCardActions() {
     document.addEventListener('click', function(e) {
         const imgContainer = e.target.closest('.file-img-container');
         if (imgContainer) {
-            // Don't trigger if clicking on like button or comment count
-            if (e.target.closest('.like-button-wrapper-overlay') || 
-                e.target.closest('.comment-count-wrapper-overlay')) {
-                return;
-            }
+            // Don't trigger if clicking on like button or comment count (no longer needed - buttons outside container)
+            // Buttons are now outside .file-img-container, so this check is not needed anymore
             
             const filename = imgContainer.getAttribute('data-filename');
             if (filename) {
@@ -163,11 +160,8 @@ function initializeFileCardTouchEvents() {
         // ==== Xử lý click vào image container (mobile) ====
         const imgContainer = e.target.closest('.file-img-container');
         if (imgContainer) {
-            // Don't trigger if clicking on like button or comment count
-            if (e.target.closest('.like-button-wrapper-overlay') || 
-                e.target.closest('.comment-count-wrapper-overlay')) {
-                return;
-            }
+            // Don't trigger if clicking on like button or comment count (no longer needed - buttons outside container)
+            // Buttons are now outside .file-img-container, so this check is not needed anymore
             
             // Don't trigger if menu is open (user might be trying to close it)
             const card = imgContainer.closest('.file-card');

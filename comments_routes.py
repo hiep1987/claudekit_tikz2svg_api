@@ -25,6 +25,7 @@ from comments_helpers import (
     sanitize_comment_text,
     logger
 )
+from notification_service import get_notification_service
 from mysql.connector import Error as MySQLError
 import time
 
@@ -322,6 +323,52 @@ def create_comment(filename):
         comment['replies'] = []
         
         logger.info(f"✅ Comment created: ID {comment_id}, User {current_user.id}, SVG {filename}")
+        
+        # Create notification for SVG owner or parent comment owner
+        try:
+            if parent_comment_id:
+                # Reply notification: notify parent comment owner
+                cursor.execute("""
+                    SELECT user_id FROM svg_comments WHERE id = %s
+                """, (parent_comment_id,))
+                parent_comment = cursor.fetchone()
+                
+                if parent_comment:
+                    parent_owner_id = parent_comment['user_id']
+                    
+                    notification_service = get_notification_service()
+                    notification_service.create_notification(
+                        user_id=parent_owner_id,
+                        actor_id=current_user.id,
+                        notification_type='reply',
+                        target_type='comment',
+                        target_id=str(parent_comment_id),
+                        content=comment_text[:100],  # Preview
+                        action_url=f'/view_svg/{filename}#comment-{comment_id}'
+                    )
+            else:
+                # Comment notification: notify SVG owner
+                cursor.execute("""
+                    SELECT user_id FROM svg_image WHERE filename = %s
+                """, (filename,))
+                svg_info = cursor.fetchone()
+                
+                if svg_info:
+                    svg_owner_id = svg_info['user_id']
+                    
+                    notification_service = get_notification_service()
+                    notification_service.create_notification(
+                        user_id=svg_owner_id,
+                        actor_id=current_user.id,
+                        notification_type='comment',
+                        target_type='svg_image',
+                        target_id=filename,
+                        content=comment_text[:100],  # Preview
+                        action_url=f'/view_svg/{filename}#comment-{comment_id}'
+                    )
+        except Exception as e:
+            # Don't fail comment creation if notification fails
+            logger.warning(f"⚠️ Failed to create comment notification: {e}")
         
         return api_response(
             success=True,

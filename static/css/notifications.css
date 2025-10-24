@@ -37,8 +37,8 @@ html body .container .tikz-app.notifications-container,
     opacity: 0;
     pointer-events: none;
 
-    /* Z-index - Use absolute highest to overcome search container stacking context */
-    z-index: var(--z-always-on-top, 99999);
+    /* Z-index - Must be higher than search container and everything else */
+    z-index: 2147483647; /* Maximum possible z-index value */
 
     /* Visual - Use foundation variables */
     background: var(--glass-bg-strong, rgba(248, 249, 250, 0.92));
@@ -47,13 +47,14 @@ html body .container .tikz-app.notifications-container,
     border-radius: var(--radius-lg, 12px);
     box-shadow: var(--glass-shadow, 0 8px 32px rgba(31, 38, 135, 0.15));
     border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.18));
-    overflow: hidden;
+    overflow: visible;
 
     /* Animation */
     transition: opacity 0.2s ease, visibility 0.2s ease;
 
-    /* Ensure proper positioning context */
+    /* Force new stacking context to escape parent contexts */
     transform: translateZ(0);
+    isolation: isolate;
     will-change: transform, opacity;
 }
 
@@ -131,8 +132,8 @@ body .tikz-app .notifications-dropdown.open,
 }
 
 .tikz-app .notification-avatar {
-    width: 32px;
-    height: 32px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
     object-fit: cover;
     flex-shrink: 0;
@@ -207,8 +208,8 @@ body .tikz-app .notifications-dropdown.open,
     }
 
     .tikz-app .notification-avatar {
-        width: 28px;
-        height: 28px;
+        width: 20px;
+        height: 20px;
     }
 
     .tikz-app .notification-text {

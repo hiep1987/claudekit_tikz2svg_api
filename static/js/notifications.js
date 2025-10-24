@@ -45,8 +45,14 @@ class NotificationsManager {
             }
         });
 
-        // Reposition dropdown on window resize (when open)
+        // Reposition dropdown on window resize and scroll (when dropdown is moved to body)
         window.addEventListener('resize', () => {
+            if (this.isOpen) {
+                this.positionDropdown();
+            }
+        });
+        
+        window.addEventListener('scroll', () => {
             if (this.isOpen) {
                 this.positionDropdown();
             }
@@ -74,213 +80,43 @@ class NotificationsManager {
     openDropdown() {
         this.isOpen = true;
         if (this.dropdown) {
+            // Move dropdown to body to escape all stacking contexts
+            if (this.dropdown.parentElement !== document.body) {
+                document.body.appendChild(this.dropdown);
+            }
+            
+            // Position dropdown relative to bell icon
+            this.positionDropdown();
+            
             // Add 'open' class to trigger CSS transition
             this.dropdown.classList.add('open');
-
-            // Position dropdown relative to bell icon (for fixed positioning)
-            this.positionDropdown();
-
-            // Apply emergency fixes immediately for search container conflict
-            setTimeout(() => {
-                this.applyEmergencyFixes();
-            }, 50);
-
-            // Debug dropdown visibility (only in debug mode)
-            if (window.location.search.includes('debug-notifications=true')) {
-                setTimeout(() => {
-                    this.debugDropdownPosition();
-                }, 100);
-            }
-
         } else {
             console.error('[Notifications] Dropdown element not found!');
         }
         this.loadNotifications();
     }
-
+    
     positionDropdown() {
         if (!this.bell || !this.dropdown) return;
-
+        
         const bellRect = this.bell.getBoundingClientRect();
-        const dropdownWidth = 360; // Match CSS width
-        const viewportWidth = window.innerWidth;
-
-        // Calculate position
-        let top = bellRect.bottom + 8; // 8px below bell
-        let right = viewportWidth - bellRect.right; // Distance from right edge
-
-        // Ensure dropdown doesn't go off-screen on mobile
-        if (bellRect.right + dropdownWidth > viewportWidth) {
-            right = 8; // Minimum margin from right edge
-        }
-
-        // Apply position
+        
+        // Position dropdown below bell icon, aligned to right
+        const top = bellRect.bottom + 8;
+        const right = window.innerWidth - bellRect.right;
+        
+        // Position dropdown (clean approach without !important)
+        this.dropdown.style.position = 'fixed';
         this.dropdown.style.top = `${top}px`;
         this.dropdown.style.right = `${right}px`;
-
-        if (window.location.search.includes('debug-notifications=true')) {
-            console.log('[Notifications] Dropdown positioned:', { top, right });
-        }
-    }
-
-    debugDropdownPosition() {
-        if (!this.dropdown) return;
-
-        const rect = this.dropdown.getBoundingClientRect();
-        const computedStyle = window.getComputedStyle(this.dropdown);
-
-        console.log('[Notifications] 🐛 Dropdown Debug Info:');
-        console.log('- Position:', { top: rect.top, left: rect.left, width: rect.width, height: rect.height });
-        console.log('- Display:', computedStyle.display);
-        console.log('- Visibility:', computedStyle.visibility);
-        console.log('- Opacity:', computedStyle.opacity);
-        console.log('- Z-index:', computedStyle.zIndex);
-        console.log('- Position type:', computedStyle.position);
-        console.log('- Transform:', computedStyle.transform);
-        console.log('- Clip:', computedStyle.clip);
-        console.log('- Clip path:', computedStyle.clipPath);
-        console.log('- Overflow:', computedStyle.overflow);
-        console.log('- Classes:', this.dropdown.className);
-
-        // Check if dropdown is in viewport
-        const isInViewport = rect.top >= 0 && rect.left >= 0 &&
-                           rect.bottom <= window.innerHeight &&
-                           rect.right <= window.innerWidth;
-        console.log('- In viewport:', isInViewport);
-
-        // Check parent elements for overflow issues
-        let parent = this.dropdown.parentElement;
-        let level = 0;
-        while (parent && level < 5) {
-            const parentStyle = window.getComputedStyle(parent);
-            console.log(`- Parent ${level} (${parent.tagName}):`, {
-                overflow: parentStyle.overflow,
-                overflowX: parentStyle.overflowX,
-                overflowY: parentStyle.overflowY,
-                position: parentStyle.position,
-                zIndex: parentStyle.zIndex
-            });
-            parent = parent.parentElement;
-            level++;
-        }
-
-        // Check if actually visible
-        if (rect.width > 0 && rect.height > 0) {
-            const elementAtPoint = document.elementFromPoint(rect.left + rect.width/2, rect.top + rect.height/2);
-            console.log('- Element at center:', elementAtPoint ? elementAtPoint.tagName : 'none');
-
-            if (elementAtPoint && elementAtPoint !== this.dropdown && !this.dropdown.contains(elementAtPoint)) {
-                console.warn('[Notifications] 🚨 Dropdown is being covered by:', elementAtPoint);
-                this.applyEmergencyFixes();
-            }
-        }
-
-        // Try alternative positioning if not visible
-        if (!isInViewport || rect.width === 0 || rect.height === 0) {
-            console.log('[Notifications] Applying fallback positioning');
-            this.applyFallbackPositioning();
-        }
-    }
-
-    checkDropdownVisibility() {
-        if (!this.dropdown) return;
-
-        const rect = this.dropdown.getBoundingClientRect();
-        const isVisible = rect.width > 0 && rect.height > 0 &&
-                         this.dropdown.offsetParent !== null;
-
-        console.log('[Notifications] Visibility check - Is visible:', isVisible);
-
-        if (!isVisible) {
-            console.warn('[Notifications] Dropdown still not visible, applying emergency fixes');
-            this.applyEmergencyFixes();
-        }
-    }
-
-    applyFallbackPositioning() {
-        if (!this.dropdown) return;
-
-        // Get bell position
-        const bellRect = this.bell.getBoundingClientRect();
-
-        // Apply fixed positioning relative to viewport
-        this.dropdown.style.position = 'fixed';
-        this.dropdown.style.top = (bellRect.bottom + 8) + 'px';
-        this.dropdown.style.right = (window.innerWidth - bellRect.right) + 'px';
         this.dropdown.style.left = 'auto';
-        this.dropdown.style.zIndex = '999999';
-
-        console.log('[Notifications] Applied fixed positioning:', {
-            top: this.dropdown.style.top,
-            right: this.dropdown.style.right
-        });
+        this.dropdown.style.bottom = 'auto';
+        this.dropdown.style.zIndex = '2147483647'; // Maximum z-index
+        this.dropdown.style.isolation = 'isolate';
+        this.dropdown.style.transform = 'translateZ(0)';
+        
     }
 
-    applyEmergencyFixes() {
-        if (!this.dropdown) return;
-
-        // Apply emergency fixes for dropdown visibility
-        if (window.location.search.includes('debug-notifications=true')) {
-            console.log('[Notifications] 🚨 Applying ULTIMATE emergency fixes');
-        }
-
-        // Move dropdown to body to escape all stacking contexts
-        document.body.appendChild(this.dropdown);
-
-        // Force all visibility properties with absolute highest z-index
-        this.dropdown.style.cssText = `
-            position: fixed !important;
-            top: 80px !important;
-            right: 20px !important;
-            left: auto !important;
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            z-index: 99999999 !important;
-            width: 360px !important;
-            max-height: 500px !important;
-            background: rgba(248, 249, 250, 0.95) !important;
-            backdrop-filter: blur(12px) !important;
-            -webkit-backdrop-filter: blur(12px) !important;
-            border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.18)) !important;
-            border-radius: 12px !important;
-            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15) !important;
-            transform: none !important;
-            clip: auto !important;
-            clip-path: none !important;
-            overflow: visible !important;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-        `;
-
-        // Force reposition relative to bell
-        setTimeout(() => {
-            if (this.bell) {
-                const bellRect = this.bell.getBoundingClientRect();
-                this.dropdown.style.top = `${bellRect.bottom + 8}px`;
-                this.dropdown.style.right = `${window.innerWidth - bellRect.right}px`;
-
-                // Verify positioning
-                setTimeout(() => {
-                    const finalRect = this.dropdown.getBoundingClientRect();
-                    const elementAtTop = document.elementFromPoint(
-                        finalRect.left + finalRect.width/2,
-                        finalRect.top + 10
-                    );
-                    console.log('[Notifications] 🎯 ULTIMATE FIX - Element at top after move:', elementAtTop?.tagName);
-                    console.log('[Notifications] 📐 Final position:', {
-                        top: finalRect.top,
-                        left: finalRect.left,
-                        width: finalRect.width,
-                        height: finalRect.height
-                    });
-                }, 50);
-            }
-        }, 50);
-
-        if (window.location.search.includes('debug-notifications=true')) {
-            console.log('[Notifications] 🚨 ULTIMATE FIX applied - dropdown moved to body with maximum z-index');
-        }
-    }
     
     closeDropdown() {
         this.isOpen = false;

@@ -86,15 +86,14 @@
   pointer-events: none; /* Prevent img from being the target, always use container */
 }
 
-/* Like Button Overlay - NEW position on image */
+/* Like Button Overlay - NEW position on image - Rounded pill style */
 .tikz-app .like-button-wrapper-overlay {
     position: absolute;
     bottom: 8px;
     right: 8px;
     z-index: 200;
     display: flex;
-    justify-content: flex-end;
-    border-radius: 10px;
+    align-items: center;
 }
 
 /* Comment Count Overlay - Below like button */
@@ -461,7 +460,7 @@
     font-weight: 400;
 }
 
-/* Like Button Styles */
+/* Like Button Styles - Rounded pill style matching comment count */
 .tikz-app input[id^="heart-"] {
     display: none;
 }
@@ -471,15 +470,23 @@
     cursor: pointer;
     display: flex;
     align-items: center;
-    height: 32px;
-    width: auto;
-    min-width: 60px;
-    border-radius: 8px;
+    gap: 4px;
+    padding: 6px 10px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
     border: none;
-    background-color: #2d2d2d;
-    overflow: hidden;
-    box-shadow: 0 2px 4px rgb(0 0 0 / 20%);
-    padding: 0;
+    overflow: visible;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+    font-size: 14px;
+    font-weight: 500;
+    color: #666;
+}
+
+.tikz-app .like-button:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
 }
 
 .tikz-app .like-button input[type="checkbox"] {
@@ -490,13 +497,17 @@
     display: flex;
     cursor: pointer;
     align-items: center;
-    justify-content: flex-start;
-    gap: 6px;
-    flex: 1;
-    width: 100%;
-    height: 100%;
-    padding: 0 8px;
+    justify-content: center;
+    gap: 4px;
     position: relative;
+}
+
+/* Like count container for animation */
+.tikz-app .like-count-container {
+    position: relative;
+    display: inline-block;
+    min-width: 16px;
+    text-align: center;
 }
 
 .tikz-app .like-icon {
@@ -507,21 +518,25 @@
 }
 
 .tikz-app .like-count {
-    color: #808080;
-    font-size: 12px;
+    color: #666;
+    font-size: 13px;
     font-weight: 500;
     transition: all 0.3s ease;
+    line-height: 1;
 }
 
 .tikz-app .like-count.two {
     position: absolute;
-    right: 8px;
+    top: 0;
+    left: 0;
+    right: 0;
     transform: translateY(20px);
     opacity: 0;
 }
 
 .tikz-app .like-count.one {
     position: relative;
+    display: block;
 }
 
 .tikz-app input[id^="heart-"]:checked ~ .like .like-icon {
@@ -537,6 +552,11 @@
 .tikz-app input[id^="heart-"]:checked ~ .like .like-count.two {
     transform: translateY(0);
     opacity: 1;
+    color: #ff4757;
+}
+
+/* Like button hover when liked */
+.tikz-app input[id^="heart-"]:checked ~ .like-button:hover {
     color: #ff4757;
 }
 

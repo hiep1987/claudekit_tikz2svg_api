@@ -145,7 +145,7 @@ class NotificationService:
                 return 0
             
             # Validation 3: Validate notification_type
-            valid_types = ['comment', 'like', 'reply', 'follow']
+            valid_types = ['comment', 'comment_social', 'like', 'reply', 'follow']
             if notification_type not in valid_types:
                 logger.warning(f"Invalid notification_type: {notification_type}")
                 return 0

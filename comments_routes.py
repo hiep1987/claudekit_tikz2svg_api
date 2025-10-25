@@ -29,6 +29,173 @@ from notification_service import get_notification_service
 from mysql.connector import Error as MySQLError
 import time
 
+# =====================================================
+# THREAD PARTICIPANTS HELPER FUNCTIONS
+# =====================================================
+
+def get_thread_participants(cursor, parent_comment_id, filename):
+    """
+    Get all unique participants in a comment thread for notifications.
+    
+    Args:
+        cursor: Database cursor
+        parent_comment_id: ID of the parent comment to trace thread from
+        filename: SVG filename to include SVG owner
+    
+    Returns:
+        set: Set of unique user_ids who should receive notifications
+    """
+    participants = set()
+    
+    try:
+        # Get the root comment ID (top-level comment in the thread)
+        root_comment_id = get_root_comment_id(cursor, parent_comment_id)
+        
+        # Get all users who participated in this thread (root + all replies)
+        cursor.execute("""
+            SELECT DISTINCT user_id
+            FROM svg_comments
+            WHERE svg_filename = %s
+            AND (id = %s OR parent_comment_id = %s)
+        """, (filename, root_comment_id, root_comment_id))
+        
+        thread_users = cursor.fetchall()
+        for user in thread_users:
+            participants.add(user['user_id'])
+        
+        # Also include SVG owner (they should know about all activity on their post)
+        cursor.execute("""
+            SELECT user_id FROM svg_image WHERE filename = %s
+        """, (filename,))
+        svg_info = cursor.fetchone()
+        
+        if svg_info:
+            participants.add(svg_info['user_id'])
+            
+        logger.info(f"Thread participants for comment {parent_comment_id}: {participants}")
+        return participants
+        
+    except Exception as e:
+        logger.warning(f"Error getting thread participants: {e}")
+        # Fallback to just parent comment owner + SVG owner
+        cursor.execute("""
+            SELECT user_id FROM svg_comments WHERE id = %s
+        """, (parent_comment_id,))
+        parent_comment = cursor.fetchone()
+        
+        if parent_comment:
+            participants.add(parent_comment['user_id'])
+            
+        cursor.execute("""
+            SELECT user_id FROM svg_image WHERE filename = %s
+        """, (filename,))
+        svg_info = cursor.fetchone()
+        
+        if svg_info:
+            participants.add(svg_info['user_id'])
+            
+        return participants
+
+
+def get_root_comment_id(cursor, comment_id):
+    """
+    Trace back to find the root (top-level) comment of a thread.
+    
+    Args:
+        cursor: Database cursor
+        comment_id: Starting comment ID
+    
+    Returns:
+        int: Root comment ID (top-level comment)
+    """
+    try:
+        cursor.execute("""
+            SELECT id, parent_comment_id
+            FROM svg_comments
+            WHERE id = %s
+        """, (comment_id,))
+        
+        comment = cursor.fetchone()
+        if not comment:
+            return comment_id
+            
+        # If this comment has no parent, it's the root
+        if comment['parent_comment_id'] is None:
+            return comment['id']
+        else:
+            # Recursively find the root
+            return get_root_comment_id(cursor, comment['parent_comment_id'])
+            
+    except Exception as e:
+        logger.warning(f"Error finding root comment: {e}")
+        return comment_id
+
+
+def check_follow_relationship(cursor, user1_id, user2_id):
+    """
+    Check if there's a follow relationship between two users (bidirectional).
+    
+    Args:
+        cursor: Database cursor
+        user1_id: First user ID
+        user2_id: Second user ID
+    
+    Returns:
+        bool: True if either user follows the other
+    """
+    try:
+        cursor.execute("""
+            SELECT COUNT(*) as count
+            FROM user_follow
+            WHERE (follower_id = %s AND followee_id = %s)
+               OR (follower_id = %s AND followee_id = %s)
+        """, (user1_id, user2_id, user2_id, user1_id))
+        
+        result = cursor.fetchone()
+        return result['count'] > 0 if result else False
+        
+    except Exception as e:
+        logger.warning(f"Error checking follow relationship: {e}")
+        return False
+
+
+def get_previous_commenters_with_follow_relationship(cursor, filename, current_user_id):
+    """
+    Get all previous commenters on an SVG who have follow relationship with current user.
+    
+    Args:
+        cursor: Database cursor
+        filename: SVG filename
+        current_user_id: ID of current user (new commenter)
+    
+    Returns:
+        set: Set of user_ids who commented before and have follow relationship
+    """
+    try:
+        # Get all unique users who have commented on this SVG (excluding current user)
+        cursor.execute("""
+            SELECT DISTINCT user_id
+            FROM svg_comments
+            WHERE svg_filename = %s AND user_id != %s
+        """, (filename, current_user_id))
+        
+        previous_commenters = cursor.fetchall()
+        followers_to_notify = set()
+        
+        # Check follow relationship for each previous commenter
+        for commenter in previous_commenters:
+            commenter_id = commenter['user_id']
+            if check_follow_relationship(cursor, current_user_id, commenter_id):
+                followers_to_notify.add(commenter_id)
+                logger.info(f"Follow relationship found: User {current_user_id} ↔ User {commenter_id}")
+        
+        logger.info(f"Previous commenters with follow relationship: {followers_to_notify}")
+        return followers_to_notify
+        
+    except Exception as e:
+        logger.warning(f"Error getting previous commenters with follow relationship: {e}")
+        return set()
+
 # Create Blueprint
 comments_bp = Blueprint('comments', __name__, url_prefix='/api/comments')
 
@@ -324,21 +491,18 @@ def create_comment(filename):
         
         logger.info(f"✅ Comment created: ID {comment_id}, User {current_user.id}, SVG {filename}")
         
-        # Create notification for SVG owner or parent comment owner
+        # Create notifications for thread participants
         try:
+            notification_service = get_notification_service()
+            
             if parent_comment_id:
-                # Reply notification: notify parent comment owner
-                cursor.execute("""
-                    SELECT user_id FROM svg_comments WHERE id = %s
-                """, (parent_comment_id,))
-                parent_comment = cursor.fetchone()
+                # Reply notification: notify ALL thread participants
+                thread_participants = get_thread_participants(cursor, parent_comment_id, filename)
                 
-                if parent_comment:
-                    parent_owner_id = parent_comment['user_id']
-                    
-                    notification_service = get_notification_service()
+                for participant_id in thread_participants:
+                    # Skip self-notification (handled by NotificationService)
                     notification_service.create_notification(
-                        user_id=parent_owner_id,
+                        user_id=participant_id,
                         actor_id=current_user.id,
                         notification_type='reply',
                         target_type='comment',
@@ -347,7 +511,9 @@ def create_comment(filename):
                         action_url=f'/view_svg/{filename}#comment-{comment_id}'
                     )
             else:
-                # Comment notification: notify SVG owner
+                # Top-level comment: notify SVG owner + previous commenters with follow relationships
+                
+                # 1. Always notify SVG owner
                 cursor.execute("""
                     SELECT user_id FROM svg_image WHERE filename = %s
                 """, (filename,))
@@ -356,7 +522,6 @@ def create_comment(filename):
                 if svg_info:
                     svg_owner_id = svg_info['user_id']
                     
-                    notification_service = get_notification_service()
                     notification_service.create_notification(
                         user_id=svg_owner_id,
                         actor_id=current_user.id,
@@ -366,6 +531,31 @@ def create_comment(filename):
                         content=comment_text[:100],  # Preview
                         action_url=f'/view_svg/{filename}#comment-{comment_id}'
                     )
+                
+                # 2. SOCIAL CROSS-ENGAGEMENT: Notify previous commenters with follow relationships
+                followers_to_notify = get_previous_commenters_with_follow_relationship(
+                    cursor, filename, current_user.id
+                )
+                
+                if followers_to_notify:
+                    # Get SVG owner username for accurate notification message
+                    cursor.execute("""
+                        SELECT username FROM user WHERE id = %s
+                    """, (svg_owner_id,))
+                    svg_owner_info = cursor.fetchone()
+                    svg_owner_username = svg_owner_info['username'] if svg_owner_info else 'người dùng khác'
+                    
+                    for follower_id in followers_to_notify:
+                        notification_service.create_notification(
+                            user_id=follower_id,
+                            actor_id=current_user.id,
+                            notification_type='comment',  # Use standard 'comment' type (enum constraint)
+                            target_type='svg_image',
+                            target_id=filename,
+                            content=f"ảnh của {svg_owner_username}",  # Include owner info in content to distinguish from regular comment
+                            action_url=f'/view_svg/{filename}#comment-{comment_id}'
+                        )
+                        logger.info(f"Social cross-engagement: Notified follower {follower_id} about comment from {current_user.id} on {svg_owner_username}'s SVG")
         except Exception as e:
             # Don't fail comment creation if notification fails
             logger.warning(f"⚠️ Failed to create comment notification: {e}")

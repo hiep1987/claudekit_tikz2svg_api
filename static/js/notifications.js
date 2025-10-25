@@ -470,6 +470,20 @@ class NotificationsManager {
             }
         }
         
+        // Handle message and content display for different notification types
+        let messageText = messageMap[notif.notification_type] || 'đã thực hiện một hành động';
+        let contentPreview = '';
+        
+        // Check for social cross-engagement notifications (comment type with "ảnh của" content)
+        if (notif.notification_type === 'comment' && notif.content && notif.content.startsWith('ảnh của')) {
+            // For social cross-engagement: "đã bình luận ảnh của [owner]"
+            messageText = `đã bình luận ${notif.content}`;
+            contentPreview = ''; // Don't show comment preview for social notifications
+        } else if (notif.content && notif.notification_type !== 'follow') {
+            // For regular notifications: show content as preview
+            contentPreview = `<p class="notification-preview">"${notif.content}"</p>`;
+        }
+        
         return `
             <div class="notification-item ${unreadClass}" 
                  data-notification-id="${notif.id}"
@@ -481,9 +495,9 @@ class NotificationsManager {
                      onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%23ccc%22%3E%3Cpath d=%22M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z%22/%3E%3C/svg%3E';">
                 <div class="notification-content">
                     <p class="notification-text">
-                        <strong>${notif.actor_username}</strong> ${messageMap[notif.notification_type]}
+                        <strong>${notif.actor_username}</strong> ${messageText}
                     </p>
-                    ${notif.content ? `<p class="notification-preview">"${notif.content}"</p>` : ''}
+                    ${contentPreview}
                     <span class="notification-time">${timeAgo}</span>
                 </div>
             </div>

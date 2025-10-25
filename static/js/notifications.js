@@ -81,9 +81,6 @@ class NotificationsManager {
         // Start polling for new notifications (every 30 seconds)
         this.startPolling();
 
-        if (window.location.search.includes('debug-notifications=true')) {
-            console.log('[Notifications] ✅ Initialized successfully');
-        }
     }
     
     toggleDropdown() {
@@ -218,9 +215,6 @@ class NotificationsManager {
         
         if (isMobile) {
             // Mobile: Apply full-width positioning with 6px margins
-            console.log('📱 Mobile detected, applying mobile styles');
-            console.log('📱 Window width:', window.innerWidth);
-            
             // Mobile styles: Full width with 6px margins from screen edges
             this.dropdown.style.width = `calc(100vw - 12px)`;
             this.dropdown.style.left = '6px';
@@ -232,13 +226,8 @@ class NotificationsManager {
             this.dropdown.style.transform = 'translateX(0)';
             this.dropdown.style.marginLeft = '0';
             this.dropdown.style.marginRight = '0';
-            
-            console.log('📱 Mobile styles applied successfully');
         } else if (isTablet) {
             // Tablet: Apply centered positioning with JavaScript (cache-proof)
-            console.log('📱 Tablet detected, applying centered positioning');
-            console.log('📱 Window width:', window.innerWidth);
-            
             // Tablet styles: Responsive width with perfect centering
             this.dropdown.style.width = `calc(100vw - 32px)`;
             this.dropdown.style.maxWidth = '360px';
@@ -249,11 +238,8 @@ class NotificationsManager {
             this.dropdown.style.bottom = 'auto';
             this.dropdown.style.marginLeft = '0';
             this.dropdown.style.marginRight = '0';
-            
-            console.log('📱 Tablet centered positioning applied successfully');
         } else {
             // Desktop: Position dropdown below bell icon, aligned to right
-            console.log('🖥️ Desktop detected, applying right-aligned positioning');
             const top = bellRect.bottom + 8;
             const right = window.innerWidth - bellRect.right;
             
@@ -394,9 +380,6 @@ class NotificationsManager {
                 }
             }
             
-            if (window.location.search.includes('debug-notifications=true')) {
-                console.log(`[Notifications] Badge updated: ${count} unread`);
-            }
             
         } catch (error) {
             console.error('[Notifications] Error updating badge:', error);
@@ -630,14 +613,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Only initialize if notifications bell exists (user is logged in)
     if (document.getElementById('notificationsBell')) {
         window.notificationsManager = new NotificationsManager();
-        if (window.location.search.includes('debug-notifications=true')) {
-            console.log('[Notifications] ✅ NotificationsManager ready');
-        }
 
         // Debug functionality (only when explicitly requested)
         if (window.location.search.includes('debug-notifications=true')) {
             setTimeout(() => {
-                console.log('[Notifications] 🔧 Debug mode: Opening dropdown automatically');
                 window.notificationsManager.openDropdown();
             }, 1000);
         }

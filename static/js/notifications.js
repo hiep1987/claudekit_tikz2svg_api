@@ -207,20 +207,64 @@ class NotificationsManager {
         if (!this.bell || !this.dropdown) return;
         
         const bellRect = this.bell.getBoundingClientRect();
+        const isMobile = window.innerWidth <= 575.98; // Mobile breakpoint
+        const isTablet = window.innerWidth > 575.98 && window.innerWidth <= 768; // Tablet breakpoint
         
-        // Position dropdown below bell icon, aligned to right
-        const top = bellRect.bottom + 8;
-        const right = window.innerWidth - bellRect.right;
-        
-        // Position dropdown (clean approach without !important)
+        // Always set essential positioning properties
         this.dropdown.style.position = 'fixed';
-        this.dropdown.style.top = `${top}px`;
-        this.dropdown.style.right = `${right}px`;
-        this.dropdown.style.left = 'auto';
-        this.dropdown.style.bottom = 'auto';
         this.dropdown.style.zIndex = '2147483647'; // Maximum z-index
         this.dropdown.style.isolation = 'isolate';
         this.dropdown.style.transform = 'translateZ(0)';
+        
+        if (isMobile) {
+            // Mobile: Apply full-width positioning with 6px margins
+            console.log('📱 Mobile detected, applying mobile styles');
+            console.log('📱 Window width:', window.innerWidth);
+            
+            // Mobile styles: Full width with 6px margins from screen edges
+            this.dropdown.style.width = `calc(100vw - 12px)`;
+            this.dropdown.style.left = '6px';
+            this.dropdown.style.right = '6px';
+            this.dropdown.style.maxWidth = 'none';
+            this.dropdown.style.minWidth = 'unset';
+            this.dropdown.style.top = `${bellRect.bottom + 8}px`;
+            this.dropdown.style.bottom = 'auto';
+            this.dropdown.style.transform = 'translateX(0)';
+            this.dropdown.style.marginLeft = '0';
+            this.dropdown.style.marginRight = '0';
+            
+            console.log('📱 Mobile styles applied successfully');
+        } else if (isTablet) {
+            // Tablet: Apply centered positioning with JavaScript (cache-proof)
+            console.log('📱 Tablet detected, applying centered positioning');
+            console.log('📱 Window width:', window.innerWidth);
+            
+            // Tablet styles: Responsive width with perfect centering
+            this.dropdown.style.width = `calc(100vw - 32px)`;
+            this.dropdown.style.maxWidth = '360px';
+            this.dropdown.style.left = '50%';
+            this.dropdown.style.right = 'auto';
+            this.dropdown.style.transform = 'translateX(-50%) translateZ(0)';
+            this.dropdown.style.top = `${bellRect.bottom + 8}px`;
+            this.dropdown.style.bottom = 'auto';
+            this.dropdown.style.marginLeft = '0';
+            this.dropdown.style.marginRight = '0';
+            
+            console.log('📱 Tablet centered positioning applied successfully');
+        } else {
+            // Desktop: Position dropdown below bell icon, aligned to right
+            console.log('🖥️ Desktop detected, applying right-aligned positioning');
+            const top = bellRect.bottom + 8;
+            const right = window.innerWidth - bellRect.right;
+            
+            this.dropdown.style.top = `${top}px`;
+            this.dropdown.style.right = `${right}px`;
+            this.dropdown.style.left = 'auto';
+            this.dropdown.style.bottom = 'auto';
+            this.dropdown.style.width = ''; // Let CSS handle width
+            this.dropdown.style.maxWidth = '';
+            this.dropdown.style.transform = 'translateZ(0)'; // Reset transform
+        }
         
         // Force solid background and enhanced styling
         this.dropdown.style.backgroundColor = 'rgb(248, 249, 250)';

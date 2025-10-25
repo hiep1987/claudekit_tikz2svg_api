@@ -56,8 +56,10 @@ node lint-template-js.js path/to/template.html
 ✅ **3 JavaScript blocks được tìm thấy và đều PASS linting:**
 
 1. **Block 1 (lines 139-156)**: Google Tag Manager code
-2. **Block 2 (lines 161-173)**: Environment detection & user ID setup
+2. **Block 2 (lines 161-173)**: Environment detection & user ID setup (✨ **Fixed IDE errors**)
 3. **Block 3 (lines 261-278)**: MathJax configuration
+
+🔧 **Recent Fix**: Chuyển từ inline Jinja2 syntax sang data attributes để tránh IDE errors.
 
 ## Tính năng của Template Linter
 
@@ -89,13 +91,18 @@ window.currentUserId = null; // Will be set by template
 window.data = {% if complex_condition %}{{ complex_data }}{% endif %};
 ```
 
-### 2. CSP-Safe Patterns
+### 2. CSP-Safe Patterns (IDE-Friendly)
 ```javascript
-// ✅ Good: Use data attributes
-const userId = document.body.dataset.userId;
+// ✅ Good: Use data attributes (no IDE errors)
+const userId = document.documentElement.dataset.userId || null;
 
-// ❌ Avoid: Inline template variables
+// ❌ Avoid: Inline template variables (IDE errors)
 window.userId = {{ user.id }};
+```
+
+```html
+<!-- ✅ Set data in HTML attributes -->
+<html data-user-id="{% if current_user.is_authenticated %}{{ current_user.id }}{% else %}null{% endif %}">
 ```
 
 ### 3. External Files
@@ -115,6 +122,31 @@ window.userId = {{ user.id }};
 - Kiểm tra `eslint.config.js` configuration
 - Đảm bảo globals được định nghĩa đúng
 - Check temporary files nếu cần debug
+
+### IDE JavaScript Errors
+**Vấn đề**: IDE báo JavaScript syntax errors trong HTML templates với Jinja2 syntax.
+
+**Nguyên nhân**: IDE cố gắng parse Jinja2 `{% %}` và `{{ }}` như JavaScript thuần túy.
+
+**Giải pháp đã áp dụng**:
+```html
+<!-- ❌ Old (gây IDE errors): -->
+<script>
+window.currentUserId = {% if current_user.is_authenticated %}{{ current_user.id }}{% else %}null{% endif %};
+</script>
+
+<!-- ✅ New (IDE-friendly): -->
+<html data-user-id="{% if current_user.is_authenticated %}{{ current_user.id }}{% else %}null{% endif %}">
+<script>
+window.currentUserId = document.documentElement.dataset.userId || null;
+</script>
+```
+
+**Lợi ích**:
+- ✅ No IDE JavaScript errors
+- ✅ CSP-compliant (Content Security Policy)
+- ✅ Separation of concerns
+- ✅ Vẫn pass ESLint linting
 
 ### Template Syntax Issues
 - Script có thể cần update regex patterns

@@ -4,6 +4,25 @@ set -euo pipefail
 PROJECT_DIR="/Users/hieplequoc/web/work/tikz2svg_api"
 cd "$PROJECT_DIR" || { echo "Không tìm thấy: $PROJECT_DIR"; exit 1; }
 
+# Start required services
+echo "🚀 Starting local development services..."
+
+# Start MySQL
+echo "📊 Starting MySQL..."
+if ! brew services list | grep mysql | grep -q started; then
+    brew services start mysql
+    sleep 2
+fi
+
+# Start Apache for phpMyAdmin
+echo "🌐 Starting Apache..."
+if ! brew services list | grep httpd | grep -q started; then
+    brew services start httpd
+    sleep 2
+fi
+
+echo "✅ Services ready!"
+
 # Load environment variables từ .env nếu có
 if [[ -f ".env" ]]; then
 	set -a
@@ -42,5 +61,14 @@ except Exception as e:
 	exit(1)
 "
 
-echo "[LOCAL DEV] http://127.0.0.1:5173/ | DB: ${DB_NAME}"
+echo ""
+echo "🎉 Development environment ready!"
+echo "📱 App: http://127.0.0.1:5173/"
+echo "🗄️  phpMyAdmin: http://localhost:8080/phpmyadmin/"
+echo "📊 Database: ${DB_NAME}"
+echo ""
+echo "Database login info:"
+echo "Username: hiep1987"
+echo "Password: (empty or your password)"
+echo ""
 exec flask --app app:app --debug run --host 127.0.0.1 --port 5173

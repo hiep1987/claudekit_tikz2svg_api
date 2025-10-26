@@ -1,0 +1,386 @@
+/**
+ * NOTIFICATIONS SYSTEM - CSS
+ * Version: 1.0.0
+ * Date: 2025-10-24
+ * 
+ * Styling for in-app notifications bell icon and dropdown
+ */
+
+/* =================================================================
+   NOTIFICATIONS CONTAINER & DROPDOWN POSITIONING
+   ================================================================= */
+
+/* Higher specificity to override global .tikz-app styles without !important */
+html body .container .tikz-app.notifications-container,
+.tikz-app .page-container .notifications-container {
+    position: relative;
+    display: inline-block;
+    height: auto;
+    min-height: 0; /* Override global min-height: 100vh */
+    width: auto;
+    max-width: none;
+}
+
+.tikz-app .notifications-dropdown {
+    /* Positioning - Use fixed to escape all stacking contexts */
+    position: fixed;
+    top: 80px; /* Will be dynamically positioned by JavaScript */
+    right: 20px; /* Will be dynamically positioned by JavaScript */
+
+    /* Size - Desktop default width and height */
+    width: 360px;
+    max-width: 360px;
+    max-height: 500px;
+
+    /* Display - Hidden by default */
+    display: none;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+
+    /* Z-index - Must be higher than search container and everything else */
+    z-index: 2147483647; /* Maximum possible z-index value */
+
+    /* Visual - Solid background with enhanced styling */
+    background: rgb(248 249 250);
+
+    /* backdrop-filter: blur(8px); */
+   border-radius: 12px;
+   box-shadow: 0 8px 32px rgb(31 38 135 / 15%), 0 2px 8px rgb(0 0 0 / 10%);
+   border: 2px solid rgb(229 231 235);
+   overflow: hidden; /* Hide overflow to respect border-radius */
+
+    /* Animation */
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+
+    /* Force new stacking context to escape parent contexts */
+    transform: translateZ(0);
+    isolation: isolate;
+    will-change: transform, opacity;
+}
+
+/* When dropdown is open (controlled by JavaScript) */
+.tikz-app .notifications-dropdown.open {
+    display: block;
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    
+    /* Force rendering in new stacking context */
+    transform: translateZ(0);
+    isolation: isolate;
+    
+    /* Enhanced border when open */
+    border: 2px solid rgb(59 130 246 / 30%);
+}
+
+/* =================================================================
+   NOTIFICATIONS BLUR OVERLAY
+   ================================================================= */
+
+.tikz-app .notifications-blur-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgb(0 0 0 / 10%);
+    backdrop-filter: blur(3px);
+    z-index: 2147483646; /* Just below dropdown */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.tikz-app .notifications-blur-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* =================================================================
+   BELL ICON & BADGE
+   ================================================================= */
+
+.tikz-app .notifications-bell:hover {
+    background: rgb(59 130 246 / 10%);
+    border-radius: var(--radius-md, 8px);
+}
+
+.tikz-app .notifications-empty i {
+    font-size: 48px;
+    color: #dfe6e9;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.tikz-app .notifications-bell:hover i {
+    color: var(--primary-color, #1976d2);
+}
+
+/* Hover effect for mark all read button */
+.tikz-app .mark-all-read-btn:hover {
+    background: var(--primary-bg, rgb(25 118 210 / 10%));
+}
+
+/* =================================================================
+   NOTIFICATION ITEMS
+   ================================================================= */
+
+.tikz-app .notification-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e5e7eb;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+/* First notification item - rounded top corners */
+.tikz-app .notification-item:first-child {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+/* Last notification item - rounded bottom corners, no border */
+.tikz-app .notification-item:last-child {
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border-bottom: none;
+}
+
+.tikz-app .notification-item:hover {
+    background: #f8fafc;
+    border-left: 3px solid #1976d2;
+    padding-left: 13px; /* Adjust for border */
+    transform: translateX(2px);
+}
+
+.tikz-app .notification-item:focus {
+    outline: 2px solid #1976d2;
+    outline-offset: -2px;
+}
+
+.tikz-app .notification-item.unread {
+    background: #f0f7ff;
+    border-left: 3px solid #3b82f6;
+    padding-left: 13px;
+}
+
+.tikz-app .notification-item.unread:hover {
+    background: #e3f2fd;
+    border-left: 3px solid #1976d2;
+    transform: translateX(2px);
+}
+
+/* Read notifications - subtle styling */
+.tikz-app .notification-item:not(.unread) {
+    opacity: 0.7; /* Slightly faded */
+    background: #fafafa; /* Very light gray */
+}
+
+.tikz-app .notification-item:not(.unread):hover {
+    opacity: 0.9; /* Less faded on hover */
+    background: #f5f5f5; /* Slightly darker gray on hover */
+    border-left: 3px solid #e0e0e0; /* Light gray accent */
+    padding-left: 13px;
+    transform: translateX(2px);
+}
+
+/* High specificity to override any other avatar styles */
+.tikz-app .notifications-dropdown .notification-item .notification-avatar {
+    width: 24px;
+    height: 24px;
+    max-width: 24px;
+    max-height: 24px;
+    min-width: 24px;
+    min-height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    box-sizing: border-box;
+}
+
+.tikz-app .notification-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.tikz-app .notification-text {
+    font-size: 13px;
+    color: #374151;
+    margin: 0 0 4px;
+    line-height: 1.4;
+}
+
+.tikz-app .notification-text strong {
+    font-weight: 600;
+    color: #1976d2;
+}
+
+.tikz-app .notification-preview {
+    font-size: 12px;
+    color: #6b7280;
+    margin: 4px 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-style: italic;
+}
+
+.tikz-app .notification-time {
+    font-size: 12px;
+    color: #95a5a6;
+}
+
+/* =================================================================
+   EMPTY STATE
+   ================================================================= */
+
+.tikz-app .notifications-empty {
+    padding: 60px 20px;
+    text-align: center;
+    color: #95a5a6;
+}
+
+.tikz-app .notifications-empty p {
+    margin: 8px 0 0;
+    font-size: 14px;
+}
+
+/* =================================================================
+   RESPONSIVE - MOBILE
+   ================================================================= */
+
+/* =================================================================
+   DESKTOP-FIRST RESPONSIVE APPROACH
+   ================================================================= */
+
+/* Base styles: Desktop (≥769px) - Default 360px width handled by base CSS */
+
+/* Large tablets and small desktops: ≤768px */
+
+/* Note: Tablet positioning now handled by JavaScript for cache compatibility */
+
+/* This ensures consistent centering behavior across different cache states */
+/* stylelint-disable-next-line media-feature-range-notation */
+@media (max-width: 768px) {
+    .tikz-app .notification-item {
+        padding: 12px;
+    }
+
+    .tikz-app .notifications-dropdown .notification-item .notification-avatar {
+        width: 20px;
+        height: 20px;
+        max-width: 20px;
+        max-height: 20px;
+        min-width: 20px;
+        min-height: 20px;
+    }
+
+    .tikz-app .notification-text {
+        font-size: 12px;
+    }
+
+    .tikz-app .notification-preview {
+        font-size: 12px;
+    }
+}
+
+/* Mobile phones: <576px - JavaScript handles positioning */
+
+/* Note: Mobile positioning handled by JavaScript for better cache compatibility */
+
+/* This ensures consistent behavior across different cache states */
+
+/* Small mobile phones: ≤480px */
+/* stylelint-disable-next-line media-feature-range-notation */
+@media (max-width: 480px) {
+    .tikz-app .notifications-header {
+        padding: 12px 16px;
+    }
+
+    .tikz-app .notifications-header h3 {
+        font-size: 15px;
+    }
+
+    .tikz-app .mark-all-read-btn {
+        font-size: 12px;
+        padding: 4px;
+    }
+}
+
+/* =================================================================
+   ALTERNATIVE POSITIONING (Fallback)
+   ================================================================= */
+
+/* Fixed positioning fallback for edge cases */
+.tikz-app .notifications-dropdown.open.fixed-position {
+    position: fixed;
+    top: 80px; /* Adjust based on navbar height */
+    right: 20px;
+    z-index: var(--z-always-on-top, 9999);
+}
+
+/* =================================================================
+   ACCESSIBILITY
+   ================================================================= */
+
+.tikz-app .notifications-bell:focus {
+    outline: 2px solid #1976d2;
+    outline-offset: 2px;
+    border-radius: 8px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .tikz-app .notifications-dropdown {
+        border: 2px solid var(--text-primary, #000);
+    }
+
+    .tikz-app .notification-badge {
+        background: var(--text-primary, #000);
+        color: var(--text-white, #fff);
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .tikz-app .notifications-bell,
+    .tikz-app .notification-item,
+    .tikz-app .mark-all-read-btn,
+    .tikz-app .notifications-dropdown {
+        transition: none;
+    }
+}
+
+/* =================================================================
+   NOTIFICATIONS LIST CONTAINER
+   ================================================================= */
+
+.tikz-app .notifications-list {
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    overflow-y: auto;
+}
+
+/* =================================================================
+   SCROLLBAR STYLING (for dropdown)
+   ================================================================= */
+
+.tikz-app .notifications-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.tikz-app .notifications-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.tikz-app .notifications-list::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+.tikz-app .notifications-list::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+

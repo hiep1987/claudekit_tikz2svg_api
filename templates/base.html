@@ -69,6 +69,11 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/login_modal.css', v='1.0') }}">
     {% endif %}
     
+    <!-- Notifications CSS (always load for logged-in users) -->
+    {% if current_user.is_authenticated %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/notifications.css') }}?v=20251024{{ range(1000, 9999) | random }}">
+    {% endif %}
+    
     <!-- Page-specific CSS -->
     {% block extra_css %}{% endblock %}
     
@@ -244,6 +249,11 @@
     <!-- Navigation JavaScript (có điều kiện) -->
     {% if include_navigation %}
     <script src="{{ url_for('static', filename='js/navigation.js', v='1.0') }}"></script>
+    {% endif %}
+    
+    <!-- Notifications JavaScript (always load for logged-in users) -->
+    {% if current_user.is_authenticated %}
+    <script src="{{ url_for('static', filename='js/notifications.js', v='1.0') }}"></script>
     {% endif %}
     
     <!-- MathJax (có điều kiện) -->

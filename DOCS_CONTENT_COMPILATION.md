@@ -9,11 +9,12 @@
 3. [🔧 Chức năng biên dịch chi tiết](#3-chức-năng-biên-dịch-chi-tiết)
 4. [🎨 Quản lý File SVG & Menu Actions](#4-quản-lý-file-svg--menu-actions)
 5. [🔄 Chuyển đổi định dạng](#5-chuyển-đổi-định-dạng)
-6. [👤 Profile & Tương tác xã hội](#6-profile--tương-tác-xã-hội)
-7. [🛡️ Xác thực danh tính & Bảo mật](#7-xác-thực-danh-tính--bảo-mật)
-8. [🔍 Tìm kiếm & Từ khóa](#8-tìm-kiếm--từ-khóa)
-9. [🛠️ Xử lý lỗi & Troubleshooting](#9-xử-lý-lỗi--troubleshooting)
-10. [💡 Tips & Best Practices](#10-tips--best-practices)
+6. [💬 Hệ thống Comments](#6-hệ-thống-comments)
+7. [👤 Profile & Tương tác xã hội](#7-profile--tương-tác-xã-hội)
+8. [🛡️ Xác thực danh tính & Bảo mật](#8-xác-thực-danh-tính--bảo-mật)
+9. [🔍 Tìm kiếm & Từ khóa](#9-tìm-kiếm--từ-khóa)
+10. [🛠️ Xử lý lỗi & Troubleshooting](#10-xử-lý-lỗi--troubleshooting)
+11. [💡 Tips & Best Practices](#11-tips--best-practices)
 
 ---
 
@@ -26,6 +27,7 @@
 - ✅ **Biên dịch TikZ real-time** với preview ngay lập tức
 - ✅ **Auto-detection packages** thông minh và manual specification nâng cao  
 - ✅ **Quản lý file SVG** với like/unlike, follow/unfollow system
+- ✅ **Comments System** bình luận với LaTeX & TikZ code sharing
 - ✅ **Chuyển đổi đa định dạng** SVG → PNG/JPEG với tùy chọn size, DPI
 - ✅ **Hệ thống xác thực** email verification với mã 6 số
 - ✅ **Tương tác xã hội** follow users, xem followed posts
@@ -302,22 +304,393 @@ Tính năng này giúp bạn dễ dàng khám phá cộng đồng, xem ai đã y
 
 ---
 
-## 6. 👤 Profile & Tương tác xã hội
+## 6. 💬 Hệ thống Comments
 
-### 6.1 Quản lý Profile
+### 6.1 Giới thiệu Comments System
+
+**Comments System** cho phép người dùng trao đổi, thảo luận về TikZ code trực tiếp trên trang xem SVG. Hệ thống hỗ trợ **LaTeX math**, **TikZ code sharing**, và **nested replies** để tạo môi trường học tập và chia sẻ kiến thức phong phú.
+
+**Tính năng chính:**
+- ✅ **Bình luận & trả lời** với cấu trúc thread (parent → replies)
+- ✅ **LaTeX math support** inline `$x^2$` và display `$$\int f(x) dx$$`
+- ✅ **TikZ code blocks** với syntax `\code{...}` và copy button
+- ✅ **Real-time preview** MathJax rendering khi gõ
+- ✅ **Like/Unlike** comments để đánh giá chất lượng
+- ✅ **Edit & Delete** comments của chính mình
+- ✅ **Pagination** tự động load thêm comments
+- ✅ **Glass morphism UI** đẹp mắt, responsive
+
+---
+
+### 6.2 Cách sử dụng Comments
+
+#### Đăng bình luận mới
+
+**Yêu cầu:** Phải đăng nhập
+
+**Bước thực hiện:**
+1. **Truy cập trang SVG** bất kỳ (ví dụ: `/view_svg.html?filename=example.svg`)
+2. **Cuộn xuống phần Comments** (ở dưới caption)
+3. **Nhập nội dung** vào textarea:
+   - Text thông thường
+   - LaTeX math: `$x^2 + y^2 = r^2$`
+   - TikZ code: `\code{\tikz \draw (0,0) circle (1cm);}`
+4. **Xem preview** real-time với MathJax rendering
+5. **Click "Gửi bình luận"** để đăng
+
+**Giới hạn:**
+- **5000 ký tự** tối đa cho mỗi comment
+- **Rate limiting** để tránh spam
+
+---
+
+#### Trả lời comment (Replies)
+
+**Cách trả lời:**
+1. **Click nút "Trả lời"** ở comment bất kỳ
+2. **Form trả lời xuất hiện** dưới comment đó
+3. **Nhập nội dung** với full LaTeX & TikZ support
+4. **Xem preview** real-time
+5. **Click "Gửi"** hoặc "Hủy"
+
+**Đặc điểm:**
+- Replies **lồng vào trong** parent comment
+- Hiển thị **avatar** và **username** của người trả lời
+- **Badge** verified nếu tài khoản đã xác thực
+
+---
+
+### 6.3 LaTeX Math Support
+
+#### Inline math (trong dòng)
+
+**Syntax:** `$công thức$`
+
+**Ví dụ:**
+```
+Công thức $E = mc^2$ rất nổi tiếng.
+```
+
+**Hiển thị:** Công thức $E = mc^2$ rất nổi tiếng.
+
+---
+
+#### Display math (hiển thị riêng)
+
+**Syntax:** `$$công thức$$`
+
+**Ví dụ:**
+```
+Tích phân:
+$$\int_0^\infty e^{-x} dx = 1$$
+```
+
+**Hiển thị:** Tích phân trên một dòng riêng, to hơn, căn giữa
+
+---
+
+### 6.4 TikZ Code Blocks
+
+#### Cú pháp chia sẻ TikZ code
+
+**Syntax:** `\code{...TikZ code...}`
+
+**Ví dụ đơn giản:**
+```
+Vẽ circle đơn giản:
+
+\code{
+\tikz \draw (0,0) circle (1cm);
+}
+```
+
+**Hiển thị:**
+```
+┌─────────────────────────────────┐
+│ TikZ Code                  📋  │ ← Header với copy button
+├─────────────────────────────────┤
+│ \tikz \draw (0,0) circle (1cm);│ ← Code formatted
+└─────────────────────────────────┘
+```
+
+---
+
+#### Ví dụ phức tạp với nested braces
+
+```
+\code{
+\begin{tikzpicture}
+  \draw (-2,0) -- (2,0);
+  \filldraw [red] (0,0) circle (4pt);
+  \draw (-2,-2) .. controls (0,0) .. (2,-2);
+  \draw (-2,2) .. controls (-1,0) and (1,0) .. (2,2);
+\end{tikzpicture}
+}
+```
+
+**Đặc điểm:**
+- ✅ **Hỗ trợ nested braces** không giới hạn độ sâu
+- ✅ **Copy button** một click copy toàn bộ code
+- ✅ **Visual feedback** 📋 → ✅ khi copy thành công
+- ✅ **Light professional design** dễ đọc
+- ✅ **Syntax preservation** giữ nguyên format
+
+---
+
+#### Copy TikZ Code
+
+**Cách copy:**
+1. **Hover vào code block** → Border chuyển màu xanh
+2. **Click nút 📋** ở góc phải header
+3. **Icon đổi thành ✅** (2 giây) → Code đã copy!
+4. **Paste** vào editor để sử dụng
+
+**Lợi ích:**
+- Không cần select + copy thủ công
+- Code được copy **chính xác 100%**
+- Tiết kiệm thời gian, giảm lỗi
+
+---
+
+### 6.5 Like & Unlike Comments
+
+#### Cách like comment
+
+**Bước thực hiện:**
+1. **Đọc comment** hữu ích hoặc hay
+2. **Click nút 👍** ở footer comment
+3. **Button chuyển màu xanh** (liked state)
+4. **Số like tăng lên** +1
+
+**Cách unlike:**
+- **Click lại nút 👍** đã liked
+- Button trở về trạng thái mặc định
+- Số like giảm -1
+
+**Đặc điểm:**
+- **Optimistic UI**: Cập nhật ngay lập tức
+- **API validation**: Xác thực từ server
+- **Visual feedback**: Màu xanh đậm khi liked
+- **Like count** hiển thị số người like
+
+---
+
+### 6.6 Edit & Delete Comments
+
+#### Edit comment
+
+**Yêu cầu:** Comment của chính mình
+
+**Bước thực hiện:**
+1. **Click nút "✏️ Sửa"** ở comment của bạn
+2. **Textarea hiện ra** với nội dung cũ
+3. **Chỉnh sửa nội dung** (vẫn support LaTeX & TikZ)
+4. **Click "Lưu"** hoặc "Hủy"
+5. **Label "(đã chỉnh sửa)"** hiển thị sau timestamp
+
+**Lưu ý:**
+- Không thể edit comment của người khác
+- Edit được **unlimited lần**
+- Timestamp không đổi, chỉ thêm edited label
+
+---
+
+#### Delete comment
+
+**Yêu cầu:** Comment của chính mình
+
+**Bước thực hiện:**
+1. **Click nút "🗑️ Xóa"** ở comment của bạn
+2. **Confirm dialog** xuất hiện
+3. **Confirm xóa** → Comment biến mất
+4. **Comment count** tự động cập nhật
+
+**Lưu ý:**
+- **Xóa vĩnh viễn**, không thể khôi phục
+- Xóa parent comment sẽ **xóa tất cả replies**
+- Comment count bao gồm cả replies bị xóa
+
+---
+
+### 6.7 Pagination & Loading
+
+#### Auto-load more comments
+
+**Cách hoạt động:**
+- Mỗi trang load **20 comments** (top-level)
+- **Button "Tải thêm"** xuất hiện nếu còn comments
+- Click button → Load 20 comments tiếp theo
+- **Smooth scrolling** và loading skeleton
+
+**Navigation:**
+- **Trang hiện tại** / **Tổng số trang** hiển thị
+- **Nút Previous/Next** để chuyển trang
+- **Disable** khi ở trang đầu/cuối
+
+---
+
+### 6.8 UI/UX Features
+
+#### Glass Morphism Design
+
+**Đặc điểm:**
+- **Backdrop blur** effect sang trọng
+- **Transparent background** với glass texture
+- **Subtle shadows** tăng chiều sâu
+- **Hover effects** smooth transitions
+
+**Consistency:**
+- Match với **image caption section**
+- Sử dụng **design system variables**
+- **WCAG AAA** contrast ratios
+
+---
+
+#### Mobile Responsive
+
+**Tối ưu cho mobile:**
+- **Font size** giảm phù hợp (11px → 14px)
+- **Touch-friendly buttons** padding lớn hơn
+- **Avatar** hiển thị rõ ràng
+- **Code blocks** horizontal scroll smooth
+
+**Breakpoints:**
+- **Mobile**: <768px - Compact, vertical layout
+- **Tablet**: 768px-992px - Balanced
+- **Desktop**: ≥992px - Full features
+
+---
+
+#### Avatar & Verified Badge
+
+**Avatar display:**
+- **User đã upload**: Hiển thị ảnh avatar
+- **Chưa upload**: Fallback circle với chữ cái đầu
+- **Gradient background**: Blue → Purple
+- **Rounded 50%**: Hình tròn đẹp mắt
+
+**Verified badge:**
+- Icon **✓ xanh** bên cạnh username
+- Chỉ hiện nếu **đã xác thực email**
+- **Tooltip** "Tài khoản đã xác thực"
+
+---
+
+### 6.9 Real-time Preview
+
+**Khi gõ comment:**
+1. **Textarea input** → Trigger preview update (debounced 300ms)
+2. **HTML escaping** để tránh XSS
+3. **Parse LaTeX** `$...$` và `$$...$$`
+4. **Parse TikZ code** `\code{...}`
+5. **MathJax rendering** công thức toán
+6. **Line breaks** conversion `\n` → `<br>`
+
+**Hiển thị preview:**
+- **"Preview (với MathJax):"** title
+- Content render **y hệt** như comment đã gửi
+- Update **real-time** khi gõ
+- **Placeholder** khi chưa nhập gì
+
+---
+
+### 6.10 Comment Count Badge
+
+**Hiển thị:**
+```
+💬 Bình luận (15)
+            ↑
+    Total comments + replies
+```
+
+**Cách đếm:**
+- **Top-level comments** + **All replies** = Total
+- Align với **industry standard** (YouTube, Facebook, Reddit)
+- **Auto-update** khi thêm/xóa comment
+
+**Lợi ích:**
+- User biết **tổng engagement**
+- **Social proof** cao hơn
+- **Transparent** về activity
+
+---
+
+### 6.11 Security & Validation
+
+#### XSS Protection
+
+**Comments System sử dụng:**
+1. **HTML escaping** tất cả user input
+2. **Double escaping** cho TikZ code:
+   - Escape → Extract code → Re-escape
+3. **No eval()** - Code chỉ display, không execute
+4. **CSP headers** restrict script sources
+
+**Test XSS:**
+```
+Input:  \code{<script>alert('XSS')</script>}
+Output: &lt;script&gt;...&lt;/script&gt; ✅ Safe!
+```
+
+---
+
+#### Input Validation
+
+**Server-side:**
+- **Max length**: 5000 characters
+- **Required fields**: comment_text, svg_filename
+- **Sanitization**: Strip HTML tags (trừ preview)
+- **Rate limiting**: Tránh spam
+
+**Client-side:**
+- **Character counter**: 0/5000
+- **Warning color** khi gần limit (>4500)
+- **Disable submit** khi rỗng
+- **Trim whitespace** before send
+
+---
+
+### 6.12 FAQ Comments
+
+**Q: Tại sao comment của tôi không hiện?**
+**A:** Kiểm tra:
+- Đã đăng nhập chưa?
+- Content có vượt 5000 ký tự không?
+- Có lỗi network không? (Check console)
+
+**Q: Tôi có thể edit comment sau khi gửi không?**
+**A:** Có, click nút "✏️ Sửa" ở comment của bạn, edit và "Lưu".
+
+**Q: Comment bị xóa có thể khôi phục không?**
+**A:** Không, xóa là vĩnh viễn. Hãy cẩn thận trước khi xóa.
+
+**Q: Làm sao để copy TikZ code từ comment?**
+**A:** Click nút 📋 ở góc phải code block, code sẽ được copy vào clipboard.
+
+**Q: Comment có hỗ trợ markdown không?**
+**A:** Không, nhưng hỗ trợ LaTeX math ($...$) và TikZ code (\code{...}).
+
+**Q: Tôi có thể reply reply không?**
+**A:** Hiện tại chỉ support 1 cấp (parent → replies). Reply to reply sẽ cùng cấp với reply đầu tiên.
+
+---
+
+## 7. 👤 Profile & Tương tác xã hội
+
+### 7.1 Quản lý Profile
 - **Tải ảnh đại diện**: Hỗ trợ nhiều định dạng (PNG, JPG, GIF)
 - **Chỉnh sửa tiểu sử**: Soạn thảo rich text với hỗ trợ markdown
 - **Trang cài đặt**: `/profile/{user_id}/settings`
 - **Profile công khai**: `/profile/{user_id}` có thể xem bởi người khác
 
-### 6.2 Follow/Unfollow System
+### 7.2 Follow/Unfollow System
 
 #### Yêu cầu để Follow
 - **✅ Tài khoản đã xác thực**: Cần xác thực email trước khi follow người khác
 - **🚫 Không thể tự follow**: Không thể follow chính mình
 - **👥 Theo dõi lẫn nhau**: Có thể follow và được follow lại
 
-### 6.3 Xem bài đăng từ người đã Follow
+### 7.3 Xem bài đăng từ người đã Follow
 **Cách sử dụng:**
 1. **Đăng nhập** và **xác thực tài khoản** (bắt buộc)
 2. **Follow các user** mà bạn quan tâm
@@ -325,7 +698,7 @@ Tính năng này giúp bạn dễ dàng khám phá cộng đồng, xem ai đã y
 4. **Sắp xếp theo thời gian** (mới nhất hiển thị trước)
 5. **Tự động tải thêm** khi cuộn xuống dưới
 
-### 6.4 Tương tác xã hội
+### 7.4 Tương tác xã hội
 **Các hoạt động có thể thực hiện:**
 - **❤️ Like/Unlike**: Thể hiện sở thích với SVG của người khác
 - **👀 Xem profile**: Click vào tên tác giả để xem profile và các SVG khác
@@ -334,7 +707,7 @@ Tính năng này giúp bạn dễ dàng khám phá cộng đồng, xem ai đã y
 
 ---
 
-## 7. 🛡️ Xác thực danh tính & Bảo mật
+## 8. 🛡️ Xác thực danh tính & Bảo mật
 
 ### 7.1 Tại sao cần xác thực?
 - **🔒 Bảo mật cao hơn**: Xác nhận email thật
@@ -342,7 +715,7 @@ Tính năng này giúp bạn dễ dàng khám phá cộng đồng, xem ai đã y
 - **✅ Uy tín**: Badge "Đã xác thực" tăng trust
 - **🚀 Priority access**: Features mới ưu tiên cho verified users
 
-### 7.2 Quy trình xác thực 5 bước
+### 8.2 Quy trình xác thực 5 bước
 
 #### Bước 1: Kiểm tra trạng thái
 - Vào **Profile Settings** → Xem verification status
@@ -390,7 +763,7 @@ Tính năng này giúp bạn dễ dàng khám phá cộng đồng, xem ai đã y
 
 ---
 
-## 8. 🔍 Tìm kiếm & Từ khóa
+## 9. 🔍 Tìm kiếm & Từ khóa
 
 ### 8.1 Tính năng tìm kiếm mới (2024)
 **Enhanced Search Bar với hai chế độ:**
@@ -453,7 +826,7 @@ GET /api/keywords/search?q={query}     # API suggestions
 
 ---
 
-## 9. 🛠️ Xử lý lỗi & Troubleshooting
+## 10. 🛠️ Xử lý lỗi & Troubleshooting
 
 ### 9.1 Lỗi biên dịch LaTeX
 
@@ -534,7 +907,7 @@ Error: Access denied - insufficient permissions
 
 ---
 
-## 10. 💡 Tips & Best Practices
+## 11. 💡 Tips & Best Practices
 
 ### 10.1 TikZ Code Examples Library
 

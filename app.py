@@ -24,6 +24,9 @@ import base64
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email_service import init_email_service, get_email_service
+from comments_helpers import add_security_headers
+from comments_routes import comments_bp
+from notification_service import init_notification_service, get_notification_service
 
 load_dotenv()
 
@@ -601,15 +604,34 @@ def get_svg_files_with_likes(user_id=None):
         cursor = conn.cursor(dictionary=True)
         
         # Query tương tự như search_results nhưng cho tất cả files
-        cursor.execute("""
-            SELECT DISTINCT s.*, u.username as creator_username, u.id as creator_id,
-                   (SELECT COUNT(*) FROM svg_like WHERE svg_image_id = s.id) as like_count,
-                   (SELECT COUNT(*) FROM svg_like WHERE svg_image_id = s.id AND user_id = %s) as is_liked_by_current_user
-            FROM svg_image s
-            JOIN user u ON s.user_id = u.id
-            ORDER BY s.created_at DESC
-            LIMIT 100
-        """, (current_user_id or 0,))
+        # Try with comment_count first, fallback if table doesn't exist
+        try:
+            cursor.execute("""
+                SELECT DISTINCT s.*, u.username as creator_username, u.id as creator_id,
+                       (SELECT COUNT(*) FROM svg_like WHERE svg_image_id = s.id) as like_count,
+                       (SELECT COUNT(*) FROM svg_like WHERE svg_image_id = s.id AND user_id = %s) as is_liked_by_current_user,
+                       COALESCE((SELECT COUNT(*) FROM svg_comments WHERE svg_filename = s.filename), 0) as comment_count
+                FROM svg_image s
+                JOIN user u ON s.user_id = u.id
+                ORDER BY s.created_at DESC
+                LIMIT 100
+            """, (current_user_id or 0,))
+        except mysql.connector.errors.ProgrammingError as e:
+            if 'svg_comments' in str(e) and "doesn't exist" in str(e):
+                # Fallback: Query without comment_count if table doesn't exist
+                print(f"[WARN] svg_comments table doesn't exist, using fallback query", flush=True)
+                cursor.execute("""
+                    SELECT DISTINCT s.*, u.username as creator_username, u.id as creator_id,
+                           (SELECT COUNT(*) FROM svg_like WHERE svg_image_id = s.id) as like_count,
+                           (SELECT COUNT(*) FROM svg_like WHERE svg_image_id = s.id AND user_id = %s) as is_liked_by_current_user,
+                           0 as comment_count
+                    FROM svg_image s
+                    JOIN user u ON s.user_id = u.id
+                    ORDER BY s.created_at DESC
+                    LIMIT 100
+                """, (current_user_id or 0,))
+            else:
+                raise
         
         rows = cursor.fetchall()
         
@@ -624,6 +646,8 @@ def get_svg_files_with_likes(user_id=None):
         conn.close()
     except Exception as e:
         print(f"[ERROR] get_svg_files_with_likes(): {e}", flush=True)
+        import traceback
+        traceback.print_exc()
     
     return svg_files
 
@@ -641,15 +665,34 @@ def get_public_svg_files():
         cursor = conn.cursor(dictionary=True)
         
         # Query cho public files (không có like info)
-        cursor.execute("""
-            SELECT DISTINCT s.*, u.username as creator_username, u.id as creator_id,
-                   (SELECT COUNT(*) FROM svg_like WHERE svg_image_id = s.id) as like_count,
-                   0 as is_liked_by_current_user
-            FROM svg_image s
-            JOIN user u ON s.user_id = u.id
-            ORDER BY s.created_at DESC
-            LIMIT 100
-        """)
+        # Try with comment_count first, fallback if table doesn't exist
+        try:
+            cursor.execute("""
+                SELECT DISTINCT s.*, u.username as creator_username, u.id as creator_id,
+                       (SELECT COUNT(*) FROM svg_like WHERE svg_image_id = s.id) as like_count,
+                       0 as is_liked_by_current_user,
+                       COALESCE((SELECT COUNT(*) FROM svg_comments WHERE svg_filename = s.filename), 0) as comment_count
+                FROM svg_image s
+                JOIN user u ON s.user_id = u.id
+                ORDER BY s.created_at DESC
+                LIMIT 100
+            """)
+        except mysql.connector.errors.ProgrammingError as e:
+            if 'svg_comments' in str(e) and "doesn't exist" in str(e):
+                # Fallback: Query without comment_count if table doesn't exist
+                print(f"[WARN] svg_comments table doesn't exist, using fallback query", flush=True)
+                cursor.execute("""
+                    SELECT DISTINCT s.*, u.username as creator_username, u.id as creator_id,
+                           (SELECT COUNT(*) FROM svg_like WHERE svg_image_id = s.id) as like_count,
+                           0 as is_liked_by_current_user,
+                           0 as comment_count
+                    FROM svg_image s
+                    JOIN user u ON s.user_id = u.id
+                    ORDER BY s.created_at DESC
+                    LIMIT 100
+                """)
+            else:
+                raise
         
         rows = cursor.fetchall()
         
@@ -664,6 +707,8 @@ def get_public_svg_files():
         conn.close()
     except Exception as e:
         print(f"[ERROR] get_public_svg_files(): {e}", flush=True)
+        import traceback
+        traceback.print_exc()
     
     return svg_files
 
@@ -1466,11 +1511,42 @@ def like_svg():
                 VALUES (%s, %s)
             """, (current_user.id, svg_id))
             
+            rows_affected = cursor.rowcount
+            
             # Log action
             cursor.execute("""
                 INSERT INTO user_action_log (user_id, target_svg_id, action_type) 
                 VALUES (%s, %s, 'like')
             """, (current_user.id, svg_id))
+            
+            # Create notification for SVG owner (only if new like was added)
+            if rows_affected > 0:
+                try:
+                    # Get SVG owner info
+                    cursor.execute("""
+                        SELECT user_id, filename 
+                        FROM svg_image 
+                        WHERE id = %s
+                    """, (svg_id,))
+                    svg_info = cursor.fetchone()
+                    
+                    if svg_info:
+                        svg_owner_id = svg_info['user_id']
+                        svg_filename = svg_info['filename']
+                        
+                        # Create notification
+                        notification_service = get_notification_service()
+                        notification_service.create_notification(
+                            user_id=svg_owner_id,
+                            actor_id=current_user.id,
+                            notification_type='like',
+                            target_type='svg_image',
+                            target_id=svg_filename,
+                            action_url=f'/view_svg/{svg_filename}'
+                        )
+                except Exception as e:
+                    # Don't fail the like operation if notification fails
+                    print(f"[WARN] Failed to create like notification: {e}", flush=True)
         else:
             # Xóa like
             cursor.execute("""
@@ -1538,11 +1614,29 @@ def follow_user(followee_id):
             VALUES (%s, %s)
         """, (current_user.id, followee_id))
         
+        rows_affected = cursor.rowcount
+        
         # Log action
         cursor.execute("""
             INSERT INTO user_action_log (user_id, target_user_id, action_type) 
             VALUES (%s, %s, 'follow')
         """, (current_user.id, followee_id))
+        
+        # Create notification for followed user (only if new follow was added)
+        if rows_affected > 0:
+            try:
+                notification_service = get_notification_service()
+                notification_service.create_notification(
+                    user_id=followee_id,
+                    actor_id=current_user.id,
+                    notification_type='follow',
+                    target_type='user',
+                    target_id=str(followee_id),
+                    action_url=f'/profile/{current_user.id}'
+                )
+            except Exception as e:
+                # Don't fail the follow operation if notification fails
+                print(f"[WARN] Failed to create follow notification: {e}", flush=True)
         
         conn.commit()
         cursor.close()
@@ -4510,6 +4604,158 @@ except Exception as e:
     print(f"❌ Failed to initialize email service: {e}", flush=True)
     import traceback
     print(f"❌ Email service init error: {traceback.format_exc()}", flush=True)
+
+# =====================================================
+# NOTIFICATION SERVICE INITIALIZATION
+# =====================================================
+try:
+    init_notification_service()
+    print("✅ Notification service initialized successfully", flush=True)
+except Exception as e:
+    print(f"❌ Failed to initialize notification service: {e}", flush=True)
+    import traceback
+    print(f"❌ Notification service init error: {traceback.format_exc()}", flush=True)
+
+# =====================================================
+# SECURITY HEADERS - Comments System Enhancement
+# =====================================================
+@app.after_request
+def apply_security_headers(response):
+    """Apply OWASP recommended security headers to all responses"""
+    return add_security_headers(response)
+
+# =====================================================
+# REGISTER COMMENTS BLUEPRINT
+# =====================================================
+app.register_blueprint(comments_bp)
+print("✅ Comments API blueprint registered at /api/comments", flush=True)
+
+# =====================================================
+# NOTIFICATIONS API ENDPOINTS
+# =====================================================
+
+@app.route('/api/notifications/unread-count', methods=['GET'])
+@login_required
+def get_unread_notifications_count():
+    """
+    API lấy số lượng notifications chưa đọc (for badge display)
+    
+    Returns:
+        JSON: {'count': int, 'timestamp': str}
+    """
+    try:
+        notification_service = get_notification_service()
+        count = notification_service.get_unread_count(current_user.id)
+        
+        return jsonify({
+            'count': count,
+            'timestamp': datetime.now(timezone.utc).isoformat()
+        }), 200
+    
+    except Exception as e:
+        print(f"[ERROR] get_unread_notifications_count: {e}", flush=True)
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': 'Server error'}), 500
+
+
+@app.route('/api/notifications', methods=['GET'])
+@login_required
+def get_notifications():
+    """
+    API lấy danh sách notifications của user
+    
+    Query params:
+        limit (int): Số lượng notifications (default 20, max 100)
+        only_unread (bool): Chỉ lấy unread (default false)
+    
+    Returns:
+        JSON: {'notifications': [...], 'count': int}
+    """
+    try:
+        # Parse query parameters
+        limit = min(int(request.args.get('limit', 20)), 100)  # Max 100
+        only_unread = request.args.get('only_unread', 'false').lower() == 'true'
+        
+        notification_service = get_notification_service()
+        notifications = notification_service.get_user_notifications(
+            user_id=current_user.id,
+            limit=limit,
+            only_unread=only_unread
+        )
+        
+        return jsonify({
+            'notifications': notifications,
+            'count': len(notifications)
+        }), 200
+    
+    except ValueError as e:
+        return jsonify({'error': 'Invalid parameters'}), 400
+    
+    except Exception as e:
+        print(f"[ERROR] get_notifications: {e}", flush=True)
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': 'Server error'}), 500
+
+
+@app.route('/api/notifications/<int:notification_id>/read', methods=['POST'])
+@login_required
+def mark_notification_read(notification_id):
+    """
+    API đánh dấu một notification đã đọc
+    
+    Args:
+        notification_id (int): ID của notification
+    
+    Returns:
+        JSON: {'success': bool}
+    """
+    try:
+        notification_service = get_notification_service()
+        success = notification_service.mark_as_read(
+            notification_id=notification_id,
+            user_id=current_user.id  # Security: only owner can mark as read
+        )
+        
+        if success:
+            return jsonify({'success': True}), 200
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Notification not found or already read'
+            }), 404
+    
+    except Exception as e:
+        print(f"[ERROR] mark_notification_read: {e}", flush=True)
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': 'Server error'}), 500
+
+
+@app.route('/api/notifications/mark-all-read', methods=['POST'])
+@login_required
+def mark_all_notifications_read():
+    """
+    API đánh dấu tất cả notifications của user đã đọc
+    
+    Returns:
+        JSON: {'success': bool, 'count': int}
+    """
+    try:
+        notification_service = get_notification_service()
+        count = notification_service.mark_all_as_read(current_user.id)
+        
+        return jsonify({
+            'success': True,
+            'count': count
+        }), 200
+    
+    except Exception as e:
+        print(f"[ERROR] mark_all_notifications_read: {e}", flush=True)
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': 'Server error'}), 500
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)

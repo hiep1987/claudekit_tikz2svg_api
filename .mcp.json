@@ -1,0 +1,24 @@
+{
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": ["@upstash/context7-mcp", "--transport", "stdio"],
+      "env": {
+        "CONTEXT7_API_KEY": "ctx7sk-88d333f7-5406-4141-bc72-4550c3e0390c"
+      }
+    },
+    "nova-memory": {
+      "command": "/opt/homebrew/bin/npx",
+      "args": ["@nova-mcp/mcp-nova"],
+      "cwd": "/Users/hieplequoc/web/work/tikz2svg_api"
+    },
+    "human-mcp": {
+      "command": "/opt/homebrew/bin/npx",
+      "args": ["@goonnguyen/human-mcp"],
+      "cwd": "/Users/hieplequoc/web/work/tikz2svg_api",
+      "env": {
+        "GOOGLE_GEMINI_API_KEY": "AIzaSyBS3bR1xeunNCEpTy-jBKKhojSz2Cd65Jg"
+      }
+    }
+  }
+}

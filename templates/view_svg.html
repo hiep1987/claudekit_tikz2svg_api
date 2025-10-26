@@ -28,6 +28,8 @@
 {% block extra_css %}
 <!-- View SVG Page CSS -->
 <link rel="stylesheet" href="{{ url_for('static', filename='css/view_svg.css', v='2.0') }}">
+<!-- Comments System CSS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/comments.css', v='1.0') }}">
 {% endblock %}
 
 {# Main content #}
@@ -148,6 +150,198 @@
     <div id="caption-message" class="caption-message"></div>
 </div>
 
+<!-- Comments Section -->
+<div class="comments-section" id="comments-section">
+    <h3 class="comments-section-title">
+        <span class="comments-icon">💬</span> 
+        Bình luận 
+        <span id="comments-count-badge" class="comments-count-badge">0</span>
+    </h3>
+    
+    <!-- Comment Form (Create new comment) -->
+    {% if current_user.is_authenticated %}
+    <div class="comment-form-container">
+        <div class="comment-form-header">
+            {% if current_avatar %}
+                <img src="{{ url_for('static', filename='avatars/' ~ current_avatar) }}" 
+                     alt="Avatar" 
+                     class="comment-user-avatar"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            {% endif %}
+            {% if not current_avatar %}
+                <div class="comment-user-avatar comment-user-avatar-fallback">
+                    {{ current_user_email[0].upper() if current_user_email else 'U' }}
+                </div>
+            {% endif %}
+            <span class="comment-user-name">
+                {{ current_username or (current_user_email.split('@')[0] if current_user_email) }}
+                {% if current_identity_verified %}
+                    <img src="{{ url_for('static', filename='identity-verification-icon.svg') }}" 
+                         alt="Verified" 
+                         class="verified-icon"
+                         title="Tài khoản đã xác thực">
+                {% endif %}
+            </span>
+        </div>
+        <textarea 
+            id="new-comment-input" 
+            class="comment-textarea"
+            placeholder="Viết bình luận... (Hỗ trợ LaTeX: $x^2$ và TikZ code: \code{...})"
+            maxlength="5000"
+        ></textarea>
+        <div class="comment-form-footer">
+            <div class="comment-char-count">
+                <span id="comment-char-current">0</span>/5000 ký tự
+            </div>
+            <button id="submit-comment-btn" class="comment-btn comment-btn-submit">
+                <span class="btn-icon">📨</span> Gửi bình luận
+            </button>
+        </div>
+        <div class="comment-preview">
+            <h4>Preview (với MathJax):</h4>
+            <div id="comment-preview-content" class="comment-preview-content">
+                Nhập bình luận để xem preview...
+            </div>
+        </div>
+        <div id="comment-form-message" class="comment-message"></div>
+    </div>
+    {% else %}
+    <div class="comment-login-prompt">
+        <p>
+            <span class="lock-icon">🔒</span>
+            <a href="#" id="login-to-comment-link" class="login-link">Đăng nhập</a> 
+            để bình luận
+        </p>
+    </div>
+    {% endif %}
+    
+    <!-- Comments List -->
+    <div class="comments-list-container">
+        <!-- Loading Skeleton -->
+        <div id="comments-loading" class="comments-loading">
+            <div class="comment-skeleton">
+                <div class="skeleton-avatar"></div>
+                <div class="skeleton-content">
+                    <div class="skeleton-line skeleton-line-short"></div>
+                    <div class="skeleton-line skeleton-line-long"></div>
+                    <div class="skeleton-line skeleton-line-medium"></div>
+                </div>
+            </div>
+            <div class="comment-skeleton">
+                <div class="skeleton-avatar"></div>
+                <div class="skeleton-content">
+                    <div class="skeleton-line skeleton-line-short"></div>
+                    <div class="skeleton-line skeleton-line-long"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Empty State -->
+        <div id="comments-empty" class="comments-empty" style="display: none;">
+            <div class="empty-icon">💭</div>
+            <p class="empty-text">Chưa có bình luận nào.</p>
+            <p class="empty-subtext">
+                {% if current_user.is_authenticated %}
+                Hãy là người đầu tiên bình luận!
+                {% else %}
+                <a href="#" class="login-link" id="login-to-comment-empty">Đăng nhập</a> để trở thành người đầu tiên bình luận.
+                {% endif %}
+            </p>
+        </div>
+        
+        <!-- Comments Container -->
+        <div id="comments-container" class="comments-container">
+            <!-- Comments will be dynamically inserted here -->
+        </div>
+        
+        <!-- Pagination -->
+        <div id="comments-pagination" class="comments-pagination" style="display: none;">
+            <button id="comments-prev-btn" class="pagination-btn" disabled>
+                ← Trước
+            </button>
+            <span id="comments-page-info" class="page-info">
+                Trang <span id="current-page">1</span> / <span id="total-pages">1</span>
+            </span>
+            <button id="comments-next-btn" class="pagination-btn" disabled>
+                Sau →
+            </button>
+        </div>
+        
+        <!-- Load More Button (alternative to pagination) -->
+        <div id="comments-load-more-container" style="display: none;">
+            <button id="comments-load-more-btn" class="load-more-btn">
+                Xem thêm bình luận
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Comment Template (Hidden, used by JavaScript) -->
+<template id="comment-template">
+    <div class="comment" data-comment-id="">
+        <div class="comment-header">
+            <div class="comment-avatar-wrapper">
+                <img src="" alt="" class="comment-avatar" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="comment-avatar comment-user-avatar-fallback" style="display: none;"></div>
+            </div>
+            <div class="comment-meta">
+                <span class="comment-author-wrapper">
+                    <span class="comment-author"></span>
+                    <img src="" alt="Verified" class="verified-icon" style="display: none;">
+                </span>
+                <span class="comment-timestamp"></span>
+            </div>
+            <div class="comment-actions-menu">
+                <button class="comment-menu-btn" aria-label="Menu">⋮</button>
+                <div class="comment-dropdown" style="display: none;">
+                    <button class="dropdown-item edit-comment-btn">✏️ Chỉnh sửa</button>
+                    <button class="dropdown-item delete-comment-btn">🗑️ Xóa</button>
+                </div>
+            </div>
+        </div>
+        <div class="comment-body">
+            <div class="comment-text"></div>
+            <div class="comment-edit-form" style="display: none;">
+                <textarea class="comment-edit-textarea" maxlength="5000"></textarea>
+                <div class="comment-edit-actions">
+                    <button class="comment-btn comment-btn-cancel">Hủy</button>
+                    <button class="comment-btn comment-btn-save">Lưu</button>
+                </div>
+            </div>
+        </div>
+        <div class="comment-footer">
+            <button class="comment-like-btn" aria-label="Thích bình luận">
+                <span class="like-icon">👍</span>
+                <span class="like-count">0</span>
+            </button>
+            <button class="comment-reply-btn" aria-label="Trả lời bình luận">
+                <span class="reply-icon">💬</span> Trả lời
+            </button>
+            <span class="comment-edited-label" style="display: none;">(đã chỉnh sửa)</span>
+        </div>
+        
+        <!-- Reply Form (hidden by default) -->
+        <div class="comment-reply-form" style="display: none;">
+            <textarea class="reply-textarea" placeholder="Viết câu trả lời..." maxlength="5000"></textarea>
+            <div class="comment-preview">
+                <h4>Preview (với MathJax):</h4>
+                <div class="reply-preview-content">
+                    Nhập câu trả lời để xem preview...
+                </div>
+            </div>
+            <div class="reply-form-actions">
+                <button class="comment-btn comment-btn-cancel">Hủy</button>
+                <button class="comment-btn comment-btn-submit">Gửi</button>
+            </div>
+        </div>
+        
+        <!-- Replies Container -->
+        <div class="comment-replies">
+            <!-- Nested replies will be inserted here -->
+        </div>
+    </div>
+</template>
+
 <!-- Inject TikZ code as JSON to avoid inline Jinja inside JS -->
 <script id="tikz-code-json" type="application/json">{{ tikz_code|default("")|tojson|safe }}</script>
 
@@ -159,10 +353,27 @@
     "isOwner": {% if user_email and user_id and current_user.is_authenticated and user_id == current_user.id %}true{% else %}false{% endif %}
 }
 </script>
+
+<!-- Inject comments data for JavaScript -->
+<script id="comments-data-json" type="application/json">
+{
+    "filename": {{ filename|tojson|safe }},
+    "isLoggedIn": {% if current_user.is_authenticated %}true{% else %}false{% endif %},
+    "currentUserId": {% if current_user.is_authenticated %}{{ current_user.id }}{% else %}null{% endif %},
+    "currentUserAvatar": {% if current_user.is_authenticated %}{% if current_avatar %}{{ url_for('static', filename='avatars/' ~ current_avatar)|tojson|safe }}{% else %}null{% endif %}{% else %}null{% endif %},
+    "currentUserAvatarFallback": {% if current_user.is_authenticated %}{% if not current_avatar %}{{ (current_user_email[0].upper() if current_user_email else 'U')|tojson|safe }}{% else %}null{% endif %}{% else %}null{% endif %},
+    "currentUserName": {% if current_user.is_authenticated %}{{ (current_username or (current_user_email.split('@')[0] if current_user_email))|tojson|safe }}{% else %}null{% endif %},
+    "currentUserVerified": {% if current_user.is_authenticated %}{{ current_identity_verified|tojson|safe }}{% else %}false{% endif %},
+    "verifiedIconUrl": {{ url_for('static', filename='identity-verification-icon.svg')|tojson|safe }},
+    "apiBasePath": "/api/comments"
+}
+</script>
 {% endblock %}
 
 {# Additional JavaScript #}
 {% block extra_js %}
 <!-- Application JavaScript -->
 <script src="{{ url_for('static', filename='js/view_svg.js', v='1.0') }}"></script>
+<!-- Comments System JavaScript -->
+<script src="{{ url_for('static', filename='js/comments.js', v='1.0') }}"></script>
 {% endblock %}

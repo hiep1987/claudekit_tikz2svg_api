@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Test Nested Braces Parser</title>
+</head>
+<body>
+    <h1>Test TikZ Code with Nested Braces</h1>
+    
+    <h2>Input:</h2>
+    <pre id="input"></pre>
+    
+    <h2>Output:</h2>
+    <div id="output"></div>
+    
+    <script>
+        // Helper function
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // The NEW renderCommentText with brace counting
+        function renderCommentText(text) {
+            if (!text) return '';
+            
+            // First, escape HTML to prevent XSS
+            let escaped = escapeHtml(text);
+            
+            // Process TikZ code blocks: \code{...}
+            // Use custom parser to handle nested braces
+            let result = '';
+            let i = 0;
+            
+            while (i < escaped.length) {
+                // Look for \code{
+                const codeStart = escaped.indexOf('\\code{', i);
+                
+                if (codeStart === -1) {
+                    // No more code blocks, append rest
+                    result += escaped.substring(i);
+                    break;
+                }
+                
+                // Append text before \code{
+                result += escaped.substring(i, codeStart);
+                
+                // Find matching closing brace by counting
+                let braceCount = 1;
+                let codeEnd = codeStart + 6; // Start after \code{
+                
+                while (codeEnd < escaped.length && braceCount > 0) {
+                    if (escaped[codeEnd] === '{' && escaped[codeEnd - 1] !== '\\') {
+                        braceCount++;
+                    } else if (escaped[codeEnd] === '}' && escaped[codeEnd - 1] !== '\\') {
+                        braceCount--;
+                    }
+                    codeEnd++;
+                }
+                
+                if (braceCount === 0) {
+                    // Found matching brace
+                    const code = escaped.substring(codeStart + 6, codeEnd - 1);
+                    
+                    // Unescape the code content for proper display
+                    const unescapedCode = code
+                        .replace(/&lt;/g, '<')
+                        .replace(/&gt;/g, '>')
+                        .replace(/&quot;/g, '"')
+                        .replace(/&#039;/g, "'")
+                        .replace(/&amp;/g, '&');
+                    
+                    // Re-escape for safe HTML display
+                    const safeCode = unescapedCode
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;');
+                    
+                    // Append code block
+                    result += `<div style="border: 2px solid blue; padding: 10px; margin: 10px 0;">
+                        <div style="background: blue; color: white; padding: 5px;">
+                            <strong>TikZ Code</strong>
+                        </div>
+                        <pre style="background: #1e1e1e; color: #d4d4d4; padding: 10px;"><code>${safeCode}</code></pre>
+                    </div>`;
+                    
+                    i = codeEnd;
+                } else {
+                    // Unmatched braces, treat as plain text
+                    result += escaped.substring(codeStart, codeStart + 6);
+                    i = codeStart + 6;
+                }
+            }
+            
+            // Convert line breaks to <br>
+            result = result.replace(/\n/g, '<br>');
+            
+            return result;
+        }
+        
+        // TEST CASE
+        const testInput = `Đây là test nested braces:
+
+\\code{\\tikz \\draw (2,0) coordinate (A) -- (0,0) coordinate (B)
+         -- (1,1) coordinate (C)
+  pic ["$\\alpha$", draw, ->] {angle};}
+
+Text sau code block.`;
+        
+        document.getElementById('input').textContent = testInput;
+        document.getElementById('output').innerHTML = renderCommentText(testInput);
+    </script>
+</body>
+</html>

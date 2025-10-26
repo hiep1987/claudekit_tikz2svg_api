@@ -13,11 +13,14 @@
     </div>
 
     <!-- Image Container -->
-    <div class="file-img-container">
+    <div class="file-img-container" data-filename="{{ file.filename }}" style="cursor: pointer;">
         <img src="{{ file.url }}" alt="{{ file.filename }}">
+    </div>
 
-        <!-- Like Button - Moved to image overlay -->
-        <div class="like-button-wrapper-overlay">
+    <!-- Like Button & Comment Count - Below image -->
+    <div class="interaction-buttons-row" style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
+        <!-- Like Button -->
+        <div class="like-button-wrapper">
             <div class="like-button">
                 <input id="heart-{{ file.id }}" type="checkbox" {{ 'checked' if file.is_liked_by_current_user else '' }} {{ 'disabled' if not logged_in else '' }} />
                 <label class="like" for="heart-{{ file.id }}" {{ 'style="opacity: 0.6; cursor: not-allowed;"' if not logged_in else '' }}>
@@ -26,15 +29,25 @@
                     </svg>
 
                     <!-- Like count display (non-clickable) -->
-                    <span class="like-count one">{{ file.like_count }}</span>
-                    <span class="like-count two">{{ file.like_count }}</span>
+                    <div class="like-count-container">
+                        <span class="like-count one">{{ file.like_count }}</span>
+                        <span class="like-count two">{{ file.like_count }}</span>
+                    </div>
                 </label>
             </div>
         </div>
+
+        <!-- Comment Count -->
+        <div class="comment-count-wrapper">
+            <a href="/view_svg/{{ file.filename }}#comments-section" class="comment-count-link">
+                <i class="fas fa-comment"></i>
+                <span class="comment-count">{{ file.comment_count|default(0) }}</span>
+            </a>
+        </div>
     </div>
 
-    <!-- Likes Preview Text - Moved to replace old like button position -->
-    <div class="likes-preview-text" data-svg-id="{{ file.id }}" style="margin-top: 8px; display: none;">
+    <!-- Likes Preview Text -->
+    <div class="likes-preview-text" data-svg-id="{{ file.id }}" style="margin-top: 4px; display: none;">
         <span class="likes-preview-content"></span>
         <button class="likes-view-all-btn" type="button" style="color: #1976d2; background: none; border: none; cursor: pointer; font-size: 13px; padding: 0; margin-left: 4px;">
             Xem tất cả

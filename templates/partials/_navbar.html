@@ -1,4 +1,4 @@
-<nav class="container bg-white/80 backdrop-blur nv-shadow rounded-2xl p-3 flex items-center justify-between mb-8 border border-white/20 hover:shadow-xl transition-all duration-300">
+<nav class="container bg-white/80 backdrop-blur nv-shadow rounded-2xl p-3 flex items-center justify-between mb-8 border border-white/20 hover:shadow-xl transition-all duration-300" style="min-height: auto; height: auto;">
     <!-- Logo -->
     <div class="flex items-center gap-2 flex-shrink-0">
         <a href="/" class="flex items-center gap-2 hover:opacity-80 transition-opacity" style="text-decoration: none;">
@@ -38,6 +38,37 @@
     <div class="flex items-center gap-2 flex-shrink-0">
         {% if current_user.is_authenticated %}
             <div class="flex items-center gap-2">
+                <!-- Notifications Bell -->
+                <div class="tikz-app notifications-container" style="position: relative; display: inline-block; height: auto; min-height: auto; width: auto;">
+                    <button class="notifications-bell" id="notificationsBell" aria-label="Thông báo" style="position: relative; background: transparent; border: none; cursor: pointer; padding: 8px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-bell" style="font-size: 18px; color: #4b5563;"></i>
+                        <span class="notification-badge" id="notificationBadge" style="display: none; position: absolute; top: 0px; right: -2px; background: #ef4444; color: white; font-size: 10px; font-weight: 600; padding: 2px 5px; border-radius: 10px; min-width: 16px; text-align: center;">0</span>
+                    </button>
+                    
+                    <!-- Notifications Dropdown (hidden by default, positioned absolutely) -->
+                    <div class="notifications-dropdown" id="notificationsDropdown">
+                        <div class="notifications-header" style="display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #eee;">
+                            <h3 style="margin: 0; font-size: 16px; font-weight: 600;">Thông báo</h3>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <button class="toggle-view-btn" id="toggleViewBtn" style="background: none; border: 1px solid #e5e7eb; color: #6b7280; font-size: 12px; cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: all 0.2s;">
+                                    Xem tất cả
+                                </button>
+                                <button class="mark-all-read-btn" id="markAllReadBtn" style="background: none; border: none; color: #1976d2; font-size: 13px; cursor: pointer; padding: 4px 8px; border-radius: 4px;">
+                                    Đánh dấu tất cả đã đọc
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="notifications-list" id="notificationsList" style="max-height: 400px; overflow-y: auto;">
+                            <!-- Notifications sẽ được load bằng JavaScript -->
+                            <div class="notifications-loading" style="padding: 40px 20px; text-align: center; color: #6c757d;">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                Đang tải...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <a href="/profile/{{ current_user.id }}/settings" class="flex items-center gap-2 bg-gray-100 px-2 py-1.5 rounded-lg border border-gray-300 hover:bg-gray-200 hover:border-gray-400 transition-all duration-200 cursor-pointer">
                     {% if current_avatar %}
                         <img src="{{ url_for('static', filename='avatars/' ~ current_avatar) }}" 

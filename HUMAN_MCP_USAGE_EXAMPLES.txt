@@ -1,0 +1,585 @@
+================================================================================
+                           HUMAN-MCP USAGE EXAMPLES
+                      Comprehensive Guide with Detailed Examples
+================================================================================
+
+📅 Created: 2025-10-16
+🔧 Version: Human-MCP v2.13.0
+👤 Compatible with: Claude Code CLI
+📋 Total Tools: 27 Tools (4 Eyes + 16 Hands + 4 Mouth + 3 Brain)
+
+================================================================================
+                               TABLE OF CONTENTS
+================================================================================
+1. 👁️ EYES TOOLS - Phân tích trực quan
+   1.1 eyes_analyze - Phân tích hình ảnh/UI
+   1.2 eyes_compare - So sánh hình ảnh
+   1.3 eyes_read_document - Đọc tài liệu
+   1.4 eyes_summarize_document - Tóm tắt tài liệu
+
+2. ✋ HANDS TOOLS - Tạo & Chỉnh sửa nội dung
+   2.1 hands_create_image - Tạo hình ảnh
+   2.2 hands_edit_image - Chỉnh sửa hình ảnh
+   2.3 hands_automate_browser - Tự động hóa trình duyệt
+   2.4 hands_create_video - Tạo video
+
+3. 🗣️ MOUTH TOOLS - Tạo giọng nói & Xử lý âm thanh
+   3.1 mouth_speak - Tạo giọng nói từ văn bản
+   3.2 mouth_create_algorithm - Thiết kế thuật toán
+   3.3 mouth_clarify - Làm rõ ý tưởng
+   3.4 mouth_translate - Dịch thuật
+
+4. 🧠 BRAIN TOOLS - Phân tích & Suy luận nâng cao
+   4.1 brain_analyze - Phân tích chuyên sâu
+   4.2 brain_solve - Giải quyết vấn đề
+   4.3 brain_synthesize - Tổng hợp thông tin
+
+5. 🔄 WORKFLOW KẾT HỢP NHIỀU TOOLS
+   5.1 Content Creation Pipeline
+   5.2 UI/UX Design Review Process
+   5.3 Technical Documentation Creation
+   5.4 Automated Testing & Reporting
+   5.5 Market Research & Presentation
+
+6. 💡 BEST PRACTICES
+   6.1 Chuẩn bị input tốt
+   6.2 Kết hợp tools hiệu quả
+   6.3 Iterative approach
+   6.4 Error handling
+   6.5 Performance optimization
+   6.6 File management
+   6.7 Quality assurance
+
+================================================================================
+1. 👁️ EYES TOOLS - Phân tích trực quan
+================================================================================
+
+1.1 eyes_analyze - Phân tích hình ảnh/UI
+--------------------------------------------------
+
+Ví dụ 1: Phân tích screenshot website
+"Hãy dùng eyes_analyze để phân tích file screenshot.png:
+- Kiểm tra layout có responsive không?
+- Đánh giá color scheme và typography
+- Tìm các UX issues cần cải thiện
+- Cho điểm chất lượng từ 1-10"
+
+Ví dụ 2: Review code screenshot
+"Dùng eyes_analyze để xem ảnh code_error.png:
+- Nhận diện lỗi cú pháp trong code
+- Phân tích cấu trúc code
+- Gợi ý cách sửa lỗi"
+
+Ví dụ 3: Phân tích design mockup
+"eyes_analyze file mobile_app_mockup.png:
+- Kiểm tra consistency với design system
+- Đánh giá visual hierarchy
+- So sánh với platform guidelines (iOS/Android)"
+
+1.2 eyes_compare - So sánh hình ảnh
+--------------------------------------------------
+
+Ví dụ 1: So sánh before/after
+"Dùng eyes_compare để so sánh 2 ảnh:
+- before_redesign.png
+- after_redesign.png
+Hãy chỉ ra các thay đổi chính và đánh giá improvement"
+
+Ví dụ 2: Compare mockup vs implementation
+"eyes_compare:
+- design_mockup.png
+- actual_implementation.png
+Tìm các điểm khác biệt và inconsistencies"
+
+1.3 eyes_read_document - Đọc tài liệu
+--------------------------------------------------
+
+Ví dụ 1: Phân tích PDF technical spec
+"eyes_read_document file technical_specification.pdf:
+- Tóm tắt các requirements chính
+- Trích xuất technical constraints
+- Liệt kê milestones và deadlines"
+
+Ví dụ 2: Đọc research paper
+"eyes_read_document academic_paper.pdf:
+- Tóm tắt abstract và conclusion
+- Trích ra key findings
+- Phân tích methodology được sử dụng"
+
+1.4 eyes_summarize_document - Tóm tắt tài liệu
+--------------------------------------------------
+
+Ví dụ 1: Tóm tắt documentation dài
+"eyes_summarize_document api_documentation.pdf:
+- Tạo executive summary (200 words)
+- Trích ra các API endpoints quan trọng
+- Liệt kê authentication methods"
+
+================================================================================
+2. ✋ HANDS TOOLS - Tạo & Chỉnh sửa nội dung
+================================================================================
+
+2.1 hands_create_image - Tạo hình ảnh
+--------------------------------------------------
+
+Ví dụ 1: Tạo UI mockup
+"hands_create_image để tạo mobile app mockup:
+- Screen: Login screen
+- Style: Modern, minimalist với blue gradient
+- Elements: Email field, password field, login button, forgot password link
+- Size: 375x812 (iPhone X dimensions)"
+
+Ví dụ 2: Tạo diagram/kỹ thuật
+"Tạo system architecture diagram:
+- Components: Frontend, API Gateway, Microservices, Database
+- Style: Clean, professional với arrows showing data flow
+- Color scheme: Blue và gray tones
+- Format: Landscape orientation"
+
+Ví dụ 3: Tạo illustration
+"hands_create_image để tạo illustration cho blog post:
+- Topic: Machine Learning concepts
+- Style: Flat design, colorful, educational
+- Elements: Neural network visualization với nodes và connections
+- Size: 1200x630 (social media sharing size)"
+
+2.2 hands_edit_image - Chỉnh sửa hình ảnh
+--------------------------------------------------
+
+Ví dụ 1: Resize và crop
+"hands_edit_image để xử lý logo.png:
+- Resize thành 200x200 pixels
+- Crop thành hình vuông
+- Maintain aspect ratio
+- Output: logo_square.png"
+
+Ví dụ 2: Thêm text watermark
+"hands_edit_image cho banner.jpg:
+- Thêm text 'CONFIDENTIAL' ở góc trên phải
+- Font: Arial, size 24, color red với transparency 50%
+- Position: Top-right corner với margin 20px"
+
+Ví dụ 3: Apply filter effects
+"hands_edit_image cho photo.jpg:
+- Apply blur effect cho background (radius 5px)
+- Tăng brightness và contrast 10%
+- Convert sang grayscale
+- Output: photo_filtered.jpg"
+
+2.3 hands_automate_browser - Tự động hóa trình duyệt
+--------------------------------------------------
+
+Ví dụ 1: Web scraping
+"hands_automate_browser để scrape data:
+1. Mở https://example.com/products
+2. Wait cho page load
+3. Extract tất cả product names và prices
+4. Save ra CSV file products.csv
+5. Handle pagination nếu có"
+
+Ví dụ 2: Automated testing
+"hands_automate_browser test e-commerce flow:
+1. Mở homepage
+2. Search cho 'laptop'
+3. Click vào sản phẩm đầu tiên
+4. Add to cart
+5. Proceed to checkout
+6. Fill billing information
+7. Verify order confirmation
+8. Take screenshot ở mỗi step"
+
+2.4 hands_create_video - Tạo video
+--------------------------------------------------
+
+Ví dụ 1: Video demo từ screenshots
+"hands_create_video để tạo product demo:
+- Input: screenshots1.png, screenshots2.png, screenshots3.png
+- Duration: 2 seconds per screenshot
+- Add transition effects between slides
+- Add background music (upbeat)
+- Output: demo_video.mp4"
+
+================================================================================
+3. 🗣️ MOUTH TOOLS - Tạo giọng nói & Xử lý âm thanh
+================================================================================
+
+3.1 mouth_speak - Tạo giọng nói từ văn bản
+--------------------------------------------------
+
+Ví dụ 1: Tạo voiceover cho video
+"mouth_speak để tạo giọng nói cho text:
+'Chào mừng bạn đến với TikZ2SVG - công cụ chuyển đổi mã TikZ thành SVG trực tuyến. Video này sẽ hướng dẫn bạn các bước sử dụng cơ bản.'
+
+Settings:
+- Language: Vietnamese
+- Voice: Female, professional tone
+- Speed: Normal (1.0x)
+- Format: MP3
+- Quality: High (44.1kHz)"
+
+Ví dụ 2: Tạo audio alerts
+"mouth_speak tạo các thông báo âm thanh:
+1. 'Upload thành công!' - voice: female, cheerful
+2. 'Có lỗi xảy ra, vui lòng thử lại' - voice: male, calm
+3. 'Đang xử lý...' - voice: neutral, informative
+
+Output: 3 separate MP3 files"
+
+Ví dụ 3: Tạo podcast narration
+"mouth_speak cho podcast script:
+'Chào các bạn, tôi là host của episode hôm nay. Chúng ta sẽ cùng thảo luận về các xu hướng công nghệ mới nhất trong lĩnh vực AI và Machine Learning.'
+
+Settings:
+- Voice: Professional male host
+- Pace: Slightly slower for clarity
+- Add pauses at comma/period
+- Format: WAV for high quality editing"
+
+3.2 mouth_create_algorithm - Thiết kế thuật toán
+--------------------------------------------------
+
+Ví dụ 1: Algorithm cho data processing
+"mouth_create_algorithm để thiết kế algorithm:
+Problem: Xử lý và clean large dataset CSV
+Input: CSV file với 1M rows, mixed data types
+Output: Cleaned CSV với validated data
+
+Requirements:
+- Handle missing values
+- Validate email formats
+- Remove duplicates
+- Processing time < 5 minutes
+- Memory efficient"
+
+Ví dụ 2: Algorithm cho authentication
+"mouth_create_algorithm cho user authentication system:
+- Input: Username/email + password
+- Output: JWT token or error
+- Security requirements: Hash passwords, rate limiting
+- Performance: <200ms response time
+- Include 2FA option"
+
+3.3 mouth_clarify - Làm rõ ý tưởng
+--------------------------------------------------
+
+Ví dụ 1: Clarify business requirements
+"mouth_clarify để làm rõ yêu cầu:
+'Tương lai của hệ thống cần có machine learning'
+
+Hãy phân tích:
+- ML cho feature nào? Recommendation, prediction, hay classification?
+- Data sources available?
+- Success metrics là gì?
+- Timeline và resources?"
+
+Ví dụ 2: Clarify technical specifications
+"mouth_clarify cho requirement 'App cần responsive':
+- Target devices: Mobile, tablet, desktop?
+- Breakpoints cụ thể: 320px, 768px, 1024px?
+- Priority order: Mobile-first hay desktop-first?
+- Browser support requirements?"
+
+3.4 mouth_translate - Dịch thuật
+--------------------------------------------------
+
+Ví dụ 1: Dịch technical documentation
+"mouth_translate để dịch API docs:
+Từ: English sang Vietnamese
+Content: REST API documentation với endpoints, parameters, examples
+Requirements:
+- Keep technical terms consistent
+- Maintain code examples unchanged
+- Format properly for Vietnamese readers"
+
+================================================================================
+4. 🧠 BRAIN TOOLS - Phân tích & Suy luận nâng cao
+================================================================================
+
+4.1 brain_analyze - Phân tích chuyên sâu
+--------------------------------------------------
+
+Ví dụ 1: Phân tích thị trường
+"brain_analyze để phân tích competitive landscape:
+Industry: Project management software
+Competitors: Jira, Asana, Trello, Monday.com
+Analysis aspects:
+- Market share and growth trends
+- Pricing strategies comparison
+- Feature differentiation analysis
+- Target market segments
+- SWOT analysis for each competitor"
+
+Ví dụ 2: Phân tích kỹ thuật
+"brain_analyze cho system architecture evaluation:
+Current system: Monolithic Ruby on Rails app
+Issues: Slow response times, difficult to scale
+Analysis requirements:
+- Identify bottlenecks and performance issues
+- Evaluate microservices migration options
+- Consider database optimization strategies
+- Analyze cost vs benefit of refactoring
+- Provide implementation roadmap"
+
+4.2 brain_solve - Giải quyết vấn đề
+--------------------------------------------------
+
+Ví dụ 1: Problem solving cho UX issues
+"brain_solve để giải quyết vấn đề:
+Problem: High bounce rate (70%) on landing page
+Context: E-commerce website, mobile traffic 60%
+Available data: Google Analytics, user session recordings
+Goal: Reduce bounce rate to 50% in 3 months
+
+Phân tích root causes và propose solutions với priority levels"
+
+Ví dụ 2: Debugging complex issue
+"brain_solve cho production issue:
+Problem: Intermittent database connection failures
+Symptoms: 5% of requests fail with timeout
+Infrastructure: AWS RDS PostgreSQL, Node.js backend
+Recent changes: Added new caching layer
+Impact: User complaints, revenue loss
+
+Systematic troubleshooting approach needed"
+
+4.3 brain_synthesize - Tổng hợp thông tin
+--------------------------------------------------
+
+Ví dụ 1: Synthesize user research
+"brain_synthesize để tổng hợp findings từ:
+- User interviews (15 users)
+- Survey responses (200 responses)
+- Analytics data (last 6 months)
+- Support tickets analysis
+- Competitor analysis
+
+Output: Actionable insights và prioritized feature roadmap"
+
+Ví dụ 2: Synthesize technical research
+"brain_synthesize cho technology evaluation:
+Sources: 10 technical papers, 5 blog posts, 3 case studies
+Topic: Microservices vs Monolith for fintech startup
+Constraints: Regulatory compliance, security, scalability
+Goal: Recommendation với pros/cons analysis"
+
+================================================================================
+5. 🔄 WORKFLOW KẾT HỢP NHIỀU TOOLS
+================================================================================
+
+5.1 Content Creation Pipeline
+--------------------------------------------------
+
+Bước 1: Research & Analysis
+"eyes_read_document để phân tích market_research.pdf và trích xuất key trends"
+
+Bước 2: Content Strategy
+"brain_synthesize findings từ research và đề xuất content strategy cho Q4"
+
+Bước 3: Visual Creation
+"hands_create_image để tạo infographic với key statistics từ research"
+
+Bước 4: Voiceover
+"mouth_speak để tạo narration cho presentation video dựa trên research insights"
+
+Bước 5: Video Assembly
+"hands_create_video để combine infographic và voiceover thành marketing video"
+
+5.2 UI/UX Design Review Process
+--------------------------------------------------
+
+Bước 1: Visual Analysis
+"eyes_analyze để review current_app_screenshot.png và identify UI issues"
+
+Bước 2: Competitive Analysis
+"eyes_compare để so sánh design với competitor_app_screenshot.png"
+
+Bước 3: Problem Identification
+"brain_analyze để phân tích user feedback và identify root causes của UX problems"
+
+Bước 4: Solution Design
+"hands_create_image để tạo improved mockup addressing identified issues"
+
+Bước 5: Validation
+"eyes_compare để so sánh before/after designs và validate improvements"
+
+5.3 Technical Documentation Creation
+--------------------------------------------------
+
+Bước 1: Code Analysis
+"eyes_analyze để đọc và understand code_screenshot.png từ legacy system"
+
+Bước 2: Architecture Documentation
+"brain_analyze để map system architecture và create technical diagrams"
+
+Bước 3: Visual Documentation
+"hands_create_image để create system architecture diagrams"
+
+Bước 4: Written Documentation
+"brain_synthesize để write comprehensive technical documentation"
+
+Bước 5: Tutorial Creation
+"mouth_speak để tạo voiceover cho tutorial video explaining the system"
+
+5.4 Automated Testing & Reporting
+--------------------------------------------------
+
+Bước 1: Test Execution
+"hands_automate_browser để run full e-commerce test suite"
+
+Bước 2: Screenshot Analysis
+"eyes_analyze để review screenshots từ failed tests và identify visual issues"
+
+Bước 3: Problem Diagnosis
+"brain_solve để analyze test failures và determine root causes"
+
+Bước 4: Bug Report Creation
+"hands_create_image để create annotated screenshots for bug reports"
+
+Bước 5: Status Communication
+"mouth_speak để create status update audio for team communication"
+
+5.5 Market Research & Presentation
+--------------------------------------------------
+
+Bước 1: Data Collection
+"hands_automate_browser để scrape competitor pricing và features"
+
+Bước 2: Document Analysis
+"eyes_read_document để analyze industry_report.pdf"
+
+Bước 3: Strategic Analysis
+"brain_analyze để perform SWOT analysis và identify opportunities"
+
+Bước 4: Presentation Creation
+"hands_create_image để create presentation slides với charts và graphs"
+
+Bước 5: Presentation Narration
+"mouth_speak để create professional voiceover for presentation"
+
+================================================================================
+6. 💡 BEST PRACTICES
+================================================================================
+
+6.1 Chuẩn bị input tốt
+--------------------------------------------------
+- Cung cấp file paths rõ ràng: `/path/to/image.png`
+- Mô tả requirements chi tiết: size, style, format
+- Context cho từng task: mục tiêu, audience, use case
+
+6.2 Kết hợp tools hiệu quả
+--------------------------------------------------
+- Sử dụng kết quả từ tool này làm input cho tool khác
+- Example: `eyes_analyze` → `brain_analyze` → `hands_create_image`
+
+6.3 Iterative approach
+--------------------------------------------------
+- Start với rough version
+- Refine với additional tools
+- Validate kết quả với `eyes_compare`
+
+6.4 Error handling
+--------------------------------------------------
+- Luôn có backup plan nếu tool thất bại
+- Try different parameters nếu kết quả không như ý
+- Use multiple tools cho cross-validation
+
+6.5 Performance optimization
+--------------------------------------------------
+- Large files: process in chunks
+- Batch operations khi possible
+- Cache results cho repeated use
+
+6.6 File management
+--------------------------------------------------
+- Use consistent naming conventions
+- Organize outputs in proper folders
+- Clean up temporary files
+
+6.7 Quality assurance
+--------------------------------------------------
+- Verify outputs với visual inspection
+- Test automated workflows end-to-end
+- Get feedback từ actual users
+
+================================================================================
+                              QUICK REFERENCE
+================================================================================
+
+👁️ EYES TOOLS (4 tools)
+- eyes_analyze: Phân tích hình ảnh/UI
+- eyes_compare: So sánh hình ảnh
+- eyes_read_document: Đọc tài liệu (PDF, DOCX)
+- eyes_summarize_document: Tóm tắt tài liệu
+
+✋ HANDS TOOLS (16+ tools)
+- hands_create_image: Tạo hình ảnh từ text description
+- hands_edit_image: Chỉnh sửa hình ảnh (resize, crop, filters)
+- hands_automate_browser: Tự động hóa trình duyệt (selenium/playwright)
+- hands_create_video: Tạo video từ images/audio
+
+🗣️ MOUTH TOOLS (4 tools)
+- mouth_speak: Tạo giọng nói từ văn bản
+- mouth_create_algorithm: Thiết kế thuật toán
+- mouth_clarify: Làm rõ ý tưởng/phân tích
+- mouth_translate: Dịch thuật ngôn ngữ
+
+🧠 BRAIN TOOLS (3 tools)
+- brain_analyze: Phân tích chuyên sâu
+- brain_solve: Giải quyết vấn đề
+- brain_synthesize: Tổng hợp thông tin
+
+================================================================================
+                               TROUBLESHOOTING
+================================================================================
+
+Common Issues & Solutions:
+
+1. Tool not responding:
+   - Check API key: `echo $GOOGLE_GEMINI_API_KEY`
+   - Verify internet connection
+   - Try again with smaller input
+
+2. Image generation fails:
+   - Reduce image size requirements
+   - Simplify description
+   - Check file path permissions
+
+3. Browser automation issues:
+   - Verify target website is accessible
+   - Check for anti-bot measures
+   - Use explicit waits
+
+4. Audio generation problems:
+   - Reduce text length
+   - Check language support
+   - Verify output path permissions
+
+5. Document reading fails:
+   - Check file format support
+   - Verify file size < 10MB
+   - Ensure text-based content
+
+================================================================================
+                              INSTALLATION STATUS
+================================================================================
+
+✅ Human-MCP v2.13.0 - INSTALLED
+✅ Google Gemini API - CONFIGURED
+✅ Claude Code CLI - INTEGRATED
+✅ MCP Connection - ACTIVE
+
+Check status: `claude mcp list`
+Expected output: "human-mcp: npx @goonnguyen/human-mcp - ✓ Connected"
+
+================================================================================
+                                END OF GUIDE
+================================================================================
+
+📞 Support:
+- GitHub: https://github.com/mrgoonie/human-mcp
+- Documentation: Available in repository README
+- Issues: Report via GitHub Issues
+
+🔄 Last Updated: 2025-10-16
+📝 Generated by: Claude Code with Human-MCP Integration
+================================================================================

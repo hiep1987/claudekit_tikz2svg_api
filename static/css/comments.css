@@ -499,6 +499,21 @@
 .tikz-app .comment-avatar-wrapper {
     position: relative;
     flex-shrink: 0;
+    transition: var(--transition-normal);
+}
+
+.tikz-app .comment-avatar-wrapper:hover {
+    transform: scale(1.05);
+    opacity: 0.9;
+}
+
+.tikz-app .comment-avatar-wrapper[style*="cursor: pointer"] {
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.tikz-app .comment-avatar-wrapper[style*="cursor: pointer"]:hover {
+    box-shadow: 0 2px 8px rgb(0 0 0 / 15%);
 }
 
 .tikz-app .comment-avatar {
@@ -528,6 +543,16 @@
     font-weight: 600;
     color: var(--primary-color);
     font-size: 0.95rem;
+    transition: var(--transition-normal);
+}
+
+.tikz-app .comment-author[style*="cursor: pointer"]:hover {
+    color: var(--success-color);
+    text-decoration: underline;
+    text-shadow: 0 1px 2px rgb(0 0 0 / 20%);
+    background: rgb(40 167 69 / 8%);
+    padding: 2px 4px;
+    border-radius: 3px;
 }
 
 .tikz-app .comment-timestamp {

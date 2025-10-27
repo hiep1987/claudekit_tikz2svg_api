@@ -474,6 +474,7 @@
         // Avatar
         const avatarImg = commentDiv.querySelector('.comment-avatar');
         const avatarFallback = commentDiv.querySelector('.comment-user-avatar-fallback');
+        const avatarWrapper = commentDiv.querySelector('.comment-avatar-wrapper');
         
         // Check if avatar exists and is not empty
         const hasValidAvatar = comment.avatar && comment.avatar.trim() !== '' && comment.avatar !== 'None';
@@ -492,9 +493,32 @@
             avatarFallback.style.display = 'flex';
         }
         
+        // Make avatar clickable to navigate to user profile
+        if (comment.user_id && avatarWrapper) {
+            avatarWrapper.style.cursor = 'pointer';
+            avatarWrapper.title = `Xem hồ sơ của ${comment.username || 'User'}`;
+            avatarWrapper.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                window.location.href = `/profile/${comment.user_id}/svg-files`;
+            });
+        }
+        
         // Author
         const author = commentDiv.querySelector('.comment-author');
         author.textContent = comment.username || 'Anonymous';
+        
+        // Make author name clickable to navigate to user profile
+        if (comment.user_id && author) {
+            author.style.cursor = 'pointer';
+            author.style.textDecoration = 'none';
+            author.title = `Xem hồ sơ của ${comment.username || 'User'}`;
+            author.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                window.location.href = `/profile/${comment.user_id}/svg-files`;
+            });
+        }
         
         // Verified icon
         if (comment.identity_verified) {

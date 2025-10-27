@@ -449,7 +449,7 @@ class NotificationsManager {
         };
         
         const messageMap = {
-            'like': 'đã thích bức ảnh của bạn',
+            'like': 'đã thích',
             'comment': 'đã bình luận vào bức ảnh của bạn',
             'reply': 'đã trả lời bình luận của bạn',
             'follow': 'đã theo dõi bạn'
@@ -479,6 +479,16 @@ class NotificationsManager {
             // For social cross-engagement: "đã bình luận ảnh của [owner]"
             messageText = `đã bình luận ${notif.content}`;
             contentPreview = ''; // Don't show comment preview for social notifications
+        } else if (notif.notification_type === 'like') {
+            // For like notifications: determine if it's SVG like or comment like
+            if (notif.target_type === 'comment') {
+                messageText = 'đã thích bình luận của bạn';
+                // Show comment preview
+                contentPreview = `<p class="notification-preview">"${notif.content}"</p>`;
+            } else {
+                messageText = 'đã thích bức ảnh của bạn';
+                contentPreview = ''; // No preview for SVG likes
+            }
         } else if (notif.content && notif.notification_type !== 'follow') {
             // For regular notifications: show content as preview
             contentPreview = `<p class="notification-preview">"${notif.content}"</p>`;
@@ -575,23 +585,40 @@ class NotificationsManager {
     formatTimeAgo(timestamp) {
         if (!timestamp) return '';
         
-        const now = new Date();
-        const past = new Date(timestamp);
-        const diffMs = now - past;
-        const diffMins = Math.floor(diffMs / 60000);
-        
-        if (diffMins < 1) return 'Vừa xong';
-        if (diffMins < 60) return `${diffMins} phút trước`;
-        
-        const diffHours = Math.floor(diffMins / 60);
-        if (diffHours < 24) return `${diffHours} giờ trước`;
-        
-        const diffDays = Math.floor(diffHours / 24);
-        if (diffDays < 7) return `${diffDays} ngày trước`;
-        
-        // Format date for older notifications
-        const options = { day: 'numeric', month: 'short' };
-        return past.toLocaleDateString('vi-VN', options);
+        try {
+            // Parse the timestamp (assume it's in Vietnam timezone from server)
+            const serverTime = new Date(timestamp);
+            
+            // Get current time in Vietnam timezone
+            const now = new Date();
+            const vnNow = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Ho_Chi_Minh"}));
+            
+            // Calculate difference
+            const diffMs = vnNow - serverTime;
+            const diffSec = Math.floor(diffMs / 1000);
+            const diffMin = Math.floor(diffSec / 60);
+            const diffHour = Math.floor(diffMin / 60);
+            const diffDay = Math.floor(diffHour / 24);
+            
+            // Format time ago
+            if (diffSec < 30) return 'Vừa xong';
+            if (diffSec < 60) return 'Vài giây trước';
+            if (diffMin < 60) return `${diffMin} phút trước`;
+            if (diffHour < 24) return `${diffHour} giờ trước`;
+            if (diffDay < 7) return `${diffDay} ngày trước`;
+            
+            // For older dates, show actual date in Vietnam timezone
+            const options = { 
+                day: 'numeric', 
+                month: 'short',
+                timeZone: 'Asia/Ho_Chi_Minh'
+            };
+            return serverTime.toLocaleDateString('vi-VN', options);
+            
+        } catch (error) {
+            console.error('Error formatting notification time:', error);
+            return timestamp; // Fallback to original timestamp
+        }
     }
     
     startPolling() {

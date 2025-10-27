@@ -213,16 +213,39 @@
     };
     
     function formatTimeAgo(isoString) {
-        const date = new Date(isoString);
-        const now = new Date();
-        const seconds = Math.floor((now - date) / 1000);
+        if (!isoString) return '';
         
-        if (seconds < 60) return 'Vừa xong';
-        if (seconds < 3600) return `${Math.floor(seconds / 60)} phút trước`;
-        if (seconds < 86400) return `${Math.floor(seconds / 3600)} giờ trước`;
-        if (seconds < 604800) return `${Math.floor(seconds / 86400)} ngày trước`;
-        
-        return date.toLocaleDateString('vi-VN');
+        try {
+            // Parse the timestamp (assume it's in Vietnam timezone from server)
+            const serverTime = new Date(isoString);
+            
+            // Get current time in Vietnam timezone
+            const now = new Date();
+            const vnNow = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Ho_Chi_Minh"}));
+            
+            // Calculate difference
+            const diffMs = vnNow - serverTime;
+            const diffSec = Math.floor(diffMs / 1000);
+            const diffMin = Math.floor(diffSec / 60);
+            const diffHour = Math.floor(diffMin / 60);
+            const diffDay = Math.floor(diffHour / 24);
+            
+            // Format time ago
+            if (diffSec < 30) return 'Vừa xong';
+            if (diffSec < 60) return 'Vài giây trước';
+            if (diffMin < 60) return `${diffMin} phút trước`;
+            if (diffHour < 24) return `${diffHour} giờ trước`;
+            if (diffDay < 7) return `${diffDay} ngày trước`;
+            
+            // For older dates, show actual date in Vietnam timezone
+            return serverTime.toLocaleDateString('vi-VN', {
+                timeZone: 'Asia/Ho_Chi_Minh'
+            });
+            
+        } catch (error) {
+            console.error('Error formatting comment time:', error);
+            return isoString; // Fallback to original timestamp
+        }
     }
     
     function showMessage(element, message, type = 'success') {
@@ -294,6 +317,7 @@
                     totalPages: paginationData.total_pages || paginationData.totalPages || 1,
                     totalComments: paginationData.total_comments || paginationData.totalComments || 0
                 };
+                
                 
                 renderComments();
                 updatePagination();
@@ -425,6 +449,7 @@
             elements.commentsEmpty.style.display = 'none';
         }
         
+        
         CommentsState.comments.forEach(comment => {
             const commentEl = createCommentElement(comment);
             elements.commentsContainer.appendChild(commentEl);
@@ -511,16 +536,20 @@
             actionsMenu.style.display = 'none';
         }
         
-        // Reply button (hide for replies)
+        // Reply button (allow unlimited nested replies)
         const replyBtn = commentDiv.querySelector('.comment-reply-btn');
-        if (isReply) {
-            replyBtn.style.display = 'none';
-        }
+        // Removed restriction - now allows infinite nesting levels
         
         // Render nested replies
         if (comment.replies && comment.replies.length > 0) {
             const repliesContainer = commentDiv.querySelector('.comment-replies');
-            comment.replies.forEach(reply => {
+            
+            if (!repliesContainer) {
+                console.error(`❌ No .comment-replies container found for comment ${comment.id}`);
+                return commentDiv;
+            }
+            
+            comment.replies.forEach((reply) => {
                 const replyEl = createCommentElement(reply, true);
                 repliesContainer.appendChild(replyEl);
             });
@@ -1026,6 +1055,7 @@
         
         // Load comments
         fetchComments(1);
+        
         
         console.log('✅ Comments System initialized');
     }

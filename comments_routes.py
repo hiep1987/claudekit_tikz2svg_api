@@ -272,8 +272,9 @@ def get_comments(filename):
         
         comments = cursor.fetchall()
         
-        # For each comment, get its replies
-        for comment in comments:
+        # Helper function to get nested replies recursively
+        def get_nested_replies(cursor, parent_id):
+            """Recursively get all nested replies for unlimited nesting levels"""
             cursor.execute("""
                 SELECT 
                     c.id,
@@ -290,16 +291,29 @@ def get_comments(filename):
                 JOIN user u ON c.user_id = u.id
                 WHERE c.parent_comment_id = %s
                 ORDER BY c.created_at ASC
-            """, (comment['id'],))
-            comment['replies'] = cursor.fetchall()
+            """, (parent_id,))
             
-            # Convert datetime to ISO format
+            replies = cursor.fetchall()
+            
+            # For each reply, recursively get its nested replies
+            for reply in replies:
+                # Convert datetime to ISO format
+                reply['created_at'] = reply['created_at'].isoformat() if reply['created_at'] else None
+                reply['updated_at'] = reply['updated_at'].isoformat() if reply['updated_at'] else None
+                
+                # Recursively get nested replies
+                reply['replies'] = get_nested_replies(cursor, reply['id'])
+            
+            return replies
+        
+        # For each top-level comment, get all nested replies
+        for comment in comments:
+            # Convert datetime to ISO format for top-level comment
             comment['created_at'] = comment['created_at'].isoformat() if comment['created_at'] else None
             comment['updated_at'] = comment['updated_at'].isoformat() if comment['updated_at'] else None
             
-            for reply in comment['replies']:
-                reply['created_at'] = reply['created_at'].isoformat() if reply['created_at'] else None
-                reply['updated_at'] = reply['updated_at'].isoformat() if reply['updated_at'] else None
+            # Get all nested replies recursively
+            comment['replies'] = get_nested_replies(cursor, comment['id'])
         
         # Get user's likes (if logged in)
         user_likes = []
@@ -814,11 +828,45 @@ def toggle_like(comment_id):
         
         conn.commit()
         
-        # Get updated likes count
-        cursor.execute("SELECT likes_count FROM svg_comments WHERE id = %s", (comment_id,))
-        likes_count = cursor.fetchone()['likes_count']
+        # Get updated likes count and comment details for notification
+        cursor.execute("""
+            SELECT 
+                c.likes_count, 
+                c.user_id as comment_owner_id,
+                c.comment_text,
+                c.svg_filename
+            FROM svg_comments c 
+            WHERE c.id = %s
+        """, (comment_id,))
+        comment_details = cursor.fetchone()
+        likes_count = comment_details['likes_count']
         
         logger.info(f"✅ Like toggled: Comment {comment_id}, User {current_user.id}, Liked: {liked}")
+        
+        # Create notification for like (only when liking, not unliking)
+        if liked:
+            try:
+                notification_service = get_notification_service()
+                comment_owner_id = comment_details['comment_owner_id']
+                svg_filename = comment_details['svg_filename']
+                comment_text = comment_details['comment_text']
+                
+                # Don't notify self-likes
+                if comment_owner_id != current_user.id:
+                    notification_service.create_notification(
+                        user_id=comment_owner_id,
+                        actor_id=current_user.id,
+                        notification_type='like',
+                        target_type='comment',
+                        target_id=str(comment_id),
+                        content=f'đã thích bình luận của bạn: "{comment_text[:50]}..."',
+                        action_url=f'/view_svg/{svg_filename}#comment-{comment_id}'
+                    )
+                    logger.info(f"📬 Like notification sent: Comment {comment_id} → User {comment_owner_id}")
+                
+            except Exception as e:
+                # Don't fail like action if notification fails
+                logger.warning(f"⚠️ Failed to create like notification: {e}")
         
         return api_response(
             success=True,

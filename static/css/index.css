@@ -580,19 +580,19 @@
     }
 
     .tikz-app .col {
-        height: 340px; /* Override từ 450px → 340px */
-        min-height: 340px; /* Override từ 450px → 340px */
-        max-height: none; /* Override từ 450px */
+        height: 450px; /* Nhất quán với các breakpoint khác */
+        min-height: 450px; /* Nhất quán với các breakpoint khác */
+        max-height: 450px; /* Nhất quán với các breakpoint khác */
         padding: var(--spacing-4); /* Override từ spacing-8 → spacing-4 */
         border-right: 1px solid var(--border-light);
         border-bottom: none;
-        overflow: auto; /* Override từ hidden → auto */
+        overflow: hidden; /* Nhất quán với các breakpoint khác */
     }
 
     .tikz-app .col:last-child {
         border-right: none;
-        min-height: 340px; /* Override từ 450px → 340px */
-        height: 340px; /* Override từ 450px → 340px */
+        min-height: 450px; /* Nhất quán với các breakpoint khác */
+        height: 450px; /* Nhất quán với các breakpoint khác */
     }
 
     /* Điều chỉnh padding cho col:first-child (chứa TikZ form) */

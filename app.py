@@ -1376,7 +1376,8 @@ def index():
                     
                     # Set svg_content to None for failed compilation
                     svg_content = None
-        except Exception as ex:
+            
+            except Exception as ex:
                 # Lưu code TikZ lỗi và log lỗi
                 timestamp = now.strftime('%Y%m%d_%H%M%S')
                 error_tex = os.path.join(ERROR_TIKZ_DIR, f'{timestamp}_{file_id}.tex')

@@ -446,6 +446,23 @@
     padding: 8px 12px;
     background: white;
     cursor: pointer;
+    
+    /* Safari cross-browser fixes */
+    /* stylelint-disable-next-line property-no-vendor-prefix */
+    -webkit-appearance: none;
+    /* stylelint-disable-next-line property-no-vendor-prefix */
+    -moz-appearance: none;
+    appearance: none;
+    height: 40px;
+    line-height: 1.4;
+    box-sizing: border-box;
+    
+    /* Custom dropdown arrow for Safari */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px;
+    padding-right: 32px;
 }
 
 .tikz-app .export-number {
@@ -571,6 +588,22 @@
         padding: 6px 8px;
         background: white;
         box-sizing: border-box;
+        height: 36px; /* Consistent height for mobile */
+    }
+    
+    /* Mobile: Ensure dropdown arrow is visible */
+    .tikz-app .export-select {
+        /* stylelint-disable-next-line property-no-vendor-prefix */
+        -webkit-appearance: none;
+        /* stylelint-disable-next-line property-no-vendor-prefix */
+        -moz-appearance: none;
+        appearance: none;
+        padding-right: 28px; /* Space for mobile arrow */
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 6px center;
+        background-size: 14px; /* Smaller arrow for mobile */
+        text-align: left; /* Left align text for select */
     }
 
     .tikz-app .export-form .export-btn {
@@ -850,6 +883,22 @@
         flex: 1;
         width: auto;
         min-width: 120px; /* Override từ 100px → 120px */
+        height: 38px; /* Consistent height for large mobile */
+    }
+    
+    /* Large Mobile: Ensure dropdown arrow is visible */
+    .tikz-app .export-select {
+        /* stylelint-disable-next-line property-no-vendor-prefix */
+        -webkit-appearance: none;
+        /* stylelint-disable-next-line property-no-vendor-prefix */
+        -moz-appearance: none;
+        appearance: none;
+        padding-right: 30px; /* Space for large mobile arrow */
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 7px center;
+        background-size: 15px; /* Medium arrow for large mobile */
+        text-align: left; /* Left align text for select */
     }
 
     .tikz-app .export-form .export-btn-group {
@@ -1091,6 +1140,22 @@
         min-width: 100px;
         font-size: 0.875rem;
         padding: 6px 8px;
+        height: 40px; /* Consistent height for tablet */
+    }
+    
+    /* Tablet: Ensure dropdown arrow is visible */
+    .tikz-app .export-select {
+        /* stylelint-disable-next-line property-no-vendor-prefix */
+        -webkit-appearance: none;
+        /* stylelint-disable-next-line property-no-vendor-prefix */
+        -moz-appearance: none;
+        appearance: none;
+        padding-right: 32px; /* Space for tablet arrow */
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 8px center;
+        background-size: 16px; /* Standard arrow for tablet */
+        text-align: left; /* Left align text for select */
     }
 
     .tikz-app .export-form .export-btn-group {
@@ -1242,6 +1307,22 @@
         font-size: 0.85rem;
         padding: 6px 8px; /* Giảm padding cho compact hơn */
         text-align: center; /* Căn giữa text trong input */
+        height: 40px; /* Consistent height for desktop */
+    }
+    
+    /* Desktop: Ensure dropdown arrow is visible */
+    .tikz-app .export-select {
+        /* stylelint-disable-next-line property-no-vendor-prefix */
+        -webkit-appearance: none;
+        /* stylelint-disable-next-line property-no-vendor-prefix */
+        -moz-appearance: none;
+        appearance: none;
+        padding-right: 32px; /* Space for desktop arrow */
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 8px center;
+        background-size: 16px; /* Standard arrow for desktop */
+        text-align: left; /* Override center alignment for select */
     }
 
     .tikz-app .export-form .export-btn-group {
@@ -1458,6 +1539,22 @@
         font-size: 0.9rem;
         padding: 8px 12px;
         text-align: center;
+        height: 42px; /* Consistent height for large desktop */
+    }
+    
+    /* Large Desktop: Ensure dropdown arrow is visible */
+    .tikz-app .export-select {
+        /* stylelint-disable-next-line property-no-vendor-prefix */
+        -webkit-appearance: none;
+        /* stylelint-disable-next-line property-no-vendor-prefix */
+        -moz-appearance: none;
+        appearance: none;
+        padding-right: 34px; /* Space for large desktop arrow */
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 9px center;
+        background-size: 17px; /* Larger arrow for large desktop */
+        text-align: left; /* Override center alignment for select */
     }
 
     .tikz-app .export-form .export-btn-group {

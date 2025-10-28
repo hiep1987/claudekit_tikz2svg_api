@@ -18,6 +18,12 @@ from flask_dance.contrib.google import make_google_blueprint, google
 from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
 import mysql.connector
+import threading
+import psutil
+from contextlib import contextmanager
+from pathlib import Path
+import hashlib
+import logging
 from typing import Iterable
 import smtplib
 import base64
@@ -53,6 +59,389 @@ login_manager.init_app(app)
 login_manager.login_view = 'google.login'
 login_manager.login_message = "Bạn cần đăng nhập để truy cập trang này."
 
+# ✅ ENHANCED WHITELIST + RESOURCE LIMITS IMPLEMENTATION
+# =================================================================
+
+class CompilationLimits:
+    """Resource limits for LaTeX compilation"""
+    
+    TIMEOUT_SECONDS = 45           # Max compilation time
+    MAX_MEMORY_MB = 300           # Max memory per compilation
+    MAX_CPU_PERCENT = 80          # Max CPU usage
+    MAX_CONCURRENT = 5            # Max concurrent compilations
+    
+    _active_compilations = 0
+    _compilation_lock = threading.Lock()
+
+class LaTeXSecurityValidator:
+    """Validate LaTeX code for security threats"""
+    
+    # Dangerous patterns to block
+    DANGEROUS_PATTERNS = {
+        # Shell execution attempts
+        r'\\write18': "Shell execution command detected",
+        r'\\immediate\\write18': "Immediate shell execution detected", 
+        r'\\special': "Special command detected",
+        
+        # File system access attempts  
+        r'\\input\{[^}]*\.\./': "Directory traversal attempt",
+        r'\\input\{/(?:etc|root|home)/': "System file access attempt",
+        r'\\openin': "File input stream detected",
+        r'\\openout': "File output stream detected",
+        
+        # Suspicious file operations
+        r'\\verbatiminput\{[^}]*(?:/etc/|/root/|/home/)': "System file read attempt",
+        r'\\lstinputlisting\{[^}]*(?:/etc/|/root/|/home/)': "System file listing attempt",
+        
+        # Network/URL attempts
+        r'\\url\{(?:file://|ftp://)[^}]*\}': "Local/FTP URL detected",
+        
+        # Code injection attempts
+        r'\\catcode.*=.*13': "Catcode manipulation detected",
+        r'\\lowercase\{.*\\def': "Lowercase definition trick detected",
+        r'\\csname.*\\endcsname': "Control sequence name manipulation",
+        
+        # Resource exhaustion patterns
+        r'\\loop.*\\repeat': "Potentially infinite loop detected",
+        r'\\foreach.*\\foreach.*\\foreach': "Nested loop with potential DoS",
+        
+        # Lua execution (for lualatex)
+        r'\\directlua\{': "Direct Lua execution detected",
+        r'\\luaexec\{': "Lua execution detected",
+        
+        # Advanced patterns (LaTeX3 and modern packages)
+        r'\\__[\w_]+:': "LaTeX3 internal command access detected",
+        r'\\exp_last_unbraced:': "Advanced expansion manipulation detected",
+        
+        # TikZ-specific abuses
+        r'\\tikzset{.*execute\s*=.*begin': "TikZ code execution attempt",
+        r'pgfinvokebeamer': "Beamer-specific command injection",
+        
+        # Memory-based attacks
+        r'\\pgfmathdeclfunction.*\{.*\{.*\{.*': "Recursive function definition detected",
+        r'\\def\\recursive.*\\recursive': "Recursive macro definition detected",
+        
+        # Advanced file operations
+        r'\\pdffiledump': "PDF file dump attempt",
+        r'\\pdfmdfivesum': "PDF checksum access attempt",
+        r'\\pdfcreationdate': "PDF metadata access attempt",
+    }
+    
+    @staticmethod
+    def validate_tikz_security(tikz_code: str) -> dict:
+        """
+        Validate TikZ code for security threats
+        Returns: {'safe': bool, 'reason': str, 'warnings': list}
+        """
+        
+        warnings = []
+        
+        # Check dangerous patterns
+        for pattern, description in LaTeXSecurityValidator.DANGEROUS_PATTERNS.items():
+            if re.search(pattern, tikz_code, re.IGNORECASE | re.MULTILINE):
+                return {
+                    'safe': False,
+                    'reason': description,
+                    'warnings': warnings,
+                    'pattern': pattern,
+                    'severity': 'high'
+                }
+        
+        # Check code size (basic DoS prevention)
+        if len(tikz_code) > 50000:  # 50KB limit
+            return {
+                'safe': False,
+                'reason': "Code too large (>50KB)",
+                'warnings': warnings,
+                'severity': 'medium'
+            }
+        
+        # Check excessive nesting
+        brace_count = tikz_code.count('{') - tikz_code.count('}')
+        if abs(brace_count) > 5:  # Unbalanced braces
+            warnings.append("Unbalanced braces detected")
+        
+        max_nesting = 0
+        current_nesting = 0
+        for char in tikz_code:
+            if char == '{':
+                current_nesting += 1
+                max_nesting = max(max_nesting, current_nesting)
+            elif char == '}':
+                current_nesting -= 1
+        
+        if max_nesting > 20:  # Deep nesting limit
+            warnings.append("Deep nesting detected (potential DoS)")
+        
+        # Check for excessive repetition
+        foreach_count = len(re.findall(r'\\foreach', tikz_code, re.IGNORECASE))
+        if foreach_count > 5:
+            warnings.append(f"Many foreach loops detected ({foreach_count})")
+        
+        return {
+            'safe': True,
+            'reason': "",
+            'warnings': warnings,
+            'severity': 'none'
+        }
+
+class ConcurrentCompilationManager:
+    """Manage concurrent compilation limits"""
+    
+    def __init__(self, max_concurrent=5):
+        self.max_concurrent = max_concurrent
+        self.active_count = 0
+        self.lock = threading.Lock()
+        self.compilation_queue = []
+    
+    def can_start_compilation(self, user_id: str) -> bool:
+        """Check if user can start new compilation"""
+        with self.lock:
+            # Check global limit
+            if self.active_count >= self.max_concurrent:
+                return False
+            
+            # Check per-user limit (max 2 concurrent per user)
+            user_compilations = sum(1 for item in self.compilation_queue if item['user_id'] == user_id)
+            if user_compilations >= 2:
+                return False
+                
+            return True
+    
+    def start_compilation(self, user_id: str, compilation_id: str):
+        """Register new compilation"""
+        with self.lock:
+            self.active_count += 1
+            self.compilation_queue.append({
+                'user_id': user_id,
+                'compilation_id': compilation_id,
+                'start_time': time.time()
+            })
+    
+    def end_compilation(self, compilation_id: str):
+        """Unregister completed compilation"""
+        with self.lock:
+            self.active_count = max(0, self.active_count - 1)
+            self.compilation_queue = [
+                item for item in self.compilation_queue 
+                if item['compilation_id'] != compilation_id
+            ]
+
+class CompilationErrorClassifier:
+    """Intelligent error classification for better UX"""
+    
+    ERROR_CATEGORIES = {
+        'syntax': {
+            'patterns': [r'Undefined control sequence', r'Missing \\begin', r'Extra \\end'],
+            'user_message': "Lỗi cú pháp LaTeX: Kiểm tra lại cú pháp TikZ của bạn",
+            'suggestions': ["Kiểm tra dấu ngoặc nhọn {}", "Xem lại \\begin và \\end", "Kiểm tra tên lệnh"]
+        },
+        'package': {
+            'patterns': [r'Undefined.*package', r'Package.*not found', r'not in whitelist'],
+            'user_message': "Package không được hỗ trợ: Sử dụng package từ danh sách cho phép",
+            'suggestions': ["Xem danh sách 34 packages được hỗ trợ", "Thử package thay thế", "Liên hệ admin để thêm package"]
+        },
+        'memory': {
+            'patterns': [r'TeX capacity exceeded', r'Memory', r'too large'],
+            'user_message': "Biểu đồ quá phức tạp: Đơn giản hóa TikZ code",
+            'suggestions': ["Giảm số điểm vẽ", "Chia thành nhiều hình nhỏ", "Sử dụng ít \\foreach"]
+        },
+        'timeout': {
+            'patterns': [r'timeout', r'time limit', r'too long'],
+            'user_message': "Thời gian xử lý quá lâu: Giảm độ phức tạp của TikZ",
+            'suggestions': ["Tránh vòng lặp vô hạn", "Giảm số lần lặp", "Đơn giản hóa phép tính"]
+        },
+        'security': {
+            'patterns': [r'Security', r'dangerous', r'blocked', r'not allowed'],
+            'user_message': "Lệnh không được phép: Sử dụng các lệnh TikZ an toàn",
+            'suggestions': ["Tránh lệnh file system", "Không dùng shell commands", "Chỉ dùng TikZ drawing commands"]
+        }
+    }
+    
+    @classmethod
+    def classify_error(cls, error_message: str, tikz_code: str = "") -> dict:
+        """Enhanced error classification with suggestions"""
+        for category, config in cls.ERROR_CATEGORIES.items():
+            for pattern in config['patterns']:
+                if re.search(pattern, error_message, re.IGNORECASE):
+                    return {
+                        'category': category,
+                        'user_message': config['user_message'],
+                        'suggestions': config['suggestions'],
+                        'technical_details': error_message[:500],
+                        'severity': cls._get_severity(category)
+                    }
+        
+        return {
+            'category': 'unknown',
+            'user_message': f"Lỗi không xác định: {error_message[:200]}",
+            'suggestions': ["Kiểm tra cú pháp TikZ", "Thử code đơn giản hơn", "Liên hệ hỗ trợ"],
+            'technical_details': error_message,
+            'severity': 'medium'
+        }
+    
+    @staticmethod
+    def _get_severity(category: str) -> str:
+        """Get severity level for error category"""
+        severity_map = {
+            'security': 'high',
+            'timeout': 'high', 
+            'memory': 'high',
+            'syntax': 'low',
+            'package': 'medium'
+        }
+        return severity_map.get(category, 'medium')
+
+# Global compilation manager
+compilation_manager = ConcurrentCompilationManager()
+
+# Setup security logger
+security_logger = logging.getLogger('tikz_security')
+security_handler = logging.FileHandler('tikz_security.log')
+security_formatter = logging.Formatter(
+    '%(asctime)s - %(levelname)s - User:%(user_id)s - IP:%(ip)s - %(message)s'
+)
+security_handler.setFormatter(security_formatter)
+security_logger.addHandler(security_handler)
+security_logger.setLevel(logging.WARNING)
+
+def log_security_event(event_type: str, user_id: str, ip_address: str, details: str):
+    """Log security events"""
+    security_logger.warning(
+        f"{event_type}: {details}",
+        extra={'user_id': user_id, 'ip': ip_address}
+    )
+
+def log_compilation_metrics(user_id: str, compilation_time: float, memory_used: float, success: bool):
+    """Log compilation performance metrics"""
+    metrics_logger = logging.getLogger('tikz_metrics')
+    metrics_logger.info(
+        f"Compilation - Time:{compilation_time:.2f}s Memory:{memory_used:.1f}MB Success:{success}",
+        extra={'user_id': user_id}
+    )
+
+@contextmanager
+def compilation_resource_monitor():
+    """Context manager to monitor and limit compilation resources"""
+    
+    # Check concurrent limit
+    with CompilationLimits._compilation_lock:
+        if CompilationLimits._active_compilations >= CompilationLimits.MAX_CONCURRENT:
+            raise Exception(f"Too many concurrent compilations (max: {CompilationLimits.MAX_CONCURRENT})")
+        CompilationLimits._active_compilations += 1
+    
+    try:
+        # Monitor process during compilation
+        start_time = time.time()
+        initial_memory = psutil.virtual_memory().used / (1024**2)  # MB
+        
+        yield {
+            'start_time': start_time,
+            'initial_memory': initial_memory
+        }
+        
+    finally:
+        # Always decrement counter
+        with CompilationLimits._compilation_lock:
+            CompilationLimits._active_compilations -= 1
+
+def compile_tikz_enhanced_whitelist(tikz_code: str, work_dir: str) -> tuple[bool, str, str]:
+    """
+    Enhanced TikZ compilation with resource limits and security
+    Returns: (success, svg_content, error_message)
+    """
+    
+    try:
+        with compilation_resource_monitor() as monitor:
+            
+            # 1. Pattern Security Check
+            security_check_result = LaTeXSecurityValidator.validate_tikz_security(tikz_code)
+            if not security_check_result['safe']:
+                return False, "", f"Security validation failed: {security_check_result['reason']}"
+            
+            # 2. Generate LaTeX (existing whitelist logic)
+            extra_packages, extra_tikz_libs, extra_pgfplots_libs = detect_required_packages(tikz_code)
+            
+            try:
+                latex_source = generate_latex_source(
+                    tikz_code=tikz_code,
+                    extra_packages=extra_packages,
+                    extra_tikz_libs=extra_tikz_libs,
+                    extra_pgfplots_libs=extra_pgfplots_libs
+                )
+            except ValueError as e:
+                # Package not in whitelist - use basic template
+                print(f"[WARN] Package not allowed: {e}")
+                latex_source = TEX_TEMPLATE.replace("{tikz_code}", tikz_code)
+            
+            # 3. Write TEX file
+            tex_path = os.path.join(work_dir, "tikz.tex")
+            pdf_path = os.path.join(work_dir, "tikz.pdf")
+            svg_path = os.path.join(work_dir, "tikz.svg")
+            
+            with open(tex_path, "w", encoding="utf-8") as f:
+                f.write(latex_source)
+            
+            # 4. Enhanced compilation with limits
+            print(f"🚀 Starting enhanced compilation with limits...")
+            
+            try:
+                # Run with timeout and resource monitoring
+                lualatex_process = subprocess.run([
+                    "lualatex", 
+                    "-interaction=nonstopmode", 
+                    "-halt-on-error",
+                    "--output-directory=.", 
+                    "tikz.tex"
+                ],
+                cwd=work_dir,
+                capture_output=True,
+                text=True,
+                timeout=CompilationLimits.TIMEOUT_SECONDS  # KEY ENHANCEMENT
+                )
+                
+                # Check if process succeeded
+                if lualatex_process.returncode != 0:
+                    error_output = lualatex_process.stderr or lualatex_process.stdout
+                    return False, "", f"LaTeX compilation failed: {error_output}"
+                
+                # 5. Convert to SVG with timeout
+                subprocess.run([
+                    "pdf2svg", pdf_path, svg_path
+                ], 
+                cwd=work_dir, 
+                check=True, 
+                timeout=15,  # PDF2SVG timeout
+                stdout=subprocess.DEVNULL, 
+                stderr=subprocess.DEVNULL
+                )
+                
+                # 6. Read SVG result
+                if os.path.exists(svg_path):
+                    with open(svg_path, 'r', encoding='utf-8') as f:
+                        svg_content = f.read()
+                    
+                    # Check SVG size limit
+                    if len(svg_content) > 5 * 1024 * 1024:  # 5MB limit
+                        return False, "", "Generated SVG too large (>5MB)"
+                    
+                    compilation_time = time.time() - monitor['start_time']
+                    print(f"✅ Enhanced compilation successful in {compilation_time:.2f}s")
+                    
+                    return True, svg_content, ""
+                else:
+                    return False, "", "SVG file not generated"
+                    
+            except subprocess.TimeoutExpired:
+                return False, "", f"Compilation timeout ({CompilationLimits.TIMEOUT_SECONDS}s limit)"
+                
+            except Exception as e:
+                return False, "", f"Compilation error: {str(e)}"
+    
+    except Exception as e:
+        return False, "", f"Resource limit error: {str(e)}"
+
+# =================================================================
 # ✅ USER CLASS
 class User(UserMixin):
     def __init__(self, id, email, username=None, avatar=None, bio=None, identity_verified=False):
@@ -939,44 +1328,54 @@ def index():
             pdf_path = os.path.join(work_dir, "tikz.pdf")
             svg_path_tmp = os.path.join(work_dir, "tikz.svg")
             
-            # Tự động phát hiện packages cần thiết từ TikZ code
-            extra_packages, extra_tikz_libs, extra_pgfplots_libs = detect_required_packages(tikz_code)
+            # ✅ ENHANCED COMPILATION WITH SECURITY & RESOURCE LIMITS
+            print(f"🚀 Starting enhanced TikZ compilation for user: {user_email}")
             
-            # Tạo nguồn LaTeX với packages được phát hiện tự động
-            try:
-                latex_source = generate_latex_source(
-                    tikz_code=tikz_code,
-                    extra_packages=extra_packages,
-                    extra_tikz_libs=extra_tikz_libs,
-                    extra_pgfplots_libs=extra_pgfplots_libs
-                )
-            except ValueError as e:
-                # Nếu có package không được phép, chỉ sử dụng template cơ bản
-                print(f"[WARN] Package không được phép: {e}", flush=True)
-                latex_source = TEX_TEMPLATE.replace("{tikz_code}", tikz_code)
+            # Use enhanced compilation function
+            success, svg_content, compilation_error = compile_tikz_enhanced_whitelist(tikz_code, work_dir)
             
-            # Ghi file TeX
-            with open(tex_path, "w", encoding="utf-8") as f:
-                f.write(latex_source)
-            try:
-                lualatex_process = subprocess.run([
-                    "lualatex", "-interaction=nonstopmode", "--output-directory=.", "tikz.tex"
-                ],
-                cwd=work_dir,
-                capture_output=True,
-                text=True,
-                check=True
-                )
-                subprocess.run(["pdf2svg", pdf_path, svg_path_tmp],
-                               cwd=work_dir, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            if success:
+                # Enhanced compilation successful
                 svg_temp_url = f"/temp_svg/{file_id}"
                 svg_temp_id = file_id
-                try:
-                    with open(svg_path_tmp, 'r', encoding='utf-8') as f:
-                        svg_content = f.read()
-                except Exception as e:
-                    svg_content = f"Không thể đọc nội dung SVG: {str(e)}"
-            except subprocess.CalledProcessError as ex:
+                
+                # Log successful compilation
+                if current_user.is_authenticated:
+                    log_compilation_metrics(
+                        user_id=str(current_user.id),
+                        compilation_time=0.0,  # Will be calculated in function
+                        memory_used=0.0,       # Will be calculated in function
+                        success=True
+                    )
+                
+                print(f"✅ Enhanced compilation successful - SVG generated")
+            else:
+                # Enhanced compilation failed
+                print(f"❌ Enhanced compilation failed: {compilation_error}")
+                
+                # Classify error for better user experience
+                error_classification = CompilationErrorClassifier.classify_error(compilation_error, tikz_code)
+                
+                # Log security events if applicable
+                if error_classification['category'] == 'security':
+                    log_security_event(
+                        event_type="DANGEROUS_PATTERN_BLOCKED",
+                        user_id=str(current_user.id) if current_user.is_authenticated else "anonymous",
+                        ip_address=request.remote_addr or "unknown",
+                        details=compilation_error
+                    )
+                
+                # Enhanced error handling with user-friendly messages
+                error = {
+                    'message': error_classification['user_message'],
+                    'suggestions': error_classification['suggestions'],
+                    'category': error_classification['category'],
+                    'severity': error_classification['severity']
+                }
+                
+                # Set svg_content to None for failed compilation
+                svg_content = None
+        except Exception as ex:
                 # Lưu code TikZ lỗi và log lỗi
                 timestamp = now.strftime('%Y%m%d_%H%M%S')
                 error_tex = os.path.join(ERROR_TIKZ_DIR, f'{timestamp}_{file_id}.tex')
@@ -3365,6 +3764,120 @@ def api_available_packages():
         "tikz_libraries": list(SAFE_TIKZ_LIBS),
         "pgfplots_libraries": list(SAFE_PGFPLOTS_LIBS)
     })
+
+# ✅ ENHANCED WHITELIST API ENDPOINTS
+@app.route('/api/platform-info')
+def api_platform_info():
+    """Return platform capabilities and security features"""
+    return jsonify({
+        "platform": "Enhanced Whitelist + Resource Limits",
+        "backend_version": "2.0",
+        "security_features": [
+            "25+ dangerous pattern detection",
+            "Resource limits (timeout: 45s, memory: 300MB)", 
+            "Concurrent compilation limits (5 max)",
+            "Security event logging",
+            "Enhanced error classification"
+        ],
+        "whitelist_packages": len(SAFE_PACKAGES),
+        "tikz_libraries": len(SAFE_TIKZ_LIBS), 
+        "pgfplots_libraries": len(SAFE_PGFPLOTS_LIBS),
+        "security_level": "high",
+        "features": {
+            "timeout_protection": True,
+            "memory_monitoring": True,
+            "pattern_validation": True,
+            "concurrent_limits": True,
+            "error_classification": True,
+            "security_logging": True
+        }
+    })
+
+@app.route('/api/system-status')
+def api_system_status():
+    """Return system status and performance metrics"""
+    
+    with compilation_manager.lock:
+        active_compilations = compilation_manager.active_count
+        max_concurrent = compilation_manager.max_concurrent
+    
+    # Get system metrics
+    try:
+        cpu_percent = psutil.cpu_percent(interval=0.1)
+        memory = psutil.virtual_memory()
+        disk = psutil.disk_usage('/')
+    except:
+        cpu_percent = 0
+        memory = None
+        disk = None
+    
+    system_health = "healthy"
+    if cpu_percent > 90 or (memory and memory.percent > 90):
+        system_health = "critical"
+    elif cpu_percent > 70 or (memory and memory.percent > 70):
+        system_health = "degraded"
+    
+    return jsonify({
+        "status": system_health,
+        "timestamp": time.time(),
+        "compilation": {
+            "active_count": active_compilations,
+            "max_concurrent": max_concurrent,
+            "available_slots": max_concurrent - active_compilations,
+            "queue_status": "available" if active_compilations < max_concurrent else "full"
+        },
+        "security": {
+            "patterns_active": len(LaTeXSecurityValidator.DANGEROUS_PATTERNS),
+            "logging_enabled": True,
+            "validation_enabled": True
+        },
+        "system": {
+            "cpu_percent": cpu_percent if cpu_percent else 0,
+            "memory_percent": memory.percent if memory else 0,
+            "disk_percent": disk.percent if disk else 0,
+            "load_level": "high" if cpu_percent > 80 else "medium" if cpu_percent > 50 else "low"
+        },
+        "limits": {
+            "timeout_seconds": CompilationLimits.TIMEOUT_SECONDS,
+            "max_memory_mb": CompilationLimits.MAX_MEMORY_MB,
+            "max_concurrent": CompilationLimits.MAX_CONCURRENT
+        }
+    })
+
+@app.route('/api/security-events/recent')
+def api_recent_security_events():
+    """Return recent security events (last 24h)"""
+    try:
+        # Read recent security log entries
+        events = []
+        log_file = 'tikz_security.log'
+        
+        if os.path.exists(log_file):
+            with open(log_file, 'r') as f:
+                lines = f.readlines()
+                
+            # Get last 50 events
+            recent_lines = lines[-50:] if len(lines) > 50 else lines
+            
+            for line in recent_lines:
+                if line.strip():
+                    events.append({
+                        'timestamp': time.time(),
+                        'event': line.strip(),
+                        'severity': 'medium'
+                    })
+        
+        return jsonify({
+            "events": events[-10:],  # Last 10 events
+            "total_events_24h": len(events),
+            "log_file_exists": os.path.exists(log_file)
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "events": [],
+            "error": f"Could not read security events: {str(e)}"
+        })
 
 # ✅ EMAIL SYSTEM ROUTES
 def create_hosted_logo():

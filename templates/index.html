@@ -74,7 +74,7 @@
         <div class="col">
           <form id="tikz-form" method="post" onsubmit="console.log('Form submit event'); return submitTikzCodeAjax(event)">
             <textarea name="code" id="code" class="tikz-code-textarea" rows="12" placeholder="Nhập code TikZ tại đây...">{{ tikz_code|default('') }}</textarea>
-            <div class="d-flex justify-content-end align-items-center gap-2" id="compile-save-row">
+            <div class="d-flex justify-content-start align-items-center gap-2" id="compile-save-row">
               <button type="submit" id="compile-btn" class="compile-save-row-btn" {% if not logged_in %}title="Bạn cần đăng nhập Google để sử dụng"{% endif %}>Biên dịch</button>
               <button
                 type="button"

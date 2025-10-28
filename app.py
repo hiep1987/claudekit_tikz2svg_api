@@ -292,8 +292,235 @@ class CompilationErrorClassifier:
         }
         return severity_map.get(category, 'medium')
 
-# Global compilation manager
+class AdaptiveCompilationLimits:
+    """Dynamic resource limits based on system load and user tier"""
+    
+    def __init__(self):
+        self.base_timeout = 45          # Base timeout seconds
+        self.base_memory_mb = 300       # Base memory MB
+        self.base_concurrent = 5        # Base concurrent limit
+        
+        # User tier multipliers
+        self.user_tier_multipliers = {
+            'free': 1.0,
+            'premium': 1.5,
+            'enterprise': 2.0
+        }
+        
+        # System load thresholds
+        self.load_thresholds = {
+            'low': 50,      # CPU < 50%
+            'medium': 80,   # CPU < 80% 
+            'high': 95      # CPU < 95%
+        }
+    
+    def get_user_tier(self, user_id: str) -> str:
+        """Determine user tier (free/premium/enterprise)"""
+        # For Phase 2, everyone is 'free' - can be extended later
+        return 'free'
+    
+    def get_system_load_level(self) -> str:
+        """Get current system load level"""
+        try:
+            cpu_percent = psutil.cpu_percent(interval=0.1)
+            if cpu_percent < self.load_thresholds['low']:
+                return 'low'
+            elif cpu_percent < self.load_thresholds['medium']:
+                return 'medium'
+            else:
+                return 'high'
+        except:
+            return 'medium'  # Default to medium if can't determine
+    
+    def get_adaptive_limits(self, user_id: str) -> dict:
+        """Calculate adaptive limits based on user tier and system load"""
+        
+        user_tier = self.get_user_tier(user_id)
+        system_load = self.get_system_load_level()
+        
+        # Base multiplier from user tier
+        tier_multiplier = self.user_tier_multipliers.get(user_tier, 1.0)
+        
+        # System load adjustments
+        load_adjustments = {
+            'low': 1.2,     # 20% more resources when system is idle
+            'medium': 1.0,  # Normal resources
+            'high': 0.7     # 30% less resources when system is busy
+        }
+        
+        load_multiplier = load_adjustments.get(system_load, 1.0)
+        
+        # Calculate final limits
+        final_multiplier = tier_multiplier * load_multiplier
+        
+        adaptive_limits = {
+            'timeout_seconds': int(self.base_timeout * final_multiplier),
+            'max_memory_mb': int(self.base_memory_mb * final_multiplier),
+            'max_concurrent': max(1, int(self.base_concurrent * load_multiplier)),
+            'user_tier': user_tier,
+            'system_load': system_load,
+            'multiplier_applied': final_multiplier
+        }
+        
+        # Ensure minimum limits
+        adaptive_limits['timeout_seconds'] = max(15, adaptive_limits['timeout_seconds'])
+        adaptive_limits['max_memory_mb'] = max(100, adaptive_limits['max_memory_mb'])
+        adaptive_limits['max_concurrent'] = max(1, adaptive_limits['max_concurrent'])
+        
+        # Ensure maximum limits for safety
+        adaptive_limits['timeout_seconds'] = min(120, adaptive_limits['timeout_seconds'])
+        adaptive_limits['max_memory_mb'] = min(1000, adaptive_limits['max_memory_mb'])
+        adaptive_limits['max_concurrent'] = min(10, adaptive_limits['max_concurrent'])
+        
+        return adaptive_limits
+
+class CompilationCache:
+    """Intelligent caching system for compilation results"""
+    
+    def __init__(self, max_cache_size_mb=50):
+        self.cache = {}                    # SHA256 -> cache_entry
+        self.max_cache_size_mb = max_cache_size_mb
+        self.current_size_bytes = 0
+        self.cache_lock = threading.Lock()
+        
+        # Cache statistics
+        self.stats = {
+            'hits': 0,
+            'misses': 0,
+            'evictions': 0,
+            'total_requests': 0
+        }
+    
+    def _calculate_cache_key(self, tikz_code: str, packages: list, tikz_libs: list, pgfplots_libs: list) -> str:
+        """Generate SHA256 cache key from compilation parameters"""
+        
+        # Create consistent string representation
+        cache_input = {
+            'tikz_code': tikz_code.strip(),
+            'packages': sorted(packages) if packages else [],
+            'tikz_libs': sorted(tikz_libs) if tikz_libs else [],
+            'pgfplots_libs': sorted(pgfplots_libs) if pgfplots_libs else []
+        }
+        
+        # Convert to JSON and generate SHA256
+        cache_string = json.dumps(cache_input, sort_keys=True)
+        return hashlib.sha256(cache_string.encode('utf-8')).hexdigest()
+    
+    def _estimate_svg_size(self, svg_content: str) -> int:
+        """Estimate SVG content size in bytes"""
+        return len(svg_content.encode('utf-8'))
+    
+    def _evict_lru_entries(self, required_space: int):
+        """Evict least recently used entries to make space"""
+        
+        if not self.cache:
+            return
+        
+        # Sort by last_accessed (LRU eviction)
+        sorted_entries = sorted(
+            self.cache.items(), 
+            key=lambda x: x[1]['last_accessed']
+        )
+        
+        freed_space = 0
+        evicted_count = 0
+        
+        for cache_key, entry in sorted_entries:
+            entry_size = entry['size_bytes']
+            
+            del self.cache[cache_key]
+            self.current_size_bytes -= entry_size
+            freed_space += entry_size
+            evicted_count += 1
+            
+            if freed_space >= required_space:
+                break
+        
+        self.stats['evictions'] += evicted_count
+        print(f"Cache: Evicted {evicted_count} entries, freed {freed_space} bytes")
+    
+    def get(self, tikz_code: str, packages: list = None, tikz_libs: list = None, pgfplots_libs: list = None) -> dict:
+        """Get cached compilation result"""
+        
+        with self.cache_lock:
+            self.stats['total_requests'] += 1
+            
+            cache_key = self._calculate_cache_key(tikz_code, packages or [], tikz_libs or [], pgfplots_libs or [])
+            
+            if cache_key in self.cache:
+                # Cache hit
+                self.stats['hits'] += 1
+                entry = self.cache[cache_key]
+                entry['last_accessed'] = time.time()
+                entry['hit_count'] += 1
+                
+                return {
+                    'found': True,
+                    'svg_content': entry['svg_content'],
+                    'cache_key': cache_key,
+                    'cached_at': entry['cached_at'],
+                    'hit_count': entry['hit_count']
+                }
+            else:
+                # Cache miss
+                self.stats['misses'] += 1
+                return {
+                    'found': False,
+                    'cache_key': cache_key
+                }
+    
+    def set(self, tikz_code: str, svg_content: str, packages: list = None, tikz_libs: list = None, pgfplots_libs: list = None):
+        """Cache compilation result"""
+        
+        with self.cache_lock:
+            cache_key = self._calculate_cache_key(tikz_code, packages or [], tikz_libs or [], pgfplots_libs or [])
+            entry_size = self._estimate_svg_size(svg_content)
+            
+            # Check if we need to make space
+            max_size_bytes = self.max_cache_size_mb * 1024 * 1024
+            if self.current_size_bytes + entry_size > max_size_bytes:
+                required_space = (self.current_size_bytes + entry_size) - max_size_bytes + (1024 * 1024)  # Extra 1MB buffer
+                self._evict_lru_entries(required_space)
+            
+            # Add to cache
+            self.cache[cache_key] = {
+                'svg_content': svg_content,
+                'cached_at': time.time(),
+                'last_accessed': time.time(),
+                'hit_count': 0,
+                'size_bytes': entry_size,
+                'tikz_code_preview': tikz_code[:100] + '...' if len(tikz_code) > 100 else tikz_code
+            }
+            
+            self.current_size_bytes += entry_size
+    
+    def get_stats(self) -> dict:
+        """Get cache statistics"""
+        with self.cache_lock:
+            hit_rate = (self.stats['hits'] / max(1, self.stats['total_requests'])) * 100
+            
+            return {
+                'entries_count': len(self.cache),
+                'size_mb': round(self.current_size_bytes / (1024 * 1024), 2),
+                'max_size_mb': self.max_cache_size_mb,
+                'hit_rate_percent': round(hit_rate, 2),
+                'total_requests': self.stats['total_requests'],
+                'hits': self.stats['hits'],
+                'misses': self.stats['misses'],
+                'evictions': self.stats['evictions']
+            }
+    
+    def clear(self):
+        """Clear all cached entries"""
+        with self.cache_lock:
+            self.cache.clear()
+            self.current_size_bytes = 0
+            print("Cache: All entries cleared")
+
+# Global instances
 compilation_manager = ConcurrentCompilationManager()
+adaptive_limits = AdaptiveCompilationLimits()
+compilation_cache = CompilationCache(max_cache_size_mb=50)  # 50MB cache
 
 # Setup security logger
 security_logger = logging.getLogger('tikz_security')
@@ -345,9 +572,9 @@ def compilation_resource_monitor():
         with CompilationLimits._compilation_lock:
             CompilationLimits._active_compilations -= 1
 
-def compile_tikz_enhanced_whitelist(tikz_code: str, work_dir: str) -> tuple[bool, str, str]:
+def compile_tikz_enhanced_whitelist(tikz_code: str, work_dir: str, user_id: str = "anonymous") -> tuple[bool, str, str]:
     """
-    Enhanced TikZ compilation with resource limits and security
+    Enhanced TikZ compilation with caching, adaptive limits, and security
     Returns: (success, svg_content, error_message)
     """
     
@@ -373,8 +600,32 @@ def compile_tikz_enhanced_whitelist(tikz_code: str, work_dir: str) -> tuple[bool
                 # Package not in whitelist - use basic template
                 print(f"[WARN] Package not allowed: {e}")
                 latex_source = TEX_TEMPLATE.replace("{tikz_code}", tikz_code)
+                extra_packages, extra_tikz_libs, extra_pgfplots_libs = [], [], []
             
-            # 3. Write TEX file
+            # 3. Check cache for existing compilation
+            cache_result = compilation_cache.get(
+                tikz_code=tikz_code,
+                packages=extra_packages,
+                tikz_libs=extra_tikz_libs,
+                pgfplots_libs=extra_pgfplots_libs
+            )
+            
+            if cache_result['found']:
+                print(f"✅ Cache HIT! Returning cached result (hit #{cache_result['hit_count']})")
+                return True, cache_result['svg_content'], ""
+            
+            print(f"⚪ Cache MISS. Proceeding with compilation...")
+            
+            # 4. Get adaptive resource limits
+            limits = adaptive_limits.get_adaptive_limits(user_id)
+            timeout_seconds = limits['timeout_seconds']
+            
+            print(f"🚀 Starting enhanced compilation with adaptive limits:")
+            print(f"   User: {user_id} (tier: {limits['user_tier']})")
+            print(f"   System load: {limits['system_load']}")
+            print(f"   Timeout: {timeout_seconds}s (multiplier: {limits['multiplier_applied']:.2f})")
+            
+            # 5. Write TEX file
             tex_path = os.path.join(work_dir, "tikz.tex")
             pdf_path = os.path.join(work_dir, "tikz.pdf")
             svg_path = os.path.join(work_dir, "tikz.svg")
@@ -382,11 +633,9 @@ def compile_tikz_enhanced_whitelist(tikz_code: str, work_dir: str) -> tuple[bool
             with open(tex_path, "w", encoding="utf-8") as f:
                 f.write(latex_source)
             
-            # 4. Enhanced compilation with limits
-            print(f"🚀 Starting enhanced compilation with limits...")
-            
+            # 6. Enhanced compilation with adaptive limits
             try:
-                # Run with timeout and resource monitoring
+                # Run with adaptive timeout and resource monitoring
                 lualatex_process = subprocess.run([
                     "lualatex", 
                     "-interaction=nonstopmode", 
@@ -397,7 +646,7 @@ def compile_tikz_enhanced_whitelist(tikz_code: str, work_dir: str) -> tuple[bool
                 cwd=work_dir,
                 capture_output=True,
                 text=True,
-                timeout=CompilationLimits.TIMEOUT_SECONDS  # KEY ENHANCEMENT
+                timeout=timeout_seconds  # ADAPTIVE TIMEOUT
                 )
                 
                 # Check if process succeeded
@@ -405,7 +654,7 @@ def compile_tikz_enhanced_whitelist(tikz_code: str, work_dir: str) -> tuple[bool
                     error_output = lualatex_process.stderr or lualatex_process.stdout
                     return False, "", f"LaTeX compilation failed: {error_output}"
                 
-                # 5. Convert to SVG with timeout
+                # 7. Convert to SVG with timeout
                 subprocess.run([
                     "pdf2svg", pdf_path, svg_path
                 ], 
@@ -416,7 +665,7 @@ def compile_tikz_enhanced_whitelist(tikz_code: str, work_dir: str) -> tuple[bool
                 stderr=subprocess.DEVNULL
                 )
                 
-                # 6. Read SVG result
+                # 8. Read SVG result
                 if os.path.exists(svg_path):
                     with open(svg_path, 'r', encoding='utf-8') as f:
                         svg_content = f.read()
@@ -425,15 +674,24 @@ def compile_tikz_enhanced_whitelist(tikz_code: str, work_dir: str) -> tuple[bool
                     if len(svg_content) > 5 * 1024 * 1024:  # 5MB limit
                         return False, "", "Generated SVG too large (>5MB)"
                     
+                    # 9. Cache successful compilation
+                    compilation_cache.set(
+                        tikz_code=tikz_code,
+                        svg_content=svg_content,
+                        packages=extra_packages,
+                        tikz_libs=extra_tikz_libs,
+                        pgfplots_libs=extra_pgfplots_libs
+                    )
+                    
                     compilation_time = time.time() - monitor['start_time']
-                    print(f"✅ Enhanced compilation successful in {compilation_time:.2f}s")
+                    print(f"✅ Enhanced compilation successful in {compilation_time:.2f}s (cached for future)")
                     
                     return True, svg_content, ""
                 else:
                     return False, "", "SVG file not generated"
                     
             except subprocess.TimeoutExpired:
-                return False, "", f"Compilation timeout ({CompilationLimits.TIMEOUT_SECONDS}s limit)"
+                return False, "", f"Compilation timeout ({timeout_seconds}s adaptive limit)"
                 
             except Exception as e:
                 return False, "", f"Compilation error: {str(e)}"
@@ -1332,8 +1590,9 @@ def index():
             print(f"🚀 Starting enhanced TikZ compilation for user: {user_email}")
             
             try:
-                # Use enhanced compilation function
-                success, svg_content, compilation_error = compile_tikz_enhanced_whitelist(tikz_code, work_dir)
+                # Use enhanced compilation function with user context
+                user_id = str(current_user.id) if current_user.is_authenticated else "anonymous"
+                success, svg_content, compilation_error = compile_tikz_enhanced_whitelist(tikz_code, work_dir, user_id)
                 
                 if success:
                     # Enhanced compilation successful
@@ -3880,6 +4139,157 @@ def api_recent_security_events():
             "events": [],
             "error": f"Could not read security events: {str(e)}"
         })
+
+# ✅ PHASE 2: ADVANCED MONITORING API ENDPOINTS
+
+@app.route('/api/adaptive-limits')
+def api_adaptive_limits():
+    """Get current adaptive limits for user/system"""
+    
+    # Get user context
+    user_id = str(current_user.id) if current_user.is_authenticated else "anonymous"
+    
+    # Get adaptive limits
+    limits = adaptive_limits.get_adaptive_limits(user_id)
+    
+    return jsonify({
+        "user_id": user_id,
+        "adaptive_limits": limits,
+        "timestamp": time.time(),
+        "explanation": {
+            "user_tier": f"User tier '{limits['user_tier']}' provides {limits['multiplier_applied']:.2f}x resource multiplier",
+            "system_load": f"System load '{limits['system_load']}' affects resource allocation",
+            "timeout_range": "15-120 seconds based on conditions",
+            "memory_range": "100-1000 MB based on conditions",
+            "concurrent_range": "1-10 based on system load"
+        }
+    })
+
+@app.route('/api/cache-stats')
+def api_cache_stats():
+    """Get compilation cache statistics"""
+    
+    cache_stats = compilation_cache.get_stats()
+    
+    return jsonify({
+        "cache_statistics": cache_stats,
+        "timestamp": time.time(),
+        "performance_analysis": {
+            "efficiency": "excellent" if cache_stats['hit_rate_percent'] > 70 else 
+                         "good" if cache_stats['hit_rate_percent'] > 40 else 
+                         "needs_improvement",
+            "memory_usage": f"{cache_stats['size_mb']}/{cache_stats['max_size_mb']} MB ({(cache_stats['size_mb']/cache_stats['max_size_mb']*100):.1f}%)",
+            "recommendations": [
+                "Cache is working effectively" if cache_stats['hit_rate_percent'] > 50 else "Consider clearing cache or adjusting size",
+                f"Total requests: {cache_stats['total_requests']}" if cache_stats['total_requests'] > 0 else "No cache usage yet"
+            ]
+        }
+    })
+
+@app.route('/api/admin/dashboard-metrics')
+def api_dashboard_metrics():
+    """Comprehensive dashboard metrics for administrators"""
+    
+    # Get compilation metrics
+    with compilation_manager.lock:
+        compilation_metrics = {
+            "active_compilations": compilation_manager.active_count,
+            "max_concurrent": compilation_manager.max_concurrent,
+            "queue_length": len(compilation_manager.compilation_queue),
+            "available_slots": compilation_manager.max_concurrent - compilation_manager.active_count
+        }
+    
+    # Get system metrics
+    try:
+        cpu_percent = psutil.cpu_percent(interval=0.1)
+        memory = psutil.virtual_memory()
+        disk = psutil.disk_usage('/')
+        
+        system_metrics = {
+            "cpu_percent": cpu_percent,
+            "memory_percent": memory.percent,
+            "memory_available_gb": round(memory.available / (1024**3), 2),
+            "disk_percent": disk.percent,
+            "disk_free_gb": round(disk.free / (1024**3), 2),
+            "system_health": "healthy" if cpu_percent < 70 and memory.percent < 80 else 
+                           "degraded" if cpu_percent < 90 and memory.percent < 90 else "critical"
+        }
+    except:
+        system_metrics = {"error": "Could not retrieve system metrics"}
+    
+    # Get cache metrics
+    cache_stats = compilation_cache.get_stats()
+    
+    # Get security metrics
+    security_metrics = {
+        "patterns_active": len(LaTeXSecurityValidator.DANGEROUS_PATTERNS),
+        "logging_enabled": True,
+        "validation_enabled": True
+    }
+    
+    # Recent security events count
+    try:
+        with open('tikz_security.log', 'r') as f:
+            recent_events = len(f.readlines())
+    except:
+        recent_events = 0
+    
+    security_metrics["total_security_events"] = recent_events
+    
+    # Get adaptive limits for anonymous user (system baseline)
+    baseline_limits = adaptive_limits.get_adaptive_limits("anonymous")
+    
+    return jsonify({
+        "dashboard_data": {
+            "compilation": compilation_metrics,
+            "system": system_metrics,
+            "cache": cache_stats,
+            "security": security_metrics,
+            "adaptive_limits": {
+                "baseline": baseline_limits,
+                "current_system_load": baseline_limits['system_load']
+            }
+        },
+        "alerts": [
+            {"level": "warning", "message": "High system load detected"} if system_metrics.get('cpu_percent', 0) > 80 else None,
+            {"level": "info", "message": f"Cache hit rate: {cache_stats['hit_rate_percent']:.1f}%"} if cache_stats['total_requests'] > 0 else None,
+            {"level": "success", "message": f"{security_metrics['patterns_active']} security patterns active"}
+        ],
+        "timestamp": time.time(),
+        "uptime_info": {
+            "platform": "Enhanced Whitelist + Resource Limits v2.0",
+            "features_active": ["Security Validation", "Adaptive Limits", "Compilation Caching", "Real-time Monitoring"]
+        }
+    })
+
+@app.route('/api/admin/cache-control', methods=['POST'])
+def api_cache_control():
+    """Cache management endpoint"""
+    
+    data = request.get_json() or {}
+    action = data.get('action', '')
+    
+    if action == 'clear':
+        compilation_cache.clear()
+        return jsonify({
+            "success": True,
+            "message": "Cache cleared successfully",
+            "timestamp": time.time()
+        })
+    
+    elif action == 'stats':
+        return jsonify({
+            "success": True,
+            "stats": compilation_cache.get_stats(),
+            "timestamp": time.time()
+        })
+    
+    else:
+        return jsonify({
+            "success": False,
+            "error": "Invalid action. Use 'clear' or 'stats'",
+            "available_actions": ["clear", "stats"]
+        }), 400
 
 # ✅ EMAIL SYSTEM ROUTES
 def create_hosted_logo():

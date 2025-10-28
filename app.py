@@ -48,7 +48,21 @@ app = Flask(__name__, static_folder=STATIC_ROOT)
 # Health check route
 @app.route("/health")
 def health():
-    return {"status": "ok"}, 200
+    """Enhanced health check for Phase 3 production"""
+    return {
+        "status": "healthy",
+        "timestamp": time.time(),
+        "version": "2.0",
+        "platform": "Enhanced Whitelist + Resource Limits v2.0",
+        "domain": "tikz2svg.com",
+        "environment": "production",
+        "features": {
+            "security_patterns": 26,
+            "cache_enabled": True,
+            "monitoring": True,
+            "backup_system": True
+        }
+    }, 200
 
 app.config['UPLOAD_FOLDER'] = STATIC_ROOT
 app.config['DEBUG'] = False # Tắt debug mode cho production
@@ -4031,8 +4045,10 @@ def api_available_packages():
 def api_platform_info():
     """Return platform capabilities and security features"""
     return jsonify({
-        "platform": "Enhanced Whitelist + Resource Limits",
+        "platform": "Enhanced Whitelist + Resource Limits v2.0",
         "backend_version": "2.0",
+        "domain": "tikz2svg.com",
+        "environment": "production",
         "security_features": [
             "25+ dangerous pattern detection",
             "Resource limits (timeout: 45s, memory: 300MB)", 

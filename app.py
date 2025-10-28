@@ -1331,50 +1331,51 @@ def index():
             # ✅ ENHANCED COMPILATION WITH SECURITY & RESOURCE LIMITS
             print(f"🚀 Starting enhanced TikZ compilation for user: {user_email}")
             
-            # Use enhanced compilation function
-            success, svg_content, compilation_error = compile_tikz_enhanced_whitelist(tikz_code, work_dir)
-            
-            if success:
-                # Enhanced compilation successful
-                svg_temp_url = f"/temp_svg/{file_id}"
-                svg_temp_id = file_id
+            try:
+                # Use enhanced compilation function
+                success, svg_content, compilation_error = compile_tikz_enhanced_whitelist(tikz_code, work_dir)
                 
-                # Log successful compilation
-                if current_user.is_authenticated:
-                    log_compilation_metrics(
-                        user_id=str(current_user.id),
-                        compilation_time=0.0,  # Will be calculated in function
-                        memory_used=0.0,       # Will be calculated in function
-                        success=True
-                    )
-                
-                print(f"✅ Enhanced compilation successful - SVG generated")
-            else:
-                # Enhanced compilation failed
-                print(f"❌ Enhanced compilation failed: {compilation_error}")
-                
-                # Classify error for better user experience
-                error_classification = CompilationErrorClassifier.classify_error(compilation_error, tikz_code)
-                
-                # Log security events if applicable
-                if error_classification['category'] == 'security':
-                    log_security_event(
-                        event_type="DANGEROUS_PATTERN_BLOCKED",
-                        user_id=str(current_user.id) if current_user.is_authenticated else "anonymous",
-                        ip_address=request.remote_addr or "unknown",
-                        details=compilation_error
-                    )
-                
-                # Enhanced error handling with user-friendly messages
-                error = {
-                    'message': error_classification['user_message'],
-                    'suggestions': error_classification['suggestions'],
-                    'category': error_classification['category'],
-                    'severity': error_classification['severity']
-                }
-                
-                # Set svg_content to None for failed compilation
-                svg_content = None
+                if success:
+                    # Enhanced compilation successful
+                    svg_temp_url = f"/temp_svg/{file_id}"
+                    svg_temp_id = file_id
+                    
+                    # Log successful compilation
+                    if current_user.is_authenticated:
+                        log_compilation_metrics(
+                            user_id=str(current_user.id),
+                            compilation_time=0.0,  # Will be calculated in function
+                            memory_used=0.0,       # Will be calculated in function
+                            success=True
+                        )
+                    
+                    print(f"✅ Enhanced compilation successful - SVG generated")
+                else:
+                    # Enhanced compilation failed
+                    print(f"❌ Enhanced compilation failed: {compilation_error}")
+                    
+                    # Classify error for better user experience
+                    error_classification = CompilationErrorClassifier.classify_error(compilation_error, tikz_code)
+                    
+                    # Log security events if applicable
+                    if error_classification['category'] == 'security':
+                        log_security_event(
+                            event_type="DANGEROUS_PATTERN_BLOCKED",
+                            user_id=str(current_user.id) if current_user.is_authenticated else "anonymous",
+                            ip_address=request.remote_addr or "unknown",
+                            details=compilation_error
+                        )
+                    
+                    # Enhanced error handling with user-friendly messages
+                    error = {
+                        'message': error_classification['user_message'],
+                        'suggestions': error_classification['suggestions'],
+                        'category': error_classification['category'],
+                        'severity': error_classification['severity']
+                    }
+                    
+                    # Set svg_content to None for failed compilation
+                    svg_content = None
         except Exception as ex:
                 # Lưu code TikZ lỗi và log lỗi
                 timestamp = now.strftime('%Y%m%d_%H%M%S')

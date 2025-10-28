@@ -184,8 +184,10 @@
         section.className = 'result-section';
         let html = `<div class=\"error\">Lỗi khi biên dịch!</div>`;
         if (fullLog && fullLog.trim()) {
-            html += `<button id=\"ajax-show-log-btn\" style=\"margin-top:10px; background:#b71c1c; color:white; border:none; border-radius:4px; padding:6px 16px; cursor:pointer;\">Hiển thị chi tiết log</button>`;
-            html += `<button id=\"ajax-copy-log-btn\" style=\"display:none; margin-left:10px; background:#ffc107; color:#212529; border:none; border-radius:4px; padding:6px 16px; cursor:pointer; font-weight:bold;\">Copy log</button>`;
+            html += `<div class=\"ajax-button-container\">`;
+            html += `<button id=\"ajax-show-log-btn\">Hiển thị chi tiết log</button>`;
+            html += `<button id=\"ajax-copy-log-btn\" style=\"display:none;\">Copy log</button>`;
+            html += `</div>`;
             html += `<pre id=\"ajax-full-log\" style=\"display:none; background:#fff0f0; color:#b71c1c; border:1px solid #f5c6cb; border-radius:4px; padding:12px; margin-top:10px; max-height:400px; overflow:auto;\">${fullLog}</pre>`;
         }
         section.innerHTML = html;
@@ -209,6 +211,30 @@
                 document.body.appendChild(section);
             }
         }
+        
+        // Update margin responsive function
+        function updateCopyButtonMargin() {
+            const copyBtn = document.getElementById('ajax-copy-log-btn');
+            if (copyBtn && copyBtn.style.display !== 'none') {
+                if (window.innerWidth < 576) {
+                    // Mobile: vertical stack, use both margins for proper spacing
+                    copyBtn.style.marginLeft = '12px';
+                    copyBtn.style.marginTop = '12px';
+                } else if (window.innerWidth < 768) {
+                    // Large mobile: horizontal, use margin-left
+                    copyBtn.style.marginLeft = '16px';
+                    copyBtn.style.marginTop = '0';
+                } else {
+                    // Desktop: horizontal, use margin-left
+                    copyBtn.style.marginLeft = '20px';
+                    copyBtn.style.marginTop = '0';
+                }
+            }
+        }
+        
+        // Add resize listener for responsive margins
+        window.addEventListener('resize', updateCopyButtonMargin);
+        
         // Gán event handler
         const logBtn = document.getElementById('ajax-show-log-btn');
         const copyBtn = document.getElementById('ajax-copy-log-btn');
@@ -219,7 +245,23 @@
                     if (log.style.display === 'none') {
                         log.style.display = 'block';
                         this.textContent = 'Ẩn chi tiết log';
-                        if (copyBtn) copyBtn.style.display = 'inline-block';
+                        if (copyBtn) {
+                            copyBtn.style.display = 'inline-flex';
+                            // Set responsive margin based on screen size
+                            if (window.innerWidth < 576) {
+                                // Mobile: vertical stack, use both margins for proper spacing
+                                copyBtn.style.marginLeft = '12px';
+                                copyBtn.style.marginTop = '12px';
+                            } else if (window.innerWidth < 768) {
+                                // Large mobile: horizontal, use margin-left
+                                copyBtn.style.marginLeft = '16px';
+                                copyBtn.style.marginTop = '0';
+                            } else {
+                                // Desktop: horizontal, use margin-left
+                                copyBtn.style.marginLeft = '20px';
+                                copyBtn.style.marginTop = '0';
+                            }
+                        }
                     } else {
                         log.style.display = 'none';
                         this.textContent = 'Hiển thị chi tiết log';

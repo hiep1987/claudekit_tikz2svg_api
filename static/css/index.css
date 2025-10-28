@@ -121,10 +121,123 @@
 
 /* Result Section */
 .tikz-app .result-section {
-    margin-top: var(--spacing-16);
-    padding: var(--spacing-10);
-    background-color: var(--bg-tertiary);
-    border-radius: var(--radius-sm);
+    /* Responsive design giống export-section */
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgb(0 0 0 / 8%);
+    padding: 20px;
+    margin: var(--spacing-8) auto; /* Căn giữa với auto margin left/right */
+    width: 900px;
+    max-width: 900px; /* Changed from 100% to match width */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Căn giữa nội dung trong section */
+}
+
+/* Ajax Full Log - Responsive Design */
+.tikz-app .result-section #ajax-full-log {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: pre-wrap;
+}
+
+/* Simple ID Selectors for Highest Priority */
+#ajax-show-log-btn {
+    background: linear-gradient(90deg, #b71c1c 0%, #d32f2f 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 16px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgb(0 0 0 / 10%);
+    margin: 0;
+}
+
+#ajax-show-log-btn:hover {
+    background: linear-gradient(90deg, #8b0000 0%, #b71c1c 100%);
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 4px 8px rgb(0 0 0 / 15%);
+}
+
+#ajax-copy-log-btn {
+    background: linear-gradient(90deg, #ffc107 0%, #ffcd38 100%);
+    color: #212529;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 16px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgb(0 0 0 / 10%);
+    
+    /* margin handled by JavaScript for responsive behavior */
+}
+
+#ajax-copy-log-btn:hover {
+    background: linear-gradient(90deg, #e0a800 0%, #ffc107 100%);
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 4px 8px rgb(0 0 0 / 15%);
+}
+
+/* Ajax Button Container - Flexbox Layout */
+.tikz-app .result-section .error .ajax-button-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+    gap: 20px;
+}
+
+/* Ajax Buttons - Enhanced Styling with High Specificity */
+.tikz-app .result-section .error #ajax-show-log-btn,
+.tikz-app .result-section .error #ajax-copy-log-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: var(--font-weight-semibold);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease;
+    text-decoration: none;
+    border: none;
+    padding: 6px 16px;
+    cursor: pointer;
+}
+
+/* Ajax Show Log Button - Error Style */
+.tikz-app .result-section .error #ajax-show-log-btn {
+    background: linear-gradient(90deg, #b71c1c 0%, #d32f2f 100%);
+    color: var(--text-white);
+}
+
+.tikz-app .result-section .error #ajax-show-log-btn:hover {
+    background: linear-gradient(90deg, #8b0000 0%, #b71c1c 100%);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px) scale(1.03);
+}
+
+/* Ajax Copy Log Button - Warning Style & Align Right */
+.tikz-app .result-section .error #ajax-copy-log-btn {
+    background: linear-gradient(90deg, #ffc107 0%, #ffcd38 100%);
+    color: #212529;
+}
+
+.tikz-app .result-section .error #ajax-copy-log-btn:hover {
+    background: linear-gradient(90deg, #e0a800 0%, #ffc107 100%);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px) scale(1.03);
 }
 
 .tikz-app .svg-preview {
@@ -231,6 +344,7 @@
     border: 1px solid var(--danger-border);
     padding: var(--spacing-8);
     border-radius: var(--radius-sm);
+    margin: var(--spacing-4);
 }
 
 /* Export Section */
@@ -368,6 +482,48 @@
         background: #fff;
         border-radius: var(--radius-lg);
         box-shadow: 0 8px 32px rgb(0 0 0 / 8%);
+    }
+
+    /* Result Section - Mobile First */
+    .tikz-app .result-section {
+        padding: var(--spacing-6);
+        margin: var(--spacing-6) auto;
+        width: 100%;
+        max-width: calc(100vw - var(--spacing-8));
+        box-sizing: border-box;
+        background: #fff;
+        border-radius: var(--radius-lg);
+        box-shadow: 0 8px 32px rgb(0 0 0 / 8%);
+    }
+
+    /* Ajax Full Log - Mobile First */
+    .tikz-app .result-section .error #ajax-full-log {
+        max-width: calc(100vw - var(--spacing-16));
+        font-size: 12px;
+        padding: var(--spacing-3);
+        margin-top: var(--spacing-2);
+        max-height: 250px;
+    }
+
+    /* Ajax Button Container - Mobile First */
+    .tikz-app .result-section .error .ajax-button-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+        margin-top: 16px;
+    }
+
+    /* Ajax button margins: handled by JavaScript */
+
+    /* Ajax Copy Log Button - Mobile First */
+    .tikz-app .result-section .error #ajax-copy-log-btn {
+        font-size: 12px;
+        padding: 4px 12px;
+        order: 2;
+    }
+
+    .tikz-app .result-section .error #ajax-show-log-btn {
+        order: 1;
     }
 
     .tikz-app .export-section h4 {
@@ -623,6 +779,45 @@
         width: 90%; /* Override từ 100% → 90% */
     }
 
+    /* Override: Result Section - 2 column wrap layout (sẽ bị override ở >= 768px) */
+    .tikz-app .result-section {
+        padding: var(--spacing-6);
+        margin: var(--spacing-8) auto;
+        width: 90%;
+    }
+
+    /* Ajax Full Log - Large Mobile/Small Tablet */
+    .tikz-app .result-section .error #ajax-full-log {
+        max-width: 90vw;
+        font-size: 13px;
+        padding: var(--spacing-4);
+        margin-top: var(--spacing-3);
+        max-height: 300px;
+    }
+
+    /* Ajax Button Container - Large Mobile/Small Tablet */
+    .tikz-app .result-section .error .ajax-button-container {
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 16px;
+        margin-top: 14px;
+    }
+
+    /* Ajax button margins: handled by JavaScript */
+    
+    /* Ajax button margins: handled by JavaScript */
+
+    /* Ajax Copy Log Button - Large Mobile/Small Tablet */
+    .tikz-app .result-section .error #ajax-copy-log-btn {
+        font-size: 13px;
+        padding: 5px 14px;
+        order: unset;
+    }
+
+    .tikz-app .result-section .error #ajax-show-log-btn {
+        order: unset;
+    }
+
     .tikz-app .export-form {
         display: flex;
         flex-flow: row wrap;
@@ -825,6 +1020,38 @@
         max-width: 800px;
     }
 
+    /* Result Section - 2 Column Layout for Tablets */
+    .tikz-app .result-section {
+        padding: var(--spacing-8);
+        margin: var(--spacing-8) auto;
+        width: 100%;
+        max-width: 800px;
+    }
+
+    /* Ajax Full Log - Tablet */
+    .tikz-app .result-section .error #ajax-full-log {
+        max-width: 100%;
+        font-size: 14px;
+        padding: var(--spacing-4);
+        margin-top: var(--spacing-4);
+        max-height: 350px;
+    }
+
+    /* Ajax Button Container - Tablet */
+    .tikz-app .result-section .error .ajax-button-container {
+        margin-top: 16px;
+    }
+
+    /* Ajax button margins: handled by JavaScript */
+    
+    /* Ajax button margins: handled by JavaScript */
+
+    /* Ajax Copy Log Button - Tablet */
+    .tikz-app .result-section .error #ajax-copy-log-btn {
+        font-size: 14px;
+        padding: 6px 16px;
+    }
+
     .tikz-app .export-form {
         display: grid;
         grid-template-columns: repeat(2, 1fr); /* 2 cột bằng nhau */
@@ -955,6 +1182,23 @@
         margin: var(--spacing-8) auto;
         width: 100%;
         max-width: 1000px; /* Giới hạn width để layout không quá rộng */
+    }
+
+    /* Result Section - 4 Column Layout */
+    .tikz-app .result-section {
+        padding: var(--spacing-10);
+        margin: var(--spacing-8) auto;
+        width: 100%;
+        max-width: 1000px; /* Giới hạn width để layout không quá rộng */
+    }
+
+    /* Ajax Full Log - Desktop */
+    .tikz-app .result-section .error #ajax-full-log {
+        max-width: 100%;
+        font-size: 14px;
+        padding: 12px;
+        margin-top: 10px;
+        max-height: 400px;
     }
 
     .tikz-app .export-form {
@@ -1156,6 +1400,23 @@
         width: 100%;
         max-width: 1200px; /* Giữ max-width nhỏ hơn container */
         padding: var(--spacing-8); /* Giảm padding để cân bằng */
+    }
+
+    /* Result Section - Ultra-wide với margin tăng - căn giữa theo input-preview */
+    .tikz-app .result-section {
+        margin: var(--spacing-8) auto;
+        width: 100%;
+        max-width: 1200px; /* Giữ max-width nhỏ hơn container */
+        padding: var(--spacing-8); /* Giảm padding để cân bằng */
+    }
+
+    /* Ajax Full Log - Ultra-wide */
+    .tikz-app .result-section .error #ajax-full-log {
+        max-width: 100%;
+        font-size: 14px;
+        padding: 12px;
+        margin-top: 10px;
+        max-height: 400px;
     }
 
     .tikz-app .export-form {

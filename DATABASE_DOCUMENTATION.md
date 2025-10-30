@@ -4,6 +4,33 @@
 
 Cơ sở dữ liệu của website TikZ to SVG API được xây dựng trên MySQL 8.0.42, sử dụng để lưu trữ thông tin người dùng, hình ảnh SVG được tạo từ mã TikZ, và các tương tác xã hội như like, follow.
 
+**Thống kê database:**
+- **Tổng số bảng:** 19 tables
+- **Bảng chính:** User, SVG Images, Comments, Likes, Follows
+- **Bảng phụ trợ:** Notifications, Email, Verification, Admin, Packages
+- **Bảng log/audit:** Action logs, Email logs, Package changelog
+
+**Danh sách bảng:**
+1. `user` - Quản lý người dùng
+2. `svg_image` - Hình ảnh SVG
+3. `svg_like` - Thích bài viết
+4. `svg_comments` - Bình luận bài viết
+5. `svg_comment_likes` - Thích bình luận
+6. `user_follow` - Theo dõi người dùng
+7. `keyword` - Từ khóa
+8. `svg_image_keyword` - Liên kết SVG-Keyword
+9. `notifications` - Thông báo
+10. `email_notifications` - Email thông báo
+11. `email_log` - Log gửi email
+12. `verification_tokens` - Token xác thực
+13. `user_action_log` - Log hành động user
+14. `svg_action_log` - Log hành động SVG
+15. `supported_packages` - Packages được hỗ trợ
+16. `package_requests` - Yêu cầu thêm package
+17. `package_changelog` - Log thay đổi package
+18. `admin_permissions` - Quyền admin
+19. `package_usage_stats` - Thống kê sử dụng package
+
 ## Cấu trúc Database
 
 ### 1. Bảng `user` - Quản lý người dùng
@@ -1188,9 +1215,162 @@ python3 run_database_report.py
 
 ---
 
+### 18. Bảng `admin_permissions` - Quản lý quyền admin
+
+**Mô tả:** Hệ thống quản lý quyền admin linh hoạt thay vì hardcode email
+
+**Cấu trúc:**
+```sql
+CREATE TABLE `admin_permissions` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `permission_level` enum('admin','moderator','reviewer') COLLATE utf8mb4_unicode_ci DEFAULT 'reviewer',
+  `granted_by` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `granted_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `is_active` tinyint(1) DEFAULT '1',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`),
+  KEY `idx_admin_email` (`email`),
+  KEY `idx_admin_active` (`is_active`,`permission_level`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
+
+**Các trường:**
+- `id`: Khóa chính, tự động tăng
+- `email`: Email của admin/moderator (duy nhất)
+- `permission_level`: Cấp độ quyền
+  - `admin`: Toàn quyền (approve/reject requests, manage users)
+  - `moderator`: Quyền vừa (approve/reject, moderate content)
+  - `reviewer`: Chỉ xem và comment
+- `granted_by`: Email của admin đã cấp quyền
+- `granted_at`: Thời điểm cấp quyền
+- `is_active`: Trạng thái (1=active, 0=revoked)
+
+**Indexes:**
+- `email` (UNIQUE): Đảm bảo mỗi email chỉ có 1 entry
+- `idx_admin_active`: Query nhanh admin đang active
+
+**Use Cases:**
+```sql
+-- Check if user is admin
+SELECT * FROM admin_permissions 
+WHERE email = 'user@example.com' 
+  AND is_active = 1 
+  AND permission_level = 'admin';
+
+-- Add new moderator
+INSERT INTO admin_permissions (email, permission_level, granted_by)
+VALUES ('newmod@example.com', 'moderator', 'admin@example.com');
+
+-- Revoke permissions
+UPDATE admin_permissions 
+SET is_active = 0 
+WHERE email = 'user@example.com';
+```
+
+---
+
+### 19. Bảng `package_usage_stats` - Thống kê sử dụng package
+
+**Mô tả:** Theo dõi thống kê sử dụng các LaTeX/TikZ packages
+
+**Cấu trúc:**
+```sql
+CREATE TABLE `package_usage_stats` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `package_id` int NOT NULL,
+  `package_name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `package_type` enum('latex_package','tikz_library','pgfplots_library') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `compilation_count` int DEFAULT '0',
+  `success_count` int DEFAULT '0',
+  `error_count` int DEFAULT '0',
+  `last_used_at` timestamp NULL DEFAULT NULL,
+  `user_id` int DEFAULT NULL,
+  `user_session_id` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `usage_date` date NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_package_id` (`package_id`),
+  KEY `idx_package_name` (`package_name`),
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_usage_date` (`usage_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
+
+**Các trường:**
+- `id`: Khóa chính, tự động tăng
+- `package_id`: ID của package (từ `supported_packages`)
+- `package_name`: Tên package (denormalized cho query nhanh)
+- `package_type`: Loại package
+  - `latex_package`: LaTeX package (amsmath, geometry, ...)
+  - `tikz_library`: TikZ library (calc, positioning, ...)
+  - `pgfplots_library`: PGFPlots library (polar, statistics, ...)
+- `compilation_count`: Tổng số lần compile sử dụng package này
+- `success_count`: Số lần compile thành công
+- `error_count`: Số lần compile lỗi
+- `last_used_at`: Lần cuối sử dụng package
+- `user_id`: ID user (nếu đã đăng nhập)
+- `user_session_id`: Session ID (nếu anonymous)
+- `usage_date`: Ngày sử dụng (dùng để group by date)
+- `created_at`: Thời điểm tạo record
+- `updated_at`: Thời điểm cập nhật cuối
+
+**Indexes:**
+- `idx_package_id`: Query theo package ID
+- `idx_package_name`: Query theo tên package
+- `idx_user_id`: Query theo user
+- `idx_usage_date`: Group/filter theo ngày
+
+**Use Cases:**
+```sql
+-- Top 10 packages phổ biến nhất
+SELECT package_name, SUM(compilation_count) as total_uses
+FROM package_usage_stats
+GROUP BY package_name
+ORDER BY total_uses DESC
+LIMIT 10;
+
+-- Success rate của packages
+SELECT 
+  package_name,
+  SUM(success_count) as successes,
+  SUM(error_count) as errors,
+  ROUND(SUM(success_count) * 100.0 / NULLIF(SUM(compilation_count), 0), 2) as success_rate
+FROM package_usage_stats
+GROUP BY package_name
+ORDER BY success_rate DESC;
+
+-- Packages được dùng trong 7 ngày qua
+SELECT package_name, COUNT(DISTINCT usage_date) as days_used
+FROM package_usage_stats
+WHERE usage_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+GROUP BY package_name
+ORDER BY days_used DESC;
+
+-- Track package usage của user
+SELECT package_name, SUM(compilation_count) as uses
+FROM package_usage_stats
+WHERE user_id = 123
+GROUP BY package_name
+ORDER BY uses DESC;
+```
+
+**Analytics Benefits:**
+- 📊 Identify most popular packages
+- 🎯 Optimize package whitelist
+- 🐛 Track packages with high error rates
+- 📈 Monitor package adoption trends
+- 👥 Understand user preferences
+
+---
+
 ## Changelog
 
 ### Tháng 10 2025
+- ✅ **Admin Permissions System**: Thêm bảng `admin_permissions` cho quản lý quyền admin linh hoạt
+- ✅ **Package Analytics**: Thêm bảng `package_usage_stats` để theo dõi thống kê sử dụng packages
+- ✅ **Package Management**: Thêm 3 bảng (`supported_packages`, `package_requests`, `package_changelog`) cho hệ thống quản lý packages
 - ✅ **Comments System**: Thêm 2 bảng mới (`svg_comments`, `svg_comment_likes`) cho hệ thống bình luận
 - ✅ **Nested Comments**: Hỗ trợ trả lời bình luận (parent_comment_id)
 - ✅ **Like Comments**: Hệ thống thích bình luận với denormalized counter
@@ -1201,6 +1381,7 @@ python3 run_database_report.py
 - ✅ **Image Caption Feature**: Cột `caption` vào bảng `svg_image` để lưu mô tả ảnh
 - ✅ **MathJax Support**: Hỗ trợ hiển thị công thức toán học LaTeX trong caption và comments
 - ✅ **UTF8MB4 Support**: Đảm bảo hỗ trợ đầy đủ Unicode và ký tự đặc biệt
+- ✅ **Database Cleanup**: Xóa 2 bảng backup không cần thiết (`package_requests_backup`, `supported_packages_backup`)
 
 ### Tháng 1 2025
 - ✅ **Thêm Code Usage Limit System**: Field `profile_verification_usage_count` để track số lần sử dụng mã xác thực

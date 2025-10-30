@@ -1650,13 +1650,41 @@ def index():
                             details=compilation_error
                         )
                     
-                    # Enhanced error handling with user-friendly messages
-                    error = {
-                        'message': error_classification['user_message'],
-                        'suggestions': error_classification['suggestions'],
-                        'category': error_classification['category'],
-                        'severity': error_classification['severity']
+                    # ✅ FIX: Read full log file for display
+                    log_path = os.path.join(work_dir, "tikz.log")
+                    if os.path.exists(log_path):
+                        try:
+                            with open(log_path, 'r', encoding='utf-8') as log_file:
+                                error_log_full = log_file.read()
+                            print(f"✅ Read error log: {len(error_log_full)} characters")
+                        except Exception as log_err:
+                            print(f"⚠️  Failed to read log file: {log_err}")
+                            error_log_full = compilation_error  # Fallback to compilation error
+                    else:
+                        print(f"⚠️  Log file not found: {log_path}")
+                        error_log_full = compilation_error  # Use compilation error as log
+                    
+                    # ✅ FIX: Format error as HTML string for template
+                    error_html = f"<strong>{error_classification['user_message']}</strong>"
+                    
+                    if error_classification['suggestions']:
+                        error_html += "<br><br><strong>💡 Gợi ý:</strong><ul>"
+                        for suggestion in error_classification['suggestions']:
+                            error_html += f"<li>{suggestion}</li>"
+                        error_html += "</ul>"
+                    
+                    # Add category badge
+                    category_colors = {
+                        'syntax': '#ff6b6b',
+                        'package': '#4ecdc4',
+                        'security': '#ffe66d',
+                        'resource': '#95e1d3',
+                        'unknown': '#9b59b6'
                     }
+                    category_color = category_colors.get(error_classification['category'], '#9b59b6')
+                    error_html += f"<br><br><span style='background:{category_color};color:#fff;padding:4px 8px;border-radius:4px;font-size:0.85em;'>Category: {error_classification['category']}</span>"
+                    
+                    error = error_html
                     
                     # Set svg_content to None for failed compilation
                     svg_content = None

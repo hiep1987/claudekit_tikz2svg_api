@@ -1610,14 +1610,14 @@ def index():
                 
                 if success:
                     # Enhanced compilation successful
-                svg_temp_url = f"/temp_svg/{file_id}"
-                svg_temp_id = file_id
+                    svg_temp_url = f"/temp_svg/{file_id}"
+                    svg_temp_id = file_id
                     
                     # ✅ IMPORTANT: Save SVG to temp file even when from cache
                     # Frontend expects file to exist at /temp_svg/{file_id}
                     svg_path_tmp = os.path.join(work_dir, "tikz.svg")
                     if not os.path.exists(svg_path_tmp) and svg_content:
-                try:
+                        try:
                             with open(svg_path_tmp, 'w', encoding='utf-8') as f:
                                 f.write(svg_content)
                             print(f"✅ SVG saved to temp file: {svg_path_tmp}")

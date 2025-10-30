@@ -525,6 +525,56 @@ def setup_package_routes(app, limiter=None):
             flash('Error loading admin interface', 'error')
             return redirect(url_for('index'))
     
+    @app.route('/api/admin/requests/count')
+    def admin_requests_count():
+        """Get count of pending package requests for admin dashboard"""
+        try:
+            # Admin authentication check - Only specific email allowed
+            if not current_user.is_authenticated:
+                return jsonify({'error': 'Unauthorized - Login required'}), 403
+            
+            # Hardcoded admin email for security
+            ADMIN_EMAIL = 'quochiep0504@gmail.com'
+            if current_user.email != ADMIN_EMAIL:
+                return jsonify({'error': 'Unauthorized - Admin access only'}), 403
+            
+            conn = get_db_connection()
+            if not conn:
+                return jsonify({'error': 'Database connection failed'}), 500
+            
+            cursor = conn.cursor(dictionary=True)
+            
+            # Get counts by status
+            cursor.execute("""
+                SELECT 
+                    COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending_count,
+                    COUNT(CASE WHEN status = 'under_review' THEN 1 END) as under_review_count,
+                    COUNT(CASE WHEN status = 'approved' THEN 1 END) as approved_count,
+                    COUNT(CASE WHEN status = 'rejected' THEN 1 END) as rejected_count,
+                    COUNT(*) as total_count
+                FROM package_requests
+            """)
+            
+            counts = cursor.fetchone()
+            
+            cursor.close()
+            conn.close()
+            
+            return jsonify({
+                'success': True,
+                'counts': {
+                    'pending': counts['pending_count'] or 0,
+                    'under_review': counts['under_review_count'] or 0,
+                    'approved': counts['approved_count'] or 0,
+                    'rejected': counts['rejected_count'] or 0,
+                    'total': counts['total_count'] or 0
+                }
+            })
+            
+        except Exception as e:
+            current_app.logger.error(f"Error getting request counts: {e}")
+            return jsonify({'error': 'Failed to get counts'}), 500
+    
     # =====================================================
     # PHASE 2: ADVANCED FEATURES - API ENDPOINTS
     # =====================================================

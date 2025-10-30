@@ -1613,6 +1613,17 @@ def index():
                     svg_temp_url = f"/temp_svg/{file_id}"
                     svg_temp_id = file_id
                     
+                    # ✅ IMPORTANT: Save SVG to temp file even when from cache
+                    # Frontend expects file to exist at /temp_svg/{file_id}
+                    svg_path_tmp = os.path.join(work_dir, "tikz.svg")
+                    if not os.path.exists(svg_path_tmp) and svg_content:
+                        try:
+                            with open(svg_path_tmp, 'w', encoding='utf-8') as f:
+                                f.write(svg_content)
+                            print(f"✅ SVG saved to temp file: {svg_path_tmp}")
+                        except Exception as write_err:
+                            print(f"⚠️  Warning: Failed to save temp SVG: {write_err}")
+                    
                     # Log successful compilation
                     if current_user.is_authenticated:
                         log_compilation_metrics(
@@ -5727,32 +5738,37 @@ def compile_tikz_enhanced_whitelist_with_tracking(tikz_code, output_dir, filenam
     """Enhanced compilation with package usage tracking"""
     try:
         # Call original compilation function
+        # Returns: (success: bool, svg_content: str, error_message: str)
         result = original_compile_tikz_enhanced_whitelist(tikz_code, output_dir, filename_base)
         
-        # Track package usage if compilation was successful
-        if result.get('success', False):
-            try:
-                # Extract packages from tikz_code
-                import re
-                
-                # Look for %!<package1,package2,package3> pattern
-                package_pattern = r'%!<([^>]+)>'
-                matches = re.findall(package_pattern, tikz_code)
-                
-                used_packages = set()
-                for match in matches:
-                    packages = [pkg.strip() for pkg in match.split(',') if pkg.strip()]
-                    used_packages.update(packages)
-                
-                if used_packages:
-                    # Update package usage in background
-                    try:
-                        update_package_usage(list(used_packages))
-                    except Exception as e:
-                        print(f"[WARNING] Failed to update package usage: {e}", flush=True)
-                        
-            except Exception as e:
-                print(f"[WARNING] Failed to track package usage: {e}", flush=True)
+        # Check if result is a tuple (expected format)
+        if isinstance(result, tuple) and len(result) >= 3:
+            success, svg_content, error_message = result
+            
+            # Track package usage if compilation was successful
+            if success:
+                try:
+                    # Extract packages from tikz_code
+                    import re
+                    
+                    # Look for %!<package1,package2,package3> pattern
+                    package_pattern = r'%!<([^>]+)>'
+                    matches = re.findall(package_pattern, tikz_code)
+                    
+                    used_packages = set()
+                    for match in matches:
+                        packages = [pkg.strip() for pkg in match.split(',') if pkg.strip()]
+                        used_packages.update(packages)
+                    
+                    if used_packages:
+                        # Update package usage in background
+                        try:
+                            update_package_usage(list(used_packages))
+                        except Exception as e:
+                            print(f"[WARNING] Failed to update package usage: {e}", flush=True)
+                            
+                except Exception as e:
+                    print(f"[WARNING] Failed to track package usage: {e}", flush=True)
         
         return result
         

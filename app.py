@@ -5698,5 +5698,74 @@ def mark_all_notifications_read():
         traceback.print_exc()
         return jsonify({'error': 'Server error'}), 500
 
+# =====================================================
+# PACKAGE MANAGEMENT SYSTEM INTEGRATION
+# =====================================================
+
+# Import package routes
+try:
+    from package_routes import setup_package_routes, update_package_usage
+    
+    # Setup package management routes
+    setup_package_routes(app, limiter=None)
+    
+    print("[INFO] Package Management System routes loaded successfully", flush=True)
+    
+except ImportError as e:
+    print(f"[WARNING] Package Management System not available: {e}", flush=True)
+except Exception as e:
+    print(f"[ERROR] Failed to load Package Management System: {e}", flush=True)
+
+# =====================================================
+# ENHANCED COMPILATION WITH PACKAGE USAGE TRACKING
+# =====================================================
+
+# Modify the existing compilation function to track package usage
+original_compile_tikz_enhanced_whitelist = compile_tikz_enhanced_whitelist
+
+def compile_tikz_enhanced_whitelist_with_tracking(tikz_code, output_dir, filename_base):
+    """Enhanced compilation with package usage tracking"""
+    try:
+        # Call original compilation function
+        result = original_compile_tikz_enhanced_whitelist(tikz_code, output_dir, filename_base)
+        
+        # Track package usage if compilation was successful
+        if result.get('success', False):
+            try:
+                # Extract packages from tikz_code
+                import re
+                
+                # Look for %!<package1,package2,package3> pattern
+                package_pattern = r'%!<([^>]+)>'
+                matches = re.findall(package_pattern, tikz_code)
+                
+                used_packages = set()
+                for match in matches:
+                    packages = [pkg.strip() for pkg in match.split(',') if pkg.strip()]
+                    used_packages.update(packages)
+                
+                if used_packages:
+                    # Update package usage in background
+                    try:
+                        update_package_usage(list(used_packages))
+                    except Exception as e:
+                        print(f"[WARNING] Failed to update package usage: {e}", flush=True)
+                        
+            except Exception as e:
+                print(f"[WARNING] Failed to track package usage: {e}", flush=True)
+        
+        return result
+        
+    except Exception as e:
+        print(f"[ERROR] Error in enhanced compilation with tracking: {e}", flush=True)
+        # Fallback to original function
+        return original_compile_tikz_enhanced_whitelist(tikz_code, output_dir, filename_base)
+
+# Replace the compilation function
+compile_tikz_enhanced_whitelist = compile_tikz_enhanced_whitelist_with_tracking
+
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    import os
+    port = int(os.environ.get('FLASK_RUN_PORT', 5000))
+    host = os.environ.get('FLASK_RUN_HOST', '0.0.0.0')
+    app.run(debug=True, host=host, port=port)

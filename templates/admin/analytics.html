@@ -1,0 +1,624 @@
+{% extends "base.html" %}
+
+{# Configuration flags for base template #}
+{% set include_highlight_js = false %}
+{% set include_codemirror = false %}
+{% set include_file_card = false %}
+{% set include_navigation = true %}
+{% set include_login_modal = false %}
+{% set include_navbar = true %}
+
+{% block title %}Analytics Dashboard - Admin - TikZ to SVG{% endblock %}
+
+{% block meta %}
+<meta name="description" content="Advanced analytics dashboard for package management system">
+<meta name="robots" content="noindex, nofollow">
+{% endblock %}
+
+{% block body_attrs %}class="tikz-app"{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/packages.css') }}?v={{ current_timestamp }}">
+<style>
+/* Analytics Dashboard Styles */
+.tikz-app .analytics-header {
+    background: linear-gradient(135deg, var(--success-color) 0%, var(--success-dark) 100%);
+    color: var(--text-white);
+    padding: var(--spacing-20) 0;
+    text-align: center;
+    margin-bottom: var(--spacing-32);
+}
+
+.tikz-app .analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-20);
+    margin-bottom: var(--spacing-32);
+}
+
+.tikz-app .analytics-card {
+    background: var(--glass-bg-light);
+    backdrop-filter: var(--glass-blur-medium);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-24);
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-fast);
+}
+
+.tikz-app .analytics-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.tikz-app .analytics-card h3 {
+    color: var(--primary-color);
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--spacing-16);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-8);
+}
+
+.tikz-app .metric-value {
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--success-color);
+    margin-bottom: var(--spacing-4);
+}
+
+.tikz-app .metric-label {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.tikz-app .chart-container {
+    background: var(--glass-bg-medium);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-16);
+    margin-top: var(--spacing-16);
+    min-height: 200px;
+    position: relative;
+}
+
+.tikz-app .loading-chart {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    color: var(--text-muted);
+}
+
+.tikz-app .popular-package-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-8);
+    margin-bottom: var(--spacing-8);
+    background: var(--glass-bg-medium);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+}
+
+.tikz-app .popular-package-item:hover {
+    background: var(--primary-bg);
+    border-color: var(--primary-color);
+}
+
+.tikz-app .package-rank {
+    background: var(--primary-color);
+    color: var(--text-white);
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-2) var(--spacing-6);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    min-width: 24px;
+    text-align: center;
+}
+
+.tikz-app .package-info {
+    flex-grow: 1;
+    margin-left: var(--spacing-12);
+}
+
+.tikz-app .package-name {
+    font-weight: var(--font-weight-medium);
+    color: var(--text-primary);
+}
+
+.tikz-app .package-type {
+    color: var(--text-muted);
+    font-size: var(--font-size-xs);
+}
+
+.tikz-app .usage-stat {
+    color: var(--success-color);
+    font-weight: var(--font-weight-medium);
+    font-size: var(--font-size-sm);
+}
+
+.tikz-app .refresh-btn {
+    position: fixed;
+    bottom: var(--spacing-24);
+    right: var(--spacing-24);
+    background: var(--primary-color);
+    color: var(--text-white);
+    border: none;
+    border-radius: var(--radius-full);
+    width: 56px;
+    height: 56px;
+    box-shadow: var(--shadow-lg);
+    transition: all var(--transition-fast);
+    z-index: var(--z-fixed);
+}
+
+.tikz-app .refresh-btn:hover {
+    background: var(--primary-dark);
+    transform: scale(1.1);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Analytics Header -->
+    <header class="analytics-header">
+        <div class="container">
+            <h1><i class="fas fa-chart-line me-3"></i>Analytics Dashboard</h1>
+            <p>Advanced package usage analytics and insights</p>
+        </div>
+    </header>
+
+    <!-- Key Metrics -->
+    <section class="container">
+        <div class="analytics-grid">
+            <div class="analytics-card">
+                <h3><i class="fas fa-cube"></i>Total Packages</h3>
+                <div class="metric-value" id="totalPackages">90</div>
+                <div class="metric-label">Active packages in system</div>
+                <div class="chart-container">
+                    <canvas id="packageTypeChart"></canvas>
+                </div>
+            </div>
+
+            <div class="analytics-card">
+                <h3><i class="fas fa-trending-up"></i>Usage Statistics</h3>
+                <div class="metric-value" id="totalUsage">0</div>
+                <div class="metric-label">Total package usages</div>
+                <div class="chart-container">
+                    <canvas id="usageChart"></canvas>
+                </div>
+            </div>
+
+            <div class="analytics-card">
+                <h3><i class="fas fa-inbox"></i>Requests</h3>
+                <div class="metric-value" id="totalRequests">0</div>
+                <div class="metric-label">Package requests submitted</div>
+                <div class="chart-container">
+                    <canvas id="requestChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Detailed Analytics -->
+    <section class="container">
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="analytics-card">
+                    <h3><i class="fas fa-star"></i>Most Popular Packages</h3>
+                    <div id="popularPackagesList">
+                        <div class="loading-chart">
+                            <i class="fas fa-spinner fa-spin me-2"></i>Loading popular packages...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 mb-4">
+                <div class="analytics-card">
+                    <h3><i class="fas fa-fire"></i>Trending Packages</h3>
+                    <div id="trendingPackagesList">
+                        <div class="loading-chart">
+                            <i class="fas fa-spinner fa-spin me-2"></i>Loading trending packages...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8 mb-4">
+                <div class="analytics-card">
+                    <h3><i class="fas fa-chart-area"></i>Request Growth</h3>
+                    <div class="chart-container">
+                        <canvas id="growthChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 mb-4">
+                <div class="analytics-card">
+                    <h3><i class="fas fa-clipboard-list"></i>Top Requested</h3>
+                    <div id="topRequestedList">
+                        <div class="loading-chart">
+                            <i class="fas fa-spinner fa-spin me-2"></i>Loading requests...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Refresh Button -->
+    <button class="refresh-btn" onclick="refreshAnalytics()" title="Refresh Analytics">
+        <i class="fas fa-sync-alt"></i>
+    </button>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Analytics Dashboard JavaScript -->
+<script>
+class AnalyticsDashboard {
+    constructor() {
+        this.charts = {};
+        this.init();
+    }
+    
+    async init() {
+        try {
+            await this.loadAnalytics();
+            this.setupCharts();
+            this.startAutoRefresh();
+        } catch (error) {
+            console.error('Failed to initialize analytics dashboard:', error);
+        }
+    }
+    
+    async loadAnalytics() {
+        try {
+            // Load analytics data
+            const response = await fetch('/api/packages/analytics');
+            const data = await response.json();
+            
+            if (response.ok) {
+                this.analyticsData = data;
+                this.updateMetrics();
+                this.updatePopularPackages();
+                this.updateTrendingPackages();
+                this.updateTopRequested();
+            } else {
+                throw new Error(data.error || 'Failed to load analytics');
+            }
+            
+            // Load popular packages
+            const popularResponse = await fetch('/api/packages/popular');
+            const popularData = await popularResponse.json();
+            
+            if (popularResponse.ok) {
+                this.popularData = popularData;
+                this.updatePopularPackages();
+                this.updateTrendingPackages();
+            }
+            
+        } catch (error) {
+            console.error('Error loading analytics:', error);
+            this.showError('Failed to load analytics data');
+        }
+    }
+    
+    updateMetrics() {
+        const data = this.analyticsData;
+        
+        // Calculate totals
+        let totalPackages = 0;
+        let totalUsage = 0;
+        
+        if (data.type_statistics) {
+            data.type_statistics.forEach(stat => {
+                totalPackages += stat.total_packages || 0;
+                totalUsage += stat.total_usage || 0;
+            });
+        }
+        
+        let totalRequests = 0;
+        if (data.request_statistics) {
+            data.request_statistics.forEach(stat => {
+                totalRequests += stat.count || 0;
+            });
+        }
+        
+        // Update metric displays
+        document.getElementById('totalPackages').textContent = totalPackages;
+        document.getElementById('totalUsage').textContent = totalUsage.toLocaleString();
+        document.getElementById('totalRequests').textContent = totalRequests;
+    }
+    
+    setupCharts() {
+        this.setupPackageTypeChart();
+        this.setupUsageChart();
+        this.setupRequestChart();
+        this.setupGrowthChart();
+    }
+    
+    setupPackageTypeChart() {
+        const ctx = document.getElementById('packageTypeChart');
+        if (!ctx || !this.analyticsData.type_statistics) return;
+        
+        const data = this.analyticsData.type_statistics;
+        
+        this.charts.packageType = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: data.map(stat => stat.package_type.replace('_', ' ').toUpperCase()),
+                datasets: [{
+                    data: data.map(stat => stat.total_packages),
+                    backgroundColor: [
+                        'rgb(25, 118, 210)',
+                        'rgb(76, 175, 80)', 
+                        'rgb(255, 152, 0)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+    
+    setupUsageChart() {
+        const ctx = document.getElementById('usageChart');
+        if (!ctx || !this.analyticsData.type_statistics) return;
+        
+        const data = this.analyticsData.type_statistics;
+        
+        this.charts.usage = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.map(stat => stat.package_type.replace('_', ' ')),
+                datasets: [{
+                    label: 'Usage Count',
+                    data: data.map(stat => stat.total_usage || 0),
+                    backgroundColor: 'rgba(76, 175, 80, 0.7)',
+                    borderColor: 'rgb(76, 175, 80)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+    
+    setupRequestChart() {
+        const ctx = document.getElementById('requestChart');
+        if (!ctx || !this.analyticsData.request_statistics) return;
+        
+        const data = this.analyticsData.request_statistics;
+        
+        this.charts.requests = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: data.map(stat => stat.status.toUpperCase()),
+                datasets: [{
+                    data: data.map(stat => stat.count),
+                    backgroundColor: [
+                        'rgb(255, 193, 7)',
+                        'rgb(76, 175, 80)',
+                        'rgb(244, 67, 54)',
+                        'rgb(156, 39, 176)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+    
+    setupGrowthChart() {
+        const ctx = document.getElementById('growthChart');
+        if (!ctx || !this.analyticsData.growth_data) return;
+        
+        const data = this.analyticsData.growth_data.reverse(); // Show chronologically
+        
+        this.charts.growth = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.map(item => new Date(item.date).toLocaleDateString()),
+                datasets: [{
+                    label: 'Daily Requests',
+                    data: data.map(item => item.requests_count),
+                    borderColor: 'rgb(25, 118, 210)',
+                    backgroundColor: 'rgba(25, 118, 210, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+    
+    updatePopularPackages() {
+        const container = document.getElementById('popularPackagesList');
+        if (!container || !this.popularData?.popular) return;
+        
+        const packages = this.popularData.popular.slice(0, 10);
+        
+        container.innerHTML = packages.map((pkg, index) => `
+            <div class="popular-package-item">
+                <div class="package-rank">${index + 1}</div>
+                <div class="package-info">
+                    <div class="package-name">${pkg.package_name}</div>
+                    <div class="package-type">${pkg.package_type.replace('_', ' ')}</div>
+                </div>
+                <div class="usage-stat">${(pkg.usage_count || 0).toLocaleString()} uses</div>
+            </div>
+        `).join('');
+    }
+    
+    updateTrendingPackages() {
+        const container = document.getElementById('trendingPackagesList');
+        if (!container || !this.popularData?.trending) return;
+        
+        const packages = this.popularData.trending;
+        
+        container.innerHTML = packages.map((pkg, index) => `
+            <div class="popular-package-item">
+                <div class="package-rank" style="background: var(--warning-color);">${index + 1}</div>
+                <div class="package-info">
+                    <div class="package-name">${pkg.package_name}</div>
+                    <div class="package-type">${pkg.package_type.replace('_', ' ')}</div>
+                </div>
+                <div class="usage-stat">${(pkg.usage_count || 0).toLocaleString()}</div>
+            </div>
+        `).join('');
+    }
+    
+    updateTopRequested() {
+        const container = document.getElementById('topRequestedList');
+        if (!container || !this.analyticsData?.top_requested) return;
+        
+        const requests = this.analyticsData.top_requested;
+        
+        if (requests.length === 0) {
+            container.innerHTML = '<div class="text-muted text-center py-3">No repeated requests</div>';
+            return;
+        }
+        
+        container.innerHTML = requests.map((req, index) => `
+            <div class="popular-package-item">
+                <div class="package-rank" style="background: var(--info-color);">${index + 1}</div>
+                <div class="package-info">
+                    <div class="package-name">${req.package_name}</div>
+                    <div class="package-type">${Math.round(req.approval_rate || 0)}% approved</div>
+                </div>
+                <div class="usage-stat">${req.request_count} req</div>
+            </div>
+        `).join('');
+    }
+    
+    async refresh() {
+        // Show loading states
+        document.querySelectorAll('.metric-value').forEach(el => {
+            el.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        });
+        
+        try {
+            await this.loadAnalytics();
+            this.updateCharts();
+            this.showSuccess('Analytics refreshed successfully');
+        } catch (error) {
+            this.showError('Failed to refresh analytics');
+        }
+    }
+    
+    updateCharts() {
+        // Destroy existing charts
+        Object.values(this.charts).forEach(chart => {
+            if (chart) chart.destroy();
+        });
+        
+        // Recreate charts
+        this.setupCharts();
+    }
+    
+    startAutoRefresh() {
+        // Auto-refresh every 5 minutes
+        setInterval(() => {
+            this.refresh();
+        }, 5 * 60 * 1000);
+    }
+    
+    showSuccess(message) {
+        this.showToast('success', message);
+    }
+    
+    showError(message) {
+        this.showToast('danger', message);
+    }
+    
+    showToast(type, message) {
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-white bg-${type} border-0`;
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">${message}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        `;
+        
+        let container = document.querySelector('.toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.className = 'toast-container position-fixed top-0 end-0 p-3';
+            container.style.zIndex = '9999';
+            document.body.appendChild(container);
+        }
+        
+        container.appendChild(toast);
+        
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+        
+        toast.addEventListener('hidden.bs.toast', () => {
+            toast.remove();
+        });
+    }
+}
+
+// Global functions
+let analyticsDashboard;
+
+function refreshAnalytics() {
+    if (analyticsDashboard) {
+        analyticsDashboard.refresh();
+    }
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    analyticsDashboard = new AnalyticsDashboard();
+});
+</script>
+{% endblock %}

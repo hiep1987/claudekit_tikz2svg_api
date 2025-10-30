@@ -1,0 +1,801 @@
+{% extends "base.html" %}
+
+{# Configuration flags for base template #}
+{% set include_highlight_js = false %}
+{% set include_codemirror = false %}
+{% set include_file_card = false %}
+{% set include_navigation = true %}
+{% set include_login_modal = false %}
+{% set include_navbar = true %}
+
+{% block title %}Admin - Package Management - TikZ to SVG{% endblock %}
+
+{% block meta %}
+<meta name="description" content="Admin interface for managing LaTeX package requests and system packages">
+<meta name="robots" content="noindex, nofollow">
+{% endblock %}
+
+{% block body_attrs %}class="tikz-app"{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/packages.css') }}?v={{ current_timestamp }}">
+<style>
+/* Admin-specific styles */
+.tikz-app .admin-header {
+    background: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-dark) 100%);
+    color: var(--text-white);
+    padding: var(--spacing-20) 0;
+    text-align: center;
+    margin-bottom: var(--spacing-32);
+}
+
+.tikz-app .admin-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-16);
+    margin-bottom: var(--spacing-32);
+}
+
+.tikz-app .admin-stat-card {
+    background: var(--glass-bg-light);
+    backdrop-filter: var(--glass-blur-medium);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-20);
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+}
+
+.tikz-app .admin-stat-card h3 {
+    font-size: var(--font-size-2xl);
+    color: var(--primary-color);
+    margin: 0;
+}
+
+.tikz-app .admin-stat-card p {
+    color: var(--text-secondary);
+    margin: var(--spacing-4) 0 0 0;
+    font-size: var(--font-size-sm);
+}
+
+.tikz-app .request-card {
+    background: var(--glass-bg-light);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-20);
+    margin-bottom: var(--spacing-16);
+    transition: all var(--transition-fast);
+}
+
+.tikz-app .request-card:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary-color);
+}
+
+.tikz-app .request-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-12);
+}
+
+.tikz-app .request-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--primary-color);
+    margin: 0;
+}
+
+.tikz-app .priority-badge {
+    padding: var(--spacing-2) var(--spacing-8);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    text-transform: uppercase;
+}
+
+.tikz-app .priority-urgent {
+    background: var(--danger-bg);
+    color: var(--danger-color);
+}
+
+/* Tabs styling */
+.tikz-app .nav-tabs {
+    border-bottom: 2px solid var(--glass-border);
+}
+
+.tikz-app .nav-tabs .nav-link {
+    color: var(--text-secondary);
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: var(--spacing-12) var(--spacing-20);
+    margin-bottom: -2px;
+    transition: all var(--transition-fast);
+}
+
+.tikz-app .nav-tabs .nav-link:hover {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-light);
+}
+
+.tikz-app .nav-tabs .nav-link.active {
+    color: var(--primary-color);
+    background: transparent;
+    border-bottom-color: var(--primary-color);
+    font-weight: var(--font-weight-semibold);
+}
+
+.tikz-app .request-card.border-success {
+    border-color: var(--success-color) !important;
+}
+
+.tikz-app .request-card.border-danger {
+    border-color: var(--danger-color) !important;
+}
+
+/* Ensure buttons are clickable */
+.tikz-app .request-card button {
+    position: relative;
+    z-index: 10;
+    pointer-events: auto;
+    cursor: pointer !important;
+}
+
+.tikz-app .request-actions {
+    position: relative;
+    z-index: 10;
+}
+
+.tikz-app .request-actions button {
+    cursor: pointer !important;
+    pointer-events: auto !important;
+}
+
+.tikz-app .btn-link {
+    cursor: pointer !important;
+    pointer-events: auto !important;
+}
+
+/* Tab content must not block interactions */
+.tikz-app .tab-content {
+    position: relative;
+    z-index: 1;
+}
+
+.tikz-app .tab-pane {
+    position: relative;
+    z-index: 1;
+}
+
+.tikz-app .priority-high {
+    background: var(--warning-bg);
+    color: var(--warning-color);
+}
+
+.tikz-app .priority-medium {
+    background: var(--info-bg);
+    color: var(--info-color);
+}
+
+.tikz-app .priority-low {
+    background: var(--success-bg);
+    color: var(--success-color);
+}
+
+.tikz-app .request-meta {
+    display: flex;
+    gap: var(--spacing-16);
+    margin-bottom: var(--spacing-12);
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.tikz-app .request-description {
+    background: var(--bg-tertiary);
+    padding: var(--spacing-12);
+    border-radius: var(--radius-md);
+    margin: var(--spacing-12) 0;
+    border-left: 4px solid var(--info-color);
+}
+
+.tikz-app .request-actions {
+    display: flex;
+    gap: var(--spacing-8);
+    justify-content: flex-end;
+}
+
+.tikz-app .btn-sm {
+    padding: var(--spacing-4) var(--spacing-12);
+    font-size: var(--font-size-sm);
+    border-radius: var(--radius-sm);
+}
+
+.tikz-app .btn-approve {
+    background: var(--success-color);
+    color: var(--text-white);
+    border: none;
+}
+
+.tikz-app .btn-approve:hover {
+    background: var(--success-dark);
+}
+
+.tikz-app .btn-reject {
+    background: var(--danger-color);
+    color: var(--text-white);
+    border: none;
+}
+
+.tikz-app .btn-reject:hover {
+    background: var(--danger-dark);
+}
+
+.tikz-app .btn-review {
+    background: var(--warning-color);
+    color: var(--text-white);
+    border: none;
+}
+
+.tikz-app .btn-review:hover {
+    background: var(--warning-dark);
+}
+
+.tikz-app .changelog-item {
+    background: var(--bg-tertiary);
+    border-left: 4px solid var(--info-color);
+    padding: var(--spacing-12);
+    margin-bottom: var(--spacing-8);
+    border-radius: var(--radius-sm);
+}
+
+.tikz-app .changelog-time {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+    <!-- Admin Header -->
+    <header class="admin-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h1><i class="fas fa-shield-alt me-3"></i>Package Management - Admin Panel</h1>
+                    <p>Quản lý yêu cầu packages và hệ thống LaTeX</p>
+                </div>
+                <div class="col-auto">
+                    <a href="{{ url_for('admin_analytics') }}" class="btn btn-success btn-lg">
+                        <i class="fas fa-chart-line me-2"></i>Analytics Dashboard
+                    </a>
+                    <a href="{{ url_for('packages') }}" class="btn btn-outline-light btn-lg ms-2">
+                        <i class="fas fa-cube me-2"></i>View Packages
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Admin Statistics -->
+    <section class="container">
+        <div class="admin-stats">
+            <div class="admin-stat-card">
+                <i class="fas fa-clock text-warning mb-2" style="font-size: 1.5rem;"></i>
+                <h3>{{ pending_requests|length }}</h3>
+                <p>Pending Requests</p>
+            </div>
+            <div class="admin-stat-card">
+                <i class="fas fa-check-circle text-success mb-2" style="font-size: 1.5rem;"></i>
+                <h3>0</h3>
+                <p>Approved Today</p>
+            </div>
+            <div class="admin-stat-card">
+                <i class="fas fa-times-circle text-danger mb-2" style="font-size: 1.5rem;"></i>
+                <h3>0</h3>
+                <p>Rejected Today</p>
+            </div>
+            <div class="admin-stat-card">
+                <i class="fas fa-cube text-primary mb-2" style="font-size: 1.5rem;"></i>
+                <h3>90</h3>
+                <p>Total Packages</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Package Requests with Tabs -->
+    <section class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <h2 class="mb-4"><i class="fas fa-inbox me-2"></i>Package Requests</h2>
+                
+                <!-- Tabs Navigation -->
+                <ul class="nav nav-tabs mb-3" id="requestTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" 
+                                data-bs-target="#pending" type="button" role="tab">
+                            <i class="fas fa-clock me-1"></i>Pending 
+                            <span class="badge bg-warning text-dark ms-1">{{ pending_requests|length }}</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="all-tab" data-bs-toggle="tab" 
+                                data-bs-target="#all" type="button" role="tab">
+                            <i class="fas fa-list me-1"></i>All Requests
+                            <span class="badge bg-secondary ms-1">{{ requests|length }}</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="approved-tab" data-bs-toggle="tab" 
+                                data-bs-target="#approved" type="button" role="tab">
+                            <i class="fas fa-check-circle me-1"></i>Approved
+                            <span class="badge bg-success ms-1">{{ approved_requests|length }}</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="rejected-tab" data-bs-toggle="tab" 
+                                data-bs-target="#rejected" type="button" role="tab">
+                            <i class="fas fa-times-circle me-1"></i>Rejected
+                            <span class="badge bg-danger ms-1">{{ rejected_requests|length }}</span>
+                        </button>
+                    </li>
+                </ul>
+                
+                <!-- Tabs Content -->
+                <div class="tab-content" id="requestTabsContent">
+                    <!-- Pending Tab -->
+                    <div class="tab-pane fade show active" id="pending" role="tabpanel">
+                        {% if pending_requests %}
+                    {% for request in pending_requests %}
+                    <div class="request-card" id="request-{{ request.id }}">
+                        <div class="request-header">
+                            <h3 class="request-title" id="package-name-display-{{ request.id }}">
+                                {{ request.package_name }}
+                                <button class="btn btn-sm btn-link text-primary" 
+                                        onclick="editPackageName({{ request.id }}, '{{ request.package_name }}')"
+                                        title="Edit package name"
+                                        style="padding: 0 0.5rem; font-size: 0.875rem;">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </h3>
+                            <span class="priority-badge priority-{{ request.priority }}">
+                                {{ request.priority }}
+                            </span>
+                        </div>
+                        
+                        <div class="request-meta">
+                            <span><i class="fas fa-cube me-1"></i>LaTeX Package</span>
+                            <span><i class="fas fa-user me-1"></i>{{ request.requester_name }}</span>
+                            <span><i class="fas fa-envelope me-1"></i>{{ request.requester_email }}</span>
+                            <span><i class="fas fa-calendar me-1"></i>{{ request.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                        </div>
+                        
+                        <div class="request-description">
+                            <strong>Justification:</strong>
+                            <p>{{ request.justification }}</p>
+                            
+                            {% if request.use_case_example %}
+                            <strong>Use Case:</strong>
+                            <p>{{ request.use_case_example }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="request-actions">
+                            <button class="btn btn-approve btn-sm" 
+                                    onclick="updateRequestStatus({{ request.id }}, 'approved')"
+                                    style="cursor: pointer;">
+                                <i class="fas fa-check me-1"></i>Approve
+                            </button>
+                            <button class="btn btn-review btn-sm" 
+                                    onclick="updateRequestStatus({{ request.id }}, 'under_review')"
+                                    style="cursor: pointer;">
+                                <i class="fas fa-eye me-1"></i>Review
+                            </button>
+                            <button class="btn btn-reject btn-sm" 
+                                    onclick="updateRequestStatus({{ request.id }}, 'rejected')"
+                                    style="cursor: pointer;">
+                                <i class="fas fa-times me-1"></i>Reject
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-inbox" style="font-size: 4rem; color: var(--text-muted);"></i>
+                                <h3 class="mt-3 text-muted">No Pending Requests</h3>
+                                <p class="text-muted">All package requests have been processed.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- All Requests Tab -->
+                    <div class="tab-pane fade" id="all" role="tabpanel">
+                        {% if requests %}
+                            {% for request in requests %}
+                            <div class="request-card" id="request-all-{{ request.id }}">
+                                <div class="request-header">
+                                    <h3 class="request-title">
+                                        {{ request.package_name }}
+                                        {% if request.status == 'pending' %}
+                                        <button class="btn btn-sm btn-link text-primary" 
+                                                onclick="editPackageName({{ request.id }}, '{{ request.package_name }}')"
+                                                title="Edit package name">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        {% endif %}
+                                    </h3>
+                                    <span class="priority-badge priority-{{ request.priority }}">
+                                        {{ request.status }}
+                                    </span>
+                                </div>
+                                
+                                <div class="request-meta">
+                                    <span><i class="fas fa-cube me-1"></i>LaTeX Package</span>
+                                    <span><i class="fas fa-user me-1"></i>{{ request.requester_name }}</span>
+                                    <span><i class="fas fa-envelope me-1"></i>{{ request.requester_email }}</span>
+                                    <span><i class="fas fa-calendar me-1"></i>{{ request.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                                </div>
+                                
+                                <div class="request-description">
+                                    <strong>Justification:</strong>
+                                    <p>{{ request.justification }}</p>
+                                    
+                                    {% if request.use_case_example %}
+                                    <strong>Use Case:</strong>
+                                    <p>{{ request.use_case_example }}</p>
+                                    {% endif %}
+                                    
+                                    {% if request.admin_notes %}
+                                    <strong>Admin Notes:</strong>
+                                    <p class="text-info">{{ request.admin_notes }}</p>
+                                    {% endif %}
+                                </div>
+                                
+                                {% if request.status == 'pending' %}
+                                <div class="request-actions">
+                                    <button class="btn btn-approve btn-sm" 
+                                            onclick="updateRequestStatus({{ request.id }}, 'approved')">
+                                        <i class="fas fa-check me-1"></i>Approve
+                                    </button>
+                                    <button class="btn btn-review btn-sm" 
+                                            onclick="updateRequestStatus({{ request.id }}, 'under_review')">
+                                        <i class="fas fa-eye me-1"></i>Review
+                                    </button>
+                                    <button class="btn btn-reject btn-sm" 
+                                            onclick="updateRequestStatus({{ request.id }}, 'rejected')">
+                                        <i class="fas fa-times me-1"></i>Reject
+                                    </button>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-list" style="font-size: 4rem; color: var(--text-muted);"></i>
+                                <h3 class="mt-3 text-muted">No Requests Yet</h3>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Approved Tab -->
+                    <div class="tab-pane fade" id="approved" role="tabpanel">
+                        {% if approved_requests %}
+                            {% for request in approved_requests %}
+                            <div class="request-card border-success">
+                                <div class="request-header">
+                                    <h3 class="request-title text-success">
+                                        <i class="fas fa-check-circle me-2"></i>{{ request.package_name }}
+                                    </h3>
+                                    <span class="badge bg-success">Approved</span>
+                                </div>
+                                
+                                <div class="request-meta">
+                                    <span><i class="fas fa-user me-1"></i>{{ request.requester_name }}</span>
+                                    <span><i class="fas fa-calendar me-1"></i>{{ request.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                                    {% if request.reviewed_at %}
+                                    <span><i class="fas fa-check me-1"></i>Approved: {{ request.reviewed_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                                    {% endif %}
+                                </div>
+                                
+                                {% if request.admin_notes %}
+                                <div class="request-description">
+                                    <strong>Admin Notes:</strong>
+                                    <p class="text-success">{{ request.admin_notes }}</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-check-circle" style="font-size: 4rem; color: var(--text-muted);"></i>
+                                <h3 class="mt-3 text-muted">No Approved Requests</h3>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Rejected Tab -->
+                    <div class="tab-pane fade" id="rejected" role="tabpanel">
+                        {% if rejected_requests %}
+                            {% for request in rejected_requests %}
+                            <div class="request-card border-danger">
+                                <div class="request-header">
+                                    <h3 class="request-title text-danger">
+                                        <i class="fas fa-times-circle me-2"></i>{{ request.package_name }}
+                                    </h3>
+                                    <span class="badge bg-danger">Rejected</span>
+                                </div>
+                                
+                                <div class="request-meta">
+                                    <span><i class="fas fa-user me-1"></i>{{ request.requester_name }}</span>
+                                    <span><i class="fas fa-calendar me-1"></i>{{ request.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                                    {% if request.reviewed_at %}
+                                    <span><i class="fas fa-times me-1"></i>Rejected: {{ request.reviewed_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="request-description">
+                                    <strong>Justification:</strong>
+                                    <p>{{ request.justification }}</p>
+                                    
+                                    {% if request.admin_notes %}
+                                    <strong>Rejection Reason:</strong>
+                                    <p class="text-danger">{{ request.admin_notes }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-times-circle" style="font-size: 4rem; color: var(--text-muted);"></i>
+                                <h3 class="mt-3 text-muted">No Rejected Requests</h3>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <h2 class="mb-4"><i class="fas fa-history me-2"></i>Recent Changes</h2>
+                
+                <div class="changelog-container">
+                    {% if recent_changes %}
+                        {% for change in recent_changes %}
+                        <div class="changelog-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <strong>{{ change.action_type.title() }}: {{ change.package_name }}</strong>
+                                <span class="changelog-time">{{ change.created_at.strftime('%m/%d %H:%M') }}</span>
+                            </div>
+                            <div class="text-muted small">
+                                by {{ change.changed_by_email }}
+                            </div>
+                            {% if change.change_reason %}
+                            <div class="small mt-1">{{ change.change_reason }}</div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-history text-muted"></i>
+                            <p class="text-muted small mb-0">No recent changes</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Quick Actions -->
+    <section class="container mt-5">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-tools me-2"></i>Quick Actions</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <a href="/packages" class="btn btn-outline-primary btn-block">
+                                    <i class="fas fa-list me-2"></i>View All Packages
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-outline-success btn-block" onclick="exportPackageData()">
+                                    <i class="fas fa-download me-2"></i>Export Data
+                                </button>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-outline-info btn-block" onclick="refreshCache()">
+                                    <i class="fas fa-sync me-2"></i>Refresh Cache
+                                </button>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="/admin/packages/bulk" class="btn btn-outline-warning btn-block">
+                                    <i class="fas fa-tasks me-2"></i>Bulk Operations
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Admin Panel JavaScript -->
+<script>
+// Request Status Management
+function updateRequestStatus(requestId, newStatus) {
+    console.log(`[Admin] Updating request ${requestId} to status: ${newStatus}`);
+    
+    if (!confirm(`Are you sure you want to ${newStatus} this request?`)) {
+        console.log('[Admin] User cancelled action');
+        return;
+    }
+    
+    console.log('[Admin] User confirmed, sending request...');
+    
+    fetch(`/api/admin/requests/${requestId}/status`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            status: newStatus,
+            admin_notes: prompt('Admin notes (optional):') || ''
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload(); // Refresh to show updated status
+        } else {
+            alert('Error updating request: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error updating request');
+    });
+}
+
+// Export Package Data
+function exportPackageData() {
+    window.open('/api/admin/packages/export', '_blank');
+}
+
+// Edit Package Name
+function editPackageName(requestId, currentName) {
+    console.log(`[Admin] Editing package name for request ${requestId}`);
+    
+    const newName = prompt('Sửa tên gói (package name):', currentName);
+    
+    if (!newName || newName.trim() === '') {
+        console.log('[Admin] User cancelled or entered empty name');
+        return;
+    }
+    
+    if (newName.trim() === currentName) {
+        console.log('[Admin] No changes made');
+        return;
+    }
+    
+    // Validate package name (basic validation)
+    const trimmedName = newName.trim();
+    if (!/^[a-zA-Z0-9\-_.]+$/.test(trimmedName)) {
+        alert('❌ Tên gói không hợp lệ!\n\nChỉ được dùng: chữ cái, số, dấu gạch ngang, gạch dưới, dấu chấm\nVí dụ: tikz-3dplot, pgfplots, amsmath');
+        return;
+    }
+    
+    console.log(`[Admin] Updating package name from "${currentName}" to "${trimmedName}"`);
+    
+    fetch(`/api/admin/requests/${requestId}/package-name`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            package_name: trimmedName,
+            admin_notes: `Package name corrected from "${currentName}" to "${trimmedName}"`
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('[Admin] ✅ Package name updated successfully');
+            // Update display without full page reload
+            const displayElement = document.getElementById(`package-name-display-${requestId}`);
+            if (displayElement) {
+                const editButton = displayElement.querySelector('button');
+                displayElement.childNodes[0].textContent = trimmedName + ' ';
+                if (editButton) {
+                    editButton.setAttribute('onclick', `editPackageName(${requestId}, '${trimmedName}')`);
+                }
+            }
+            alert(`✅ Đã cập nhật tên gói thành: ${trimmedName}`);
+        } else {
+            alert('❌ Lỗi: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('❌ Lỗi khi cập nhật tên gói');
+    });
+}
+
+// Refresh Cache
+function refreshCache() {
+    fetch('/api/admin/cache/refresh', {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Cache refreshed successfully');
+        } else {
+            alert('Error refreshing cache: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error refreshing cache');
+    });
+}
+
+// Real-time updates (optional)
+function setupRealTimeUpdates() {
+    // Poll for new requests every 30 seconds
+    setInterval(() => {
+        fetch('/api/admin/requests/count')
+            .then(response => response.json())
+            .then(data => {
+                const currentCount = document.querySelectorAll('.request-card').length;
+                if (data.count !== currentCount) {
+                    // Show notification about new requests
+                    const notification = document.createElement('div');
+                    notification.className = 'alert alert-info alert-dismissible fade show position-fixed';
+                    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; width: 300px;';
+                    notification.innerHTML = `
+                        <strong>New request(s) received!</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    document.body.appendChild(notification);
+                    
+                    // Auto remove after 5 seconds
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 5000);
+                }
+            })
+            .catch(error => console.log('Polling error:', error));
+    }, 30000);
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    setupRealTimeUpdates();
+    
+    // Add keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey || e.metaKey) {
+            switch(e.key) {
+                case 'r':
+                    e.preventDefault();
+                    location.reload();
+                    break;
+                case 'e':
+                    e.preventDefault();
+                    exportPackageData();
+                    break;
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

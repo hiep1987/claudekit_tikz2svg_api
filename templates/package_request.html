@@ -1,0 +1,563 @@
+{% extends "base.html" %}
+
+{# Configuration flags for base template #}
+{% set include_highlight_js = false %}
+{% set include_codemirror = false %}
+{% set include_file_card = false %}
+{% set include_navigation = true %}
+{% set include_login_modal = true %}
+{% set include_navbar = true %}
+
+{% block title %}Yêu cầu Package mới - TikZ to SVG{% endblock %}
+
+{% block meta %}
+<meta name="description" content="Gửi yêu cầu thêm LaTeX package hoặc TikZ library mới vào hệ thống TikZ to SVG. Hỗ trợ mở rộng tính năng cho cộng đồng.">
+<meta name="keywords" content="LaTeX package request, TikZ library request, package suggestion, LaTeX support">
+<meta name="author" content="TikZ to SVG">
+<meta name="robots" content="index, follow">
+
+<!-- Open Graph Meta Tags -->
+<meta property="og:title" content="Yêu cầu Package mới - TikZ to SVG">
+<meta property="og:description" content="Gửi yêu cầu thêm LaTeX package hoặc TikZ library mới vào hệ thống TikZ to SVG">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ request.url }}">
+<meta property="og:locale" content="vi_VN">
+<meta property="og:site_name" content="TikZ to SVG">
+
+<!-- Twitter Card Meta Tags -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Yêu cầu Package mới - TikZ to SVG">
+<meta name="twitter:description" content="Gửi yêu cầu thêm LaTeX package mới">
+{% endblock %}
+
+{% block body_attrs %}class="tikz-app"{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/packages.css') }}?v={{ current_timestamp }}">
+<style>
+/* Package Request Form Styles - CSS Foundation Integration */
+.tikz-app .package-request-header {
+    background: linear-gradient(135deg, var(--info-color) 0%, var(--info-dark) 100%);
+    color: var(--text-white);
+    padding: var(--spacing-24) 0;
+    text-align: center;
+    margin-bottom: var(--spacing-32);
+}
+
+.tikz-app .package-request-form {
+    padding: var(--spacing-32) 0;
+}
+
+.tikz-app .request-form-card {
+    background: var(--glass-bg-light);
+    backdrop-filter: var(--glass-blur-medium);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-32);
+    box-shadow: var(--shadow-lg);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.tikz-app .form-section {
+    margin-bottom: var(--spacing-32);
+    padding-bottom: var(--spacing-24);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.tikz-app .form-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.tikz-app .form-section h3 {
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-20);
+    font-weight: var(--font-weight-semibold);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-8);
+    font-size: var(--font-size-xl);
+}
+
+.tikz-app .form-label {
+    color: var(--text-primary);
+    font-weight: var(--font-weight-medium);
+    margin-bottom: var(--spacing-4);
+    font-size: var(--font-size-sm);
+}
+
+.tikz-app .form-control,
+.tikz-app .form-select {
+    background: var(--glass-bg-medium);
+    backdrop-filter: var(--glass-blur-light);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+    font-size: var(--font-size-base);
+}
+
+.tikz-app .form-control:focus,
+.tikz-app .form-select:focus {
+    border-color: var(--info-color);
+    box-shadow: 0 0 0 2px rgb(59 130 246 / 20%);
+    background: var(--glass-bg-strong);
+}
+
+.tikz-app .form-text {
+    color: var(--text-muted);
+    font-size: var(--font-size-xs);
+    margin-top: var(--spacing-2);
+}
+
+.tikz-app .character-counter {
+    text-align: right;
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    margin-top: var(--spacing-2);
+}
+
+.tikz-app .character-counter.warning {
+    color: var(--warning-color);
+}
+
+.tikz-app .character-counter.danger {
+    color: var(--danger-color);
+}
+
+.tikz-app .submit-buttons {
+    display: flex;
+    gap: var(--spacing-12);
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.tikz-app .btn-primary {
+    background: linear-gradient(135deg, var(--info-color) 0%, var(--info-dark) 100%);
+    border: none;
+    padding: var(--spacing-10) var(--spacing-24);
+    border-radius: var(--radius-md);
+    font-weight: var(--font-weight-semibold);
+    transition: all var(--transition-fast);
+    box-shadow: var(--shadow-sm);
+}
+
+.tikz-app .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    filter: brightness(1.1);
+}
+
+.tikz-app .btn-outline-secondary {
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: var(--spacing-10) var(--spacing-24);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+}
+
+.tikz-app .btn-outline-secondary:hover {
+    background: var(--glass-bg-light);
+    border-color: var(--text-secondary);
+}
+
+.tikz-app .tip-card {
+    background: var(--glass-bg-light);
+    backdrop-filter: var(--glass-blur-medium);
+    border: 1px solid var(--info-bg);
+    border-left: 4px solid var(--info-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-24);
+    height: 100%;
+}
+
+.tikz-app .tip-card h4 {
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-16);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-8);
+    font-size: var(--font-size-lg);
+}
+
+.tikz-app .tip-card .tip-icon {
+    color: var(--info-color);
+}
+
+.tikz-app .alert {
+    border-radius: var(--radius-md);
+    backdrop-filter: var(--glass-blur-light);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .tikz-app .submit-buttons {
+        flex-direction: column;
+    }
+    
+    .tikz-app .btn {
+        width: 100%;
+    }
+    
+    .tikz-app .request-form-card {
+        padding: var(--spacing-20);
+        margin: 0 var(--spacing-8);
+    }
+}
+</style>
+{% endblock %}
+
+{% block head_js %}
+<script>
+// Form validation data - Updated for simplified schema
+window.formConfig = {
+    maxPackageNameLength: 100,
+    maxJustificationLength: 1000,
+    maxUseCaseLength: 800
+};
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Package Request Header -->
+    <header class="package-request-header">
+        <div class="container">
+            <h1><i class="fas fa-paper-plane me-3"></i>Yêu cầu Package mới</h1>
+            <p>Giúp chúng tôi mở rộng thư viện LaTeX packages cho cộng đồng TikZ</p>
+        </div>
+    </header>
+
+    <!-- Package Request Form -->
+    <section class="package-request-form">
+        <div class="container">
+            <div class="request-form-card">
+                <form id="packageRequestForm" method="POST" action="{{ url_for('submit_package_request') }}" novalidate>
+                    
+                    <!-- Package Information Section - Simplified -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-info-circle me-2"></i>Package cần thêm</h3>
+                        
+                        <div class="mb-3">
+                            <label for="packageName" class="form-label">Tên Package <span class="text-danger">*</span></label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="packageName" 
+                                   name="package_name" 
+                                   required 
+                                   maxlength="100"
+                                   placeholder="Ví dụ: amsmath, circuitikz, tikz-3dplot, siunitx..."
+                                   aria-describedby="packageNameHelp">
+                            <div id="packageNameHelp" class="form-text">
+                                <strong>Quan trọng:</strong> Nhập tên chính xác của package như trong LaTeX documentation. 
+                                Có thể là LaTeX package (\usepackage{}), TikZ library (\usetikzlibrary{}), hoặc PGFPlots library (\usepgfplotslibrary{}).
+                            </div>
+                            <div class="character-counter" data-target="packageName" data-max="100">0/100</div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-info-circle me-2"></i>Lưu ý về Status Package</h6>
+                            <p class="mb-2">Sau khi được phê duyệt, package sẽ được phân loại:</p>
+                            <ul class="mb-0">
+                                <li><strong>Active:</strong> Có sẵn trong template mặc định (không cần %!&lt;..&gt;)</li>
+                                <li><strong>Manual:</strong> Cần thêm %!&lt;package&gt; vào TikZ code</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Justification Section -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-lightbulb me-2"></i>Lý do yêu cầu</h3>
+                        
+                        <div class="mb-3">
+                            <label for="justification" class="form-label">Tại sao package này cần thiết? <span class="text-danger">*</span></label>
+                            <textarea class="form-control" 
+                                      id="justification" 
+                                      name="justification" 
+                                      rows="4" 
+                                      required 
+                                      maxlength="1000"
+                                      placeholder="Giải thích tại sao package này quan trọng cho việc tạo TikZ diagrams, tính năng nào còn thiếu hiện tại..."
+                                      aria-describedby="justificationHelp"></textarea>
+                            <div id="justificationHelp" class="form-text">
+                                Càng chi tiết càng tốt để admin có thể đánh giá tính cần thiết của package.
+                            </div>
+                            <div class="character-counter" data-target="justification" data-max="1000">0/1000</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="useCase" class="form-label">Ví dụ sử dụng cụ thể</label>
+                            <textarea class="form-control" 
+                                      id="useCase" 
+                                      name="use_case_example" 
+                                      rows="4" 
+                                      maxlength="800"
+                                      placeholder="Ví dụ: Tôi cần package 'circuitikz' để vẽ sơ đồ mạch điện tử với các linh kiện như transistor, diode..."
+                                      aria-describedby="useCaseHelp"></textarea>
+                            <div id="useCaseHelp" class="form-text">
+                                Ví dụ cụ thể về cách bạn sẽ sử dụng package này trong TikZ diagrams.
+                            </div>
+                            <div class="character-counter" data-target="useCase" data-max="800">0/800</div>
+                        </div>
+                    </div>
+
+                    <!-- Contact Information Section -->
+                    <div class="form-section">
+                        <h3><i class="fas fa-envelope me-2"></i>Thông tin liên hệ</h3>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="requesterName" class="form-label">Họ tên <span class="text-danger">*</span></label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="requesterName" 
+                                       name="requester_name" 
+                                       required 
+                                       maxlength="100"
+                                       value="{% if current_user.is_authenticated %}{{ current_username or (current_user_email.split('@')[0] if current_user_email) }}{% endif %}"
+                                       placeholder="Tên của bạn">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="requesterEmail" class="form-label">Email <span class="text-danger">*</span></label>
+                                <input type="email" 
+                                       class="form-control" 
+                                       id="requesterEmail" 
+                                       name="requester_email" 
+                                       required 
+                                       value="{% if current_user.is_authenticated %}{{ current_user_email }}{% endif %}"
+                                       placeholder="email@example.com">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="priority" class="form-label">Mức độ ưu tiên</label>
+                            <select class="form-select" id="priority" name="priority" aria-describedby="priorityHelp">
+                                <option value="low" selected>Thấp - Có thể chờ đợi</option>
+                                <option value="medium">Trung bình - Cần trong vài tuần</option>
+                                <option value="high">Cao - Cần gấp cho dự án</option>
+                                <option value="urgent">Khẩn cấp - Cần ngay lập tức</option>
+                            </select>
+                            <div id="priorityHelp" class="form-text">
+                                Mức độ ưu tiên giúp admin sắp xếp thứ tự xử lý yêu cầu.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Buttons -->
+                    <div class="submit-buttons">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-paper-plane me-2"></i>Gửi yêu cầu
+                        </button>
+                        <a href="{{ url_for('packages') }}" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-arrow-left me-2"></i>Quay lại
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Helpful Tips Section -->
+    <section class="helpful-tips">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="tip-card">
+                        <h4><i class="fas fa-search tip-icon me-2"></i>Kiểm tra trước</h4>
+                        <p>Hãy kiểm tra <a href="{{ url_for('packages') }}">danh sách packages hiện tại</a> để đảm bảo package bạn yêu cầu chưa được hỗ trợ.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="tip-card">
+                        <h4><i class="fas fa-clock tip-icon me-2"></i>Thời gian xử lý</h4>
+                        <p>Yêu cầu thường được xử lý trong 3-7 ngày làm việc. Packages phổ biến sẽ được ưu tiên xem xét trước.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="tip-card">
+                        <h4><i class="fas fa-bell tip-icon me-2"></i>Thông báo</h4>
+                        <p>Bạn sẽ nhận được email thông báo khi yêu cầu được phê duyệt hoặc từ chối, kèm theo lý do chi tiết.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Package Request Form JavaScript -->
+<script>
+// Simplified Form Validation and Enhancement
+class PackageRequestForm {
+    constructor() {
+        this.form = document.getElementById('packageRequestForm');
+        this.packageNameInput = document.getElementById('packageName');
+        
+        this.setupEventListeners();
+        this.setupCharacterCounters();
+        this.setupFormValidation();
+    }
+    
+    setupEventListeners() {
+        // Form submission
+        this.form?.addEventListener('submit', (e) => {
+            if (!this.validateForm()) {
+                e.preventDefault();
+            }
+        });
+        
+        // Package name normalization
+        this.packageNameInput?.addEventListener('blur', (e) => {
+            // Trim whitespace and normalize package name
+            e.target.value = e.target.value.trim();
+        });
+    }
+    
+    setupCharacterCounters() {
+        const counters = document.querySelectorAll('.character-counter');
+        counters.forEach(counter => {
+            const targetId = counter.dataset.target;
+            const maxLength = parseInt(counter.dataset.max);
+            const target = document.getElementById(targetId);
+            
+            if (target) {
+                const updateCounter = () => {
+                    const currentLength = target.value.length;
+                    counter.textContent = `${currentLength}/${maxLength}`;
+                    
+                    // Color coding based on usage
+                    counter.classList.remove('warning', 'danger');
+                    if (currentLength > maxLength * 0.9) {
+                        counter.classList.add('danger');
+                    } else if (currentLength > maxLength * 0.7) {
+                        counter.classList.add('warning');
+                    }
+                };
+                
+                target.addEventListener('input', updateCounter);
+                updateCounter(); // Initial update
+            }
+        });
+    }
+    
+    setupFormValidation() {
+        // Custom validation messages
+        const requiredFields = this.form?.querySelectorAll('[required]');
+        requiredFields?.forEach(field => {
+            field.addEventListener('invalid', (e) => {
+                e.target.setCustomValidity('');
+                if (e.target.validity.valueMissing) {
+                    e.target.setCustomValidity('Trường này là bắt buộc');
+                }
+            });
+            
+            field.addEventListener('input', (e) => {
+                e.target.setCustomValidity('');
+            });
+        });
+        
+        // Email validation
+        const emailField = document.getElementById('requesterEmail');
+        emailField?.addEventListener('input', (e) => {
+            if (e.target.validity.typeMismatch) {
+                e.target.setCustomValidity('Vui lòng nhập địa chỉ email hợp lệ');
+            } else {
+                e.target.setCustomValidity('');
+            }
+        });
+        
+        // URL validation
+        const urlField = document.getElementById('documentationUrl');
+        urlField?.addEventListener('input', (e) => {
+            if (e.target.value && e.target.validity.typeMismatch) {
+                e.target.setCustomValidity('Vui lòng nhập URL hợp lệ (bắt đầu với http:// hoặc https://)');
+            } else {
+                e.target.setCustomValidity('');
+            }
+        });
+    }
+    
+    validateForm() {
+        let isValid = true;
+        const requiredFields = this.form?.querySelectorAll('[required]');
+        
+        // Check all required fields
+        requiredFields?.forEach(field => {
+            if (!field.value.trim()) {
+                field.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                field.classList.remove('is-invalid');
+                field.classList.add('is-valid');
+            }
+        });
+        
+        // Check character limits
+        const textareas = this.form?.querySelectorAll('textarea[maxlength]');
+        textareas?.forEach(textarea => {
+            const maxLength = parseInt(textarea.getAttribute('maxlength'));
+            if (textarea.value.length > maxLength) {
+                textarea.classList.add('is-invalid');
+                isValid = false;
+            }
+        });
+        
+        if (!isValid) {
+            // Scroll to first invalid field
+            const firstInvalid = this.form?.querySelector('.is-invalid');
+            if (firstInvalid) {
+                firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstInvalid.focus();
+            }
+        }
+        
+        return isValid;
+    }
+}
+
+// Analytics tracking
+function trackFormInteraction(action, field) {
+    if (typeof gtag !== 'undefined') {
+        gtag('event', 'form_interaction', {
+            'event_category': 'package_request',
+            'event_label': field,
+            'action': action
+        });
+    }
+}
+
+// Initialize form enhancements
+document.addEventListener('DOMContentLoaded', function() {
+    new PackageRequestForm();
+    
+    // Track form start
+    trackFormInteraction('form_start', 'package_request');
+    
+    // Track field interactions
+    const formFields = document.querySelectorAll('#packageRequestForm input, #packageRequestForm select, #packageRequestForm textarea');
+    formFields.forEach(field => {
+        field.addEventListener('focus', () => trackFormInteraction('field_focus', field.name));
+        field.addEventListener('blur', () => {
+            if (field.value.trim()) {
+                trackFormInteraction('field_complete', field.name);
+            }
+        });
+    });
+});
+
+// Form submission tracking
+document.getElementById('packageRequestForm')?.addEventListener('submit', function() {
+    trackFormInteraction('form_submit', 'package_request');
+});
+</script>
+
+{% if current_user.is_authenticated %}
+<!-- Notifications JavaScript (only for logged-in users) -->
+<script src="{{ url_for('static', filename='js/notifications.js') }}?v=20251024{{ range(1000, 9999) | random }}"></script>
+{% endif %}
+{% endblock %}

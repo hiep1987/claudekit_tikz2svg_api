@@ -1,0 +1,455 @@
+{% extends "base.html" %}
+
+{# Configuration flags for base template #}
+{% set include_highlight_js = true %}
+{% set include_codemirror = false %}
+{% set include_file_card = false %}
+{% set include_navigation = true %}
+{% set include_login_modal = true %}
+{% set include_navbar = true %}
+
+{% block title %}LaTeX Packages - TikZ to SVG{% endblock %}
+
+{% block meta %}
+<meta name="description" content="Comprehensive LaTeX packages supported by TikZ to SVG. Browse, search, and request new packages for your TikZ diagrams.">
+<meta name="keywords" content="LaTeX packages, TikZ libraries, PGFPlots libraries, LaTeX documentation, package management">
+<meta name="author" content="TikZ to SVG">
+<meta name="robots" content="index, follow">
+
+<!-- Open Graph Meta Tags -->
+<meta property="og:title" content="LaTeX Packages - TikZ to SVG">
+<meta property="og:description" content="Comprehensive LaTeX packages supported by TikZ to SVG. Browse, search, and request new packages.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ request.url }}">
+<meta property="og:locale" content="vi_VN">
+<meta property="og:site_name" content="TikZ to SVG">
+
+<!-- Twitter Card Meta Tags -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="LaTeX Packages - TikZ to SVG">
+<meta name="twitter:description" content="Comprehensive LaTeX packages supported by TikZ to SVG">
+{% endblock %}
+
+{% block body_attrs %}class="tikz-app"{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/packages.css') }}?v={{ current_timestamp }}">
+{% endblock %}
+
+{% block head_js %}
+<script>
+// JavaScript variables from backend - Simplified Schema
+window.packageData = {
+    activePackages: {{ package_stats.active_packages|default(0) }},
+    manualPackages: {{ package_stats.manual_packages|default(0) }},
+    totalPackages: {{ package_stats.total_packages|default(0) }},
+    pendingRequests: {{ package_stats.pending_requests|default(0) }},
+    currentUser: {% if current_user.is_authenticated %}{
+        id: {{ current_user.id }},
+        email: {{ current_user_email|tojson|safe }},
+        username: {{ current_username|tojson|safe }},
+        avatar: {{ current_avatar|tojson|safe }},
+        isAuthenticated: true
+    }{% else %}null{% endif %}
+};
+
+// SEO Schema.org structured data
+const schemaData = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "LaTeX Packages - TikZ to SVG",
+    "description": "Comprehensive LaTeX packages supported by TikZ to SVG",
+    "url": "{{ request.url }}",
+    "mainEntity": {
+        "@type": "SoftwareApplication",
+        "name": "TikZ to SVG",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Web"
+    }
+};
+
+// Inject schema data
+const script = document.createElement('script');
+script.type = 'application/ld+json';
+script.textContent = JSON.stringify(schemaData);
+document.head.appendChild(script);
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Packages Header -->
+    <header class="packages-header">
+        <div class="container">
+            <h1><i class="fas fa-box-open me-3"></i>LaTeX Packages</h1>
+            <p>Khám phá và quản lý các gói LaTeX được hỗ trợ cho TikZ diagrams</p>
+        </div>
+    </header>
+
+    <!-- Package Statistics -->
+    <section class="package-stats">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 col-sm-6 mb-4">
+                    <div class="stat-card active-packages">
+                        <i class="fas fa-check-circle stat-icon text-success"></i>
+                        <h3>{{ package_stats.active_packages|default(28) }}</h3>
+                        <p>Có sẵn (không cần %!&lt;..&gt;)</p>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-6 mb-4">
+                    <div class="stat-card manual-packages">
+                        <i class="fas fa-code stat-icon text-warning"></i>
+                        <h3>{{ package_stats.manual_packages|default(52) }}</h3>
+                        <p>Cần %!&lt;..&gt; trong code</p>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-6 mb-4">
+                    <div class="stat-card pending-requests">
+                        <i class="fas fa-plus-circle stat-icon text-info"></i>
+                        <h3>{{ package_stats.pending_requests|default(0) }}</h3>
+                        <p>Yêu cầu chờ xử lý</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Package Search -->
+    <section class="package-search">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mb-3">
+                    <div class="search-input-wrapper">
+                        <i class="fas fa-search"></i>
+                        <input type="text" 
+                               class="form-control" 
+                               id="packageSearch" 
+                               placeholder="Tìm kiếm packages, libraries..."
+                               aria-label="Search packages">
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-3">
+                    <select class="form-select" id="packageTypeFilter" aria-label="Filter by package type">
+                        <option value="">Tất cả loại</option>
+                        <option value="latex_package">LaTeX Packages</option>
+                        <option value="tikz_library">TikZ Libraries</option>
+                        <option value="pgfplots_library">PGFPlots Libraries</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Usage Instructions -->
+    <section class="usage-instructions">
+        <div class="container">
+            <h2><i class="fas fa-lightbulb me-3"></i>Cách sử dụng Packages</h2>
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="instruction-card">
+                        <i class="fas fa-code instruction-icon"></i>
+                        <h3>1. Syntax cơ bản</h3>
+                        <p>Sử dụng syntax đặc biệt để gọi packages:</p>
+                        <code>%!&lt;amsmath,tikz,pgfplots&gt;</code>
+                        <p class="mt-2">Đặt ở đầu TikZ code của bạn để load các packages cần thiết.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="instruction-card">
+                        <i class="fas fa-list instruction-icon"></i>
+                        <h3>2. Nhiều packages</h3>
+                        <p>Tách các package bằng dấu phẩy:</p>
+                        <code>%!&lt;geometry,amsfonts,xcolor&gt;</code>
+                        <p class="mt-2">Không có giới hạn số lượng packages trong danh sách được hỗ trợ.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Two-Column Package Layout -->
+    <section class="packages-content">
+        <div class="container">
+            <div class="row">
+                <!-- Active Packages Column -->
+                <div class="col-lg-6 mb-5">
+                    <div class="package-column active-column">
+                        <div class="column-header">
+                            <h2><i class="fas fa-check-circle me-2 text-success"></i>Có sẵn trong Template</h2>
+                            <p class="text-muted">{{ active_packages|length }} packages - Không cần %!&lt;..&gt;</p>
+                        </div>
+                        
+                        <div class="package-grid" id="packageGrid">
+                            {% for package in active_packages %}
+                            <div class="package-card active-card" data-package-name="{{ package.package_name }}" data-status="active">
+                                <div class="card-body">
+                                    <div class="package-name" onclick="copyPackageName('{{ package.package_name }}')">
+                                        {{ package.package_name }}
+                                    </div>
+                                    <div class="package-actions">
+                                        <button class="btn btn-sm btn-outline-success copy-btn" 
+                                                onclick="copyPackageName('{{ package.package_name }}')" 
+                                                title="Copy package name">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Manual Packages Column -->
+                <div class="col-lg-6 mb-5">
+                    <div class="package-column manual-column">
+                        <div class="column-header">
+                            <h2><i class="fas fa-code me-2 text-warning"></i>Cần %!&lt;..&gt; trong code</h2>
+                            <p class="text-muted">{{ manual_packages|length }} packages - Thêm vào TikZ code</p>
+                        </div>
+                        
+                        <div class="package-grid">
+                            {% for package in manual_packages %}
+                            <div class="package-card manual-card" data-package-name="{{ package.package_name }}" data-status="manual">
+                                <div class="card-body">
+                                    <div class="package-name" onclick="copyPackageWithSyntax('{{ package.package_name }}')">
+                                        {{ package.package_name }}
+                                    </div>
+                                    <div class="package-actions">
+                                        <button class="btn btn-sm btn-outline-warning copy-btn"
+                                                onclick="copyPackageWithSyntax('{{ package.package_name }}')"
+                                                title="Copy with %!<...> syntax">
+                                            <i class="fas fa-code"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Package Request Section -->
+    <section class="package-request">
+        <div class="container">
+            <div class="request-card">
+                <h2><i class="fas fa-plus-circle me-3"></i>Yêu cầu Package mới</h2>
+                <p>Không tìm thấy package bạn cần? Gửi yêu cầu để chúng tôi thêm vào hệ thống!</p>
+                <a href="{{ url_for('package_request_form') }}" class="request-btn">
+                    <i class="fas fa-paper-plane me-2"></i>Gửi yêu cầu Package
+                </a>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Toast container for notifications -->
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+    <div id="copyToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <i class="fas fa-check-circle text-success me-2"></i>
+            <strong class="me-auto">Thành công!</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            Package name đã được copy vào clipboard!
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Package Management JavaScript -->
+<script>
+// Simplified Package Search for 2-Column Layout
+class PackageSearch {
+    constructor() {
+        this.searchInput = document.getElementById('packageSearch');
+        this.typeFilter = document.getElementById('packageTypeFilter');
+        this.packageCards = document.querySelectorAll('.package-card');
+        
+        this.setupEventListeners();
+        this.updateTypeFilter();
+    }
+    
+    setupEventListeners() {
+        let searchTimeout;
+        this.searchInput?.addEventListener('input', () => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => this.performSearch(), 300);
+        });
+        
+        this.typeFilter?.addEventListener('change', () => this.performSearch());
+    }
+    
+    updateTypeFilter() {
+        // Update filter options for new schema
+        if (this.typeFilter) {
+            this.typeFilter.innerHTML = `
+                <option value="">Tất cả packages</option>
+                <option value="active">Có sẵn (không cần %!&lt;..&gt;)</option>
+                <option value="manual">Cần %!&lt;..&gt; trong code</option>
+            `;
+        }
+    }
+    
+    performSearch() {
+        const searchTerm = this.searchInput?.value.toLowerCase() || '';
+        const statusFilter = this.typeFilter?.value || '';
+        
+        let activeVisible = 0;
+        let manualVisible = 0;
+        
+        this.packageCards.forEach(card => {
+            const packageName = card.dataset.packageName?.toLowerCase() || '';
+            const packageStatus = card.dataset.status || '';
+            
+            const matchesSearch = !searchTerm || packageName.includes(searchTerm);
+            const matchesStatus = !statusFilter || packageStatus === statusFilter;
+            
+            const isVisible = matchesSearch && matchesStatus;
+            
+            card.style.display = isVisible ? 'flex' : 'none';
+            
+            if (isVisible) {
+                if (packageStatus === 'active') activeVisible++;
+                else if (packageStatus === 'manual') manualVisible++;
+            }
+        });
+        
+        console.log(`Search: ${activeVisible} active, ${manualVisible} manual packages visible`);
+    }
+}
+
+// Copy Functions
+function copyPackageName(packageName) {
+    navigator.clipboard.writeText(packageName).then(() => {
+        showCopyToast(`"${packageName}" copied!`);
+        
+        if (typeof gtag !== 'undefined') {
+            gtag('event', 'copy_package_name', {
+                'event_category': 'packages',
+                'event_label': packageName,
+                'copy_type': 'direct'
+            });
+        }
+    }).catch(err => {
+        console.error('Copy failed:', err);
+        fallbackCopyToClipboard(packageName);
+    });
+}
+
+function copyPackageWithSyntax(packageName) {
+    const syntaxCode = `%!<${packageName}>`;
+    navigator.clipboard.writeText(syntaxCode).then(() => {
+        showCopyToast(`"%!&lt;${packageName}&gt;" copied!`);
+        
+        if (typeof gtag !== 'undefined') {
+            gtag('event', 'copy_package_syntax', {
+                'event_category': 'packages',
+                'event_label': packageName,
+                'copy_type': 'syntax'
+            });
+        }
+    }).catch(err => {
+        console.error('Copy with syntax failed:', err);
+        fallbackCopyToClipboard(syntaxCode);
+    });
+}
+
+function fallbackCopyToClipboard(text) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+        document.execCommand('copy');
+        showCopyToast(`"${text}" copied!`);
+    } catch (err) {
+        console.error('Fallback copy failed:', err);
+    }
+    
+    document.body.removeChild(textArea);
+}
+
+function showCopyToast(message = 'Copied to clipboard!') {
+    const toastEl = document.getElementById('copyToast');
+    if (toastEl) {
+        const toastBody = toastEl.querySelector('.toast-body');
+        if (toastBody) toastBody.textContent = message;
+        
+        const toast = new bootstrap.Toast(toastEl);
+        toast.show();
+    }
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Initializing simplified package management...');
+    new PackageSearch();
+    
+    // Track page view
+    if (typeof gtag !== 'undefined') {
+        gtag('event', 'page_view', {
+            'page_title': 'LaTeX Packages - 2 Column Layout',
+            'page_location': window.location.href
+        });
+    }
+    
+    setupAccessibilityFeatures();
+});
+
+function setupAccessibilityFeatures() {
+    // Add keyboard navigation for package names
+    document.querySelectorAll('.package-name').forEach(nameEl => {
+        nameEl.setAttribute('tabindex', '0');
+        nameEl.setAttribute('role', 'button');
+        nameEl.setAttribute('aria-label', `Copy: ${nameEl.textContent}`);
+        
+        nameEl.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                const packageCard = nameEl.closest('.package-card');
+                const packageName = packageCard?.dataset.packageName;
+                const status = packageCard?.dataset.status;
+                
+                if (status === 'active') {
+                    copyPackageName(packageName);
+                } else {
+                    copyPackageWithSyntax(packageName);
+                }
+            }
+        });
+    });
+}
+
+// Performance monitoring
+window.addEventListener('load', function() {
+    const loadTime = performance.now();
+    if (typeof gtag !== 'undefined') {
+        gtag('event', 'timing_complete', {
+            'name': 'packages_2column_load',
+            'value': Math.round(loadTime)
+        });
+    }
+});
+</script>
+
+
+{% if current_user.is_authenticated %}
+<!-- Notifications JavaScript (only for logged-in users) -->
+<script src="{{ url_for('static', filename='js/notifications.js') }}?v=20251024{{ range(1000, 9999) | random }}"></script>
+{% endif %}
+{% endblock %}

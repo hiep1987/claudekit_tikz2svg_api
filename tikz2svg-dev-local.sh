@@ -71,4 +71,18 @@ echo "Database login info:"
 echo "Username: hiep1987"
 echo "Password: (empty or your password)"
 echo ""
+
+# Check and kill existing Flask processes on port 5173
+echo "🔍 Checking port 5173..."
+if lsof -i :5173 >/dev/null 2>&1; then
+    echo "⚠️  Port 5173 is in use. Stopping existing processes..."
+    pkill -f "flask.*5173" || true
+    sleep 2
+    if lsof -i :5173 >/dev/null 2>&1; then
+        echo "❌ Failed to free port 5173. Try manually: pkill -f flask"
+        exit 1
+    fi
+    echo "✅ Port 5173 is now free"
+fi
+
 exec flask --app app:app --debug run --host 127.0.0.1 --port 5173

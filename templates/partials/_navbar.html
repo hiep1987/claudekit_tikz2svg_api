@@ -17,6 +17,13 @@
                 <a href="/" class="block text-base" style="line-height: 1;">Trang chủ</a>
                 <div class="menu-underline"></div>
             </li>
+            <li class="menu-item relative px-2 py-1 cursor-pointer transition hover:text-blue-600">
+                <a href="/packages" class="block text-base flex items-center gap-1" style="line-height: 1;">
+                    <i class="fas fa-cube" style="font-size: 14px;"></i>
+                    Packages
+                </a>
+                <div class="menu-underline"></div>
+            </li>
             {% if current_user.is_authenticated %}
             <li class="menu-item relative px-2 py-1 cursor-pointer transition hover:text-blue-600">
                 <a href="/profile/{{ current_user.id }}/settings" class="block text-base" style="line-height: 1;">Hồ sơ</a>
@@ -106,6 +113,13 @@
             <a href="/" class="block text-base" style="line-height: 1;">Trang chủ</a>
             <div class="menu-underline"></div>
         </li>
+        <li class="menu-item relative px-2 py-1 cursor-pointer transition hover:text-blue-600">
+            <a href="/packages" class="block text-base flex items-center gap-1" style="line-height: 1;">
+                <i class="fas fa-cube" style="font-size: 14px;"></i>
+                Packages
+            </a>
+            <div class="menu-underline"></div>
+        </li>
         {% if current_user.is_authenticated %}
         <li class="menu-item relative px-2 py-1 cursor-pointer transition hover:text-blue-600">
             <a href="/profile/{{ current_user.id }}/settings" class="block text-base" style="line-height: 1;">Hồ sơ</a>
@@ -131,6 +145,10 @@
             <i class="fas fa-times"></i>
         </button>
         <a href="/" class="py-2 px-3 rounded-lg text-gray-700 font-medium hover:bg-blue-100 transition">Trang chủ</a>
+        <a href="/packages" class="py-2 px-3 rounded-lg text-gray-700 font-medium hover:bg-blue-100 transition flex items-center gap-2">
+            <i class="fas fa-cube" style="font-size: 14px;"></i>
+            Packages
+        </a>
         {% if current_user.is_authenticated %}
         <a href="/profile/{{ current_user.id }}/settings" class="py-2 px-3 rounded-lg text-gray-700 font-medium hover:bg-blue-100 transition">Hồ sơ</a>
         <a href="/profile/{{ current_user.id }}/svg-files" class="py-2 px-3 rounded-lg text-gray-700 font-medium hover:bg-blue-100 transition">File SVG</a>

@@ -7,6 +7,8 @@
 1. [🚀 Giới thiệu tổng quan](#1-giới-thiệu-tổng-quan)
 2. [📋 Hướng dẫn bắt đầu nhanh](#2-hướng-dẫn-bắt-đầu-nhanh)  
 3. [🔧 Chức năng biên dịch chi tiết](#3-chức-năng-biên-dịch-chi-tiết)
+   - [3.3 🌏 Unicode & Multi-language Support](#33--unicode--multi-language-support-nâng-cao)
+   - [3.4 📦 Manual Package Specification](#34--manual-package-specification-nâng-cao)
 4. [🎨 Quản lý File SVG & Menu Actions](#4-quản-lý-file-svg--menu-actions)
 5. [🔄 Chuyển đổi định dạng](#5-chuyển-đổi-định-dạng)
 6. [💬 Hệ thống Comments](#6-hệ-thống-comments)
@@ -25,7 +27,8 @@
 
 ### Tính năng chính
 - ✅ **Biên dịch TikZ real-time** với preview ngay lập tức
-- ✅ **Auto-detection packages** thông minh và manual specification nâng cao  
+- ✅ **Auto-detection packages** thông minh và manual specification nâng cao
+- ✅ **Unicode đầy đủ** hỗ trợ tiếng Việt, Trung, Nhật, Hàn (CJK) với LuaLaTeX + fontspec
 - ✅ **Quản lý file SVG** với like/unlike, follow/unfollow system
 - ✅ **Comments System** bình luận với LaTeX & TikZ code sharing
 - ✅ **Chuyển đổi đa định dạng** SVG → PNG/JPEG với tùy chọn size, DPI
@@ -107,7 +110,42 @@ Hệ thống tự động phát hiện các packages sau:
 
 *Lưu ý: Đây là danh sách đầy đủ các packages được phép sử dụng. Hệ thống sẽ tự động phát hiện khi bạn sử dụng các lệnh như `\draw`, `\node`, `\addplot`, etc.*
 
-### 3.3 📦 Manual Package Specification (Nâng cao)
+### 3.3 🌏 Unicode & Multi-language Support (Nâng cao)
+
+**Hệ thống hỗ trợ Unicode đầy đủ:**
+- ✅ **Hệ thống hỗ trợ ĐẦY ĐỦ** chữ Trung/Nhật/Hàn (CJK characters)
+- ✅ **Người dùng CHỈ CẦN thêm** `\setmainfont{STSong}` để hiển thị chữ CJK
+- ✅ **KHÔNG CẦN sửa** `app.py` hay thêm package
+- ✅ **LuaLaTeX + fontspec** = Unicode native support HOÀN HẢO
+
+**Ví dụ sử dụng chữ Trung Quốc, Nhật Bản, Hàn Quốc:**
+
+```latex
+\setmainfont{STSong}  % Chỉ cần thêm dòng này!
+
+\begin{tikzpicture}
+  \node {中文: 富贵};                    % Tiếng Trung
+  \node at (0,-1) {日本語: こんにちは};    % Tiếng Nhật
+  \node at (0,-2) {한국어: 안녕하세요};    % Tiếng Hàn
+\end{tikzpicture}
+```
+
+**Fonts CJK có sẵn trên hệ thống:**
+- **STSong** (宋体) - ✅ Khuyến nghị cho văn bản thông thường
+- **Heiti TC/SC** (黑体) - Chữ đậm, tiêu đề
+- **Kaiti TC/SC** (楷书) - Thư pháp, chữ viết tay đẹp
+
+**Lưu ý:**
+- ❌ **KHÔNG dùng** `%!<CJKutf8>` (xung đột với LuaLaTeX + fontspec)
+- ❌ **KHÔNG dùng** `\begin{CJK*}{UTF8}{gbsn}...\end{CJK*}` (cú pháp cũ)
+- ✅ **CHỈ CẦN** `\setmainfont{STSong}` (hoặc font CJK khác)
+- ✅ Tiếng Việt hoạt động **HOÀN HẢO** không cần font đặc biệt
+
+**Xem chi tiết:** Tham khảo `USER_GUIDE_CJK_CHARACTERS.md` và `CHINESE_CHARACTERS_ANALYSIS.md`
+
+---
+
+### 3.4 📦 Manual Package Specification (Nâng cao)
 
 **Khi nào cần sử dụng?**
 - ✅ Hệ thống không tự động phát hiện package cần thiết  
@@ -1002,6 +1040,19 @@ Error: Access denied - insufficient permissions
 
 ### Q: Tôi quên mật khẩu thì sao?
 **A:** TikZ2SVG sử dụng Google OAuth, bạn chỉ cần đăng nhập bằng tài khoản Google của mình. Không cần nhớ mật khẩu riêng.
+
+### Q: Làm sao để hiển thị chữ Trung Quốc, Nhật Bản, Hàn Quốc trong TikZ?
+**A:** Hệ thống hỗ trợ ĐẦY ĐỦ Unicode với LuaLaTeX + fontspec. Bạn chỉ cần thêm dòng `\setmainfont{STSong}` vào đầu code TikZ:
+```latex
+\setmainfont{STSong}
+\begin{tikzpicture}
+  \node {中文: 富贵};  % Tiếng Trung hiển thị HOÀN HẢO
+\end{tikzpicture}
+```
+**Lưu ý:** KHÔNG dùng `%!<CJKutf8>` vì không tương thích với LuaLaTeX. Xem chi tiết tại section "3.3 Unicode & Multi-language Support".
+
+### Q: Tại sao chữ Trung/Nhật/Hàn hiện thành hộp vuông `��`?
+**A:** Bạn chưa chọn font hỗ trợ CJK. Thêm `\setmainfont{STSong}` (hoặc font CJK khác) vào đầu code TikZ. Font mặc định (Latin Modern) không có ký tự CJK.
 
 ---
 

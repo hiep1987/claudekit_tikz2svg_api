@@ -133,6 +133,121 @@
             padding: 0.4rem 0.8rem;
         }
     }
+    
+    /* Flash Messages Styling */
+    .flash-messages-container {
+        position: fixed;
+        top: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1050;
+        width: 100%;
+        max-width: 600px;
+        pointer-events: none;
+    }
+    
+    .flash-message {
+        pointer-events: auto;
+        margin-bottom: 1rem;
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: slideInDown 0.5s ease-out;
+    }
+    
+    .flash-content {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .flash-icon {
+        font-size: 1.2rem;
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
+    
+    .flash-text {
+        flex: 1;
+        line-height: 1.5;
+    }
+    
+    .flash-text strong {
+        font-weight: 600;
+    }
+    
+    /* Success messages */
+    .alert-success.flash-message {
+        background: rgba(34, 197, 94, 0.15);
+        border-color: rgba(34, 197, 94, 0.3);
+        color: #059669;
+    }
+    
+    .alert-success .flash-icon {
+        color: #059669;
+    }
+    
+    /* Error messages */
+    .alert-danger.flash-message {
+        background: rgba(239, 68, 68, 0.15);
+        border-color: rgba(239, 68, 68, 0.3);
+        color: #dc2626;
+    }
+    
+    .alert-danger .flash-icon {
+        color: #dc2626;
+    }
+    
+    /* Info messages */
+    .alert-info.flash-message {
+        background: rgba(59, 130, 246, 0.15);
+        border-color: rgba(59, 130, 246, 0.3);
+        color: #2563eb;
+    }
+    
+    .alert-info .flash-icon {
+        color: #2563eb;
+    }
+    
+    /* Warning messages */
+    .alert-warning.flash-message {
+        background: rgba(245, 158, 11, 0.15);
+        border-color: rgba(245, 158, 11, 0.3);
+        color: #d97706;
+    }
+    
+    .alert-warning .flash-icon {
+        color: #d97706;
+    }
+    
+    @keyframes slideInDown {
+        0% {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+        .flash-messages-container {
+            top: 70px;
+            max-width: 95%;
+            padding: 0 10px;
+        }
+        
+        .flash-message {
+            font-size: 0.9rem;
+        }
+        
+        .flash-icon {
+            font-size: 1.1rem;
+        }
+    }
     </style>
     
     <!-- Google Tag Manager - Exactly as Google recommends -->
@@ -189,6 +304,33 @@
     {% if include_navbar %}
     {% include 'partials/_navbar.html' %}
     {% endif %}
+    
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages-container">
+                <div class="container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'success' if category == 'success' else 'danger' if category == 'error' else 'info' if category == 'info' else 'warning' }} alert-dismissible fade show flash-message" role="alert">
+                            <div class="flash-content">
+                                {% if category == 'success' %}
+                                    <i class="fas fa-check-circle flash-icon"></i>
+                                {% elif category == 'error' %}
+                                    <i class="fas fa-exclamation-triangle flash-icon"></i>
+                                {% elif category == 'info' %}
+                                    <i class="fas fa-info-circle flash-icon"></i>
+                                {% else %}
+                                    <i class="fas fa-exclamation-circle flash-icon"></i>
+                                {% endif %}
+                                <div class="flash-text">{{ message|safe }}</div>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    {% endwith %}
     
     <!-- Page Content -->
     {% block content %}{% endblock %}
@@ -280,6 +422,62 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
     {% endif %}
+    
+    <!-- Flash Messages JavaScript -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-dismiss flash messages after 6 seconds (success) or 8 seconds (others)
+        const flashMessages = document.querySelectorAll('.flash-message');
+        flashMessages.forEach(function(message) {
+            const isSuccess = message.classList.contains('alert-success');
+            const delay = isSuccess ? 6000 : 8000; // Success messages dismiss faster
+            
+            setTimeout(function() {
+                // Use Bootstrap's built-in dismiss functionality
+                const closeButton = message.querySelector('.btn-close');
+                if (closeButton) {
+                    closeButton.click();
+                }
+            }, delay);
+        });
+        
+        // Add smooth removal animation
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function(alert) {
+            alert.addEventListener('close.bs.alert', function() {
+                alert.style.transition = 'all 0.3s ease-out';
+                alert.style.opacity = '0';
+                alert.style.transform = 'translateY(-20px)';
+            });
+        });
+        
+        // Enhanced click-to-dismiss (anywhere on the message)
+        flashMessages.forEach(function(message) {
+            message.style.cursor = 'pointer';
+            message.addEventListener('click', function(e) {
+                // Don't dismiss if clicking on the close button (let Bootstrap handle it)
+                if (!e.target.classList.contains('btn-close')) {
+                    const closeButton = message.querySelector('.btn-close');
+                    if (closeButton) {
+                        closeButton.click();
+                    }
+                }
+            });
+        });
+        
+        // Add hover effects
+        flashMessages.forEach(function(message) {
+            message.addEventListener('mouseenter', function() {
+                message.style.transform = 'scale(1.02)';
+                message.style.transition = 'transform 0.2s ease';
+            });
+            
+            message.addEventListener('mouseleave', function() {
+                message.style.transform = 'scale(1)';
+            });
+        });
+    });
+    </script>
     
     <!-- Page-specific JavaScript -->
     {% block extra_js %}{% endblock %}

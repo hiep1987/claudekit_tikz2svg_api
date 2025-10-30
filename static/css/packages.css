@@ -1,0 +1,595 @@
+/* 
+Package Management System Styles - CSS Foundation Integration
+============================================================
+⚠️ CRITICAL: Integrated with TikZ2SVG CSS Foundation System for consistency
+*/
+
+/* 1. Import Foundation Variables (MUST BE FIRST) */
+@import url('foundation/master-variables.css');
+@import url('foundation/global-base.css');
+
+/* 2. Package Management Specific Styles using Foundation */
+.tikz-app .packages-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    color: var(--text-white);
+    padding: var(--spacing-24) 0;
+    text-align: center;
+    margin-bottom: var(--spacing-32);
+    position: relative;
+    overflow: hidden;
+}
+
+.tikz-app .packages-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--glass-bg-light);
+    backdrop-filter: var(--glass-blur-light);
+    opacity: 0.1;
+}
+
+.tikz-app .packages-header h1,
+.tikz-app .packages-header p {
+    position: relative;
+    z-index: 2;
+    margin: 0;
+}
+
+.tikz-app .packages-header h1 {
+    font-size: var(--font-size-4xl);
+    font-weight: var(--font-weight-bold);
+    margin-bottom: var(--spacing-4);
+}
+
+.tikz-app .packages-header p {
+    font-size: var(--font-size-lg);
+    opacity: 0.9;
+}
+
+/* Package Statistics Cards */
+.tikz-app .package-stats {
+    padding: 0 var(--spacing-16);
+    margin-bottom: var(--spacing-32);
+}
+
+.tikz-app .package-stats .row {
+    gap: var(--spacing-16);
+}
+
+.tikz-app .stat-card {
+    background: var(--glass-bg-light);
+    backdrop-filter: var(--glass-blur-medium);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: var(--spacing-24);
+    text-align: center;
+    transition: all var(--transition-fast);
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.tikz-app .stat-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.tikz-app .stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+    border-color: var(--primary-color);
+}
+
+.tikz-app .stat-card:hover::before {
+    opacity: 0.05;
+}
+
+.tikz-app .stat-card h3 {
+    font-size: var(--font-size-3xl);
+    color: var(--primary-color);
+    margin: 0;
+    font-weight: var(--font-weight-bold);
+    position: relative;
+    z-index: 2;
+}
+
+.tikz-app .stat-card p {
+    color: var(--text-secondary);
+    margin: var(--spacing-4) 0 0 0;
+    font-weight: var(--font-weight-medium);
+    position: relative;
+    z-index: 2;
+    font-size: var(--font-size-sm);
+}
+
+.tikz-app .stat-icon {
+    color: var(--primary-color);
+    font-size: var(--font-size-2xl);
+    margin-bottom: var(--spacing-8);
+    position: relative;
+    z-index: 2;
+}
+
+/* Package Search Section */
+.tikz-app .package-search {
+    padding: 0 var(--spacing-16);
+    margin-bottom: var(--spacing-32);
+}
+
+.tikz-app .search-input-wrapper {
+    position: relative;
+}
+
+.tikz-app .search-input-wrapper i {
+    position: absolute;
+    left: var(--spacing-12);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    z-index: 3;
+}
+
+.tikz-app .package-search input {
+    padding: var(--spacing-8) var(--spacing-12) var(--spacing-8) var(--spacing-20);
+    border: 1px solid var(--border-light);
+    background: var(--glass-bg-light);
+    backdrop-filter: var(--glass-blur-light);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+    font-size: var(--font-size-base);
+}
+
+.tikz-app .package-search input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgb(25 118 210 / 20%);
+    background: var(--glass-bg-strong);
+    outline: none;
+}
+
+.tikz-app .package-search select {
+    border: 1px solid var(--border-light);
+    background: var(--glass-bg-light);
+    backdrop-filter: var(--glass-blur-light);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+    padding: var(--spacing-8) var(--spacing-12);
+    font-size: var(--font-size-base);
+}
+
+.tikz-app .package-search select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgb(25 118 210 / 20%);
+    outline: none;
+}
+
+/* Usage Instructions */
+.tikz-app .usage-instructions {
+    background: var(--glass-bg-light);
+    backdrop-filter: var(--glass-blur-light);
+    padding: var(--spacing-32);
+    margin-bottom: var(--spacing-32);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-sm);
+}
+
+.tikz-app .usage-instructions h2 {
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-24);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-2xl);
+}
+
+.tikz-app .instruction-card {
+    background: var(--glass-bg-medium);
+    backdrop-filter: var(--glass-blur-medium);
+    border: 1px solid var(--glass-border);
+    border-left: 4px solid var(--primary-color);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-20);
+    transition: all var(--transition-fast);
+    height: 100%;
+    margin-bottom: var(--spacing-16);
+}
+
+.tikz-app .instruction-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-left-color: var(--success-color);
+}
+
+.tikz-app .instruction-card h3 {
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-8) 0;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+}
+
+.tikz-app .instruction-card code {
+    background: var(--input-bg);
+    color: var(--text-primary);
+    padding: var(--spacing-2) var(--spacing-4);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-family-mono);
+    border: 1px solid var(--border-light);
+    display: inline-block;
+    margin: var(--spacing-4) 0;
+    font-size: var(--font-size-sm);
+}
+
+.tikz-app .instruction-icon {
+    color: var(--primary-color);
+    font-size: var(--font-size-xl);
+    margin-bottom: var(--spacing-8);
+}
+
+
+/* Two-Column Package Layout */
+.tikz-app .package-column {
+    height: 100%;
+}
+
+.tikz-app .column-header {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    border: var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-16);
+    margin-bottom: var(--spacing-16);
+    text-align: center;
+}
+
+.tikz-app .column-header h2 {
+    margin-bottom: var(--spacing-4);
+    font-size: var(--font-size-lg);
+}
+
+.tikz-app .column-header p {
+    margin: 0;
+    font-size: var(--font-size-sm);
+}
+
+/* Active Column Styling */
+.tikz-app .active-column .column-header {
+    border-left: 4px solid var(--success-color);
+}
+
+.tikz-app .active-column .active-card {
+    border-left: 3px solid var(--success-color);
+}
+
+/* Manual Column Styling */
+.tikz-app .manual-column .column-header {
+    border-left: 4px solid var(--warning-color);
+}
+
+.tikz-app .manual-column .manual-card {
+    border-left: 3px solid var(--warning-color);
+}
+
+/* Package Categories - Legacy Support */
+.tikz-app .package-category {
+    margin-bottom: var(--spacing-32);
+}
+
+.tikz-app .package-category h2 {
+    color: var(--text-primary);
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: var(--spacing-8);
+    margin-bottom: var(--spacing-24);
+    font-weight: var(--font-weight-bold);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-8);
+    font-size: var(--font-size-2xl);
+}
+
+.tikz-app .package-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--spacing-12);
+    max-height: 600px;
+    overflow-y: auto;
+    padding: var(--spacing-8);
+    background: var(--glass-bg-subtle);
+    border-radius: var(--radius-md);
+}
+
+/* Simplified Package Cards for 2-Column Layout */
+.tikz-app .package-card {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 50px;
+}
+
+.tikz-app .package-card .card-body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: var(--spacing-12) var(--spacing-16);
+}
+
+.tikz-app .package-card .package-name {
+    font-weight: var(--font-weight-medium);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-family: 'Roboto Mono', monospace;
+    font-size: var(--font-size-sm);
+    flex: 1;
+    transition: color var(--transition-fast);
+}
+
+.tikz-app .package-card .package-name:hover {
+    color: var(--primary-color);
+}
+
+.tikz-app .package-card .package-actions {
+    margin-left: var(--spacing-12);
+}
+
+.tikz-app .package-card .copy-btn {
+    padding: var(--spacing-4) var(--spacing-8);
+    font-size: var(--font-size-xs);
+    border-radius: var(--radius-sm);
+}
+
+.tikz-app .package-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.tikz-app .package-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+    border-color: var(--primary-color);
+}
+
+.tikz-app .package-card:hover::before {
+    opacity: 0.03;
+}
+
+.tikz-app .package-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-12);
+    position: relative;
+    z-index: 2;
+}
+
+.tikz-app .package-card h3 {
+    color: var(--primary-color);
+    margin: 0;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+
+.tikz-app .package-card h3:hover {
+    color: var(--primary-dark);
+}
+
+.tikz-app .copy-btn {
+    background: transparent;
+    border: 1px solid var(--border-light);
+    color: var(--text-muted);
+    padding: var(--spacing-2) var(--spacing-4);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-size: var(--font-size-xs);
+    position: relative;
+    z-index: 2;
+}
+
+.tikz-app .copy-btn:hover {
+    background: var(--glass-bg-light);
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.tikz-app .package-card p {
+    color: var(--text-secondary);
+    margin: 0 0 var(--spacing-12) 0;
+    line-height: var(--line-height-relaxed);
+    position: relative;
+    z-index: 2;
+    font-size: var(--font-size-sm);
+    flex-grow: 1;
+}
+
+.tikz-app .package-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: var(--font-size-xs);
+    position: relative;
+    z-index: 2;
+    margin-top: auto;
+    padding-top: var(--spacing-8);
+    border-top: 1px solid var(--border-muted);
+}
+
+.tikz-app .usage-count {
+    color: var(--success-color);
+    font-weight: var(--font-weight-medium);
+}
+
+.tikz-app .doc-link {
+    color: var(--info-color);
+    text-decoration: none;
+    font-weight: var(--font-weight-medium);
+    transition: color var(--transition-fast);
+}
+
+.tikz-app .doc-link:hover {
+    color: var(--info-dark);
+}
+
+/* Package Request Section */
+.tikz-app .package-request {
+    padding: var(--spacing-32);
+    margin-top: var(--spacing-32);
+}
+
+.tikz-app .request-card {
+    background: var(--glass-bg-light);
+    backdrop-filter: var(--glass-blur-medium);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-32);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+}
+
+.tikz-app .request-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+    opacity: 0.05;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.tikz-app .request-card h2 {
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-16);
+    position: relative;
+    z-index: 2;
+    font-size: var(--font-size-3xl);
+}
+
+.tikz-app .request-card p {
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-24);
+    position: relative;
+    z-index: 2;
+    font-size: var(--font-size-lg);
+}
+
+.tikz-app .request-btn {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+    color: var(--text-white);
+    border: none;
+    padding: var(--spacing-12) var(--spacing-24);
+    border-radius: var(--radius-md);
+    font-weight: var(--font-weight-semibold);
+    transition: all var(--transition-fast);
+    position: relative;
+    z-index: 2;
+    box-shadow: var(--shadow-md);
+    font-size: var(--font-size-lg);
+    text-decoration: none;
+    display: inline-block;
+}
+
+.tikz-app .request-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    filter: brightness(1.1);
+    text-decoration: none;
+    color: var(--text-white);
+}
+
+/* Responsive Design */
+@media (width <= 768px) {
+    .tikz-app .package-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .tikz-app .package-meta {
+        flex-direction: column;
+        gap: var(--spacing-4);
+        align-items: flex-start;
+    }
+    
+    .tikz-app .packages-header {
+        padding: var(--spacing-20) 0;
+    }
+    
+    .tikz-app .packages-header h1 {
+        font-size: var(--font-size-3xl);
+    }
+    
+    .tikz-app .stat-card {
+        min-height: 100px;
+        padding: var(--spacing-16);
+    }
+    
+    .tikz-app .stat-card h3 {
+        font-size: var(--font-size-2xl);
+    }
+}
+
+/* Loading State */
+.tikz-app .package-card.loading {
+    background: var(--bg-muted);
+    border: 1px solid var(--border-muted);
+}
+
+.tikz-app .package-card.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, var(--glass-bg-light), transparent);
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* Focus States for Accessibility */
+.tikz-app .package-search input:focus,
+.tikz-app .package-search select:focus,
+.tikz-app .copy-btn:focus,
+.tikz-app .request-btn:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+    .tikz-app .stat-card,
+    .tikz-app .package-card,
+    .tikz-app .instruction-card {
+        border-width: 2px;
+    }
+    
+    .tikz-app .stat-card h3,
+    .tikz-app .package-card h3 {
+        color: var(--text-primary);
+    }
+}

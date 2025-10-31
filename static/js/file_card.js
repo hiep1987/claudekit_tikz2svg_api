@@ -1249,16 +1249,6 @@ function formatTimeAgo(timestamp) {
  * Load and display preview text below like buttons automatically
  */
 function initializeLikesPreview() {
-
-    // Load preview for all file cards on page
-    const fileCards = document.querySelectorAll('.file-card[data-file-id]');
-    fileCards.forEach(card => {
-        const svgId = card.dataset.fileId;
-        if (svgId) {
-            loadLikesPreview(svgId);
-        }
-    });
-
     // Handle "Xem tất cả" button clicks
     document.addEventListener('click', function(e) {
         if (e.target.closest('.likes-view-all-btn')) {
@@ -1267,17 +1257,79 @@ function initializeLikesPreview() {
             openLikesModal(svgId);
         }
     });
+
+    // =====================================================
+    // PHASE 3: LAZY LOADING WITH INTERSECTION OBSERVER
+    // =====================================================
+    // Only load likes preview when card is visible in viewport
+    // Reduces initial API calls from 50 to ~10 (items in viewport)
+    
+    const observerOptions = {
+        root: null, // viewport
+        rootMargin: '50px', // Load slightly before entering viewport
+        threshold: 0.1 // Trigger when 10% of card is visible
+    };
+
+    // Track which cards have been loaded
+    const loadedCards = new Set();
+
+    const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const card = entry.target;
+                const svgId = card.dataset.fileId;
+                
+                // Only load once per card
+                if (svgId && !loadedCards.has(svgId)) {
+                    console.log(`👁️ Loading likes preview for SVG ${svgId} (visible)`);
+                    loadedCards.add(svgId);
+                    loadLikesPreview(svgId);
+                    
+                    // Stop observing this card after loading
+                    observer.unobserve(card);
+                }
+            }
+        });
+    }, observerOptions);
+
+    // Observe all file cards
+    const fileCards = document.querySelectorAll('.file-card[data-file-id]');
+    console.log(`🔭 Observing ${fileCards.length} file cards for lazy loading`);
+    fileCards.forEach(card => observer.observe(card));
 }
 
 /**
  * Load likes preview data for a specific SVG
+ * With rate limit handling and exponential backoff
  */
-function loadLikesPreview(svgId) {
+function loadLikesPreview(svgId, retryCount = 0) {
     fetch(`/api/svg/${svgId}/likes/preview`)
-        .then(response => response.json())
+        .then(response => {
+            // Handle rate limit (429)
+            if (response.status === 429) {
+                return response.json().then(data => {
+                    const retryAfter = data.retry_after || 60;
+                    console.warn(`⏱️ Rate limit exceeded for SVG ${svgId}. Retry after ${retryAfter}s`);
+                    
+                    // Exponential backoff: retry after delay if not too many retries
+                    if (retryCount < 3) {
+                        const delay = Math.min(retryAfter * 1000 * Math.pow(2, retryCount), 120000);
+                        console.log(`🔄 Retrying in ${delay/1000}s (attempt ${retryCount + 1}/3)`);
+                        setTimeout(() => {
+                            loadLikesPreview(svgId, retryCount + 1);
+                        }, delay);
+                    }
+                    return { success: false, rate_limited: true };
+                });
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success && data.total_likes > 0) {
                 renderLikesPreview(svgId, data);
+            } else if (!data.rate_limited) {
+                // Only log non-rate-limit errors
+                console.log(`No likes to preview for SVG ${svgId}`);
             }
         })
         .catch(error => {
@@ -1370,15 +1422,36 @@ function getCurrentUserId() {
 /**
  * ✅ NEW: Refresh likes preview text after like/unlike action
  * Calls the preview API to get updated user list and refreshes the display
+ * With rate limit handling and exponential backoff
  */
-function refreshLikesPreviewText(svgId) {
+function refreshLikesPreviewText(svgId, retryCount = 0) {
 
     fetch(`/api/svg/${svgId}/likes/preview`)
-        .then(response => response.json())
+        .then(response => {
+            // Handle rate limit (429)
+            if (response.status === 429) {
+                return response.json().then(data => {
+                    const retryAfter = data.retry_after || 60;
+                    console.warn(`⏱️ Rate limit exceeded while refreshing likes preview for SVG ${svgId}. Retry after ${retryAfter}s`);
+                    
+                    // Exponential backoff: retry after delay if not too many retries
+                    if (retryCount < 3) {
+                        const delay = Math.min(retryAfter * 1000 * Math.pow(2, retryCount), 120000);
+                        console.log(`🔄 Retrying refresh in ${delay/1000}s (attempt ${retryCount + 1}/3)`);
+                        setTimeout(() => {
+                            refreshLikesPreviewText(svgId, retryCount + 1);
+                        }, delay);
+                    }
+                    return { success: false, rate_limited: true };
+                });
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 renderLikesPreview(svgId, data);
-            } else {
+            } else if (!data.rate_limited) {
+                // Only log non-rate-limit errors
                 console.error('❌ Failed to refresh likes preview:', data.message);
             }
         })

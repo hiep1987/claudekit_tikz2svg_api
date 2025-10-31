@@ -82,8 +82,48 @@
   object-fit: contain;
   display: block;
   background-color: #fff;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s ease, opacity 0.3s ease;
   pointer-events: none; /* Prevent img from being the target, always use container */
+}
+
+/* =====================================================
+ * PHASE 3: LAZY LOADING STYLES
+ * ===================================================== */
+
+/* Image loading state - show skeleton while loading */
+.tikz-app .file-img-container img[loading="lazy"] {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 0%,
+    #f8f8f8 50%,
+    #f0f0f0 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Remove skeleton animation when image is loaded */
+.tikz-app .file-img-container img[loading="lazy"]:not([src=""]) {
+  animation: none;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Fade in effect when image loads */
+.tikz-app .file-img-container img {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.tikz-app .file-img-container img[loading="lazy"] {
+  opacity: 1;
 }
 
 /* Interaction Buttons Row - Below image */

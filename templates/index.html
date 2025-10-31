@@ -177,7 +177,7 @@
 
 <!-- Block 3: Files Section -->
 <div class="files-section-container files-section" data-is-owner="{{ 'true' if logged_in else 'false' }}">
-    <h3 class="files-section-title">📁 Files đã lưu</h3>
+    <h3 class="files-section-title">📁 Files đã lưu ({{ total_items }} files)</h3>
     <div id="files-container" class="files-grid">
         {% if svg_files %}
             {% for file in svg_files %}
@@ -191,6 +191,53 @@
             </div>
         {% endif %}
     </div>
+    
+    <!-- =====================================================
+         PAGINATION UI
+         ===================================================== -->
+    {% if total_pages > 1 %}
+    <div class="pagination-container" style="margin-top: 2rem; display: flex; justify-content: center; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+        <!-- Previous Button -->
+        {% if has_prev %}
+            <a href="?page={{ page - 1 }}" class="pagination-btn pagination-btn-prev" title="Trang trước">
+                ← Trước
+            </a>
+        {% else %}
+            <span class="pagination-btn pagination-btn-prev pagination-btn-disabled">
+                ← Trước
+            </span>
+        {% endif %}
+        
+        <!-- Page Numbers -->
+        <div class="pagination-numbers" style="display: flex; gap: 0.25rem;">
+            {% for page_num in page_numbers %}
+                {% if page_num == '...' %}
+                    <span class="pagination-ellipsis">...</span>
+                {% elif page_num == page %}
+                    <span class="pagination-btn pagination-btn-active">{{ page_num }}</span>
+                {% else %}
+                    <a href="?page={{ page_num }}" class="pagination-btn">{{ page_num }}</a>
+                {% endif %}
+            {% endfor %}
+        </div>
+        
+        <!-- Next Button -->
+        {% if has_next %}
+            <a href="?page={{ page + 1 }}" class="pagination-btn pagination-btn-next" title="Trang sau">
+                Sau →
+            </a>
+        {% else %}
+            <span class="pagination-btn pagination-btn-next pagination-btn-disabled">
+                Sau →
+            </span>
+        {% endif %}
+    </div>
+    
+    <!-- Pagination Info -->
+    <div class="pagination-info" style="text-align: center; margin-top: 1rem; color: #666; font-size: 0.9rem;">
+        Trang {{ page }} / {{ total_pages }} • Hiển thị {{ svg_files|length }} / {{ total_items }} files
+    </div>
+    {% endif %}
 </div>
 
 <!-- Modal nhập từ khóa Bootstrap -->

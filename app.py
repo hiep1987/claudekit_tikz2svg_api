@@ -1,5 +1,7 @@
 from flask import Flask, request, render_template, url_for, send_file, jsonify, session, redirect, flash, make_response, send_from_directory, render_template_string
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 import os
 import subprocess
 import uuid
@@ -44,6 +46,185 @@ os.makedirs(os.path.join(STATIC_ROOT, 'avatars'), exist_ok=True)
 os.makedirs(os.path.join(STATIC_ROOT, 'images'), exist_ok=True)
 
 app = Flask(__name__, static_folder=STATIC_ROOT)
+
+# =====================================================
+# RATE LIMITING CONFIGURATION (PHASE 2)
+# =====================================================
+# Detect environment: Development has more generous limits
+IS_DEVELOPMENT = os.environ.get('FLASK_ENV') == 'development' or os.environ.get('DEBUG') == '1'
+
+# Storage: Use memory for development, Redis for production
+# For production with multiple workers, set REDIS_URL in environment
+RATE_LIMIT_STORAGE_URI = os.environ.get('REDIS_URL', 'memory://')
+
+# Initialize Flask-Limiter
+limiter = Limiter(
+    app=app,
+    key_func=get_remote_address,
+    storage_uri=RATE_LIMIT_STORAGE_URI,
+    default_limits=["1000 per hour"] if IS_DEVELOPMENT else ["200 per hour"],
+    storage_options={"socket_connect_timeout": 30},
+    strategy="fixed-window",
+)
+
+# Development: More generous limits for testing
+# Production: Stricter limits for security
+RATE_LIMITS = {
+    'api_likes_preview': "100 per minute" if IS_DEVELOPMENT else "30 per minute",
+    'api_like_counts': "60 per minute" if IS_DEVELOPMENT else "20 per minute",
+    'api_general': "200 per minute" if IS_DEVELOPMENT else "60 per minute",
+    'api_write': "30 per minute" if IS_DEVELOPMENT else "10 per minute",
+}
+
+print(f"🔧 Rate Limiting: {'DEVELOPMENT' if IS_DEVELOPMENT else 'PRODUCTION'} mode")
+print(f"📊 Storage: {RATE_LIMIT_STORAGE_URI}")
+print(f"⚡ Limits: {RATE_LIMITS}")
+
+# =====================================================
+# RATE LIMITING ERROR HANDLERS
+# =====================================================
+@app.errorhandler(429)
+def ratelimit_handler(e):
+    """
+    Custom error handler for rate limit exceeded (429)
+    Returns proper JSON response instead of HTML error page
+    """
+    # Check if request is API call (expects JSON)
+    if request.path.startswith('/api/'):
+        return jsonify({
+            "success": False,
+            "error": "rate_limit_exceeded",
+            "message": "Too many requests. Please slow down and try again later.",
+            "retry_after": getattr(e, 'retry_after', 60)
+        }), 429
+    
+    # For HTML pages, show user-friendly error
+    return render_template_string('''
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Too Many Requests</title>
+            <style>
+                body {
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                    margin: 0;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                }
+                .error-container {
+                    text-align: center;
+                    background: rgba(255, 255, 255, 0.1);
+                    padding: 3rem;
+                    border-radius: 20px;
+                    backdrop-filter: blur(10px);
+                    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+                }
+                h1 { font-size: 4rem; margin: 0; }
+                p { font-size: 1.2rem; margin: 1rem 0; }
+                .retry-info { font-size: 0.9rem; opacity: 0.8; }
+                a {
+                    display: inline-block;
+                    margin-top: 1.5rem;
+                    padding: 0.8rem 2rem;
+                    background: white;
+                    color: #667eea;
+                    text-decoration: none;
+                    border-radius: 10px;
+                    font-weight: bold;
+                    transition: transform 0.2s;
+                }
+                a:hover { transform: translateY(-2px); }
+            </style>
+        </head>
+        <body>
+            <div class="error-container">
+                <h1>⏱️ 429</h1>
+                <p>Too Many Requests</p>
+                <p class="retry-info">You're making requests too quickly. Please wait a moment and try again.</p>
+                <a href="/">← Back to Home</a>
+            </div>
+        </body>
+        </html>
+    '''), 429
+
+# =====================================================
+# PAGINATION CONFIGURATION
+# =====================================================
+ITEMS_PER_PAGE = 50  # Number of items per page (configurable: 20, 50, 100)
+MAX_PAGES_DISPLAY = 10  # Maximum page numbers to show in pagination UI
+
+def get_pagination_params(request):
+    """
+    Extract and validate pagination parameters from request
+    
+    Args:
+        request: Flask request object
+        
+    Returns:
+        tuple: (page, per_page) - validated integers
+    """
+    try:
+        page = int(request.args.get('page', 1))
+        per_page = int(request.args.get('per_page', ITEMS_PER_PAGE))
+        
+        # Validation: ensure reasonable bounds
+        page = max(1, min(page, 10000))  # Between 1-10000
+        per_page = max(10, min(per_page, 100))  # Between 10-100
+        
+        return page, per_page
+    except (ValueError, TypeError):
+        # If invalid parameters, return defaults
+        return 1, ITEMS_PER_PAGE
+
+def generate_page_numbers(current_page, total_pages, max_display=10):
+    """
+    Generate smart page numbers for pagination UI
+    
+    Example: Current=50, Total=200, Max=10
+    Result: [1, '...', 46, 47, 48, 49, 50, 51, 52, 53, 54, '...', 200]
+    
+    Args:
+        current_page: Current page number
+        total_pages: Total number of pages
+        max_display: Maximum page numbers to display
+        
+    Returns:
+        list: Page numbers with ellipsis for gaps
+    """
+    if total_pages <= max_display:
+        # If total pages fit in max_display, show all
+        return list(range(1, total_pages + 1))
+    
+    half_display = max_display // 2
+    pages = set()
+    
+    # Always include first and last page
+    pages.add(1)
+    pages.add(total_pages)
+    
+    # Add pages around current page
+    for i in range(max(1, current_page - half_display), 
+                   min(total_pages + 1, current_page + half_display + 1)):
+        pages.add(i)
+    
+    # Convert to sorted list with ellipsis
+    pages_list = sorted(pages)
+    result = []
+    prev = 0
+    
+    for page in pages_list:
+        if page > prev + 1:
+            result.append('...')
+        result.append(page)
+        prev = page
+    
+    return result
+
+print(f"✅ Pagination configured: {ITEMS_PER_PAGE} items per page")
 
 # Health check route
 @app.route("/health")
@@ -1720,13 +1901,105 @@ def index():
                     except Exception:
                         pass
                         
-    # Lấy danh sách các file SVG đã tạo với format thống nhất
-    if logged_in:
-        # Private files cho user đã đăng nhập
-        svg_files = get_svg_files_with_likes()
-    else:
-        # Public files cho user chưa đăng nhập
-        svg_files = get_public_svg_files()
+    # =====================================================
+    # PAGINATION: Lấy danh sách SVG với phân trang
+    # =====================================================
+    page, per_page = get_pagination_params(request)
+    offset = (page - 1) * per_page
+    
+    try:
+        conn = mysql.connector.connect(
+            host=os.environ.get('DB_HOST', 'localhost'),
+            user=os.environ.get('DB_USER', 'hiep1987'),
+            password=os.environ.get('DB_PASSWORD', ''),
+            database=os.environ.get('DB_NAME', 'tikz2svg')
+        )
+        cursor = conn.cursor(dictionary=True)
+        
+        # Get total count for pagination (all items for now)
+        cursor.execute("SELECT COUNT(*) as total FROM svg_image")
+        total_items = cursor.fetchone()['total']
+        
+        # Calculate pagination metadata
+        total_pages = max(1, (total_items + per_page - 1) // per_page)  # Ceiling division
+        has_prev = page > 1
+        has_next = page < total_pages
+        
+        # Fetch paginated data - match structure of profile_followed_posts
+        user_id_for_like = current_user.id if logged_in else 0
+        cursor.execute("""
+            SELECT 
+                s.id,
+                s.filename,
+                s.created_at,
+                s.user_id,
+                s.tikz_code,
+                s.keywords,
+                u.id as creator_id,
+                COALESCE(u.username, 'Anonymous') as creator_username,
+                COUNT(DISTINCT c.id) as comment_count,
+                COUNT(DISTINCT sl.id) as like_count,
+                CASE WHEN user_like.id IS NOT NULL THEN 1 ELSE 0 END as is_liked_by_current_user
+            FROM svg_image s
+            LEFT JOIN user u ON s.user_id = u.id
+            LEFT JOIN svg_comments c ON s.filename = c.svg_filename
+            LEFT JOIN svg_like sl ON s.id = sl.svg_image_id
+            LEFT JOIN svg_like user_like ON s.id = user_like.svg_image_id AND user_like.user_id = %s
+            GROUP BY s.id, s.filename, s.created_at, s.user_id, s.tikz_code, s.keywords, u.id, u.username, user_like.id
+            ORDER BY s.created_at DESC
+            LIMIT %s OFFSET %s
+        """, (user_id_for_like, per_page, offset))
+        
+        svg_files = cursor.fetchall()
+        
+        # Format svg_files to match profile_followed_posts structure exactly
+        for svg in svg_files:
+            # Format timestamps
+            created_at = svg.get('created_at')
+            if created_at:
+                svg['created_time_vn'] = created_at.strftime('%d/%m/%Y %H:%M')
+                svg['created_time'] = str(created_at)
+            else:
+                svg['created_time_vn'] = ''
+                svg['created_time'] = ''
+            
+            # URL using url_for (same as profile_followed_posts)
+            svg['url'] = f"/static/{svg['filename']}"
+            
+            # Convert is_liked to boolean
+            svg['is_liked_by_current_user'] = bool(svg.get('is_liked_by_current_user', 0))
+            
+            # Ensure counts are integers
+            svg['like_count'] = svg.get('like_count', 0) or 0
+            svg['comment_count'] = svg.get('comment_count', 0) or 0
+            
+            # creator_id and creator_username already from SQL query
+        
+        cursor.close()
+        conn.close()
+        
+        # Generate page numbers for UI
+        page_numbers = generate_page_numbers(page, total_pages, MAX_PAGES_DISPLAY)
+        
+        print(f"✅ Pagination: Page {page}/{total_pages}, showing {len(svg_files)} of {total_items} items")
+        
+    except Exception as e:
+        print(f"❌ Pagination error: {e}")
+        import traceback
+        traceback.print_exc()
+        # Fallback to old method if pagination fails
+        if logged_in:
+            svg_files = get_svg_files_with_likes()
+        else:
+            svg_files = get_public_svg_files()
+        
+        # Default pagination values
+        total_items = len(svg_files)
+        total_pages = 1
+        has_prev = False
+        has_next = False
+        page_numbers = [1]
+        page = 1
     
     return render_template("index.html",
                            tikz_code=tikz_code,
@@ -1741,8 +2014,16 @@ def index():
                            error_log_full=error_log_full,
                            logged_in=logged_in,
                            user_email=user_email,
-                           username=username,   # ✅ THÊM
-                           avatar=avatar        # ✅ THÊM
+                           username=username,
+                           avatar=avatar,
+                           # Pagination data
+                           page=page,
+                           per_page=per_page,
+                           total_pages=total_pages,
+                           total_items=total_items,
+                           has_prev=has_prev,
+                           has_next=has_next,
+                           page_numbers=page_numbers
     )
 
 @app.route('/temp_svg/<file_id>')
@@ -2398,6 +2679,7 @@ def unfollow_user(followee_id):
 # ✅ API FOLLOWED POSTS
 @app.route('/api/followed_posts')
 @login_required
+@limiter.limit(RATE_LIMITS['api_general'])
 def api_followed_posts():
     try:
         conn = mysql.connector.connect(
@@ -2454,6 +2736,7 @@ def api_followed_posts():
 
 @app.route('/api/files')
 @login_required
+@limiter.limit(RATE_LIMITS['api_general'])
 def api_files():
     try:
         conn = mysql.connector.connect(
@@ -2507,6 +2790,7 @@ def api_files():
         return jsonify([]), 500
 
 @app.route('/api/public/files')
+@limiter.limit(RATE_LIMITS['api_general'])
 def api_public_files():
     """API để lấy danh sách SVG files công khai (không cần đăng nhập)"""
     try:
@@ -3611,6 +3895,7 @@ def inject_user_info():
     }
 
 @app.route('/api/like_counts', methods=['POST'])
+@limiter.limit(RATE_LIMITS['api_like_counts'])
 def api_like_counts():
     data = request.get_json()
     svg_ids = data.get('ids', [])
@@ -3714,6 +3999,7 @@ def api_like_counts():
     return jsonify(result)
 
 @app.route('/api/svg/<int:svg_id>/likes', methods=['GET'])
+@limiter.limit(RATE_LIMITS['api_general'])
 def get_svg_likes(svg_id):
     """
     Lấy danh sách người dùng đã like một SVG file.
@@ -3803,9 +4089,11 @@ def get_svg_likes(svg_id):
         return jsonify({"success": False, "message": "Server error"}), 500
 
 @app.route('/api/svg/<int:svg_id>/likes/preview', methods=['GET'])
+@limiter.limit(RATE_LIMITS['api_likes_preview'])
 def get_svg_likes_preview(svg_id):
     """
     Lấy preview danh sách người đã like (3-5 users đầu tiên) để hiển thị text
+    Rate Limited: 100/min (dev) or 30/min (prod)
     """
     try:
         # Validate parameters

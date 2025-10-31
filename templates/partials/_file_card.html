@@ -14,7 +14,11 @@
 
     <!-- Image Container -->
     <div class="file-img-container" data-filename="{{ file.filename }}" style="cursor: pointer;">
-        <img src="{{ file.url }}" alt="{{ file.filename }}">
+        <!-- Phase 3: Native lazy loading for images -->
+        <img src="{{ file.url }}" 
+             alt="{{ file.filename }}" 
+             loading="lazy"
+             decoding="async">
     </div>
 
     <!-- Like Button & Comment Count - Below image -->

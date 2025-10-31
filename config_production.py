@@ -37,11 +37,11 @@ class ProductionConfig:
     # Content Security Policy
     CSP_POLICY = {
         'default-src': ["'self'"],
-        'script-src': ["'self'", "'unsafe-inline'"],  # Required for inline scripts
-        'style-src': ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-        'font-src': ["'self'", "https://fonts.gstatic.com"],
+        'script-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cdn.jsdelivr.net", "https://www.googletagmanager.com", "https://cdnjs.cloudflare.com", "https://codemirror.net", "https://cdn.quilljs.com"],  # Required for inline scripts and CDN resources
+        'style-src': ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com", "https://codemirror.net", "https://cdn.quilljs.com"],
+        'font-src': ["'self'", "https://fonts.gstatic.com", "https://cdn.jsdelivr.net", "https://cdnjs.cloudflare.com"],
         'img-src': ["'self'", "data:", "https:"],
-        'connect-src': ["'self'"],
+        'connect-src': ["'self'", "https://cdn.jsdelivr.net", "https://cdn.quilljs.com"],
         'frame-ancestors': ["'none'"],
         'base-uri': ["'self'"],
         'form-action': ["'self'"],

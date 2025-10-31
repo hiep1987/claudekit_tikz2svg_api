@@ -133,11 +133,11 @@ def add_security_headers(response):
     # Relaxed for development - allows CDN resources
     response.headers['Content-Security-Policy'] = (
         "default-src 'self'; "
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://www.googletagmanager.com https://cdnjs.cloudflare.com https://codemirror.net; "
-        "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://codemirror.net https://fonts.googleapis.com; "
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://www.googletagmanager.com https://cdnjs.cloudflare.com https://codemirror.net https://cdn.quilljs.com; "
+        "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://codemirror.net https://fonts.googleapis.com https://cdn.quilljs.com; "
         "img-src 'self' data: https:; "
         "font-src 'self' data: https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.gstatic.com; "
-        "connect-src 'self' https://cdn.jsdelivr.net"
+        "connect-src 'self' https://cdn.jsdelivr.net https://cdn.quilljs.com"
     )
     
     # HSTS (only add if using HTTPS)

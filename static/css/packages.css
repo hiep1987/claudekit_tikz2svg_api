@@ -46,29 +46,40 @@ Package Management System Styles - CSS Foundation Integration
     opacity: 0.9;
 }
 
-/* Package Statistics Cards */
+/* Package Statistics Cards - Enhanced Contrast & Compact */
 .tikz-app .package-stats {
     padding: 0 var(--spacing-16);
     margin-bottom: var(--spacing-32);
 }
 
-.tikz-app .package-stats .row {
-    gap: var(--spacing-16);
+/* Note: Using padding instead of gap to work with Bootstrap grid */
+.tikz-app .package-stats .col-sm-4 {
+    padding-left: 6px;
+    padding-right: 6px;
+}
+
+/* Ensure 3 columns on sm and above (≥576px) */
+@media (width >= 576px) {
+    .tikz-app .package-stats .col-sm-4 {
+        flex: 0 0 auto;
+        width: 33.3333%;
+        max-width: 33.3333%;
+    }
 }
 
 .tikz-app .stat-card {
-    background: var(--glass-bg-light);
+    background: linear-gradient(135deg, rgb(255 255 255 / 98%) 0%, rgb(249 250 251 / 98%) 100%);
     backdrop-filter: var(--glass-blur-medium);
-    border: 1px solid var(--glass-border);
+    border: 2px solid rgb(229 231 235 / 90%);
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-md);
-    padding: var(--spacing-24);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 6%);
+    padding: var(--spacing-16);
     text-align: center;
     transition: all var(--transition-fast);
     position: relative;
     overflow: hidden;
     height: 100%;
-    min-height: 120px;
+    min-height: 100px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -84,18 +95,18 @@ Package Management System Styles - CSS Foundation Integration
 }
 
 .tikz-app .stat-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-xl);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgb(0 0 0 / 10%);
     border-color: var(--primary-color);
 }
 
 .tikz-app .stat-card:hover::before {
-    opacity: 0.05;
+    opacity: 0.04;
 }
 
 .tikz-app .stat-card h3 {
-    font-size: var(--font-size-3xl);
-    color: var(--primary-color);
+    font-size: var(--font-size-2xl);
+    color: #1a202c; /* High contrast - WCAG AAA */
     margin: 0;
     font-weight: var(--font-weight-bold);
     position: relative;
@@ -103,20 +114,22 @@ Package Management System Styles - CSS Foundation Integration
 }
 
 .tikz-app .stat-card p {
-    color: var(--text-secondary);
-    margin: var(--spacing-4) 0 0 0;
+    color: #374151; /* High contrast - WCAG AAA */
+    margin: var(--spacing-3) 0 0 0;
     font-weight: var(--font-weight-medium);
     position: relative;
     z-index: 2;
     font-size: var(--font-size-sm);
+    line-height: var(--line-height-snug);
 }
 
 .tikz-app .stat-icon {
     color: var(--primary-color);
-    font-size: var(--font-size-2xl);
-    margin-bottom: var(--spacing-8);
+    font-size: var(--font-size-xl);
+    margin-bottom: var(--spacing-4);
     position: relative;
     z-index: 2;
+    filter: drop-shadow(0 1px 2px rgb(0 0 0 / 10%));
 }
 
 /* Package Search Section */
@@ -171,109 +184,177 @@ Package Management System Styles - CSS Foundation Integration
     outline: none;
 }
 
-/* Usage Instructions */
+/* Usage Instructions - Enhanced Contrast & Accessibility */
 .tikz-app .usage-instructions {
-    background: var(--glass-bg-light);
+    background: linear-gradient(135deg, rgb(249 250 251 / 98%) 0%, rgb(243 244 246 / 98%) 100%);
     backdrop-filter: var(--glass-blur-light);
     padding: var(--spacing-32);
     margin-bottom: var(--spacing-32);
     border-radius: var(--radius-lg);
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--shadow-sm);
+    border: 2px solid rgb(229 231 235 / 90%);
+    box-shadow: 0 4px 16px rgb(0 0 0 / 8%);
+    position: relative;
+    overflow: hidden;
+}
+
+.tikz-app .usage-instructions::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color), var(--info-color), var(--success-color));
+    opacity: 0.8;
 }
 
 .tikz-app .usage-instructions h2 {
-    color: var(--text-primary);
+    color: #1a202c; /* Very high contrast - WCAG AAA */
     margin-bottom: var(--spacing-24);
     font-weight: var(--font-weight-bold);
     font-size: var(--font-size-2xl);
+    text-shadow: 0 1px 2px rgb(255 255 255 / 80%);
 }
 
 .tikz-app .instruction-card {
-    background: var(--glass-bg-medium);
+    background: linear-gradient(135deg, rgb(255 255 255 / 98%) 0%, rgb(249 250 251 / 98%) 100%);
     backdrop-filter: var(--glass-blur-medium);
-    border: 1px solid var(--glass-border);
-    border-left: 4px solid var(--primary-color);
+    border: 2px solid rgb(229 231 235 / 95%);
+    border-left: 5px solid var(--primary-color);
     border-radius: var(--radius-md);
     padding: var(--spacing-20);
     transition: all var(--transition-fast);
     height: 100%;
     margin-bottom: var(--spacing-16);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 6%);
+    position: relative;
+}
+
+.tikz-app .instruction-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+    border-radius: var(--radius-md);
+    pointer-events: none;
 }
 
 .tikz-app .instruction-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 12%);
+    border-color: rgb(209 213 219 / 95%);
     border-left-color: var(--success-color);
 }
 
+.tikz-app .instruction-card:hover::before {
+    opacity: 0.04;
+}
+
 .tikz-app .instruction-card h3 {
-    color: var(--text-primary);
-    margin: 0 0 var(--spacing-8) 0;
+    color: #1a202c; /* Very high contrast - WCAG AAA */
+    margin: var(--spacing-8) 0 var(--spacing-12) 0;
     font-size: var(--font-size-lg);
     font-weight: var(--font-weight-semibold);
+    position: relative;
+    z-index: 1;
+}
+
+.tikz-app .instruction-card p {
+    color: #374151; /* High contrast - WCAG AA */
+    line-height: var(--line-height-relaxed);
+    margin: var(--spacing-6) 0;
+    position: relative;
+    z-index: 1;
+    font-size: var(--font-size-base);
 }
 
 .tikz-app .instruction-card code {
-    background: var(--input-bg);
-    color: var(--text-primary);
-    padding: var(--spacing-2) var(--spacing-4);
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    color: #1e293b; /* Very high contrast for code */
+    padding: var(--spacing-3) var(--spacing-6);
     border-radius: var(--radius-sm);
     font-family: var(--font-family-mono);
-    border: 1px solid var(--border-light);
+    border: 1.5px solid rgb(209 213 219 / 90%);
     display: inline-block;
-    margin: var(--spacing-4) 0;
+    margin: var(--spacing-6) 0;
     font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 5%);
+    transition: all var(--transition-fast);
+    max-width: 100%;
+    word-break: break-all;
+    overflow-wrap: break-word;
+}
+
+.tikz-app .instruction-card code:hover {
+    background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+    border-color: var(--primary-color);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgb(0 0 0 / 8%);
 }
 
 .tikz-app .instruction-icon {
     color: var(--primary-color);
-    font-size: var(--font-size-xl);
-    margin-bottom: var(--spacing-8);
+    font-size: var(--font-size-2xl);
+    margin-bottom: var(--spacing-4);
+    display: block;
+    position: relative;
+    z-index: 1;
+    filter: drop-shadow(0 1px 2px rgb(0 0 0 / 10%));
 }
 
 
-/* Two-Column Package Layout */
+/* Two-Column Package Layout - Enhanced Contrast */
 .tikz-app .package-column {
     height: 100%;
 }
 
 .tikz-app .column-header {
-    background: var(--glass-bg);
+    background: linear-gradient(135deg, rgb(249 250 251 / 98%) 0%, rgb(243 244 246 / 98%) 100%);
     backdrop-filter: var(--glass-blur);
-    border: var(--glass-border);
+    border: 2px solid rgb(229 231 235 / 90%);
     border-radius: var(--radius-lg);
     padding: var(--spacing-16);
     margin-bottom: var(--spacing-16);
     text-align: center;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 6%);
 }
 
 .tikz-app .column-header h2 {
+    color: #1a202c; /* High contrast - WCAG AAA */
     margin-bottom: var(--spacing-4);
     font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
 }
 
 .tikz-app .column-header p {
+    color: #374151; /* High contrast - WCAG AA */
     margin: 0;
     font-size: var(--font-size-sm);
 }
 
-/* Active Column Styling */
+/* Active Column Styling - Enhanced */
 .tikz-app .active-column .column-header {
-    border-left: 4px solid var(--success-color);
+    border-left: 5px solid var(--success-color);
+    background: linear-gradient(135deg, rgb(236 253 245 / 98%) 0%, rgb(243 244 246 / 98%) 100%);
 }
 
 .tikz-app .active-column .active-card {
-    border-left: 3px solid var(--success-color);
+    border-left: 4px solid var(--success-color);
 }
 
-/* Manual Column Styling */
+/* Manual Column Styling - Enhanced */
 .tikz-app .manual-column .column-header {
-    border-left: 4px solid var(--warning-color);
+    border-left: 5px solid var(--warning-color);
+    background: linear-gradient(135deg, rgb(254 252 232 / 98%) 0%, rgb(243 244 246 / 98%) 100%);
 }
 
 .tikz-app .manual-column .manual-card {
-    border-left: 3px solid var(--warning-color);
+    border-left: 4px solid var(--warning-color);
 }
 
 /* Package Categories - Legacy Support */
@@ -304,11 +385,11 @@ Package Management System Styles - CSS Foundation Integration
     border-radius: var(--radius-md);
 }
 
-/* Simplified Package Cards for 2-Column Layout */
+/* Simplified Package Cards for 2-Column Layout - Enhanced Contrast */
 .tikz-app .package-card {
-    background: var(--glass-bg);
+    background: linear-gradient(135deg, rgb(255 255 255 / 98%) 0%, rgb(249 250 251 / 95%) 100%);
     backdrop-filter: var(--glass-blur);
-    border: 1px solid var(--glass-border);
+    border: 1.5px solid rgb(229 231 235 / 90%);
     border-radius: var(--radius-md);
     transition: all var(--transition-fast);
     position: relative;
@@ -316,7 +397,8 @@ Package Management System Styles - CSS Foundation Integration
     display: flex;
     align-items: center;
     justify-content: space-between;
-    min-height: 50px;
+    min-height: 36px;
+    box-shadow: 0 1px 3px rgb(0 0 0 / 4%);
 }
 
 .tikz-app .package-card .card-body {
@@ -324,12 +406,14 @@ Package Management System Styles - CSS Foundation Integration
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    padding: var(--spacing-12) var(--spacing-16);
+    padding: var(--spacing-3) var(--spacing-6);
+    position: relative;
+    z-index: 1;
 }
 
 .tikz-app .package-card .package-name {
     font-weight: var(--font-weight-medium);
-    color: var(--text-primary);
+    color: #1a202c; /* High contrast - WCAG AAA */
     cursor: pointer;
     font-family: 'Roboto Mono', monospace;
     font-size: var(--font-size-sm);
@@ -345,6 +429,29 @@ Package Management System Styles - CSS Foundation Integration
     margin-left: var(--spacing-12);
 }
 
+/* Copy Button - Base Styles (must come before more specific selectors) */
+.tikz-app .copy-btn {
+    background: transparent;
+    border: 1.5px solid rgb(209 213 219 / 90%);
+    color: #52525b; /* Enhanced contrast - Gray-600 */
+    padding: var(--spacing-2) var(--spacing-4);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    position: relative;
+    z-index: 2;
+}
+
+.tikz-app .copy-btn:hover {
+    background: linear-gradient(135deg, rgb(249 250 251 / 98%) 0%, rgb(243 244 246 / 98%) 100%);
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 8%);
+}
+
+/* Package Card Specific Copy Button Overrides */
 .tikz-app .package-card .copy-btn {
     padding: var(--spacing-4) var(--spacing-8);
     font-size: var(--font-size-xs);
@@ -363,13 +470,13 @@ Package Management System Styles - CSS Foundation Integration
 }
 
 .tikz-app .package-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-xl);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgb(0 0 0 / 10%);
     border-color: var(--primary-color);
 }
 
 .tikz-app .package-card:hover::before {
-    opacity: 0.03;
+    opacity: 0.04;
 }
 
 .tikz-app .package-header {
@@ -392,25 +499,6 @@ Package Management System Styles - CSS Foundation Integration
 
 .tikz-app .package-card h3:hover {
     color: var(--primary-dark);
-}
-
-.tikz-app .copy-btn {
-    background: transparent;
-    border: 1px solid var(--border-light);
-    color: var(--text-muted);
-    padding: var(--spacing-2) var(--spacing-4);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-    font-size: var(--font-size-xs);
-    position: relative;
-    z-index: 2;
-}
-
-.tikz-app .copy-btn:hover {
-    background: var(--glass-bg-light);
-    color: var(--primary-color);
-    border-color: var(--primary-color);
 }
 
 .tikz-app .package-card p {
@@ -451,69 +539,73 @@ Package Management System Styles - CSS Foundation Integration
     color: var(--info-dark);
 }
 
-/* Package Request Section */
+/* Package Request Section - Enhanced Contrast */
 .tikz-app .package-request {
-    padding: var(--spacing-32);
-    margin-top: var(--spacing-32);
+    padding: 0;
+    margin-bottom: var(--spacing-32);
 }
 
 .tikz-app .request-card {
-    background: var(--glass-bg-light);
+    background: linear-gradient(135deg, rgb(239 246 255 / 98%) 0%, rgb(243 244 246 / 98%) 100%);
     backdrop-filter: var(--glass-blur-medium);
-    border: 1px solid var(--glass-border);
+    border: 2px solid rgb(191 219 254 / 90%);
     border-radius: var(--radius-xl);
-    padding: var(--spacing-32);
+    padding: var(--spacing-24);
     text-align: center;
     position: relative;
     overflow: hidden;
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 4px 16px rgb(0 0 0 / 8%);
 }
 
 .tikz-app .request-card::before {
     content: '';
     position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
-    opacity: 0.05;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color), var(--info-color), var(--primary-light));
+    opacity: 0.9;
     z-index: 0;
-    pointer-events: none;
 }
 
 .tikz-app .request-card h2 {
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-16);
+    color: #1a202c; /* High contrast - WCAG AAA */
+    margin-bottom: var(--spacing-12);
     position: relative;
     z-index: 2;
-    font-size: var(--font-size-3xl);
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
 }
 
 .tikz-app .request-card p {
-    color: var(--text-secondary);
-    margin-bottom: var(--spacing-24);
+    color: #374151; /* High contrast - WCAG AAA */
+    margin-bottom: var(--spacing-20);
     position: relative;
     z-index: 2;
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-relaxed);
 }
 
 .tikz-app .request-btn {
     background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
     color: var(--text-white);
     border: none;
-    padding: var(--spacing-12) var(--spacing-24);
+    padding: var(--spacing-10) var(--spacing-20);
     border-radius: var(--radius-md);
     font-weight: var(--font-weight-semibold);
     transition: all var(--transition-fast);
     position: relative;
     z-index: 2;
-    box-shadow: var(--shadow-md);
-    font-size: var(--font-size-lg);
+    box-shadow: 0 4px 12px rgb(25 118 210 / 25%);
+    font-size: var(--font-size-base);
     text-decoration: none;
     display: inline-block;
 }
 
 .tikz-app .request-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgb(25 118 210 / 35%);
     filter: brightness(1.1);
     text-decoration: none;
     color: var(--text-white);
@@ -540,12 +632,74 @@ Package Management System Styles - CSS Foundation Integration
     }
     
     .tikz-app .stat-card {
-        min-height: 100px;
-        padding: var(--spacing-16);
+        min-height: 90px;
+        padding: var(--spacing-12);
     }
     
     .tikz-app .stat-card h3 {
-        font-size: var(--font-size-2xl);
+        font-size: var(--font-size-xl);
+    }
+    
+    .tikz-app .stat-card p {
+        font-size: var(--font-size-xs);
+        margin: var(--spacing-2) 0 0 0;
+    }
+    
+    .tikz-app .stat-icon {
+        font-size: var(--font-size-lg);
+        margin-bottom: var(--spacing-2);
+    }
+    
+    /* Usage Instructions Mobile Optimization */
+    .tikz-app .usage-instructions {
+        padding: var(--spacing-20);
+        margin-bottom: var(--spacing-24);
+    }
+    
+    .tikz-app .usage-instructions h2 {
+        font-size: var(--font-size-xl);
+    }
+    
+    .tikz-app .instruction-card {
+        padding: var(--spacing-16);
+        margin-bottom: var(--spacing-12);
+    }
+    
+    .tikz-app .instruction-card h3 {
+        font-size: var(--font-size-base);
+    }
+    
+    .tikz-app .instruction-card code {
+        font-size: var(--font-size-xs);
+        padding: var(--spacing-2) var(--spacing-4);
+    }
+    
+    /* Package Request Mobile Optimization */
+    .tikz-app .package-request {
+        padding: 0;
+        margin-bottom: var(--spacing-24);
+    }
+    
+    .tikz-app .request-card {
+        padding: var(--spacing-16);
+        border-radius: var(--radius-lg);
+    }
+    
+    .tikz-app .request-card h2 {
+        font-size: var(--font-size-xl);
+        margin-bottom: var(--spacing-8);
+    }
+    
+    .tikz-app .request-card p {
+        font-size: var(--font-size-sm);
+        margin-bottom: var(--spacing-16);
+    }
+    
+    .tikz-app .request-btn {
+        padding: var(--spacing-8) var(--spacing-16);
+        font-size: var(--font-size-sm);
+        width: 100%;
+        max-width: 280px;
     }
 }
 
@@ -585,11 +739,61 @@ Package Management System Styles - CSS Foundation Integration
     .tikz-app .stat-card,
     .tikz-app .package-card,
     .tikz-app .instruction-card {
-        border-width: 2px;
+        border-width: 3px;
+        border-color: #000;
     }
     
     .tikz-app .stat-card h3,
-    .tikz-app .package-card h3 {
-        color: var(--text-primary);
+    .tikz-app .package-card h3,
+    .tikz-app .instruction-card h3,
+    .tikz-app .usage-instructions h2 {
+        color: #000;
+        font-weight: var(--font-weight-bold);
+    }
+    
+    .tikz-app .instruction-card p {
+        color: #000;
+    }
+    
+    .tikz-app .instruction-card code {
+        border-color: #000;
+        background: #fff;
+        color: #000;
+    }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    .tikz-app .instruction-card,
+    .tikz-app .stat-card,
+    .tikz-app .package-card {
+        transition: none;
+    }
+    
+    .tikz-app .instruction-card:hover,
+    .tikz-app .stat-card:hover,
+    .tikz-app .package-card:hover {
+        transform: none;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .tikz-app .usage-instructions {
+        background: #fff;
+        border: 2px solid #000;
+        page-break-inside: avoid;
+    }
+    
+    .tikz-app .instruction-card {
+        background: #fff;
+        border: 1px solid #000;
+        box-shadow: none;
+        page-break-inside: avoid;
+    }
+    
+    .tikz-app .instruction-card code {
+        background: #f5f5f5;
+        border: 1px solid #000;
     }
 }

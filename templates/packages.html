@@ -90,25 +90,74 @@ document.head.appendChild(script);
     <section class="package-stats">
         <div class="container">
             <div class="row">
-                <div class="col-md-4 col-sm-6 mb-4">
+                <div class="col-sm-4 mb-4">
                     <div class="stat-card active-packages">
                         <i class="fas fa-check-circle stat-icon text-success"></i>
                         <h3>{{ package_stats.active_packages|default(28) }}</h3>
                         <p>Có sẵn (không cần %!&lt;..&gt;)</p>
                     </div>
                 </div>
-                <div class="col-md-4 col-sm-6 mb-4">
+                <div class="col-sm-4 mb-4">
                     <div class="stat-card manual-packages">
                         <i class="fas fa-code stat-icon text-warning"></i>
                         <h3>{{ package_stats.manual_packages|default(52) }}</h3>
                         <p>Cần %!&lt;..&gt; trong code</p>
                     </div>
                 </div>
-                <div class="col-md-4 col-sm-6 mb-4">
+                <div class="col-sm-4 mb-4">
                     <div class="stat-card pending-requests">
                         <i class="fas fa-plus-circle stat-icon text-info"></i>
                         <h3>{{ package_stats.pending_requests|default(0) }}</h3>
                         <p>Yêu cầu chờ xử lý</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Package Request Section -->
+    <section class="package-request">
+        <div class="container">
+            <div class="request-card">
+                <h2><i class="fas fa-plus-circle me-3"></i>Yêu cầu Package mới</h2>
+                <p>Không tìm thấy package bạn cần? Gửi yêu cầu để chúng tôi thêm vào hệ thống!</p>
+                <a href="{{ url_for('package_request_form') }}" class="request-btn">
+                    <i class="fas fa-paper-plane me-2"></i>Gửi yêu cầu Package
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Usage Instructions -->
+    <section class="usage-instructions">
+        <div class="container">
+            <h2><i class="fas fa-lightbulb me-3"></i>Cách sử dụng Packages</h2>
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="instruction-card">
+                        <i class="fas fa-code instruction-icon"></i>
+                        <h3>1. Syntax cơ bản</h3>
+                        <p>Sử dụng syntax đặc biệt để gọi packages:</p>
+                        <code>%!&lt;geometry,xcolor&gt;</code>
+                        <p class="mt-2">Đặt ở đầu TikZ code của bạn để load các packages cần thiết.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="instruction-card">
+                        <i class="fas fa-list instruction-icon"></i>
+                        <h3>2. Nhiều packages</h3>
+                        <p>Tách các package bằng dấu phẩy:</p>
+                        <code>%!&lt;babel,enumitem&gt;</code>
+                        <p class="mt-2">Không có giới hạn số lượng packages trong danh sách.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="instruction-card">
+                        <i class="fas fa-check-circle instruction-icon"></i>
+                        <h3>3. Packages có sẵn</h3>
+                        <p>Một số packages đã được load mặc định:</p>
+                        <code>tikz, pgfplots, amsmath...</code>
+                        <p class="mt-2">Không cần thêm syntax %!&lt;..&gt; cho các packages này.</p>
                     </div>
                 </div>
             </div>
@@ -136,33 +185,6 @@ document.head.appendChild(script);
                         <option value="tikz_library">TikZ Libraries</option>
                         <option value="pgfplots_library">PGFPlots Libraries</option>
                     </select>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Usage Instructions -->
-    <section class="usage-instructions">
-        <div class="container">
-            <h2><i class="fas fa-lightbulb me-3"></i>Cách sử dụng Packages</h2>
-            <div class="row">
-                <div class="col-md-4 mb-4">
-                    <div class="instruction-card">
-                        <i class="fas fa-code instruction-icon"></i>
-                        <h3>1. Syntax cơ bản</h3>
-                        <p>Sử dụng syntax đặc biệt để gọi packages:</p>
-                        <code>%!&lt;amsmath,tikz,pgfplots&gt;</code>
-                        <p class="mt-2">Đặt ở đầu TikZ code của bạn để load các packages cần thiết.</p>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-4">
-                    <div class="instruction-card">
-                        <i class="fas fa-list instruction-icon"></i>
-                        <h3>2. Nhiều packages</h3>
-                        <p>Tách các package bằng dấu phẩy:</p>
-                        <code>%!&lt;geometry,amsfonts,xcolor&gt;</code>
-                        <p class="mt-2">Không có giới hạn số lượng packages trong danh sách được hỗ trợ.</p>
-                    </div>
                 </div>
             </div>
         </div>
@@ -229,19 +251,6 @@ document.head.appendChild(script);
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Package Request Section -->
-    <section class="package-request">
-        <div class="container">
-            <div class="request-card">
-                <h2><i class="fas fa-plus-circle me-3"></i>Yêu cầu Package mới</h2>
-                <p>Không tìm thấy package bạn cần? Gửi yêu cầu để chúng tôi thêm vào hệ thống!</p>
-                <a href="{{ url_for('package_request_form') }}" class="request-btn">
-                    <i class="fas fa-paper-plane me-2"></i>Gửi yêu cầu Package
-                </a>
             </div>
         </div>
     </section>

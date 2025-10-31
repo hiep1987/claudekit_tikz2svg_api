@@ -10,8 +10,8 @@
         </a>
     </div>
 
-    <!-- Menu - Desktop -->
-    <div class="hidden md:flex flex-grow mx-4 justify-center">
+    <!-- Menu - Desktop (Hidden) -->
+    <div class="hidden">
         <ul id="main-menu" class="list-unstyled p-0 m-0 d-flex align-items-center gap-3 font-medium text-gray-700">
             <li class="menu-item relative px-2 py-1 cursor-pointer transition hover:text-blue-600">
                 <a href="/" class="block text-base" style="line-height: 1;">Trang chủ</a>
@@ -94,7 +94,6 @@
                         {% endif %}
                     </span>
                 </a>
-                <button id="logout-btn" class="hidden md:block bg-gradient-to-r from-red-400 to-red-600 text-white px-3 py-1.5 rounded-xl shadow hover:scale-105 transition-all duration-200 font-semibold text-xs border-0 hover:from-red-500 hover:to-red-700 focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-opacity-50">Đăng xuất</button>
             </div>
         {% else %}
             <button class="hidden md:block bg-gradient-to-r from-blue-400 to-yellow-400 text-white px-3 py-1.5 rounded-xl shadow hover:scale-105 transition-all duration-200 font-semibold text-sm border-0 hover:from-blue-500 hover:to-yellow-500 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50" onclick="window.location.href='/login/google'">Đăng nhập</button>
@@ -106,8 +105,8 @@
     </div>
 </nav>
 
-<!-- Scrollable Menu - Mobile -->
-<div id="scrollable-menu" class="md:hidden container mb-8">
+<!-- Scrollable Menu - Always Visible -->
+<div id="scrollable-menu" class="container mb-8">
     <ul id="scrollable-menu-list" class="list-unstyled p-0 m-0 d-flex align-items-center gap-3 font-medium text-gray-700 px-3">
         <li class="menu-item relative px-2 py-1 cursor-pointer transition hover:text-blue-600">
             <a href="/" class="block text-base" style="line-height: 1;">Trang chủ</a>

@@ -295,7 +295,36 @@
             </div>
 
             <div class="code-example">
-                <div class="code-header">Multiple packages</div>
+                <div class="code-header">Package with options (⭐ MỚI)</div>
+                <pre><code>%!&lt;\usepackage[siunitx]{circuitikz}&gt;
+\begin{tikzpicture}
+\draw (0,0) to[R=1&lt;\ohm&gt;] (2,0)
+          to[L=1&lt;\henry&gt;] (4,0)
+          to[C=1&lt;\farad&gt;] (6,0);
+\end{tikzpicture}</code></pre>
+            </div>
+
+            <div class="code-example">
+                <div class="code-header">Multiple packages (1 dòng)</div>
+                <pre><code>%!&lt;\usepackage{circuitikz},\usepackage{pgfornament}&gt;
+\begin{tikzpicture}
+\draw (0,0) to[R, o-o] (2,0);
+\node at (3,0) {\pgfornament[width=1cm]{15}};
+\end{tikzpicture}</code></pre>
+            </div>
+
+            <div class="code-example">
+                <div class="code-header">Multiple packages (nhiều dòng)</div>
+                <pre><code>%!&lt;\usepackage{circuitikz}&gt;
+%!&lt;\usepackage{pgfornament}&gt;
+\begin{tikzpicture}
+\draw (0,0) to[R, o-o] (2,0);
+\node at (3,0) {\pgfornament[width=1cm]{15}};
+\end{tikzpicture}</code></pre>
+            </div>
+
+            <div class="code-example">
+                <div class="code-header">Kết hợp packages và libraries</div>
                 <pre><code>%!&lt;\usepackage{circuitikz},\usetikzlibrary{angles,quotes}&gt;
 \begin{tikzpicture}
 \draw (0,0) to[R, o-o] (2,0);
@@ -924,7 +953,6 @@
 \end{tikzpicture}
 
 % Geometric construction
-%!&lt;\usetikzlibrary{angles,quotes}&gt;
 \begin{tikzpicture}
 \coordinate (A) at (0,0);
 \coordinate (B) at (3,0);

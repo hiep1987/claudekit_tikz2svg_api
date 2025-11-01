@@ -113,6 +113,7 @@ pic [draw=green!50!black, fill=green!20, angle radius=9mm,
 
 ### 1. Cú pháp chính xác:
 - ✅ `%!<\usepackage{package_name}>`
+- ✅ `%!<\usepackage[options]{package_name}>` (với package options)
 - ❌ `%!< \usepackage{package_name} >` (không có khoảng trắng thừa)
 - ❌ `%!<usepackage{package_name}>` (thiếu dấu `\`)
 
@@ -155,7 +156,7 @@ pic [draw=green!50!black, fill=green!20, angle radius=9mm,
 
 ## 🎨 Ví dụ thực tế
 
-### Ví dụ 4: Sử dụng circuitikz
+### Ví dụ 4: Sử dụng circuitikz (cơ bản)
 
 ```latex
 %!<\usepackage{circuitikz}>
@@ -165,6 +166,21 @@ pic [draw=green!50!black, fill=green!20, angle radius=9mm,
 \draw (4,0) to[C, o-o] (6,0);
 \end{tikzpicture}
 ```
+
+### Ví dụ 4b: Sử dụng circuitikz với options (siunitx)
+
+**⚠️ Mới:** Hệ thống hỗ trợ package options!
+
+```latex
+%!<\usepackage[siunitx]{circuitikz}>
+\begin{tikzpicture}
+\draw (0,0) to[R=1<\ohm>] (2,0)
+          to[L=1<\henry>] (4,0)
+          to[C=1<\farad>] (6,0);
+\end{tikzpicture}
+```
+
+**Kết quả:** Hệ thống sẽ tự động thêm `\usepackage[siunitx]{circuitikz}` vào template, cho phép sử dụng cú pháp `1<\ohm>`, `1<\henry>`, `1<\farad>` trong circuitikz.
 
 ### Ví dụ 5: Sử dụng physics package
 

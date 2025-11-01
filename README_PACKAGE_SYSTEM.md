@@ -107,6 +107,19 @@ Sử dụng cú pháp `%!<...>` khi cần thiết:
 \end{tikzpicture}
 ```
 
+### Ví dụ 3b: Sử dụng circuitikz với package options (⭐ MỚI)
+
+**Hỗ trợ package options**: Sử dụng `[siunitx]` để có thể dùng cú pháp `1<\ohm>`, `1<\henry>`, `1<\farad>` trong circuitikz:
+
+```latex
+%!<\usepackage[siunitx]{circuitikz}>
+\begin{tikzpicture}
+\draw (0,0) to[R=1<\ohm>] (2,0)
+          to[L=1<\henry>] (4,0)
+          to[C=1<\farad>] (6,0);
+\end{tikzpicture}
+```
+
 ### Ví dụ 4: Kết hợp nhiều packages
 ```latex
 %!<\usetikzlibrary{angles,quotes},\usetikzlibrary{positioning},\usepackage{tikz}>
@@ -124,6 +137,7 @@ pic [draw=green!50!black, fill=green!20, angle radius=9mm,
 
 ### Cú pháp chính xác:
 - ✅ `%!<\usepackage{package_name}>`
+- ✅ `%!<\usepackage[options]{package_name}>` (hỗ trợ package options)
 - ❌ `%!< \usepackage{package_name} >` (không có khoảng trắng thừa)
 - ❌ `%!<usepackage{package_name}>` (thiếu dấu `\`)
 

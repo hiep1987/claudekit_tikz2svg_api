@@ -252,6 +252,7 @@ pic [draw=green!50!black, fill=green!20, angle radius=9mm,
 ### Lưu ý quan trọng
 
 - ✅ Cú pháp chính xác: `%!<\usepackage{package_name}>`
+- ✅ Hỗ trợ options: `%!<\usepackage[options]{package_name}>`
 - ❌ Không có khoảng trắng thừa: `%!< \usepackage{package_name} >`
 - ❌ Không thiếu dấu `\`: `%!<usepackage{package_name}>`
 - Packages không trong allowlist sẽ bị bỏ qua

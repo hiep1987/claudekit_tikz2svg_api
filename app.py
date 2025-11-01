@@ -609,10 +609,22 @@ class CompilationCache:
     def _calculate_cache_key(self, tikz_code: str, packages: list, tikz_libs: list, pgfplots_libs: list) -> str:
         """Generate SHA256 cache key from compilation parameters"""
         
+        # Normalize packages to consistent format for caching
+        normalized_packages = []
+        if packages:
+            for pkg in packages:
+                if isinstance(pkg, dict):
+                    # Dict format: {'name': 'circuitikz', 'options': 'siunitx'}
+                    pkg_str = f"{pkg.get('name', '')}[{pkg.get('options', '')}]" if pkg.get('options') else pkg.get('name', '')
+                    normalized_packages.append(pkg_str)
+                else:
+                    # String format
+                    normalized_packages.append(str(pkg))
+        
         # Create consistent string representation
         cache_input = {
             'tikz_code': tikz_code.strip(),
-            'packages': sorted(packages) if packages else [],
+            'packages': sorted(normalized_packages),
             'tikz_libs': sorted(tikz_libs) if tikz_libs else [],
             'pgfplots_libs': sorted(pgfplots_libs) if pgfplots_libs else []
         }
@@ -1035,18 +1047,45 @@ def _sanitize_name(name: str, *, kind: str, allowed: set[str]) -> str:
         raise ValueError(f"{kind} '{name}' không trong danh sách cho phép")
     return name
 
-def _lines_for_usepackage(pkgs: Iterable[str]) -> str:
+def _lines_for_usepackage(pkgs: Iterable) -> str:
+    """
+    Hỗ trợ packages dạng:
+    - string: "circuitikz" -> \\usepackage{circuitikz}
+    - dict: {"name": "circuitikz", "options": "siunitx"} -> \\usepackage[siunitx]{circuitikz}
+    """
     if not pkgs: return ""
-    safe = [_sanitize_name(p, kind="Gói", allowed=SAFE_PACKAGES) for p in pkgs]
-    # gom các gói phổ biến theo nhóm để gọn, phần còn lại nạp từng cái
+    
+    # Xử lý packages với hoặc không có options
+    processed = []
+    for p in pkgs:
+        if isinstance(p, dict):
+            pkg_name = p.get('name', '').strip()
+            pkg_options = p.get('options', '').strip()
+            if pkg_name:
+                _sanitize_name(pkg_name, kind="Gói", allowed=SAFE_PACKAGES)
+                processed.append({'name': pkg_name, 'options': pkg_options})
+        else:
+            # String format
+            pkg_name = str(p).strip()
+            if pkg_name:
+                _sanitize_name(pkg_name, kind="Gói", allowed=SAFE_PACKAGES)
+                processed.append({'name': pkg_name, 'options': ''})
+    
+    # Gom các gói phổ biến theo nhóm để gọn
     groups = {"ams": {"amsmath","amssymb","amsfonts"}}
     out = []
-    ams_in = [p for p in safe if p in groups["ams"]]
-    others = [p for p in safe if p not in groups["ams"]]
+    ams_in = [p for p in processed if p['name'] in groups["ams"] and not p['options']]
+    others = [p for p in processed if p['name'] not in groups["ams"] or p['options']]
+    
     if ams_in:
         out.append(r"\usepackage{amsmath,amssymb,amsfonts}")
+    
     for p in others:
-        out.append(fr"\usepackage{{{p}}}")
+        if p['options']:
+            out.append(fr"\usepackage[{p['options']}]{{{p['name']}}}")
+        else:
+            out.append(fr"\usepackage{{{p['name']}}}")
+    
     return "\n".join(dict.fromkeys(out))  # dedupe, giữ thứ tự
 
 def _lines_for_tikz_libs(libs: Iterable[str]) -> str:
@@ -1162,12 +1201,17 @@ def detect_required_packages(tikz_code: str) -> tuple[list[str], list[str], list
             # Phân tích nội dung trong %!<...>
             for item in manual_content.split(','):
                 item = item.strip()
-                if item.startswith('\\usepackage{'):
-                    # Trích xuất tên package
-                    pkg_match = re.search(r'\\usepackage\{([^}]+)\}', item)
+                if item.startswith('\\usepackage'):
+                    # Trích xuất tên package với hoặc không có options
+                    # Hỗ trợ cả: \usepackage{name} và \usepackage[options]{name}
+                    pkg_match = re.search(r'\\usepackage(?:\[([^\]]+)\])?\{([^}]+)\}', item)
                     if pkg_match:
-                        pkg_name = pkg_match.group(1).strip()
-                        manual_packages.append(pkg_name)
+                        pkg_options = pkg_match.group(1)  # None nếu không có options
+                        pkg_name = pkg_match.group(2).strip()
+                        if pkg_options:
+                            manual_packages.append({'name': pkg_name, 'options': pkg_options.strip()})
+                        else:
+                            manual_packages.append({'name': pkg_name, 'options': ''})
                 elif item.startswith('\\usetikzlibrary{'):
                     # Trích xuất tên tikz library
                     lib_match = re.search(r'\\usetikzlibrary\{([^}]+)\}', item)
@@ -1359,7 +1403,27 @@ def detect_required_packages(tikz_code: str) -> tuple[list[str], list[str], list
         pgfplots_libs.append("units")
     
     # Kết hợp packages tự động và thủ công
-    all_packages = list(dict.fromkeys(packages + manual_packages))  # Loại bỏ trùng lặp
+    # Tự động phát hiện trả về string, thủ công trả về dict
+    # Cần merge chúng một cách thông minh
+    all_packages = []
+    
+    # Thêm packages tự động (string format)
+    for pkg in packages:
+        all_packages.append({'name': pkg, 'options': ''})
+    
+    # Thêm packages thủ công (dict format) - có thể ghi đè options
+    package_dict = {p['name']: p for p in all_packages}
+    for manual_pkg in manual_packages:
+        pkg_name = manual_pkg['name']
+        # Nếu package đã tồn tại và manual có options, ưu tiên manual
+        if pkg_name in package_dict:
+            if manual_pkg['options']:
+                package_dict[pkg_name] = manual_pkg
+        else:
+            package_dict[pkg_name] = manual_pkg
+    
+    all_packages = list(package_dict.values())
+    
     all_tikz_libs = list(dict.fromkeys(tikz_libs + manual_tikz_libs))  # Loại bỏ trùng lặp
     all_pgfplots_libs = list(dict.fromkeys(pgfplots_libs + manual_pgfplots_libs))  # Loại bỏ trùng lặp
     
@@ -4503,6 +4567,54 @@ def compile_with_packages():
         
     except Exception as e:
         return jsonify({"error": f"Lỗi không xác định: {str(e)}"}), 500
+
+@app.route('/api/debug_parse_packages', methods=['POST'])
+def api_debug_parse_packages():
+    """DEBUG endpoint để test package parsing"""
+    data = request.json
+    tikz_code = data.get('tikz_code', '')
+    
+    try:
+        packages, tikz_libs, pgfplots_libs = detect_required_packages(tikz_code)
+        
+        # Convert packages to serializable format
+        serializable_packages = []
+        for pkg in packages:
+            if isinstance(pkg, dict):
+                serializable_packages.append(pkg)
+            else:
+                serializable_packages.append({'name': str(pkg), 'options': ''})
+        
+        latex_output = _lines_for_usepackage(packages)
+        
+        return jsonify({
+            "success": True,
+            "packages": serializable_packages,
+            "tikz_libs": tikz_libs,
+            "pgfplots_libs": pgfplots_libs,
+            "latex_output": latex_output
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 400
+
+@app.route('/api/clear_compilation_cache', methods=['POST'])
+def api_clear_compilation_cache():
+    """DEBUG endpoint để clear compilation cache"""
+    try:
+        # Clear the compilation cache
+        compilation_cache.cache.clear()
+        return jsonify({
+            "success": True,
+            "message": "Compilation cache cleared successfully"
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
 
 @app.route('/api/available_packages')
 def api_available_packages():

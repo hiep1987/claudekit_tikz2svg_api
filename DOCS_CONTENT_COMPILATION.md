@@ -163,7 +163,36 @@ Hệ thống tự động phát hiện các packages sau:
 \end{tikzpicture}
 ```
 
-**Multiple packages:**
+**Package with options (⭐ MỚI):**
+```latex
+%!<\usepackage[siunitx]{circuitikz}>
+\begin{tikzpicture}
+\draw (0,0) to[R=1<\ohm>] (2,0)
+          to[L=1<\henry>] (4,0)
+          to[C=1<\farad>] (6,0);
+\end{tikzpicture}
+```
+
+**Multiple packages (1 dòng):**
+```latex
+%!<\usepackage{circuitikz},\usepackage{pgfornament}>
+\begin{tikzpicture}
+\draw (0,0) to[R, o-o] (2,0);
+\node at (3,0) {\pgfornament[width=1cm]{15}};
+\end{tikzpicture}
+```
+
+**Multiple packages (nhiều dòng):**
+```latex
+%!<\usepackage{circuitikz}>
+%!<\usepackage{pgfornament}>
+\begin{tikzpicture}
+\draw (0,0) to[R, o-o] (2,0);
+\node at (3,0) {\pgfornament[width=1cm]{15}};
+\end{tikzpicture}
+```
+
+**Kết hợp packages và libraries:**
 ```latex
 %!<\usepackage{circuitikz},\usetikzlibrary{angles,quotes}>
 \begin{tikzpicture}

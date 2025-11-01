@@ -57,10 +57,19 @@ IS_DEVELOPMENT = os.environ.get('FLASK_ENV') == 'development' or os.environ.get(
 # For production with multiple workers, set REDIS_URL in environment
 RATE_LIMIT_STORAGE_URI = os.environ.get('REDIS_URL', 'memory://')
 
+# Custom key function to get real IP from X-Forwarded-For header (behind Nginx proxy)
+def get_real_ip():
+    """Get real client IP from X-Forwarded-For header or fallback to remote_addr"""
+    if request.headers.get('X-Forwarded-For'):
+        # X-Forwarded-For can be: "client, proxy1, proxy2"
+        # We want the first (client) IP
+        return request.headers.get('X-Forwarded-For').split(',')[0].strip()
+    return request.remote_addr or '127.0.0.1'
+
 # Initialize Flask-Limiter
 limiter = Limiter(
     app=app,
-    key_func=get_remote_address,
+    key_func=get_real_ip,  # Use custom function to get real IP
     storage_uri=RATE_LIMIT_STORAGE_URI,
     default_limits=["1000 per hour"] if IS_DEVELOPMENT else ["200 per hour"],
     storage_options={"socket_connect_timeout": 30},

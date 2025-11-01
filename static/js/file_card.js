@@ -1133,7 +1133,6 @@ function createUserListItem(user) {
 
         // Add error handling for broken images
         img.onerror = function() {
-            console.warn(`Failed to load avatar: ${user.avatar} for user: ${user.username}`);
             // Replace with placeholder on error
             const placeholder = document.createElement('div');
             placeholder.className = 'avatar-placeholder';
@@ -1281,7 +1280,6 @@ function initializeLikesPreview() {
                 
                 // Only load once per card
                 if (svgId && !loadedCards.has(svgId)) {
-                    console.log(`👁️ Loading likes preview for SVG ${svgId} (visible)`);
                     loadedCards.add(svgId);
                     loadLikesPreview(svgId);
                     
@@ -1294,7 +1292,6 @@ function initializeLikesPreview() {
 
     // Observe all file cards
     const fileCards = document.querySelectorAll('.file-card[data-file-id]');
-    console.log(`🔭 Observing ${fileCards.length} file cards for lazy loading`);
     fileCards.forEach(card => observer.observe(card));
 }
 
@@ -1309,12 +1306,10 @@ function loadLikesPreview(svgId, retryCount = 0) {
             if (response.status === 429) {
                 return response.json().then(data => {
                     const retryAfter = data.retry_after || 60;
-                    console.warn(`⏱️ Rate limit exceeded for SVG ${svgId}. Retry after ${retryAfter}s`);
                     
                     // Exponential backoff: retry after delay if not too many retries
                     if (retryCount < 3) {
                         const delay = Math.min(retryAfter * 1000 * Math.pow(2, retryCount), 120000);
-                        console.log(`🔄 Retrying in ${delay/1000}s (attempt ${retryCount + 1}/3)`);
                         setTimeout(() => {
                             loadLikesPreview(svgId, retryCount + 1);
                         }, delay);
@@ -1327,9 +1322,6 @@ function loadLikesPreview(svgId, retryCount = 0) {
         .then(data => {
             if (data.success && data.total_likes > 0) {
                 renderLikesPreview(svgId, data);
-            } else if (!data.rate_limited) {
-                // Only log non-rate-limit errors
-                console.log(`No likes to preview for SVG ${svgId}`);
             }
         })
         .catch(error => {
@@ -1432,12 +1424,10 @@ function refreshLikesPreviewText(svgId, retryCount = 0) {
             if (response.status === 429) {
                 return response.json().then(data => {
                     const retryAfter = data.retry_after || 60;
-                    console.warn(`⏱️ Rate limit exceeded while refreshing likes preview for SVG ${svgId}. Retry after ${retryAfter}s`);
                     
                     // Exponential backoff: retry after delay if not too many retries
                     if (retryCount < 3) {
                         const delay = Math.min(retryAfter * 1000 * Math.pow(2, retryCount), 120000);
-                        console.log(`🔄 Retrying refresh in ${delay/1000}s (attempt ${retryCount + 1}/3)`);
                         setTimeout(() => {
                             refreshLikesPreviewText(svgId, retryCount + 1);
                         }, delay);

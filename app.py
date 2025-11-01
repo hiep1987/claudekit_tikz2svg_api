@@ -2,6 +2,7 @@ from flask import Flask, request, render_template, url_for, send_file, jsonify, 
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from werkzeug.middleware.proxy_fix import ProxyFix
 import os
 import subprocess
 import uuid
@@ -47,6 +48,12 @@ os.makedirs(os.path.join(STATIC_ROOT, 'images'), exist_ok=True)
 
 app = Flask(__name__, static_folder=STATIC_ROOT)
 
+# Apply ProxyFix middleware to correctly handle X-Forwarded-For headers from Nginx
+# x_for=1: trust the first X-Forwarded-For value
+# x_proto=1: trust X-Forwarded-Proto
+# x_host=1: trust X-Forwarded-Host
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
+
 # =====================================================
 # RATE LIMITING CONFIGURATION (PHASE 2)
 # =====================================================
@@ -69,9 +76,10 @@ def get_real_ip():
 # Initialize Flask-Limiter
 # In development: disable rate limiting entirely for testing
 # In production: use Redis storage with real IP tracking
+# Note: ProxyFix middleware above ensures request.remote_addr contains the real client IP
 limiter = Limiter(
     app=app,
-    key_func=get_real_ip,  # Use custom function to get real IP
+    key_func=get_remote_address,  # Use Flask-Limiter's built-in function (works with ProxyFix)
     storage_uri=RATE_LIMIT_STORAGE_URI,
     default_limits=[] if IS_DEVELOPMENT else ["200 per hour"],  # No limits in dev
     storage_options={"socket_connect_timeout": 30},

@@ -103,6 +103,7 @@ def setup_package_routes(app, limiter=None):
     """Setup all package management routes"""
     
     # Create limiter if not provided
+    # NOTE: In production, limiter should be passed from app.py to avoid conflicts
     if limiter is None:
         import warnings
         # Suppress Flask-Limiter memory storage warning for development
@@ -111,7 +112,7 @@ def setup_package_routes(app, limiter=None):
             limiter = Limiter(
                 key_func=get_remote_address,
                 app=app,
-                default_limits=["1000 per hour", "100 per minute"]
+                default_limits=["1000 per hour", "1000 per minute"]  # Increased to not conflict with api_likes_preview (500/min)
             )
     
     @app.route('/packages')

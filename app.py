@@ -70,10 +70,10 @@ limiter = Limiter(
 # Development: More generous limits for testing
 # Production: Stricter limits for security
 RATE_LIMITS = {
-    'api_likes_preview': "100 per minute" if IS_DEVELOPMENT else "30 per minute",
-    'api_like_counts': "60 per minute" if IS_DEVELOPMENT else "20 per minute",
-    'api_general': "200 per minute" if IS_DEVELOPMENT else "60 per minute",
-    'api_write': "30 per minute" if IS_DEVELOPMENT else "10 per minute",
+    'api_likes_preview': "100 per minute" if IS_DEVELOPMENT else "60 per minute",  # Increased for lazy loading
+    'api_like_counts': "60 per minute" if IS_DEVELOPMENT else "40 per minute",
+    'api_general': "200 per minute" if IS_DEVELOPMENT else "120 per minute",
+    'api_write': "30 per minute" if IS_DEVELOPMENT else "20 per minute",
 }
 
 print(f"🔧 Rate Limiting: {'DEVELOPMENT' if IS_DEVELOPMENT else 'PRODUCTION'} mode")
@@ -3791,9 +3791,40 @@ def profile_followed_posts(user_id):
         if not user:
             return "User not found", 404
 
-        # Fetch followed posts data for server-side rendering
+        # =====================================================
+        # PHASE 3: PAGINATION FOR FOLLOWED POSTS
+        # =====================================================
+        # Get pagination parameters (same as index page)
+        page, per_page = get_pagination_params(request)
+        offset = (page - 1) * per_page
+        
+        # Fetch followed posts data with pagination
         followed_posts = []
+        total_items = 0
+        total_pages = 1
+        has_prev = False
+        has_next = False
+        page_numbers = [1]
+        
         if is_owner:  # Only fetch for owner
+            # Get total count for pagination
+            cursor.execute("""
+                SELECT COUNT(DISTINCT s.id) as total
+                FROM svg_image s
+                JOIN user u ON s.user_id = u.id
+                JOIN user_follow uf ON u.id = uf.followee_id
+                WHERE uf.follower_id = %s
+            """, (current_user.id,))
+            
+            total_items = cursor.fetchone()['total']
+            
+            # Calculate pagination metadata
+            total_pages = max(1, (total_items + per_page - 1) // per_page)
+            has_prev = page > 1
+            has_next = page < total_pages
+            page_numbers = generate_page_numbers(page, total_pages, MAX_PAGES_DISPLAY)
+            
+            # Fetch paginated data
             cursor.execute("""
                 SELECT 
                     s.id, 
@@ -3812,8 +3843,8 @@ def profile_followed_posts(user_id):
                 WHERE uf.follower_id = %s
                 GROUP BY s.id, s.filename, s.tikz_code, s.created_at, u.id, u.username, user_like.id
                 ORDER BY s.created_at DESC
-                LIMIT 50
-            """, (current_user.id, current_user.id))
+                LIMIT %s OFFSET %s
+            """, (current_user.id, current_user.id, per_page, offset))
             
             for row in cursor.fetchall():
                 followed_posts.append({
@@ -3842,7 +3873,15 @@ def profile_followed_posts(user_id):
             followed_posts=followed_posts,
             current_user_email=current_user.email if current_user.is_authenticated else None,
             current_username=current_user.username if current_user.is_authenticated else None,
-            current_avatar=current_user.avatar if current_user.is_authenticated else None
+            current_avatar=current_user.avatar if current_user.is_authenticated else None,
+            # Pagination metadata
+            page=page,
+            per_page=per_page,
+            total_items=total_items,
+            total_pages=total_pages,
+            has_prev=has_prev,
+            has_next=has_next,
+            page_numbers=page_numbers
         )
     except Exception as e:
         print(f"❌ General error in profile_followed_posts: {e}", flush=True)

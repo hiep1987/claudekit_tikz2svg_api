@@ -79,9 +79,9 @@ limiter = Limiter(
 # Development: More generous limits for testing
 # Production: Stricter limits for security
 RATE_LIMITS = {
-    'api_likes_preview': "100 per minute" if IS_DEVELOPMENT else "60 per minute",  # Increased for lazy loading
-    'api_like_counts': "60 per minute" if IS_DEVELOPMENT else "40 per minute",
-    'api_general': "200 per minute" if IS_DEVELOPMENT else "120 per minute",
+    'api_likes_preview': "100 per minute",  # Same for dev and prod - lazy loading needs high limit
+    'api_like_counts': "100 per minute",
+    'api_general': "200 per minute",
     'api_write': "30 per minute" if IS_DEVELOPMENT else "20 per minute",
 }
 

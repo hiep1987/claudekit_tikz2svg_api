@@ -3683,7 +3683,27 @@ def profile_svg_files(user_id):
         if not user:
             return "User not found", 404
 
-        # Lấy danh sách SVG với cấu trúc database đúng
+        # =====================================================
+        # OPTIMIZATION: PAGINATION (Same as index & followed_posts)
+        # =====================================================
+        page, per_page = get_pagination_params(request)
+        offset = (page - 1) * per_page
+        
+        # Get total count for pagination
+        cursor.execute("""
+            SELECT COUNT(*) as total
+            FROM svg_image s
+            WHERE s.user_id = %s
+        """, (user_id,))
+        total_items = cursor.fetchone()['total']
+        
+        # Calculate pagination metadata
+        total_pages = max(1, (total_items + per_page - 1) // per_page)
+        has_prev = page > 1
+        has_next = page < total_pages
+        page_numbers = generate_page_numbers(page, total_pages, MAX_PAGES_DISPLAY)
+
+        # Lấy danh sách SVG với cấu trúc database đúng + PAGINATION
         if current_user_id:
             cursor.execute("""
                 SELECT 
@@ -3701,7 +3721,8 @@ def profile_svg_files(user_id):
                 WHERE s.user_id = %s
                 GROUP BY s.id, s.filename, s.tikz_code, s.keywords, s.created_at, s.user_id, user_like.id
                 ORDER BY s.created_at DESC
-            """, (current_user_id, user_id))
+                LIMIT %s OFFSET %s
+            """, (current_user_id, user_id, per_page, offset))
         else:
             cursor.execute("""
                 SELECT 
@@ -3718,7 +3739,8 @@ def profile_svg_files(user_id):
                 WHERE s.user_id = %s
                 GROUP BY s.id, s.filename, s.tikz_code, s.keywords, s.created_at, s.user_id
                 ORDER BY s.created_at DESC
-            """, (user_id,))
+                LIMIT %s OFFSET %s
+            """, (user_id, per_page, offset))
         
         svg_rows = cursor.fetchall()
 
@@ -3768,7 +3790,14 @@ def profile_svg_files(user_id):
             follower_count=follower_count,
             current_user_email=current_user.email if current_user.is_authenticated else None,
             current_username=current_user.username if current_user.is_authenticated else None,
-            current_avatar=current_user.avatar if current_user.is_authenticated else None
+            current_avatar=current_user.avatar if current_user.is_authenticated else None,
+            # Pagination metadata
+            page=page,
+            total_pages=total_pages,
+            total_items=total_items,
+            has_prev=has_prev,
+            has_next=has_next,
+            page_numbers=page_numbers
         )
     except Exception as e:
         print(f"❌ General error in profile_svg_files: {e}", flush=True)

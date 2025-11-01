@@ -122,6 +122,54 @@
                 {% include 'partials/_file_card.html' %}
             {% endfor %}
         </div>
+        
+        <!-- =====================================================
+             OPTIMIZATION: PAGINATION UI (Same as index & followed_posts)
+             ===================================================== -->
+        {% if total_pages > 1 %}
+        <div class="pagination-container" style="margin-top: 2rem; display: flex; justify-content: center; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+            <!-- Previous Button -->
+            {% if has_prev %}
+                <a href="?page={{ page - 1 }}" class="pagination-btn pagination-btn-prev" title="Trang trước">
+                    ← Trước
+                </a>
+            {% else %}
+                <span class="pagination-btn pagination-btn-prev pagination-btn-disabled">
+                    ← Trước
+                </span>
+            {% endif %}
+            
+            <!-- Page Numbers -->
+            <div class="pagination-numbers" style="display: flex; gap: 0.25rem;">
+                {% for page_num in page_numbers %}
+                    {% if page_num == '...' %}
+                        <span class="pagination-ellipsis">...</span>
+                    {% elif page_num == page %}
+                        <span class="pagination-btn pagination-btn-active">{{ page_num }}</span>
+                    {% else %}
+                        <a href="?page={{ page_num }}" class="pagination-btn">{{ page_num }}</a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            
+            <!-- Next Button -->
+            {% if has_next %}
+                <a href="?page={{ page + 1 }}" class="pagination-btn pagination-btn-next" title="Trang sau">
+                    Sau →
+                </a>
+            {% else %}
+                <span class="pagination-btn pagination-btn-next pagination-btn-disabled">
+                    Sau →
+                </span>
+            {% endif %}
+        </div>
+        
+        <!-- Pagination Info -->
+        <div class="pagination-info" style="text-align: center; margin-top: 1rem; color: #666; font-size: 0.9rem;">
+            Trang {{ page }} / {{ total_pages }} • Hiển thị {{ svg_files|length }} / {{ total_items }} files
+        </div>
+        {% endif %}
+        
         {% else %}
         <div class="no-files">
             <div class="no-files-icon">📂</div>
@@ -152,8 +200,8 @@
 <!-- Navigation JavaScript - Shared component -->
 <script src="{{ url_for('static', filename='js/navigation.js', v='1.0') }}"></script>
 
-<!-- File Card JavaScript - Shared component -->
-<script src="{{ url_for('static', filename='js/file_card.js', v='1.2') }}"></script>
+<!-- File Card JavaScript - Shared component (with lazy loading) -->
+<script src="{{ url_for('static', filename='js/file_card.js', v='1.3') }}"></script>
 
 <!-- Debug and Initialization Script -->
     <script>

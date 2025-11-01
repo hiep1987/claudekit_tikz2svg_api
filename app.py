@@ -4146,6 +4146,10 @@ def get_svg_likes_preview(svg_id):
     Lấy preview danh sách người đã like (3-5 users đầu tiên) để hiển thị text
     Rate Limited: 100/min (dev) or 30/min (prod)
     """
+    # Debug: Log IP tracking
+    real_ip = get_real_ip()
+    app.logger.info(f"🔍 Rate Limit Check - SVG {svg_id} - IP: {real_ip} - X-Forwarded-For: {request.headers.get('X-Forwarded-For')} - Remote: {request.remote_addr}")
+    
     try:
         # Validate parameters
         if svg_id <= 0:

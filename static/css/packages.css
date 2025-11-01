@@ -19,6 +19,132 @@ Package Management System Styles - CSS Foundation Integration
     overflow: hidden;
 }
 
+/* Package Request Header - Specific styling for /packages/request page */
+.tikz-app .container-fluid > .package-request-header {
+    margin-bottom: 0;
+    margin-left: 0;
+    margin-right: 0;
+    border-radius: var(--radius-lg);
+}
+
+/* Package Request Form - Make container full width with rounded corners and shadow */
+.tikz-app .container-fluid > .package-request-form > .container {
+    margin: 0;
+    max-width: 100%;
+    width: 100%;
+    padding-left: 0;
+    padding-right: 0;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-lg); /* Same shadow as index search container */
+    background-color: var(--container-bg-secondary);
+    backdrop-filter: var(--container-bg-blur);
+}
+
+.tikz-app .container-fluid > .package-request-form > .container > .request-form-card {
+    padding: 0;
+    max-width: 100%;
+    margin: 0;
+    border-radius: 0;
+}
+
+/* Enhanced contrast for form elements on glass background */
+.tikz-app .request-form-card .form-section h3 {
+    color: #1a202c; /* Very high contrast - WCAG AAA (16.1:1 ratio on white) */
+    font-weight: var(--font-weight-bold);
+}
+
+.tikz-app .request-form-card .form-label {
+    color: #1a202c; /* Very high contrast - WCAG AAA (16.1:1 ratio on white) */
+    font-weight: var(--font-weight-semibold);
+}
+
+/* Package Request Form - Add padding */
+.tikz-app #packageRequestForm {
+    padding: 12px;
+}
+
+/* Enhanced contrast for form help text - WCAG AA compliant */
+.tikz-app .request-form-card .form-text {
+    color: #4a5568; /* High contrast - WCAG AA (7.48:1 ratio on white) */
+    font-size: var(--font-size-xs);
+    margin-top: var(--spacing-2);
+    line-height: var(--line-height-relaxed);
+}
+
+/* Enhanced contrast for alert-info elements - WCAG AA compliant */
+.tikz-app .alert-info {
+    background-color: #e7f3ff; /* Light blue background */
+    border-color: #b3d9ff;
+    color: #084298; /* Dark blue text for high contrast */
+}
+
+.tikz-app .alert-info h6 {
+    color: #052c65; /* Very dark blue for headers - WCAG AAA (12.1:1 ratio) */
+    font-weight: var(--font-weight-bold);
+    margin-bottom: var(--spacing-8);
+}
+
+.tikz-app .alert-info p,
+.tikz-app .alert-info li {
+    color: #084298; /* Dark blue text - WCAG AA (8.2:1 ratio on light blue bg) */
+    margin-bottom: var(--spacing-6);
+}
+
+.tikz-app .alert-info strong {
+    color: #052c65; /* Very dark blue for emphasis */
+    font-weight: var(--font-weight-bold);
+}
+
+/* Submit buttons - Compact size, always on one row - MUST BE AFTER TEMPLATE STYLES */
+body.tikz-app div.container-fluid section.package-request-form #packageRequestForm div.submit-buttons {
+    display: flex;
+    gap: var(--spacing-8);
+    justify-content: center;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    margin-top: var(--spacing-16);
+}
+
+body.tikz-app div.container-fluid section.package-request-form #packageRequestForm div.submit-buttons button.btn.btn-primary.btn-lg,
+body.tikz-app div.container-fluid section.package-request-form #packageRequestForm div.submit-buttons a.btn.btn-outline-secondary.btn-lg {
+    padding: var(--spacing-6) var(--spacing-12);
+    font-size: var(--font-size-sm);
+    white-space: nowrap;
+    flex-shrink: 0;
+    width: auto;
+    max-width: none;
+}
+
+/* Mobile optimization - even more compact on small screens */
+@media (max-width: 768px) {
+    body.tikz-app div.container-fluid section.package-request-form #packageRequestForm div.submit-buttons {
+        gap: var(--spacing-6);
+        flex-direction: row;
+    }
+    
+    body.tikz-app div.container-fluid section.package-request-form #packageRequestForm div.submit-buttons button.btn.btn-primary.btn-lg,
+    body.tikz-app div.container-fluid section.package-request-form #packageRequestForm div.submit-buttons a.btn.btn-outline-secondary.btn-lg {
+        padding: var(--spacing-5) var(--spacing-8);
+        font-size: var(--font-size-xs);
+        width: auto;
+        flex: 0 0 auto;
+    }
+    
+    body.tikz-app div.container-fluid section.package-request-form #packageRequestForm div.submit-buttons .btn i {
+        font-size: var(--font-size-xs);
+        margin-right: var(--spacing-2);
+    }
+}
+
+@media (max-width: 576px) {
+    body.tikz-app div.container-fluid section.package-request-form #packageRequestForm div.submit-buttons button.btn.btn-primary.btn-lg,
+    body.tikz-app div.container-fluid section.package-request-form #packageRequestForm div.submit-buttons a.btn.btn-outline-secondary.btn-lg {
+        padding: var(--spacing-4) var(--spacing-6);
+        font-size: 11px;
+    }
+}
+
 .tikz-app .packages-header::before {
     content: '';
     position: absolute;
@@ -26,6 +152,126 @@ Package Management System Styles - CSS Foundation Integration
     background: var(--glass-bg-light);
     backdrop-filter: var(--glass-blur-light);
     opacity: 0.1;
+}
+
+/* CRITICAL OVERRIDE - Must be at the end of file to override template styles */
+/* Force buttons to stay on one row - FINAL OVERRIDE */
+body.tikz-app div.container-fluid section.package-request-form div.container div.request-form-card form#packageRequestForm div.submit-buttons {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: var(--spacing-8);
+    justify-content: center;
+    margin-top: var(--spacing-16);
+}
+
+body.tikz-app div.container-fluid section.package-request-form div.container div.request-form-card form#packageRequestForm div.submit-buttons button.btn.btn-primary.btn-lg,
+body.tikz-app div.container-fluid section.package-request-form div.container div.request-form-card form#packageRequestForm div.submit-buttons a.btn.btn-outline-secondary.btn-lg {
+    padding: var(--spacing-6) var(--spacing-12);
+    font-size: var(--font-size-sm);
+    white-space: nowrap;
+    flex-shrink: 0;
+    width: auto;
+    max-width: none;
+    flex: 0 0 auto;
+}
+
+/* Mobile - Force row layout */
+@media (max-width: 768px) {
+    body.tikz-app div.container-fluid section.package-request-form div.container div.request-form-card form#packageRequestForm div.submit-buttons {
+        flex-direction: row;
+        gap: var(--spacing-6);
+    }
+    
+    body.tikz-app div.container-fluid section.package-request-form div.container div.request-form-card form#packageRequestForm div.submit-buttons button.btn.btn-primary.btn-lg,
+    body.tikz-app div.container-fluid section.package-request-form div.container div.request-form-card form#packageRequestForm div.submit-buttons a.btn.btn-outline-secondary.btn-lg {
+        padding: var(--spacing-5) var(--spacing-8);
+        font-size: var(--font-size-xs);
+        width: auto;
+        flex: 0 0 auto;
+    }
+}
+
+@media (max-width: 576px) {
+    body.tikz-app div.container-fluid section.package-request-form div.container div.request-form-card form#packageRequestForm div.submit-buttons button.btn.btn-primary.btn-lg,
+    body.tikz-app div.container-fluid section.package-request-form div.container div.request-form-card form#packageRequestForm div.submit-buttons a.btn.btn-outline-secondary.btn-lg {
+        padding: var(--spacing-4) var(--spacing-6);
+        font-size: 11px;
+    }
+}
+
+/* Tip cards container - Remove margin and enhance contrast */
+.tikz-app .package-request-form + .container {
+    margin: 0;
+    padding: var(--spacing-16) 0;
+}
+
+/* Enhanced contrast for tip cards - WCAG AA compliant */
+.tikz-app .tip-card {
+    background: linear-gradient(135deg, rgb(255 255 255 / 98%) 0%, rgb(249 250 251 / 98%) 100%);
+    backdrop-filter: var(--glass-blur-medium);
+    border: 2px solid rgb(229 231 235 / 90%);
+    border-left: 4px solid var(--info-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-20);
+    height: 100%;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 6%);
+    transition: all var(--transition-fast);
+}
+
+.tikz-app .tip-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgb(0 0 0 / 10%);
+    border-color: rgb(209 213 219 / 95%);
+    border-left-color: var(--info-dark);
+}
+
+.tikz-app .tip-card h4 {
+    color: #1a202c; /* Very high contrast - WCAG AAA (16.1:1 ratio) */
+    margin-bottom: var(--spacing-12);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-6);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+}
+
+.tikz-app .tip-card .tip-icon {
+    color: var(--info-color);
+    font-size: var(--font-size-lg);
+}
+
+.tikz-app .tip-card p {
+    color: #374151; /* High contrast - WCAG AA (8.9:1 ratio) */
+    line-height: var(--line-height-relaxed);
+    margin: 0;
+    font-size: var(--font-size-base);
+}
+
+.tikz-app .tip-card p a {
+    color: var(--info-color);
+    text-decoration: none;
+    font-weight: var(--font-weight-semibold);
+    transition: color var(--transition-fast);
+}
+
+.tikz-app .tip-card p a:hover {
+    color: var(--info-dark);
+    text-decoration: underline;
+}
+
+/* Specific styling for third tip card - reduced padding and enhanced contrast */
+body.tikz-app div.container-fluid section.helpful-tips div.container div.row div:nth-child(3) div.tip-card {
+    padding: 6px;
+}
+
+body.tikz-app div.container-fluid section.helpful-tips div.container div.row div:nth-child(3) div.tip-card h4 {
+    color: #000000; /* Maximum contrast - WCAG AAA (21:1 ratio) */
+    font-weight: var(--font-weight-extrabold);
+    text-shadow: none;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: var(--spacing-2);
+    border-radius: var(--radius-sm);
 }
 
 .tikz-app .packages-header h1,

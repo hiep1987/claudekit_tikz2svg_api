@@ -18,6 +18,9 @@
   
   /* Box Model Foundation - Let Bootstrap handle globally */
   box-sizing: border-box;
+  
+  /* Force light mode - Override dark mode media queries */
+  color-scheme: light;
 }
 
 /* Option 3: Let Bootstrap handle box-sizing globally - No override needed */

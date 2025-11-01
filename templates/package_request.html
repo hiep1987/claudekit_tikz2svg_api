@@ -172,12 +172,13 @@
 }
 
 .tikz-app .tip-card h4 {
-    color: var(--text-primary);
+    color: #1a202c;
     margin-bottom: var(--spacing-16);
     display: flex;
     align-items: center;
     gap: var(--spacing-8);
     font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
 }
 
 .tikz-app .tip-card .tip-icon {
@@ -189,19 +190,47 @@
     backdrop-filter: var(--glass-blur-light);
 }
 
-/* Responsive adjustments */
+/* OVERRIDE: Force buttons to stay on one row - CRITICAL */
+.tikz-app .submit-buttons {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: var(--spacing-8);
+    justify-content: center;
+}
+
+.tikz-app .submit-buttons .btn.btn-lg {
+    padding: var(--spacing-6) var(--spacing-12);
+    font-size: var(--font-size-lg);
+    width: auto;
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+/* Responsive adjustments - KEEP ROW LAYOUT */
 @media (max-width: 768px) {
     .tikz-app .submit-buttons {
-        flex-direction: column;
+        flex-direction: row;
+        gap: var(--spacing-6);
     }
     
-    .tikz-app .btn {
-        width: 100%;
+    .tikz-app .submit-buttons .btn.btn-lg {
+        padding: var(--spacing-5) var(--spacing-8);
+        font-size: var(--font-size-base);
+        width: auto;
+        flex: 0 0 auto;
     }
     
     .tikz-app .request-form-card {
         padding: var(--spacing-20);
         margin: 0 var(--spacing-8);
+    }
+}
+
+@media (max-width: 576px) {
+    .tikz-app .submit-buttons .btn.btn-lg {
+        padding: var(--spacing-4) var(--spacing-6);
+        font-size: var(--font-size-sm);
     }
 }
 </style>

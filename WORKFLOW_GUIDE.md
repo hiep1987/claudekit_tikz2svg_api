@@ -296,6 +296,207 @@ python3 -c "import os; from dotenv import load_dotenv; load_dotenv('/var/www/tik
 ```
 
 ---
+
+## 🔴 YÊU CẦU BẮT BUỘC CHO VPS DEPLOYMENT
+
+### ⚠️ Redis Server - BẮT BUỘC
+
+**Tại sao cần Redis?**
+- Flask-Limiter sử dụng Redis để lưu trữ rate limit counters
+- Đảm bảo rate limiting hoạt động đúng với multiple Gunicorn workers
+- Tracking chính xác số requests per IP address
+- Tránh tình trạng tất cả users share chung rate limit counter
+
+**Vấn đề nếu không có Redis:**
+- ❌ Flask-Limiter fallback về `memory://` storage
+- ❌ Mỗi worker có counter riêng → không đồng bộ
+- ❌ Rate limiting không chính xác
+- ❌ Users bị 429 (TOO MANY REQUESTS) sai
+
+### 📋 Cài đặt Redis trên VPS
+
+#### **Ubuntu/Debian:**
+```bash
+# 1. Cài đặt Redis
+sudo apt update
+sudo apt install redis-server -y
+
+# 2. Cấu hình Redis để chạy như service
+sudo systemctl enable redis-server
+sudo systemctl start redis-server
+
+# 3. Kiểm tra Redis hoạt động
+redis-cli ping
+# Expected output: PONG
+
+# 4. Kiểm tra Redis đang listen
+sudo systemctl status redis-server
+```
+
+#### **CentOS/RHEL:**
+```bash
+# 1. Cài đặt Redis
+sudo yum install redis -y
+
+# 2. Start và enable Redis
+sudo systemctl enable redis
+sudo systemctl start redis
+
+# 3. Kiểm tra
+redis-cli ping
+```
+
+### 🔧 Cấu hình Redis cho TikZ2SVG
+
+#### **1. Thêm REDIS_URL vào .env:**
+```bash
+# File: /var/www/tikz2svg_api/shared/.env
+echo "REDIS_URL=redis://localhost:6379/0" >> /var/www/tikz2svg_api/shared/.env
+```
+
+#### **2. Cấu hình Systemd Service:**
+```bash
+# Edit service override
+sudo systemctl edit tikz2svg.service
+
+# Thêm vào file override:
+[Service]
+EnvironmentFile=/var/www/tikz2svg_api/shared/.env
+Environment="REDIS_URL=redis://localhost:6379/0"
+```
+
+#### **3. Reload và restart:**
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart tikz2svg.service
+```
+
+### ✅ Kiểm tra Redis hoạt động
+
+#### **Test Redis connection:**
+```bash
+# 1. Check Redis keys
+redis-cli KEYS "LIMITER*"
+
+# 2. Monitor Redis in real-time
+redis-cli MONITOR
+
+# 3. Check Redis info
+redis-cli INFO stats
+```
+
+#### **Test từ Python:**
+```bash
+cd /var/www/tikz2svg_api/current
+source ../venv/bin/activate
+python3 -c "
+import redis
+import os
+from dotenv import load_dotenv
+load_dotenv('/var/www/tikz2svg_api/shared/.env')
+r = redis.from_url(os.environ.get('REDIS_URL'))
+print('Redis PING:', r.ping())
+"
+# Expected output: Redis PING: True
+```
+
+#### **Kiểm tra Rate Limiting logs:**
+```bash
+# Xem logs để verify Redis storage
+tail -100 /var/www/tikz2svg_api/current/logs/gunicorn_error.log | grep "Storage:"
+# Expected: 📊 Storage: redis://localhost:6379/0
+
+# Xem rate limit logs
+tail -100 /var/www/tikz2svg_api/current/logs/gunicorn_error.log | grep "flask-limiter"
+# Expected: ratelimit 500 per 1 minute (REAL_IP) exceeded
+```
+
+### 🚨 Troubleshooting Redis
+
+#### **Vấn đề: Redis không kết nối được**
+```bash
+# Check Redis service
+sudo systemctl status redis-server
+
+# Check Redis logs
+sudo journalctl -u redis-server -n 50
+
+# Check Redis port
+sudo netstat -tlnp | grep 6379
+
+# Test connection
+redis-cli -h localhost -p 6379 ping
+```
+
+#### **Vấn đề: REDIS_URL không được load**
+```bash
+# Check .env file
+cat /var/www/tikz2svg_api/shared/.env | grep REDIS_URL
+
+# Check systemd environment
+sudo systemctl show tikz2svg.service | grep Environment
+
+# Verify trong Python
+cd /var/www/tikz2svg_api/current
+python3 -c "import os; from dotenv import load_dotenv; load_dotenv('../shared/.env'); print(os.environ.get('REDIS_URL'))"
+```
+
+#### **Vấn đề: Rate limiting vẫn dùng memory://**
+```bash
+# Clear Redis và restart
+redis-cli FLUSHDB
+sudo systemctl restart tikz2svg.service
+
+# Check logs
+tail -50 logs/gunicorn_error.log | grep "Storage:"
+```
+
+### 📊 Monitoring Redis
+
+#### **Check Redis memory usage:**
+```bash
+redis-cli INFO memory | grep used_memory_human
+```
+
+#### **Check rate limit keys:**
+```bash
+# List all rate limit keys
+redis-cli KEYS "LIMITER*"
+
+# Count rate limit keys
+redis-cli KEYS "LIMITER*" | wc -l
+
+# Check specific IP's counter
+redis-cli GET "LIMITER/api/svg/*/likes/preview/YOUR_IP"
+```
+
+#### **Clear old rate limit data:**
+```bash
+# Clear all rate limit keys (careful!)
+redis-cli --scan --pattern "LIMITER*" | xargs redis-cli DEL
+
+# Or flush entire database (VERY CAREFUL!)
+redis-cli FLUSHDB
+```
+
+---
+
+## 📝 VPS Deployment Checklist
+
+### ✅ Pre-deployment Requirements:
+- [ ] Redis server installed and running
+- [ ] `REDIS_URL` set in `/var/www/tikz2svg_api/shared/.env`
+- [ ] Systemd service configured with `EnvironmentFile`
+- [ ] Redis connection tested successfully
+
+### ✅ Post-deployment Verification:
+- [ ] Check logs for `Storage: redis://localhost:6379/0`
+- [ ] Verify rate limiting uses real client IP (not 127.0.0.1)
+- [ ] Test rate limits with multiple requests
+- [ ] Monitor Redis keys: `redis-cli KEYS "LIMITER*"`
+
+---
+
 **Ngày tạo:** 25/08/2025  
 **Người tạo:** AI Assistant  
 **Mục đích:** Ghi lại vấn đề cấu hình static files để xử lý sau
@@ -305,4 +506,11 @@ python3 -c "import os; from dotenv import load_dotenv; load_dotenv('/var/www/tik
 1. 502 Bad Gateway do symbolic link avatars bị hỏng
 2. File SVG được lưu sai thư mục (current/static thay vì shared/static) - **ĐÃ KHẮC PHỤC HOÀN TOÀN**
 3. Biến môi trường `TIKZ_SVG_DIR` đã được thêm vào file `.env`
+
+**Ngày cập nhật:** 01/11/2025  
+**Cập nhật mới:**
+1. ✅ Thêm yêu cầu BẮT BUỘC: Redis Server cho VPS deployment
+2. ✅ Hướng dẫn cài đặt và cấu hình Redis chi tiết
+3. ✅ Troubleshooting Redis và rate limiting
+4. ✅ Monitoring và maintenance Redis
 

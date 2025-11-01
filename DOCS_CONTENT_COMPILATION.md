@@ -9,6 +9,7 @@
 3. [🔧 Chức năng biên dịch chi tiết](#3-chức-năng-biên-dịch-chi-tiết)
    - [3.3 🌏 Unicode & Multi-language Support](#33--unicode--multi-language-support-nâng-cao)
    - [3.4 📦 Manual Package Specification](#34--manual-package-specification-nâng-cao)
+   - [3.5 📮 Yêu cầu thêm Package mới](#35--yêu-cầu-thêm-package-mới)
 4. [🎨 Quản lý File SVG & Menu Actions](#4-quản-lý-file-svg--menu-actions)
 5. [🔄 Chuyển đổi định dạng](#5-chuyển-đổi-định-dạng)
 6. [💬 Hệ thống Comments](#6-hệ-thống-comments)
@@ -28,6 +29,7 @@
 ### Tính năng chính
 - ✅ **Biên dịch TikZ real-time** với preview ngay lập tức
 - ✅ **Auto-detection packages** thông minh và manual specification nâng cao
+- ✅ **Yêu cầu Package mới** gửi đề xuất thêm LaTeX packages vào hệ thống
 - ✅ **Unicode đầy đủ** hỗ trợ tiếng Việt, Trung, Nhật, Hàn (CJK) với LuaLaTeX + fontspec
 - ✅ **Quản lý file SVG** với like/unlike, follow/unfollow system
 - ✅ **Comments System** bình luận với LaTeX & TikZ code sharing
@@ -195,6 +197,133 @@ Hệ thống tự động phát hiện các packages sau:
 2. 📦 **Thêm dòng `%!<...>`** ở đầu nếu cần package đặc biệt
 3. ⚡ **Biên dịch** → Hệ thống tự động xử lý
 4. ✅ **Xem kết quả SVG** như thường lệ
+
+---
+
+### 3.5 📮 Yêu cầu thêm Package mới
+
+**Khi nào cần sử dụng?**
+- ❓ Package bạn cần chưa có trong danh sách hỗ trợ
+- 🆕 Muốn sử dụng package mới hoặc ít phổ biến
+- 🤝 Đóng góp mở rộng thư viện cho cộng đồng
+
+**Cách gửi yêu cầu:**
+
+#### Bước 1: Truy cập trang Packages
+1. **Vào trang chủ** → Click menu "📦 Packages"
+2. **Hoặc truy cập trực tiếp**: `/packages`
+3. **Xem danh sách packages** hiện có để đảm bảo package chưa tồn tại
+
+#### Bước 2: Mở form yêu cầu
+1. **Cuộn xuống** phần "Yêu cầu Package mới"
+2. **Click nút** "🚀 Gửi yêu cầu Package"
+3. **Chuyển đến** trang form yêu cầu `/packages/request`
+
+#### Bước 3: Điền thông tin yêu cầu
+
+**📦 Thông tin Package:**
+- **Tên Package** (bắt buộc): Nhập tên chính xác như trong LaTeX documentation
+  - Ví dụ: `amsmath`, `circuitikz`, `tikz-3dplot`, `siunitx`
+  - Có thể là LaTeX package, TikZ library, hoặc PGFPlots library
+  - Tối đa 100 ký tự
+
+**💡 Lý do yêu cầu:**
+- **Justification** (bắt buộc): Giải thích tại sao package này cần thiết
+  - Tính năng nào còn thiếu hiện tại?
+  - Package này giúp tạo loại diagram nào?
+  - Tối đa 1000 ký tự
+  
+- **Ví dụ sử dụng** (tùy chọn): Mô tả cụ thể cách sử dụng
+  - Ví dụ: "Tôi cần `circuitikz` để vẽ sơ đồ mạch điện tử với transistor, diode..."
+  - Tối đa 800 ký tự
+
+**📧 Thông tin liên hệ:**
+- **Họ tên** (bắt buộc): Tên của bạn
+  - Tự động điền nếu đã đăng nhập
+  
+- **Email** (bắt buộc): Email để nhận thông báo
+  - Tự động điền nếu đã đăng nhập
+  
+- **Mức độ ưu tiên**: Chọn độ khẩn cấp
+  - 🟢 **Thấp**: Có thể chờ đợi
+  - 🟡 **Trung bình**: Cần trong vài tuần (mặc định)
+  - 🟠 **Cao**: Cần gấp cho dự án
+  - 🔴 **Khẩn cấp**: Cần ngay lập tức
+
+#### Bước 4: Gửi yêu cầu
+1. **Kiểm tra lại** thông tin đã nhập
+2. **Click "🚀 Gửi yêu cầu"**
+3. **Nhận thông báo** xác nhận đã gửi thành công
+
+**Giới hạn Rate Limiting:**
+- ⏱️ **Tối đa 3 yêu cầu/giờ** để tránh spam
+- 📧 **Email thông báo** khi yêu cầu được xử lý
+
+---
+
+#### Quy trình xét duyệt
+
+**Trạng thái yêu cầu:**
+1. ⏳ **Pending**: Yêu cầu đang chờ xử lý
+2. 🔍 **Under Review**: Admin đang xem xét
+3. ✅ **Approved**: Đã phê duyệt, package sẽ được thêm
+4. ❌ **Rejected**: Bị từ chối (có lý do kèm theo)
+
+**Sau khi được phê duyệt:**
+- **Active Package**: Có sẵn trong template mặc định (không cần `%!<...>`)
+- **Manual Package**: Cần thêm `%!<package>` vào TikZ code để sử dụng
+
+**Thời gian xử lý:**
+- ⚡ **Yêu cầu khẩn cấp**: 1-2 ngày làm việc
+- 🟠 **Ưu tiên cao**: 3-5 ngày làm việc
+- 🟡 **Trung bình**: 1-2 tuần
+- 🟢 **Thấp**: 2-4 tuần
+
+---
+
+#### Kiểm tra trùng lặp
+
+**Hệ thống tự động kiểm tra:**
+- ✅ **Package đã tồn tại**: Chuyển hướng đến trang `/packages` với thông báo
+- ⏳ **Yêu cầu đang xử lý**: Thông báo yêu cầu trùng lặp, vui lòng đợi kết quả
+
+**Lưu ý:**
+- Kiểm tra kỹ danh sách packages hiện có trước khi gửi yêu cầu
+- Mỗi package chỉ cần yêu cầu một lần
+- Nếu nhiều người yêu cầu cùng package, admin sẽ ưu tiên xử lý
+
+---
+
+#### Tips để yêu cầu được chấp nhận
+
+✅ **Nên làm:**
+- Nhập tên package **chính xác** như trong documentation
+- Giải thích **rõ ràng** lý do cần thiết
+- Cung cấp **ví dụ cụ thể** về cách sử dụng
+- Đặt **mức độ ưu tiên** phù hợp với nhu cầu thực tế
+- Kiểm tra package **chưa tồn tại** trong hệ thống
+
+❌ **Không nên:**
+- Gửi yêu cầu cho package đã có sẵn
+- Viết lý do quá ngắn gọn hoặc không rõ ràng
+- Spam nhiều yêu cầu giống nhau
+- Đặt mức ưu tiên "Khẩn cấp" khi không thực sự cần
+- Nhập sai tên package
+
+---
+
+#### Xem danh sách Packages hiện có
+
+**Truy cập trang `/packages` để xem:**
+- 📦 **Active Packages**: Packages có sẵn trong template mặc định
+- 🔧 **Manual Packages**: Packages cần khai báo `%!<...>` để sử dụng
+- 📊 **Thống kê**: Tổng số packages được hỗ trợ
+- 🔍 **Tìm kiếm**: Tìm package theo tên hoặc loại
+
+**Phân loại Packages:**
+- **LaTeX Packages**: `\usepackage{...}` - amsmath, geometry, xcolor, etc.
+- **TikZ Libraries**: `\usetikzlibrary{...}` - calc, positioning, arrows.meta, etc.
+- **PGFPlots Libraries**: `\usepgfplotslibrary{...}` - polar, statistics, fillbetween, etc.
 
 ---
 
@@ -1054,6 +1183,27 @@ Error: Access denied - insufficient permissions
 ### Q: Tại sao chữ Trung/Nhật/Hàn hiện thành hộp vuông `��`?
 **A:** Bạn chưa chọn font hỗ trợ CJK. Thêm `\setmainfont{STSong}` (hoặc font CJK khác) vào đầu code TikZ. Font mặc định (Latin Modern) không có ký tự CJK.
 
+### Q: Làm sao để yêu cầu thêm package mới vào hệ thống?
+**A:** Truy cập trang `/packages` → Cuộn xuống phần "Yêu cầu Package mới" → Click "Gửi yêu cầu Package" → Điền form với thông tin package cần thiết. Bạn cần cung cấp tên package, lý do yêu cầu, và thông tin liên hệ. Hệ thống giới hạn 3 yêu cầu/giờ.
+
+### Q: Mất bao lâu để yêu cầu package được xử lý?
+**A:** Tùy vào mức độ ưu tiên:
+- **Khẩn cấp**: 1-2 ngày làm việc
+- **Cao**: 3-5 ngày làm việc  
+- **Trung bình**: 1-2 tuần
+- **Thấp**: 2-4 tuần
+
+Bạn sẽ nhận email thông báo khi yêu cầu được xử lý.
+
+### Q: Package tôi yêu cầu có chắc chắn được thêm vào không?
+**A:** Không chắc chắn. Admin sẽ xem xét dựa trên:
+- Tính hợp lệ và an toàn của package
+- Mức độ cần thiết cho cộng đồng
+- Khả năng tương thích với hệ thống
+- Số lượng người yêu cầu
+
+Nếu bị từ chối, bạn sẽ nhận được email giải thích lý do.
+
 ---
 
 ## 12. 🎥 Hướng dẫn trực quan
@@ -1102,6 +1252,13 @@ Error: Access denied - insufficient permissions
 ---
 
 ## 14. 🆕 Tính năng mới & Cập nhật
+
+### Tháng 11/2024 - Package Management System:
+- ✨ **Package Request System**: Gửi yêu cầu thêm LaTeX packages mới vào hệ thống
+- ✨ **Package Listing Page**: Xem danh sách đầy đủ packages được hỗ trợ (Active & Manual)
+- ✨ **Request Status Tracking**: Theo dõi trạng thái yêu cầu (Pending, Under Review, Approved, Rejected)
+- 🔧 **Rate Limiting**: Giới hạn 3 yêu cầu/giờ để tránh spam
+- 🔧 **Email Notifications**: Thông báo khi yêu cầu được xử lý
 
 ### Tháng 10/2024 - Major Update:
 - ✨ **Likes Modal Enhancement**: Xem danh sách đầy đủ người đã like với pagination

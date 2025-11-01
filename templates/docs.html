@@ -1,0 +1,1136 @@
+{% extends "base.html" %}
+
+{# Configuration flags #}
+{% set include_highlight_js = false %}
+{% set include_codemirror = false %}
+{% set include_file_card = false %}
+{% set include_navigation = true %}
+{% set include_login_modal = true %}
+{% set include_navbar = true %}
+
+{# Page Title #}
+{% block title %}Tài liệu hướng dẫn - TikZ to SVG{% endblock %}
+
+{# Custom Meta Tags #}
+{% block meta %}
+<meta name="description" content="Tài liệu hướng dẫn đầy đủ về TikZ2SVG - Hướng dẫn sử dụng, tính năng và best practices">
+<meta name="keywords" content="tài liệu, documentation, TikZ2SVG, hướng dẫn sử dụng, tutorial">
+<meta name="author" content="TikZ to SVG">
+<meta name="robots" content="index, follow">
+<meta property="og:title" content="Tài liệu hướng dẫn - TikZ to SVG">
+<meta property="og:description" content="Tài liệu hướng dẫn đầy đủ về TikZ2SVG">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="vi_VN">
+{% endblock %}
+
+{# Extra CSS for docs page #}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/docs.css') }}">
+{% endblock %}
+
+{# Main Content #}
+{% block content %}
+<div class="docs-wrapper">
+    <!-- Sidebar Navigation -->
+    <aside class="docs-sidebar" id="docsSidebar">
+        <div class="sidebar-header">
+            <h3>📚 Mục lục</h3>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="#intro" class="nav-link active">🚀 Giới thiệu</a>
+            <a href="#quickstart" class="nav-link">📋 Bắt đầu nhanh</a>
+            <a href="#compilation" class="nav-link">🔧 Biên dịch TikZ</a>
+            <div class="nav-submenu">
+                <a href="#unicode" class="nav-link-sub">🌏 Unicode & CJK</a>
+                <a href="#manual-packages" class="nav-link-sub">📦 Manual Packages</a>
+                <a href="#request-packages" class="nav-link-sub">📮 Yêu cầu Package</a>
+            </div>
+            <a href="#file-management" class="nav-link">🎨 Quản lý File</a>
+            <a href="#conversion" class="nav-link">🔄 Chuyển đổi định dạng</a>
+            <a href="#comments" class="nav-link">💬 Hệ thống Comments</a>
+            <a href="#profile" class="nav-link">👤 Profile & Xã hội</a>
+            <a href="#verification" class="nav-link">🛡️ Xác thực</a>
+            <a href="#search" class="nav-link">🔍 Tìm kiếm</a>
+            <a href="#troubleshooting" class="nav-link">🛠️ Xử lý lỗi</a>
+            <a href="#tips" class="nav-link">💡 Tips</a>
+            <a href="#faq" class="nav-link">❓ FAQ</a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="docs-content">
+        <div class="docs-header">
+            <h1>📚 Tài liệu hướng dẫn TikZ2SVG</h1>
+            <p class="subtitle">Hướng dẫn đầy đủ về cách sử dụng TikZ2SVG API</p>
+        </div>
+
+        <!-- Section 1: Giới thiệu -->
+        <section id="intro" class="docs-section">
+            <h2>🚀 Giới thiệu tổng quan</h2>
+            
+            <div class="intro-box">
+                <h3>Mô tả ứng dụng</h3>
+                <p>
+                    <strong>TikZ2SVG API</strong> là một web application mạnh mẽ cho phép chuyển đổi TikZ LaTeX code 
+                    thành các file SVG vector graphics chất lượng cao. Ứng dụng cung cấp giao diện thân thiện, 
+                    hệ thống quản lý file, tương tác xã hội và API mở cho developers.
+                </p>
+            </div>
+
+            <h3>✨ Tính năng chính</h3>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h4>Biên dịch Real-time</h4>
+                    <p>Preview ngay lập tức với auto-detection packages thông minh</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌏</div>
+                    <h4>Unicode đầy đủ</h4>
+                    <p>Hỗ trợ tiếng Việt, Trung, Nhật, Hàn với LuaLaTeX + fontspec</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎨</div>
+                    <h4>Quản lý File</h4>
+                    <p>Like/unlike, follow/unfollow system hoàn chỉnh</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💬</div>
+                    <h4>Comments System</h4>
+                    <p>Bình luận với LaTeX & TikZ code sharing</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h4>Chuyển đổi định dạng</h4>
+                    <p>SVG → PNG/JPEG với tùy chọn size, DPI</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔍</div>
+                    <h4>Search & Tagging</h4>
+                    <p>Tìm kiếm SVG theo keywords và username</p>
+                </div>
+            </div>
+
+            <h3>🛠️ Công nghệ sử dụng</h3>
+            <ul>
+                <li><strong>Backend:</strong> Python Flask, MySQL, LuaLaTeX, pdf2svg</li>
+                <li><strong>Frontend:</strong> Bootstrap 5, JavaScript ES6+, CodeMirror</li>
+                <li><strong>Email:</strong> Zoho Mail SMTP với rate limiting</li>
+                <li><strong>Security:</strong> OAuth 2.0 (Google), CSRF protection, input validation</li>
+                <li><strong>Performance:</strong> Caching, async processing, image optimization</li>
+            </ul>
+        </section>
+
+        <!-- Section 2: Bắt đầu nhanh -->
+        <section id="quickstart" class="docs-section">
+            <h2>📋 Hướng dẫn bắt đầu nhanh</h2>
+
+            <div class="step-container">
+                <div class="step-box">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Đăng ký tài khoản</h3>
+                        <ol>
+                            <li>Truy cập trang chủ tại <code>/</code></li>
+                            <li>Nhấn <strong>"Đăng nhập"</strong> → Chọn <strong>"Google OAuth"</strong></li>
+                            <li>Authorize ứng dụng với Google account của bạn</li>
+                            <li>Tự động tạo profile với thông tin cơ bản từ Google</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="step-box">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Chuyển đổi TikZ đầu tiên</h3>
+                        <ol>
+                            <li>Nhập TikZ code vào code editor (CodeMirror)</li>
+                            <li>Nhấn <strong>"Biên dịch"</strong> → Hệ thống tự động phát hiện packages</li>
+                            <li>Xem preview SVG ngay lập tức ở phần kết quả</li>
+                            <li>Tải về hoặc lưu file SVG vào account</li>
+                        </ol>
+                        <div class="code-example">
+                            <div class="code-header">Ví dụ TikZ code đơn giản</div>
+                            <pre><code>\begin{tikzpicture}
+  \draw (0,0) circle (1cm);
+  \node at (0,0) {Hello World};
+\end{tikzpicture}</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-box">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Lưu và quản lý file</h3>
+                        <ol>
+                            <li>Nhấn <strong>"Lưu SVG"</strong> sau khi biên dịch thành công</li>
+                            <li>Nhập keywords/tags để dễ tìm kiếm sau này</li>
+                            <li>Xem file đã lưu trong section "Các file SVG đã tạo"</li>
+                            <li>Sử dụng menu actions trên mỗi file card để quản lý</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Biên dịch TikZ -->
+        <section id="compilation" class="docs-section">
+            <h2>🔧 Chức năng biên dịch chi tiết</h2>
+
+            <h3>Trình biên dịch TikZ cơ bản</h3>
+            <ul>
+                <li><strong>Input:</strong> CodeMirror editor với syntax highlighting</li>
+                <li><strong>Auto-detection:</strong> Tự động phát hiện packages, TikZ libraries, PGFPlots libraries</li>
+                <li><strong>Compilation:</strong> LuaLaTeX → PDF → SVG (pdf2svg)</li>
+                <li><strong>Preview:</strong> Real-time SVG preview với zoom/pan</li>
+                <li><strong>Error handling:</strong> Chi tiết log lỗi LaTeX với line numbers</li>
+            </ul>
+
+            <h3>Auto-detection thông minh</h3>
+            <p>Hệ thống tự động phát hiện các packages sau:</p>
+
+            <div class="package-categories">
+                <div class="package-category">
+                    <h4>📦 LaTeX Packages cơ bản</h4>
+                    <ul>
+                        <li><strong>Nền tảng:</strong> fontspec, polyglossia, xcolor, graphicx, geometry, setspace</li>
+                        <li><strong>Toán học:</strong> amsmath, amssymb, amsfonts, mathtools, physics, siunitx, cancel, cases</li>
+                        <li><strong>TikZ/PGF:</strong> tikz, pgfplots, tikz-3dplot, tkz-euclide, tkz-tab, pgf, pgfkeys, pgfornament</li>
+                        <li><strong>Chuyên biệt:</strong> circuitikz, tikz-timing, tikz-cd, tikz-network, tikzpeople, tikzmark</li>
+                        <li><strong>Bảng biểu:</strong> array, booktabs, multirow, colortbl, longtable, tabularx</li>
+                    </ul>
+                </div>
+
+                <div class="package-category">
+                    <h4>🎨 TikZ Libraries</h4>
+                    <ul>
+                        <li><strong>Tính toán:</strong> calc, math, positioning, arrows.meta, intersections</li>
+                        <li><strong>Hình học:</strong> angles, quotes, shapes.geometric, shapes.symbols, shapes.arrows</li>
+                        <li><strong>Trang trí:</strong> decorations.markings, decorations.pathreplacing, decorations.text</li>
+                        <li><strong>Hiệu ứng:</strong> patterns, shadings, hobby, spy, backgrounds, fadings, shadows</li>
+                        <li><strong>Cấu trúc:</strong> fit, matrix, chains, automata, petri, mindmap, trees</li>
+                    </ul>
+                </div>
+
+                <div class="package-category">
+                    <h4>📊 PGFPlots Libraries</h4>
+                    <ul>
+                        <li>polar, statistics, dateplot, fillbetween, colorbrewer</li>
+                        <li>groupplots, ternary, smithchart, units</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <strong>💡 Lưu ý:</strong> Đây là danh sách đầy đủ các packages được phép sử dụng. 
+                Hệ thống sẽ tự động phát hiện khi bạn sử dụng các lệnh như <code>\draw</code>, 
+                <code>\node</code>, <code>\addplot</code>, etc.
+            </div>
+        </section>
+
+        <!-- Section 3.3: Unicode & CJK -->
+        <section id="unicode" class="docs-section">
+            <h2>🌏 Unicode & Multi-language Support</h2>
+
+            <div class="highlight-box">
+                <h3>✅ Hệ thống hỗ trợ Unicode đầy đủ</h3>
+                <ul>
+                    <li>✅ Hệ thống hỗ trợ <strong>ĐẦY ĐỦ</strong> chữ Trung/Nhật/Hàn (CJK characters)</li>
+                    <li>✅ Người dùng <strong>CHỈ CẦN thêm</strong> <code>\setmainfont{STSong}</code> để hiển thị chữ CJK</li>
+                    <li>✅ <strong>KHÔNG CẦN sửa</strong> <code>app.py</code> hay thêm package</li>
+                    <li>✅ <strong>LuaLaTeX + fontspec</strong> = Unicode native support HOÀN HẢO</li>
+                </ul>
+            </div>
+
+            <h3>Ví dụ sử dụng chữ CJK</h3>
+            <div class="code-example">
+                <div class="code-header">Tiếng Trung, Nhật, Hàn</div>
+                <pre><code>\setmainfont{STSong}  % Chỉ cần thêm dòng này!
+
+\begin{tikzpicture}
+  \node {中文: 富贵};                    % Tiếng Trung
+  \node at (0,-1) {日本語: こんにちは};    % Tiếng Nhật
+  \node at (0,-2) {한국어: 안녕하세요};    % Tiếng Hàn
+\end{tikzpicture}</code></pre>
+            </div>
+
+            <h3>Fonts CJK có sẵn</h3>
+            <ul>
+                <li><strong>STSong</strong> (宋体) - ✅ Khuyến nghị cho văn bản thông thường</li>
+                <li><strong>Heiti TC/SC</strong> (黑体) - Chữ đậm, tiêu đề</li>
+                <li><strong>Kaiti TC/SC</strong> (楷书) - Thư pháp, chữ viết tay đẹp</li>
+            </ul>
+
+            <div class="warning-box">
+                <h3>⚠️ Lưu ý quan trọng</h3>
+                <ul>
+                    <li>❌ <strong>KHÔNG dùng</strong> <code>%!&lt;CJKutf8&gt;</code> (xung đột với LuaLaTeX + fontspec)</li>
+                    <li>❌ <strong>KHÔNG dùng</strong> <code>\begin{CJK*}{UTF8}{gbsn}...\end{CJK*}</code> (cú pháp cũ)</li>
+                    <li>✅ <strong>CHỈ CẦN</strong> <code>\setmainfont{STSong}</code> (hoặc font CJK khác)</li>
+                    <li>✅ Tiếng Việt hoạt động <strong>HOÀN HẢO</strong> không cần font đặc biệt</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 3.4: Manual Packages -->
+        <section id="manual-packages" class="docs-section">
+            <h2>📦 Manual Package Specification</h2>
+
+            <h3>Khi nào cần sử dụng?</h3>
+            <ul>
+                <li>✅ Hệ thống không tự động phát hiện package cần thiết</li>
+                <li>✅ Packages ít phổ biến hoặc mới</li>
+                <li>✅ Cần kiểm soát chính xác packages được load</li>
+            </ul>
+
+            <h3>Cú pháp: <code>%!&lt;commands&gt;</code></h3>
+
+            <div class="code-example">
+                <div class="code-header">Ví dụ đơn giản</div>
+                <pre><code>%!&lt;\usepackage{pgfornament}&gt;
+\begin{tikzpicture}
+\pgfornament[width=2cm]{15}
+\end{tikzpicture}</code></pre>
+            </div>
+
+            <div class="code-example">
+                <div class="code-header">Multiple packages</div>
+                <pre><code>%!&lt;\usepackage{circuitikz},\usetikzlibrary{angles,quotes}&gt;
+\begin{tikzpicture}
+\draw (0,0) to[R, o-o] (2,0);
+\pic [draw, angle radius=5mm] {angle = A--B--C};
+\end{tikzpicture}</code></pre>
+            </div>
+
+            <h3>Quy trình sử dụng</h3>
+            <ol>
+                <li>✍️ Viết TikZ code như bình thường</li>
+                <li>📦 Thêm dòng <code>%!&lt;...&gt;</code> ở đầu nếu cần package đặc biệt</li>
+                <li>⚡ Biên dịch → Hệ thống tự động xử lý</li>
+                <li>✅ Xem kết quả SVG như thường lệ</li>
+            </ol>
+        </section>
+
+        <!-- Section 3.5: Request Packages -->
+        <section id="request-packages" class="docs-section">
+            <h2>📮 Yêu cầu thêm Package mới</h2>
+
+            <h3>Khi nào cần sử dụng?</h3>
+            <ul>
+                <li>❓ Package bạn cần chưa có trong danh sách hỗ trợ</li>
+                <li>🆕 Muốn sử dụng package mới hoặc ít phổ biến</li>
+                <li>🤝 Đóng góp mở rộng thư viện cho cộng đồng</li>
+            </ul>
+
+            <h3>Cách gửi yêu cầu</h3>
+            
+            <div class="step-container">
+                <div class="step-box">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>Truy cập trang Packages</h4>
+                        <ul>
+                            <li>Vào trang chủ → Click menu <strong>"📦 Packages"</strong></li>
+                            <li>Hoặc truy cập trực tiếp: <code>/packages</code></li>
+                            <li>Xem danh sách packages hiện có</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="step-box">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>Mở form yêu cầu</h4>
+                        <ul>
+                            <li>Cuộn xuống phần "Yêu cầu Package mới"</li>
+                            <li>Click nút <strong>"🚀 Gửi yêu cầu Package"</strong></li>
+                            <li>Chuyển đến trang form <code>/packages/request</code></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="step-box">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>Điền thông tin</h4>
+                        <ul>
+                            <li><strong>Tên Package</strong> (bắt buộc): Nhập tên chính xác</li>
+                            <li><strong>Lý do yêu cầu</strong> (bắt buộc): Giải thích tại sao cần thiết</li>
+                            <li><strong>Ví dụ sử dụng</strong> (tùy chọn): Mô tả cụ thể cách sử dụng</li>
+                            <li><strong>Mức độ ưu tiên</strong>: Chọn độ khẩn cấp</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="step-box">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h4>Gửi yêu cầu</h4>
+                        <ul>
+                            <li>Kiểm tra lại thông tin</li>
+                            <li>Click <strong>"🚀 Gửi yêu cầu"</strong></li>
+                            <li>Nhận thông báo xác nhận</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <strong>⏱️ Giới hạn Rate Limiting:</strong> Tối đa 3 yêu cầu/giờ để tránh spam. 
+                Bạn sẽ nhận email thông báo khi yêu cầu được xử lý.
+            </div>
+
+            <h3>Quy trình xét duyệt</h3>
+            <div class="status-grid">
+                <div class="status-card">
+                    <div class="status-icon pending">⏳</div>
+                    <h4>Pending</h4>
+                    <p>Yêu cầu đang chờ xử lý</p>
+                </div>
+                <div class="status-card">
+                    <div class="status-icon review">🔍</div>
+                    <h4>Under Review</h4>
+                    <p>Admin đang xem xét</p>
+                </div>
+                <div class="status-card">
+                    <div class="status-icon approved">✅</div>
+                    <h4>Approved</h4>
+                    <p>Đã phê duyệt, sẽ được thêm</p>
+                </div>
+                <div class="status-card">
+                    <div class="status-icon rejected">❌</div>
+                    <h4>Rejected</h4>
+                    <p>Bị từ chối (có lý do)</p>
+                </div>
+            </div>
+
+            <h3>Thời gian xử lý</h3>
+            <ul>
+                <li>⚡ <strong>Khẩn cấp:</strong> 1-2 ngày làm việc</li>
+                <li>🟠 <strong>Ưu tiên cao:</strong> 3-5 ngày làm việc</li>
+                <li>🟡 <strong>Trung bình:</strong> 1-2 tuần</li>
+                <li>🟢 <strong>Thấp:</strong> 2-4 tuần</li>
+            </ul>
+
+            <h3>Tips để yêu cầu được chấp nhận</h3>
+            <div class="tips-grid">
+                <div class="tip-card success">
+                    <h4>✅ Nên làm</h4>
+                    <ul>
+                        <li>Nhập tên package chính xác</li>
+                        <li>Giải thích rõ ràng lý do</li>
+                        <li>Cung cấp ví dụ cụ thể</li>
+                        <li>Đặt mức ưu tiên phù hợp</li>
+                        <li>Kiểm tra package chưa tồn tại</li>
+                    </ul>
+                </div>
+                <div class="tip-card danger">
+                    <h4>❌ Không nên</h4>
+                    <ul>
+                        <li>Gửi yêu cầu package đã có</li>
+                        <li>Viết lý do quá ngắn gọn</li>
+                        <li>Spam nhiều yêu cầu giống nhau</li>
+                        <li>Đặt "Khẩn cấp" khi không cần</li>
+                        <li>Nhập sai tên package</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: File Management -->
+        <section id="file-management" class="docs-section">
+            <h2>🎨 Quản lý File SVG & Menu Actions</h2>
+
+            <h3>Giao diện File Card</h3>
+            <p>Mỗi SVG file được hiển thị dưới dạng "thẻ" (card) bao gồm:</p>
+            <ul>
+                <li>📷 <strong>Ảnh preview:</strong> Hiển thị SVG đã tạo</li>
+                <li>👤 <strong>Thông tin tác giả:</strong> Tên người tạo và thời gian</li>
+                <li>❤️ <strong>Nút Like:</strong> Thể hiện sự yêu thích</li>
+                <li>⋯ <strong>Menu actions:</strong> Các hành động có thể thực hiện</li>
+                <li>💻 <strong>Code section:</strong> TikZ code (có thể ẩn/hiện)</li>
+            </ul>
+
+            <h3>Cách sử dụng Menu Actions</h3>
+            <div class="device-instructions">
+                <div class="device-box">
+                    <h4>🖥️ Trên máy tính (Desktop)</h4>
+                    <ul>
+                        <li>Di chuột qua file card → Menu tự động xuất hiện</li>
+                        <li>Click vào button để thực hiện hành động</li>
+                    </ul>
+                </div>
+                <div class="device-box">
+                    <h4>📱 Trên điện thoại (Mobile)</h4>
+                    <ul>
+                        <li>Tap 1 lần vào nút menu (⋯) → Hiện menu</li>
+                        <li>Tap 2 lần vào action button → Thực hiện hành động</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Các hành động có thể thực hiện</h3>
+            <div class="actions-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Hành động</th>
+                            <th>Mô tả</th>
+                            <th>Cần đăng nhập?</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>📥 Tải ảnh</td>
+                            <td>Xem chi tiết và tải file SVG về máy</td>
+                            <td>❌</td>
+                        </tr>
+                        <tr>
+                            <td>📘 Facebook</td>
+                            <td>Copy link để chia sẻ lên Facebook</td>
+                            <td>❌</td>
+                        </tr>
+                        <tr>
+                            <td>🔗 Copy Link</td>
+                            <td>Copy đường dẫn trực tiếp đến file SVG</td>
+                            <td>❌</td>
+                        </tr>
+                        <tr>
+                            <td>💻 Xem Code</td>
+                            <td>Hiển thị/ẩn mã TikZ đã sử dụng</td>
+                            <td>✅</td>
+                        </tr>
+                        <tr>
+                            <td>🗑️ Xóa file</td>
+                            <td>Xóa file SVG khỏi hệ thống</td>
+                            <td>✅ (chủ sở hữu)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Hệ thống Like (Yêu thích)</h3>
+            <div class="feature-detail">
+                <h4>Cách sử dụng</h4>
+                <ol>
+                    <li>Đăng nhập tài khoản (bắt buộc)</li>
+                    <li>Click vào nút ❤️ trên file card</li>
+                    <li>Trái tim chuyển màu đỏ → Đã like</li>
+                    <li>Click lại để unlike → Trái tim về màu xám</li>
+                </ol>
+
+                <h4>Xem danh sách người đã like</h4>
+                <p>
+                    Click vào <strong>số lượt like</strong> (bên cạnh nút ❤️) để xem danh sách tất cả người đã like file đó. 
+                    Modal sẽ hiện ra với avatar, username và thời gian like. Hỗ trợ phân trang (20 người/lần).
+                </p>
+            </div>
+        </section>
+
+        <!-- Section 5: Conversion -->
+        <section id="conversion" class="docs-section">
+            <h2>🔄 Chuyển đổi định dạng</h2>
+
+            <h3>Định dạng được hỗ trợ</h3>
+            <ul>
+                <li><strong>SVG → PNG:</strong> Chuyển đổi raster với tùy chỉnh chiều rộng/cao/DPI</li>
+                <li><strong>SVG → JPEG:</strong> Chuyển đổi chất lượng cao với tùy chọn nén</li>
+                <li><strong>Xử lý hàng loạt:</strong> Chuyển đổi nhiều file cùng lúc</li>
+            </ul>
+
+            <h3>Cách chuyển đổi định dạng</h3>
+            <div class="step-container">
+                <div class="step-box">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>Tạo SVG</h4>
+                        <ul>
+                            <li>Biên dịch TikZ code thành công</li>
+                            <li>Lưu SVG vào tài khoản (nếu muốn)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="step-box">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>Chuyển đổi</h4>
+                        <ul>
+                            <li>Click <strong>"📥 Tải ảnh"</strong> trên file card</li>
+                            <li>Chọn định dạng: PNG hoặc JPEG</li>
+                            <li>Tùy chỉnh kích thước (width, height, DPI)</li>
+                            <li>Click <strong>"Convert"</strong> để bắt đầu</li>
+                            <li>Tải file về máy khi hoàn tất</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Giới hạn kích thước & Kiểm tra</h3>
+            <ul>
+                <li><strong>Tối đa pixels:</strong> 60MP tổng cộng (60,000,000 pixels)</li>
+                <li><strong>Tối đa DPI:</strong> 2000 DPI</li>
+                <li><strong>Kiểm tra:</strong> Hệ thống kiểm tra trước khi chuyển đổi</li>
+                <li><strong>Thông báo lỗi:</strong> Phản hồi rõ ràng khi vượt giới hạn</li>
+            </ul>
+        </section>
+
+        <!-- Section 6: Comments -->
+        <section id="comments" class="docs-section">
+            <h2>💬 Hệ thống Comments</h2>
+
+            <div class="intro-box">
+                <p>
+                    <strong>Comments System</strong> cho phép người dùng trao đổi, thảo luận về TikZ code trực tiếp 
+                    trên trang xem SVG. Hệ thống hỗ trợ <strong>LaTeX math</strong>, <strong>TikZ code sharing</strong>, 
+                    và <strong>nested replies</strong>.
+                </p>
+            </div>
+
+            <h3>Tính năng chính</h3>
+            <ul>
+                <li>✅ Bình luận & trả lời với cấu trúc thread (parent → replies)</li>
+                <li>✅ LaTeX math support inline <code>$x^2$</code> và display <code>$$\int f(x) dx$$</code></li>
+                <li>✅ TikZ code blocks với syntax <code>\code{...}</code> và copy button</li>
+                <li>✅ Real-time preview MathJax rendering khi gõ</li>
+                <li>✅ Like/Unlike comments để đánh giá chất lượng</li>
+                <li>✅ Edit & Delete comments của chính mình</li>
+                <li>✅ Pagination tự động load thêm comments</li>
+            </ul>
+
+            <h3>LaTeX Math Support</h3>
+            <div class="math-examples">
+                <div class="math-box">
+                    <h4>Inline math (trong dòng)</h4>
+                    <p><strong>Syntax:</strong> <code>$công thức$</code></p>
+                    <p><strong>Ví dụ:</strong> Công thức <code>$E = mc^2$</code> rất nổi tiếng.</p>
+                </div>
+                <div class="math-box">
+                    <h4>Display math (hiển thị riêng)</h4>
+                    <p><strong>Syntax:</strong> <code>$$công thức$$</code></p>
+                    <p><strong>Ví dụ:</strong> <code>$$\int_0^\infty e^{-x} dx = 1$$</code></p>
+                </div>
+            </div>
+
+            <h3>TikZ Code Blocks</h3>
+            <div class="code-example">
+                <div class="code-header">Cú pháp chia sẻ TikZ code</div>
+                <pre><code>Vẽ circle đơn giản:
+
+\code{
+\tikz \draw (0,0) circle (1cm);
+}</code></pre>
+            </div>
+
+            <div class="info-box">
+                <strong>💡 Đặc điểm:</strong>
+                <ul>
+                    <li>✅ Hỗ trợ nested braces không giới hạn độ sâu</li>
+                    <li>✅ Copy button một click copy toàn bộ code</li>
+                    <li>✅ Visual feedback 📋 → ✅ khi copy thành công</li>
+                    <li>✅ Syntax preservation giữ nguyên format</li>
+                </ul>
+            </div>
+
+            <h3>Like & Unlike Comments</h3>
+            <ol>
+                <li>Đọc comment hữu ích hoặc hay</li>
+                <li>Click nút 👍 ở footer comment</li>
+                <li>Button chuyển màu xanh (liked state)</li>
+                <li>Click lại để unlike → Button về trạng thái mặc định</li>
+            </ol>
+
+            <h3>Edit & Delete Comments</h3>
+            <div class="feature-detail">
+                <h4>Edit comment</h4>
+                <ul>
+                    <li>Click nút <strong>"✏️ Sửa"</strong> ở comment của bạn</li>
+                    <li>Textarea hiện ra với nội dung cũ</li>
+                    <li>Chỉnh sửa nội dung (vẫn support LaTeX & TikZ)</li>
+                    <li>Click <strong>"Lưu"</strong> hoặc <strong>"Hủy"</strong></li>
+                    <li>Label "(đã chỉnh sửa)" hiển thị sau timestamp</li>
+                </ul>
+
+                <h4>Delete comment</h4>
+                <ul>
+                    <li>Click nút <strong>"🗑️ Xóa"</strong> ở comment của bạn</li>
+                    <li>Confirm dialog xuất hiện</li>
+                    <li>Confirm xóa → Comment biến mất</li>
+                    <li><strong>Lưu ý:</strong> Xóa vĩnh viễn, không thể khôi phục</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 7: Profile -->
+        <section id="profile" class="docs-section">
+            <h2>👤 Profile & Tương tác xã hội</h2>
+
+            <h3>Quản lý Profile</h3>
+            <ul>
+                <li><strong>Tải ảnh đại diện:</strong> Hỗ trợ nhiều định dạng (PNG, JPG, GIF)</li>
+                <li><strong>Chỉnh sửa tiểu sử:</strong> Soạn thảo rich text với hỗ trợ markdown</li>
+                <li><strong>Trang cài đặt:</strong> <code>/profile/{user_id}/settings</code></li>
+                <li><strong>Profile công khai:</strong> <code>/profile/{user_id}</code> có thể xem bởi người khác</li>
+            </ul>
+
+            <h3>Follow/Unfollow System</h3>
+            <div class="feature-detail">
+                <h4>Yêu cầu để Follow</h4>
+                <ul>
+                    <li>✅ <strong>Tài khoản đã xác thực:</strong> Cần xác thực email trước</li>
+                    <li>🚫 <strong>Không thể tự follow:</strong> Không thể follow chính mình</li>
+                    <li>👥 <strong>Theo dõi lẫn nhau:</strong> Có thể follow và được follow lại</li>
+                </ul>
+
+                <h4>Xem bài đăng từ người đã Follow</h4>
+                <ol>
+                    <li>Đăng nhập và xác thực tài khoản (bắt buộc)</li>
+                    <li>Follow các user mà bạn quan tâm</li>
+                    <li>Xem feed các SVG mới từ những người bạn follow</li>
+                    <li>Sắp xếp theo thời gian (mới nhất hiển thị trước)</li>
+                    <li>Tự động tải thêm khi cuộn xuống dưới</li>
+                </ol>
+            </div>
+
+            <h3>Tương tác xã hội</h3>
+            <ul>
+                <li>❤️ <strong>Like/Unlike:</strong> Thể hiện sở thích với SVG của người khác</li>
+                <li>👀 <strong>Xem profile:</strong> Click vào tên tác giả để xem profile</li>
+                <li>👥 <strong>Follow từ profile:</strong> Follow người dùng từ trang profile</li>
+                <li>📋 <strong>Theo dõi hoạt động:</strong> Xem timeline các SVG mới</li>
+            </ul>
+        </section>
+
+        <!-- Section 8: Verification -->
+        <section id="verification" class="docs-section">
+            <h2>🛡️ Xác thực danh tính & Bảo mật</h2>
+
+            <h3>Tại sao cần xác thực?</h3>
+            <ul>
+                <li>🔒 <strong>Bảo mật cao hơn:</strong> Xác nhận email thật</li>
+                <li>👥 <strong>Unlock features:</strong> Follow/Unfollow yêu cầu verified account</li>
+                <li>✅ <strong>Uy tín:</strong> Badge "Đã xác thực" tăng trust</li>
+                <li>🚀 <strong>Priority access:</strong> Features mới ưu tiên cho verified users</li>
+            </ul>
+
+            <h3>Quy trình xác thực 5 bước</h3>
+            <div class="step-container">
+                <div class="step-box">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>Kiểm tra trạng thái</h4>
+                        <p>Vào Profile Settings → Xem verification status</p>
+                    </div>
+                </div>
+
+                <div class="step-box">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>Bắt đầu xác thực</h4>
+                        <p>Nhấn "Xác thực tài khoản" → Đọc Terms & Conditions → "Tôi đồng ý"</p>
+                    </div>
+                </div>
+
+                <div class="step-box">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>Nhận email</h4>
+                        <p>Hệ thống gửi 6-digit code đến email. Check Inbox và Spam folder. Mã có hiệu lực 24 giờ.</p>
+                    </div>
+                </div>
+
+                <div class="step-box">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h4>Nhập mã</h4>
+                        <p>Enter chính xác 6 digits từ email. Max 5 attempts. Nhấn "Xác thực".</p>
+                    </div>
+                </div>
+
+                <div class="step-box">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <h4>Hoàn tất</h4>
+                        <p>Status chuyển thành "✅ Đã xác thực". Badge icon xuất hiện. Unlock Follow/Unfollow.</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Lợi ích khi xác thực</h3>
+            <div class="benefits-grid">
+                <div class="benefit-card">
+                    <div class="benefit-icon">🔓</div>
+                    <h4>Tính năng mở khóa</h4>
+                    <ul>
+                        <li>Follow/Unfollow người dùng</li>
+                        <li>Xem bài đăng từ người đã follow</li>
+                        <li>Thông báo email</li>
+                        <li>Hỗ trợ ưu tiên</li>
+                    </ul>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">🛡️</div>
+                    <h4>Bảo mật nâng cao</h4>
+                    <ul>
+                        <li>Khôi phục tài khoản qua email</li>
+                        <li>Thông báo bảo mật</li>
+                        <li>Xác thực hai yếu tố (sắp ra mắt)</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 9: Search -->
+        <section id="search" class="docs-section">
+            <h2>🔍 Tìm kiếm & Từ khóa</h2>
+
+            <h3>Enhanced Search Bar với hai chế độ</h3>
+            <div class="search-modes">
+                <div class="search-mode">
+                    <h4>🔹 Tìm theo từ khóa (mặc định)</h4>
+                    <ul>
+                        <li><strong>Placeholder:</strong> "Tìm theo từ khóa..."</li>
+                        <li><strong>Auto-suggestions:</strong> Hiển thị gợi ý từ keywords database</li>
+                        <li><strong>Tìm kiếm:</strong> SVG files có keywords matching</li>
+                        <li><strong>Real-time:</strong> Suggestions xuất hiện khi gõ</li>
+                    </ul>
+                </div>
+                <div class="search-mode">
+                    <h4>🔹 Tìm theo tên tài khoản</h4>
+                    <ul>
+                        <li><strong>Placeholder:</strong> "Tìm theo tên tài khoản..."</li>
+                        <li><strong>No suggestions:</strong> Tìm kiếm trực tiếp</li>
+                        <li><strong>Tìm kiếm:</strong> SVG files của username matching</li>
+                        <li><strong>Fuzzy search:</strong> Hỗ trợ tìm kiếm gần đúng</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Cách sử dụng Search Bar</h3>
+            <ol>
+                <li><strong>Chọn loại tìm kiếm:</strong> Click button "Từ khóa" hoặc "Tên tài khoản"</li>
+                <li><strong>Nhập và tìm kiếm:</strong>
+                    <ul>
+                        <li>Mode từ khóa: Gõ từ khóa → chọn từ suggestions → Enter</li>
+                        <li>Mode tên tài khoản: Gõ username → Enter</li>
+                    </ul>
+                </li>
+                <li><strong>Xem kết quả:</strong> Grid layout với tất cả SVG files matching</li>
+            </ol>
+
+            <h3>Hệ thống từ khóa</h3>
+            <ul>
+                <li><strong>Gắn thẻ cho SVG:</strong> Nhập keywords khi lưu SVG</li>
+                <li><strong>Gợi ý tự động:</strong> Hệ thống gợi ý từ keywords có sẵn</li>
+                <li><strong>Không phân biệt hoa thường:</strong> "Circle" và "circle" như nhau</li>
+            </ul>
+        </section>
+
+        <!-- Section 10: Troubleshooting -->
+        <section id="troubleshooting" class="docs-section">
+            <h2>🛠️ Xử lý lỗi & Troubleshooting</h2>
+
+            <h3>Lỗi biên dịch LaTeX</h3>
+            <div class="error-solutions">
+                <div class="error-box">
+                    <h4>❌ Thiếu Packages</h4>
+                    <p><strong>Error:</strong> <code>! LaTeX Error: File 'pgfornament.sty' not found.</code></p>
+                    <p><strong>Solutions:</strong></p>
+                    <ul>
+                        <li>Use manual package specification: <code>%!&lt;\usepackage{pgfornament}&gt;</code></li>
+                        <li>Check package name spelling</li>
+                        <li>Verify package is in allowlist</li>
+                    </ul>
+                </div>
+
+                <div class="error-box">
+                    <h4>❌ Lỗi cú pháp</h4>
+                    <p><strong>Error:</strong> <code>! Missing $ inserted.</code></p>
+                    <p><strong>Solutions:</strong></p>
+                    <ul>
+                        <li>Check TikZ code syntax</li>
+                        <li>Ensure proper math mode delimiters</li>
+                        <li>Validate bracket matching</li>
+                    </ul>
+                </div>
+
+                <div class="error-box">
+                    <h4>❌ Vấn đề bộ nhớ/Timeout</h4>
+                    <p><strong>Error:</strong> <code>Compilation timeout after 30 seconds</code></p>
+                    <p><strong>Solutions:</strong></p>
+                    <ul>
+                        <li>Simplify complex diagrams</li>
+                        <li>Reduce number of plot points</li>
+                        <li>Optimize loops và calculations</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Vấn đề Upload/Lưu file</h3>
+            <div class="info-box">
+                <h4>Giới hạn dung lượng file</h4>
+                <ul>
+                    <li><strong>SVG files:</strong> Max 10MB</li>
+                    <li><strong>Converted images:</strong> Max 60MP (60M pixels)</li>
+                    <li><strong>DPI limit:</strong> Max 2000 DPI</li>
+                </ul>
+            </div>
+
+            <h3>Vấn đề xác thực</h3>
+            <ul>
+                <li><strong>Google OAuth:</strong> Check OAuth settings, scope permissions</li>
+                <li><strong>Email not received:</strong> Check spam folder, wait 2-3 minutes</li>
+                <li><strong>Code expired:</strong> Request new verification code</li>
+                <li><strong>Max attempts:</strong> Wait 24 hours for reset</li>
+            </ul>
+
+            <h3>Tương thích trình duyệt</h3>
+            <ul>
+                <li><strong>Modern browsers:</strong> Chrome 80+, Firefox 75+, Safari 13+</li>
+                <li><strong>JavaScript required:</strong> Enable JavaScript for full functionality</li>
+                <li><strong>Cookies required:</strong> Enable cookies for authentication</li>
+                <li><strong>Local storage:</strong> Required for user preferences</li>
+            </ul>
+        </section>
+
+        <!-- Section 11: Tips -->
+        <section id="tips" class="docs-section">
+            <h2>💡 Tips & Best Practices</h2>
+
+            <h3>TikZ Code Examples Library</h3>
+            
+            <div class="code-example">
+                <div class="code-header">Basic Shapes</div>
+                <pre><code>% Circle with label
+\begin{tikzpicture}
+\draw (0,0) circle (1cm);
+\node at (0,0) {Center};
+\end{tikzpicture}
+
+% Rectangle with rounded corners
+\begin{tikzpicture}
+\draw[rounded corners=5pt] (0,0) rectangle (3,2);
+\end{tikzpicture}</code></pre>
+            </div>
+
+            <div class="code-example">
+                <div class="code-header">Mathematical Diagrams</div>
+                <pre><code>% Function plot
+\begin{tikzpicture}
+\begin{axis}[domain=-2:2]
+\addplot {x^2};
+\end{axis}
+\end{tikzpicture}
+
+% Geometric construction
+%!&lt;\usetikzlibrary{angles,quotes}&gt;
+\begin{tikzpicture}
+\coordinate (A) at (0,0);
+\coordinate (B) at (3,0);
+\coordinate (C) at (1,2);
+\draw (A) -- (B) -- (C) -- cycle;
+\pic [draw, angle radius=8mm, "$\alpha$"] {angle = B--A--C};
+\end{tikzpicture}</code></pre>
+            </div>
+
+            <div class="code-example">
+                <div class="code-header">Circuit Diagrams</div>
+                <pre><code>%!&lt;\usepackage{circuitikz}&gt;
+\begin{tikzpicture}
+\draw (0,0) to[R=1&lt;\ohm&gt;] (2,0)
+      to[L=1&lt;\henry&gt;] (4,0)
+      to[C=1&lt;\farad&gt;] (6,0);
+\end{tikzpicture}</code></pre>
+            </div>
+
+            <h3>Sử dụng trên nhiều thiết bị</h3>
+            <div class="device-tips">
+                <div class="device-tip">
+                    <h4>🖥️ Desktop</h4>
+                    <ul>
+                        <li>Hover hiệu ứng: Di chuột để xem menu</li>
+                        <li>Transitions mượt: Chuyển động tự nhiên</li>
+                        <li>Visual feedback: Phản hồi trực quan</li>
+                        <li>Loading states: Placeholder khi đang tải</li>
+                    </ul>
+                </div>
+                <div class="device-tip">
+                    <h4>📱 Mobile</h4>
+                    <ul>
+                        <li>2-tap logic: Tap để hiện, tap lần 2 thực hiện</li>
+                        <li>Touch-friendly: Nút to đủ cho ngón tay</li>
+                        <li>Responsive: Tự động điều chỉnh màn hình</li>
+                        <li>Smooth scroll: Cuộn mượt mà</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 12: FAQ -->
+        <section id="faq" class="docs-section">
+            <h2>❓ Câu hỏi thường gặp (FAQ)</h2>
+
+            <div class="faq-list">
+                <div class="faq-item">
+                    <h3>Q: Tôi có thể sử dụng miễn phí không?</h3>
+                    <p><strong>A:</strong> Có, TikZ2SVG hoàn toàn miễn phí cho tất cả tính năng cơ bản. Bạn chỉ cần đăng nhập bằng Google để sử dụng đầy đủ tính năng.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h3>Q: File SVG có bị xóa tự động không?</h3>
+                    <p><strong>A:</strong> Không, file SVG của bạn được lưu trữ vĩnh viễn sau khi tạo. Chỉ có chủ sở hữu mới có thể xóa file của mình.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h3>Q: Tôi có thể tạo bao nhiêu file SVG mỗi ngày?</h3>
+                    <p><strong>A:</strong> Hiện tại giới hạn 10 file SVG mới mỗi ngày cho mỗi tài khoản để đảm bảo chất lượng dịch vụ.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h3>Q: Tại sao tôi không thể follow người khác?</h3>
+                    <p><strong>A:</strong> Để follow người khác, bạn cần xác thực tài khoản qua email. Vào Profile Settings → Xác thực tài khoản để mở khóa tính năng này.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h3>Q: File TikZ của tôi không biên dịch được, phải làm sao?</h3>
+                    <p><strong>A:</strong> Kiểm tra:</p>
+                    <ul>
+                        <li>Cú pháp TikZ có đúng không</li>
+                        <li>Có thiếu packages không (sử dụng <code>%!&lt;\usepackage{...}&gt;</code> nếu cần)</li>
+                        <li>Xem log lỗi chi tiết để khắc phục</li>
+                    </ul>
+                </div>
+
+                <div class="faq-item">
+                    <h3>Q: Làm sao để hiển thị chữ Trung Quốc, Nhật Bản, Hàn Quốc trong TikZ?</h3>
+                    <p><strong>A:</strong> Hệ thống hỗ trợ ĐẦY ĐỦ Unicode với LuaLaTeX + fontspec. Bạn chỉ cần thêm dòng <code>\setmainfont{STSong}</code> vào đầu code TikZ:</p>
+                    <div class="code-example">
+                        <pre><code>\setmainfont{STSong}
+\begin{tikzpicture}
+  \node {中文: 富贵};  % Tiếng Trung hiển thị HOÀN HẢO
+\end{tikzpicture}</code></pre>
+                    </div>
+                    <p><strong>Lưu ý:</strong> KHÔNG dùng <code>%!&lt;CJKutf8&gt;</code> vì không tương thích với LuaLaTeX.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h3>Q: Tại sao chữ Trung/Nhật/Hàn hiện thành hộp vuông □□?</h3>
+                    <p><strong>A:</strong> Bạn chưa chọn font hỗ trợ CJK. Thêm <code>\setmainfont{STSong}</code> (hoặc font CJK khác) vào đầu code TikZ. Font mặc định (Latin Modern) không có ký tự CJK.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h3>Q: Làm sao để yêu cầu thêm package mới vào hệ thống?</h3>
+                    <p><strong>A:</strong> Truy cập trang <code>/packages</code> → Cuộn xuống phần "Yêu cầu Package mới" → Click "Gửi yêu cầu Package" → Điền form với thông tin package cần thiết. Hệ thống giới hạn 3 yêu cầu/giờ.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h3>Q: Mất bao lâu để yêu cầu package được xử lý?</h3>
+                    <p><strong>A:</strong> Tùy vào mức độ ưu tiên:</p>
+                    <ul>
+                        <li><strong>Khẩn cấp:</strong> 1-2 ngày làm việc</li>
+                        <li><strong>Cao:</strong> 3-5 ngày làm việc</li>
+                        <li><strong>Trung bình:</strong> 1-2 tuần</li>
+                        <li><strong>Thấp:</strong> 2-4 tuần</li>
+                    </ul>
+                    <p>Bạn sẽ nhận email thông báo khi yêu cầu được xử lý.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h3>Q: Tôi quên mật khẩu thì sao?</h3>
+                    <p><strong>A:</strong> TikZ2SVG sử dụng Google OAuth, bạn chỉ cần đăng nhập bằng tài khoản Google của mình. Không cần nhớ mật khẩu riêng.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section class="contact-section">
+            <h3>📞 Liên hệ và hỗ trợ</h3>
+            <p>Nếu bạn có câu hỏi hoặc cần hỗ trợ:</p>
+            <ul>
+                <li><strong>Website:</strong> <a href="/">TikZ2SVG.com</a></li>
+                <li><strong>Email hỗ trợ:</strong> support@tikz2svg.com</li>
+                <li><strong>Báo cáo vi phạm:</strong> report@tikz2svg.com</li>
+            </ul>
+            <p class="thank-you">
+                Cảm ơn bạn đã sử dụng TikZ2SVG! 🚀<br>
+                Chúc bạn có trải nghiệm tuyệt vời!
+            </p>
+        </section>
+    </main>
+</div>
+
+<!-- Scroll to top button -->
+<button id="scrollTopBtn" class="scroll-top-btn" title="Lên đầu trang">
+    <i class="fas fa-arrow-up"></i>
+</button>
+
+<script>
+// Sidebar navigation active state
+document.addEventListener('DOMContentLoaded', function() {
+    const sections = document.querySelectorAll('.docs-section');
+    const navLinks = document.querySelectorAll('.sidebar-nav .nav-link, .sidebar-nav .nav-link-sub');
+    
+    // Intersection Observer for active section
+    const observerOptions = {
+        root: null,
+        rootMargin: '-20% 0px -70% 0px',
+        threshold: 0
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const id = entry.target.getAttribute('id');
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${id}`) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        });
+    }, observerOptions);
+    
+    sections.forEach(section => observer.observe(section));
+    
+    // Smooth scroll for navigation links
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+            const targetSection = document.querySelector(targetId);
+            
+            if (targetSection) {
+                const offset = 80; // Account for fixed header
+                const targetPosition = targetSection.offsetTop - offset;
+                
+                window.scrollTo({
+                    top: targetPosition,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+    
+    // Scroll to top button
+    const scrollTopBtn = document.getElementById('scrollTopBtn');
+    
+    window.addEventListener('scroll', () => {
+        if (window.pageYOffset > 300) {
+            scrollTopBtn.classList.add('show');
+        } else {
+            scrollTopBtn.classList.remove('show');
+        }
+    });
+    
+    scrollTopBtn.addEventListener('click', () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+});
+</script>
+{% endblock %}
+

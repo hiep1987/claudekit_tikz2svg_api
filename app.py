@@ -1767,6 +1767,12 @@ def terms_of_service():
     
     return render_template('terms_of_service.html', current_date=current_date)
 
+# Documentation route
+@app.route("/docs")
+def docs():
+    """Route cho trang Documentation"""
+    return render_template('docs.html')
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     print(f"DEBUG: Index route accessed - method: {request.method}")

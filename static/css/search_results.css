@@ -114,32 +114,58 @@
 /* Pagination Buttons */
 .pagination-btn {
     padding: 8px 16px;
-    background: white;
+    background-color: #ffffff;
     border: 1px solid #ddd;
     border-radius: 4px;
-    color: #333;
+    color: #1a1a1a;
     text-decoration: none;
     transition: all 0.2s;
     font-size: 14px;
     cursor: pointer;
+    font-weight: 500;
 }
 
 .pagination-btn:hover {
-    background: #f0f0f0;
-    border-color: #007bff;
+    background-color: #1976d2;
+    color: #ffffff;
+    border-color: #1976d2;
     transform: translateY(-1px);
 }
 
+.pagination-btn:active,
+.pagination-btn:focus {
+    background-color: #1976d2;
+    color: #ffffff;
+    border-color: #1976d2;
+    outline: 2px solid #1976d2;
+    outline-offset: 2px;
+}
+
 .pagination-btn-active {
-    background: #007bff;
-    color: white;
-    border-color: #007bff;
+    background-color: #1976d2;
+    color: #ffffff;
+    border-color: #1976d2;
 }
 
 .pagination-btn-disabled {
-    opacity: 0.5;
+    background-color: #f5f5f5;
+    color: #999999;
+    opacity: 0.6;
     cursor: not-allowed;
     pointer-events: none;
+}
+
+/* Specific styles for prev/next buttons to ensure contrast */
+a.pagination-btn.pagination-btn-next,
+a.pagination-btn.pagination-btn-prev {
+    background-color: #ffffff;
+    color: #1a1a1a;
+}
+
+a.pagination-btn.pagination-btn-next:hover,
+a.pagination-btn.pagination-btn-prev:hover {
+    background-color: #1976d2;
+    color: #ffffff;
 }
 
 /* Pagination Ellipsis */

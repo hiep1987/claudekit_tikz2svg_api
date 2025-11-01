@@ -155,38 +155,63 @@
 
 .tikz-app .pagination-btn {
     padding: 0.5rem 1rem;
-    background: var(--container-bg);
+    background-color: #ffffff;
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
-    color: var(--text-primary);
+    color: #1a1a1a;
     text-decoration: none;
     transition: all 0.3s ease;
     font-size: 0.9rem;
+    font-weight: 500;
     cursor: pointer;
     min-width: 40px;
     text-align: center;
 }
 
 .tikz-app .pagination-btn:hover {
-    background: var(--primary-color);
-    color: white;
-    border-color: var(--primary-color);
+    background-color: #1976d2;
+    color: #ffffff;
+    border-color: #1976d2;
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
+.tikz-app .pagination-btn:active,
+.tikz-app .pagination-btn:focus {
+    background-color: #1976d2;
+    color: #ffffff;
+    border-color: #1976d2;
+    outline: 2px solid #1976d2;
+    outline-offset: 2px;
+}
+
 .tikz-app .pagination-btn-active {
-    background: var(--primary-color);
-    color: white;
-    border-color: var(--primary-color);
+    background-color: #1976d2;
+    color: #ffffff;
+    border-color: #1976d2;
     font-weight: 600;
     cursor: default;
 }
 
 .tikz-app .pagination-btn-disabled {
-    opacity: 0.5;
+    background-color: #f5f5f5;
+    color: #999999;
+    opacity: 0.6;
     cursor: not-allowed;
     pointer-events: none;
+}
+
+/* Specific styles for prev/next buttons to ensure contrast */
+.tikz-app a.pagination-btn.pagination-btn-next,
+.tikz-app a.pagination-btn.pagination-btn-prev {
+    background-color: #ffffff;
+    color: #1a1a1a;
+}
+
+.tikz-app a.pagination-btn.pagination-btn-next:hover,
+.tikz-app a.pagination-btn.pagination-btn-prev:hover {
+    background-color: #1976d2;
+    color: #ffffff;
 }
 
 .tikz-app .pagination-ellipsis {

@@ -140,12 +140,20 @@
     font-weight: var(--font-weight-semibold);
     transition: all var(--transition-fast);
     box-shadow: var(--shadow-sm);
+    color: #ffffff;
 }
 
 .tikz-app .btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
     filter: brightness(1.1);
+    color: #ffffff;
+}
+
+.tikz-app .btn-primary:focus {
+    outline: 2px solid var(--info-color);
+    outline-offset: 2px;
+    color: #ffffff;
 }
 
 .tikz-app .btn-outline-secondary {

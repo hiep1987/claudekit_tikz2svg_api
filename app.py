@@ -6173,8 +6173,8 @@ def mark_all_notifications_read():
 try:
     from package_routes import setup_package_routes, update_package_usage
     
-    # Setup package management routes
-    setup_package_routes(app, limiter=None)
+    # Setup package management routes - Pass the main limiter to avoid conflicts
+    setup_package_routes(app, limiter=limiter)
     
     print("[INFO] Package Management System routes loaded successfully", flush=True)
     

@@ -51,6 +51,53 @@
             </div>
         {% endif %}
     </div>
+    
+    <!-- =====================================================
+         OPTIMIZATION: PAGINATION UI (Same as index & other pages)
+         ===================================================== -->
+    {% if search_results and total_pages > 1 %}
+    <div class="pagination-container" style="margin-top: 2rem; display: flex; justify-content: center; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+        <!-- Previous Button -->
+        {% if has_prev %}
+            <a href="?q={{ search_query }}&type={{ search_type }}&page={{ page - 1 }}" class="pagination-btn pagination-btn-prev" title="Trang trước">
+                ← Trước
+            </a>
+        {% else %}
+            <span class="pagination-btn pagination-btn-prev pagination-btn-disabled">
+                ← Trước
+            </span>
+        {% endif %}
+        
+        <!-- Page Numbers -->
+        <div class="pagination-numbers" style="display: flex; gap: 0.25rem;">
+            {% for page_num in page_numbers %}
+                {% if page_num == '...' %}
+                    <span class="pagination-ellipsis">...</span>
+                {% elif page_num == page %}
+                    <span class="pagination-btn pagination-btn-active">{{ page_num }}</span>
+                {% else %}
+                    <a href="?q={{ search_query }}&type={{ search_type }}&page={{ page_num }}" class="pagination-btn">{{ page_num }}</a>
+                {% endif %}
+            {% endfor %}
+        </div>
+        
+        <!-- Next Button -->
+        {% if has_next %}
+            <a href="?q={{ search_query }}&type={{ search_type }}&page={{ page + 1 }}" class="pagination-btn pagination-btn-next" title="Trang sau">
+                Sau →
+            </a>
+        {% else %}
+            <span class="pagination-btn pagination-btn-next pagination-btn-disabled">
+                Sau →
+            </span>
+        {% endif %}
+    </div>
+    
+    <!-- Pagination Info -->
+    <div class="pagination-info" style="text-align: center; margin-top: 1rem; color: #666; font-size: 0.9rem;">
+        Trang {{ page }} / {{ total_pages }} • Hiển thị {{ search_results|length }} / {{ total_items }} kết quả
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
 
@@ -87,5 +134,5 @@
         }
     });
 </script>
-<script src="{{ url_for('static', filename='js/file_card.js', v='1.2') }}"></script>
+<script src="{{ url_for('static', filename='js/file_card.js', v='1.3') }}"></script>
 {% endblock %}

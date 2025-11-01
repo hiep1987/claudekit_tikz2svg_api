@@ -2249,8 +2249,40 @@ def search_results():
         )
         cursor = conn.cursor(dictionary=True)
 
+        # =====================================================
+        # OPTIMIZATION: PAGINATION (Same as index & other pages)
+        # =====================================================
+        page, per_page = get_pagination_params(request)
+        offset = (page - 1) * per_page
+        
+        # Get total count for pagination
         if search_type == 'username':
-            # Search for SVG files by username
+            cursor.execute("""
+                SELECT COUNT(DISTINCT s.id) as total
+                FROM svg_image s
+                JOIN user u ON s.user_id = u.id
+                WHERE u.username LIKE %s COLLATE utf8mb4_general_ci
+            """, (f"%{query}%",))
+        else:
+            cursor.execute("""
+                SELECT COUNT(DISTINCT s.id) as total
+                FROM svg_image s
+                JOIN user u ON s.user_id = u.id
+                JOIN svg_image_keyword sik ON s.id = sik.svg_image_id
+                JOIN keyword k ON sik.keyword_id = k.id
+                WHERE k.word LIKE %s COLLATE utf8mb4_general_ci
+            """, (f"%{query}%",))
+        
+        total_items = cursor.fetchone()['total']
+        
+        # Calculate pagination metadata
+        total_pages = max(1, (total_items + per_page - 1) // per_page)
+        has_prev = page > 1
+        has_next = page < total_pages
+        page_numbers = generate_page_numbers(page, total_pages, MAX_PAGES_DISPLAY)
+
+        if search_type == 'username':
+            # Search for SVG files by username + PAGINATION
             cursor.execute("""
                 SELECT DISTINCT s.*, u.username as creator_username, u.id as creator_id,
                        (SELECT COUNT(*) FROM svg_like WHERE svg_image_id = s.id) as like_count,
@@ -2259,9 +2291,10 @@ def search_results():
                 JOIN user u ON s.user_id = u.id
                 WHERE u.username LIKE %s COLLATE utf8mb4_general_ci
                 ORDER BY s.created_at DESC
-            """, (get_user_id_from_session() or 0, f"%{query}%"))
+                LIMIT %s OFFSET %s
+            """, (get_user_id_from_session() or 0, f"%{query}%", per_page, offset))
         else:
-            # Default: Search for SVG files by keywords
+            # Default: Search for SVG files by keywords + PAGINATION
             cursor.execute("""
                 SELECT DISTINCT s.*, u.username as creator_username, u.id as creator_id,
                        (SELECT COUNT(*) FROM svg_like WHERE svg_image_id = s.id) as like_count,
@@ -2272,7 +2305,8 @@ def search_results():
                 JOIN keyword k ON sik.keyword_id = k.id
                 WHERE k.word LIKE %s COLLATE utf8mb4_general_ci
                 ORDER BY s.created_at DESC
-            """, (get_user_id_from_session() or 0, f"%{query}%"))
+                LIMIT %s OFFSET %s
+            """, (get_user_id_from_session() or 0, f"%{query}%", per_page, offset))
 
         search_results = cursor.fetchall()
 
@@ -2293,11 +2327,18 @@ def search_results():
                              search_type=search_type,
                              search_type_description=search_type_description,
                              search_results=search_results,
-                             results_count=len(search_results),
+                             results_count=total_items,
                              logged_in=current_user.is_authenticated,
                              user_email=current_user.email if current_user.is_authenticated else None,
                              username=current_user.username if current_user.is_authenticated else None,
-                             avatar=current_user.avatar if current_user.is_authenticated else None)
+                             avatar=current_user.avatar if current_user.is_authenticated else None,
+                             # Pagination metadata
+                             page=page,
+                             total_pages=total_pages,
+                             total_items=total_items,
+                             has_prev=has_prev,
+                             has_next=has_next,
+                             page_numbers=page_numbers)
 
     except Exception as e:
         print(f"[ERROR] /search: {e}", flush=True)
@@ -2311,7 +2352,14 @@ def search_results():
                              logged_in=current_user.is_authenticated,
                              user_email=current_user.email if current_user.is_authenticated else None,
                              username=current_user.username if current_user.is_authenticated else None,
-                             avatar=current_user.avatar if current_user.is_authenticated else None)
+                             avatar=current_user.avatar if current_user.is_authenticated else None,
+                             # Pagination metadata (error case)
+                             page=1,
+                             total_pages=1,
+                             total_items=0,
+                             has_prev=False,
+                             has_next=False,
+                             page_numbers=[1])
 
 def get_user_id_from_session():
     """Helper function for backward compatibility"""

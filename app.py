@@ -67,22 +67,25 @@ def get_real_ip():
     return request.remote_addr or '127.0.0.1'
 
 # Initialize Flask-Limiter
+# In development: disable rate limiting entirely for testing
+# In production: use Redis storage with real IP tracking
 limiter = Limiter(
     app=app,
     key_func=get_real_ip,  # Use custom function to get real IP
     storage_uri=RATE_LIMIT_STORAGE_URI,
-    default_limits=["1000 per hour"] if IS_DEVELOPMENT else ["200 per hour"],
+    default_limits=[] if IS_DEVELOPMENT else ["200 per hour"],  # No limits in dev
     storage_options={"socket_connect_timeout": 30},
     strategy="fixed-window",
+    enabled=not IS_DEVELOPMENT,  # Disable limiter entirely in development
 )
 
 # Development: More generous limits for testing
 # Production: Stricter limits for security
 RATE_LIMITS = {
-    'api_likes_preview': "100 per minute",  # Same for dev and prod - lazy loading needs high limit
-    'api_like_counts': "100 per minute",
-    'api_general': "200 per minute",
-    'api_write': "30 per minute" if IS_DEVELOPMENT else "20 per minute",
+    'api_likes_preview': "10000 per minute" if IS_DEVELOPMENT else "150 per minute",  # Very high limit in dev
+    'api_like_counts': "10000 per minute" if IS_DEVELOPMENT else "150 per minute",
+    'api_general': "10000 per minute" if IS_DEVELOPMENT else "300 per minute",
+    'api_write': "10000 per minute" if IS_DEVELOPMENT else "20 per minute",
 }
 
 print(f"🔧 Rate Limiting: {'DEVELOPMENT' if IS_DEVELOPMENT else 'PRODUCTION'} mode")

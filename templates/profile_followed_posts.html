@@ -53,6 +53,53 @@
                 </div>
             {% endif %}
         </div>
+        
+        <!-- =====================================================
+             PHASE 3: PAGINATION UI (Same as index.html)
+             ===================================================== -->
+        {% if total_pages > 1 %}
+        <div class="pagination-container" style="margin-top: 2rem; display: flex; justify-content: center; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+            <!-- Previous Button -->
+            {% if has_prev %}
+                <a href="?page={{ page - 1 }}" class="pagination-btn pagination-btn-prev" title="Trang trước">
+                    ← Trước
+                </a>
+            {% else %}
+                <span class="pagination-btn pagination-btn-prev pagination-btn-disabled">
+                    ← Trước
+                </span>
+            {% endif %}
+            
+            <!-- Page Numbers -->
+            <div class="pagination-numbers" style="display: flex; gap: 0.25rem;">
+                {% for page_num in page_numbers %}
+                    {% if page_num == '...' %}
+                        <span class="pagination-ellipsis">...</span>
+                    {% elif page_num == page %}
+                        <span class="pagination-btn pagination-btn-active">{{ page_num }}</span>
+                    {% else %}
+                        <a href="?page={{ page_num }}" class="pagination-btn">{{ page_num }}</a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            
+            <!-- Next Button -->
+            {% if has_next %}
+                <a href="?page={{ page + 1 }}" class="pagination-btn pagination-btn-next" title="Trang sau">
+                    Sau →
+                </a>
+            {% else %}
+                <span class="pagination-btn pagination-btn-next pagination-btn-disabled">
+                    Sau →
+                </span>
+            {% endif %}
+        </div>
+        
+        <!-- Pagination Info -->
+        <div class="pagination-info" style="text-align: center; margin-top: 1rem; color: #666; font-size: 0.9rem;">
+            Trang {{ page }} / {{ total_pages }} • Hiển thị {{ followed_posts|length }} / {{ total_items }} bài đăng
+        </div>
+        {% endif %}
     </div>
 
     <!-- Modal đăng xuất chỉ render nếu đã login -->

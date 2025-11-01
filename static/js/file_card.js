@@ -1266,8 +1266,8 @@ function initializeLikesPreview() {
     
     const observerOptions = {
         root: null, // viewport
-        rootMargin: '50px', // Load slightly before entering viewport
-        threshold: 0.1 // Trigger when 10% of card is visible
+        rootMargin: '0px', // Load only when entering viewport (no preload)
+        threshold: 0.3 // Trigger when 30% of card is visible (more strict)
     };
 
     // Track which cards have been loaded

@@ -79,13 +79,13 @@ limiter = Limiter(
     enabled=not IS_DEVELOPMENT,  # Disable limiter entirely in development
 )
 
-# Development: More generous limits for testing
-# Production: Stricter limits for security
+# Development: No limits (disabled entirely)
+# Production: Balanced limits for real-world usage with lazy loading
 RATE_LIMITS = {
-    'api_likes_preview': "10000 per minute" if IS_DEVELOPMENT else "150 per minute",  # Very high limit in dev
-    'api_like_counts': "10000 per minute" if IS_DEVELOPMENT else "150 per minute",
-    'api_general': "10000 per minute" if IS_DEVELOPMENT else "300 per minute",
-    'api_write': "10000 per minute" if IS_DEVELOPMENT else "20 per minute",
+    'api_likes_preview': "10000 per minute" if IS_DEVELOPMENT else "500 per minute",  # Higher for lazy loading
+    'api_like_counts': "10000 per minute" if IS_DEVELOPMENT else "500 per minute",
+    'api_general': "10000 per minute" if IS_DEVELOPMENT else "1000 per minute",
+    'api_write': "10000 per minute" if IS_DEVELOPMENT else "50 per minute",
 }
 
 print(f"🔧 Rate Limiting: {'DEVELOPMENT' if IS_DEVELOPMENT else 'PRODUCTION'} mode")

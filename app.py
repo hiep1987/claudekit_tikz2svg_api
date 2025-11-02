@@ -1114,7 +1114,7 @@ TEX_TEMPLATE = r"""
 \usepackage{tikz}
 \usepackage{tikz-3dplot}
 \usepackage{pgfplots}
-\pgfplotsset{compat=1.17}
+\pgfplotsset{compat=1.18}
 \usepackage{tkz-euclide}
 \usepackage{tkz-tab}
 

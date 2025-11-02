@@ -1163,6 +1163,24 @@ def generate_latex_source(
         if not re.match(r'^%!<.*>$', line.strip())
     ])
     
+    # Auto-fallback: Replace STSong với Noto Serif CJK SC (có sẵn trên server)
+    # STSong là font thương mại của Microsoft, không có trên Linux
+    cleaned_tikz_code = re.sub(
+        r'\\setmainfont\{STSong\}',
+        r'\\setmainfont{Noto Serif CJK SC}',
+        cleaned_tikz_code
+    )
+    cleaned_tikz_code = re.sub(
+        r'\\fontspec\{STSong\}',
+        r'\\fontspec{Noto Serif CJK SC}',
+        cleaned_tikz_code
+    )
+    cleaned_tikz_code = re.sub(
+        r'\\newfontfamily[^\{]*\{[^\}]*STSong[^\}]*\}',
+        lambda m: m.group(0).replace('STSong', 'Noto Serif CJK SC'),
+        cleaned_tikz_code
+    )
+    
     pkg_lines   = _lines_for_usepackage(extra_packages)
     tikz_lines  = _lines_for_tikz_libs(extra_tikz_libs)
     pgfl_lines  = _lines_for_pgfplots_libs(extra_pgfplots_libs)

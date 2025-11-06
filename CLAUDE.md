@@ -7,17 +7,78 @@ Tệp này cung cấp hướng dẫn cho Claude Code (claude.ai/code) khi hỗ t
 ## 📝 Tổng quan dự án
 
 **Tên dự án:** tikz2svg_api  
-**Mục tiêu:** Cung cấp một ứng dụng web cho phép người dùng chuyển đổi mã TikZ thành SVG, quản lý tài khoản, chia sẻ và tương tác với các file SVG.
+**Mục tiêu:** Cung cấp một ứng dụng web cho phép người dùng chuyển đổi mã TikZ thành SVG, quản lý tài khoản, chia sẻ và tương tác với các file SVG trong môi trường cộng đồng học thuật.
 
 **Thành phần chính:**
 - **Backend:** Flask (Python) + MySQL + Gunicorn
 - **Frontend:** HTML/CSS/JavaScript (Server-side rendering với Jinja2)
 - **Xác thực:** Google OAuth2 + Flask-Login
 - **Email:** Flask-Mail với Zoho SMTP
-- **File Processing:** CairoSVG, PIL (Pillow), lualatex
-- **TikZ Processing:** Tự động phát hiện packages và libraries
-- **Triển khai:** Production-ready với rate limiting và security
-- **External Libraries:** CodeMirror, Quill.js, Cropper.js
+- **File Processing:** CairoSVG, PIL (Pillow), lualatex, pdf2svg
+- **TikZ Processing:** 
+  - Tự động phát hiện packages và libraries
+  - Manual package specification với cú pháp `%!<\usepackage{...}>`
+  - Package request system cho người dùng
+- **Comments System:** LaTeX math + TikZ code sharing với MathJax
+- **Triển khai:** Production-ready với rate limiting, caching và security
+- **External Libraries:** CodeMirror, Quill.js, Cropper.js, MathJax
+
+---
+
+## ✨ Tính năng chính
+
+### 1. TikZ Processing System
+- **Auto-detection:** Tự động phát hiện 50+ LaTeX packages, TikZ libraries, PGFPlots libraries
+- **Manual Specification:** Cú pháp `%!<\usepackage{...}>` cho packages đặc biệt
+- **Package Options:** Hỗ trợ `\usepackage[options]{package}`
+- **Unicode Support:** LuaLaTeX + fontspec cho tiếng Việt, CJK characters
+- **Compilation:** lualatex → PDF → SVG (pdf2svg)
+- **Error Handling:** Chi tiết log lỗi LaTeX với line numbers
+- **Timeout Protection:** 30 giây timeout cho compilation
+
+### 2. Package Management System
+- **Package Listing:** Xem danh sách packages được hỗ trợ tại `/packages`
+- **Package Request:** Người dùng gửi yêu cầu thêm package mới
+- **Status Tracking:** Pending → Under Review → Approved/Rejected
+- **Priority Levels:** Thấp, Trung bình, Cao, Khẩn cấp
+- **Email Notifications:** Thông báo khi request được xử lý
+- **Rate Limiting:** 3 requests/giờ để tránh spam
+
+### 3. Comments System
+- **LaTeX Math:** Inline `$...$` và display `$$...$$` với MathJax
+- **TikZ Code Blocks:** `\code{...}` với copy button
+- **Nested Replies:** Parent comments và replies
+- **Like/Unlike:** Đánh giá chất lượng comments
+- **Edit/Delete:** Chỉnh sửa và xóa comments của mình
+- **Real-time Preview:** MathJax rendering khi gõ
+- **Security:** XSS protection với HTML escaping
+
+### 4. Social Features
+- **Like System:** Like/unlike SVG files với modal hiển thị danh sách
+- **Follow System:** Follow/unfollow users (requires verification)
+- **Profile Pages:** Public profiles với SVG gallery
+- **Followed Posts:** Xem SVG mới từ người đã follow
+- **Verification:** Email verification với 6-digit code
+
+### 5. Search & Discovery
+- **Dual-mode Search:** Tìm theo keywords hoặc username
+- **Auto-suggestions:** Real-time suggestions cho keywords
+- **Fuzzy Search:** Tìm kiếm gần đúng
+- **Keyword Tagging:** Gắn thẻ cho SVG files
+
+### 6. File Management
+- **File Upload:** Tạo và lưu SVG files
+- **Format Conversion:** SVG → PNG/JPEG với DPI customization
+- **File Actions:** Download, share, copy link, delete
+- **Keywords:** Tagging system cho dễ tìm kiếm
+- **View Statistics:** Likes count, views count
+
+### 7. Documentation
+- **Comprehensive Docs:** Trang `/docs` với full documentation
+- **Interactive TOC:** Sidebar navigation với smooth scrolling
+- **Code Examples:** TikZ code examples với syntax highlighting
+- **FAQ Section:** Câu hỏi thường gặp
+- **User Guides:** Hướng dẫn chi tiết cho từng tính năng
 
 ---
 
@@ -28,15 +89,28 @@ Tệp này cung cấp hướng dẫn cho Claude Code (claude.ai/code) khi hỗ t
 - **Database:** MySQL với mysql-connector-python
 - **Authentication:** Google OAuth2 + Flask-Login + Flask-Dance
 - **TikZ Processing:** 
-  - Tự động phát hiện `\usepackage` và `\usetikzlibrary`
-  - Sử dụng lualatex để biên dịch .tex → PDF
-  - CairoSVG + Pillow để chuyển đổi PDF/SVG → PNG/JPEG
+  - Tự động phát hiện `\usepackage`, `\usetikzlibrary`, `\usepgfplotslibrary`
+  - Manual package specification: `%!<\usepackage{...}>` với options support
+  - Sử dụng lualatex để biên dịch .tex → PDF → SVG (pdf2svg)
+  - CairoSVG + Pillow để chuyển đổi SVG → PNG/JPEG
+- **Package Management:**
+  - Whitelist-based package system với 50+ packages
+  - User package request system với status tracking
+  - Admin approval workflow
+- **Comments System:**
+  - LaTeX math rendering với MathJax
+  - TikZ code blocks với copy functionality
+  - Nested replies support
 - **Email Service:** Flask-Mail với Zoho SMTP
-- **Rate Limiting:** Custom implementation cho email và API
+- **Rate Limiting:** Custom implementation cho email, API và package requests
 - **Static Files:** Flask static folder với persistent storage
 - **File Management:** Unique naming cho SVG files và avatars
 - **API Endpoints:**
-  - `/api/svg/<svg_id>/likes` - Lấy danh sách users đã like SVG (pagination support)
+  - `/api/svg/<svg_id>/likes` - Lấy danh sách users đã like SVG (pagination)
+  - `/api/keywords/search` - Auto-suggestions cho keywords
+  - `/api/comments/` - CRUD operations cho comments
+  - `/packages` - Package listing và request system
+  - `/docs` - Comprehensive documentation page
 
 ### Frontend
 - **Template Engine:** Jinja2 với partials (reusable components)
@@ -45,31 +119,57 @@ Tệp này cung cấp hướng dẫn cho Claude Code (claude.ai/code) khi hỗ t
   - **Design System:** Colors, spacing, typography, glass morphism variables
   - **Migration Status:** 6/10 priority files completed (index.css, profile_*.css)
   - **Load Order:** Foundation → Global Base → Component CSS
+  - **Optimization:** Pagination, lazy loading, optimistic UI updates
 - **JavaScript:** Vanilla JS (ES6+) với AJAX/Fetch API
 - **External Libraries:**
-  - **CodeMirror:** Trình soạn thảo code cho TikZ
+  - **CodeMirror:** Trình soạn thảo code cho TikZ với syntax highlighting
+  - **MathJax:** Render LaTeX math trong comments
   - **Quill.js:** Rich text editor cho user bio
   - **Cropper.js:** Cắt và chỉnh sửa ảnh đại diện
-- **UI Components:** Modal dialogs, file upload, real-time interactions, likes modal
-- **Design Features:** Glass morphism, responsive design, accessibility compliance
-- **Real-time Features:** Polling cho likes, follows, new posts
-- **Likes System:**
-  - Click-to-view likes modal với user list
-  - Pagination support (20 users per page)
-  - Real-time like count updates
-  - Avatar placeholders và profile links
+- **UI Components:** 
+  - Modal dialogs (login, likes, delete confirmation)
+  - File upload với preview
+  - Real-time interactions (likes, follows, comments)
+  - Search bar với auto-suggestions
+  - Mobile-friendly 2-tap menu system
+- **Design Features:** 
+  - Glass morphism với backdrop blur
+  - Responsive design (mobile-first)
+  - WCAG AAA accessibility compliance (contrast ≥ 6.2:1)
+  - Smooth transitions và hover effects
+- **Real-time Features:** 
+  - Polling cho likes, follows, new posts
+  - Optimistic UI updates
+  - Real-time MathJax preview trong comment editor
+- **Search System:**
+  - Dual-mode search (keywords/username)
+  - Auto-suggestions cho keywords
+  - Fuzzy search support
+- **Comments System:**
+  - LaTeX math inline `$...$` và display `$$...$$`
+  - TikZ code blocks `\code{...}` với copy button
+  - Nested replies support
+  - Like/unlike comments
+  - Edit/delete với confirmation
 
 ### Database Schema
-- **Users:** id, email, username, avatar, bio, identity_verified
+- **Users:** id, email, username, avatar, bio, identity_verified, created_at
 - **SVG Files:** user_id, filename, original_tikz, created_at, likes, views, keywords
-- **User Interactions:** follows, likes, comments
+- **User Interactions:** 
+  - follows (follower_id, followed_id)
+  - likes (user_id, svg_filename)
+  - comments (id, user_id, svg_filename, parent_id, content, likes, edited)
+- **Package Management:**
+  - packages (name, type, is_active, requires_manual, options_support)
+  - package_requests (user_id, package_name, justification, priority, status)
 - **Email Logs:** Tracking email sending và delivery
 - **Rate Limit Logs:** Monitoring API usage
+- **Verification:** Email verification codes với expiry
 
 ### File Structure
 ```
 tikz2svg_api/
-├── app.py                 # Main Flask application (3821 lines)
+├── app.py                 # Main Flask application (4000+ lines)
 ├── requirements.txt       # Python dependencies
 ├── static/               # Static files (CSS, JS, images, avatars)
 │   ├── css/              # Component-based CSS files
@@ -77,19 +177,41 @@ tikz2svg_api/
 │   │   │   ├── master-variables.css  # Design system variables
 │   │   │   └── global-base.css       # Global base styles
 │   │   ├── index.css     # Main page styles (migrated)
+│   │   ├── docs.css      # Documentation page styles
+│   │   ├── packages.css  # Package management page
 │   │   ├── profile_*.css # Profile pages (migrated)  
+│   │   ├── search_results.css # Search page styles
 │   │   ├── file_card.css # File components
 │   │   └── navigation.css # Navigation styles
 │   ├── js/               # JavaScript modules
+│   │   ├── index.js      # Main page logic
+│   │   ├── file_card.js  # File card interactions (v1.3)
+│   │   ├── navigation.js # Navigation và search
+│   │   └── comments.js   # Comments system
 │   ├── images/           # Generated SVG files
 │   └── avatars/          # User profile images
 ├── templates/            # Jinja2 templates
 │   ├── partials/         # Reusable template components
-│   ├── emails/           # Email templates
-│   └── *.html            # Main page templates
+│   │   ├── _navbar.html  # Navigation bar
+│   │   ├── _file_card.html # File card component
+│   │   └── _login_modal.html # Login modal
+│   ├── emails/           # Email templates (6 templates)
+│   ├── admin/            # Admin panel templates
+│   ├── index.html        # Main TikZ editor page
+│   ├── docs.html         # Documentation page
+│   ├── packages.html     # Package listing
+│   ├── package_request.html # Package request form
+│   ├── view_svg.html     # SVG detail với comments
+│   ├── search_results.html # Search results page
+│   ├── profile_*.html    # Profile pages
+│   └── *.html            # Other page templates
 ├── email_service.py      # Email functionality
 ├── verification_service.py # Identity verification
-├── *.md                  # Documentation files
+├── *.md                  # Documentation files (15+ files)
+│   ├── DOCS_CONTENT_COMPILATION.md # Full docs content
+│   ├── CUOC_THI_VNFEAI_2025.md # Competition docs
+│   ├── CSS_FOUNDATION_*.md # CSS architecture docs
+│   └── USER_GUIDE_*.md   # User guides
 └── deployment/           # Deployment scripts
 ```
 
@@ -109,28 +231,58 @@ Claude Code cần tuân theo các nguyên tắc sau khi hỗ trợ dự án:
 - **Flask Routes:** Tuân thủ RESTful conventions
 - **Database:** Sử dụng parameterized queries để tránh SQL injection
 - **Error Handling:** Implement proper try-catch với logging
-- **Security:** Validate input, sanitize data, implement CSRF protection
-- **Performance:** Optimize database queries, implement caching khi cần
-- **TikZ Processing:** Implement timeout và error handling cho lualatex
-- **File Upload:** Validate file types, implement size limits
-- **Real-time Updates:** Implement efficient polling mechanisms
+- **Security:** 
+  - Validate input, sanitize data, implement CSRF protection
+  - XSS protection: HTML escaping cho user-generated content
+  - Rate limiting cho all endpoints nhạy cảm
+  - Whitelist-based package system
+- **Performance:** 
+  - Optimize database queries với indexes
+  - Implement pagination (20 items per page)
+  - Lazy loading và optimistic UI updates
+  - Redis caching cho VPS deployment
+- **TikZ Processing:** 
+  - Implement timeout (30s) và error handling cho lualatex
+  - Auto-detection packages với regex patterns
+  - Manual package specification parsing `%!<...>`
+  - Package options support `[option1,option2]`
+- **File Upload:** Validate file types, implement size limits (10MB SVG, 60MP images)
+- **Real-time Updates:** Implement efficient polling mechanisms với debouncing
 - **Environment Variables:** Sử dụng `os.environ.get()` với default values
+- **Comments System:**
+  - MathJax rendering cho LaTeX math
+  - Nested braces parsing cho TikZ code blocks
+  - XSS protection với double escaping
+  - Character limit (5000) với validation
 - **CSS Architecture:** Tuân thủ CSS Foundation migration methodology
   - **Variables First:** Luôn sử dụng `var(--variable-name)` thay vì hardcoded values
   - **Scoping:** Tất cả selectors phải có `.tikz-app` prefix
   - **No Conflicts:** Tránh duplicate html/body/:root rules
   - **Glass Morphism:** Sử dụng foundation glass variables cho UI transparency
   - **Responsive:** Foundation breakpoint variables cho consistency
+  - **Accessibility:** WCAG AAA compliance (contrast ≥ 6.2:1)
 
 ### 3. Testing
 - **Unit Tests:** Sử dụng pytest cho backend testing
 - **Integration Tests:** Test API endpoints và database operations
 - **Frontend Tests:** Test JavaScript functionality
-- **TikZ Processing Tests:** Test conversion pipeline end-to-end
+- **TikZ Processing Tests:** 
+  - Test conversion pipeline end-to-end
+  - Test package auto-detection
+  - Test manual package specification
+  - Test package options parsing
+- **Comments System Tests:**
+  - Test LaTeX math rendering
+  - Test TikZ code block parsing
+  - Test XSS protection
+  - Test nested replies
 - **Email Tests:** Test email sending và templates
-- **Rate Limiting Tests:** Test API throttling
+- **Rate Limiting Tests:** Test API throttling (email, package requests, comments)
 - **CSS Regression Tests:** Visual testing sau migration
-- **Accessibility Tests:** Contrast ratio ≥ 4.5:1, keyboard navigation
+- **Accessibility Tests:** 
+  - Contrast ratio ≥ 6.2:1 (WCAG AAA)
+  - Keyboard navigation
+  - Screen reader compatibility
 - **Coverage:** Mục tiêu ≥ 70% cho critical paths
 
 ### 4. Commit & PR
@@ -343,35 +495,109 @@ gunicorn -w 4 -b 0.0.0.0:5000 app:app
 ## 📚 Documentation Files
 
 Dự án này có nhiều file documentation chi tiết:
-- `README.md` - Tổng quan dự án
+
+### Core Documentation
+- `DOCS_CONTENT_COMPILATION.md` - Tổng hợp đầy đủ nội dung cho trang /docs
+- `CUOC_THI_VNFEAI_2025.md` - Tài liệu tham gia cuộc thi VNFEAI 2025
+- `FACEBOOK_POST_TIKZ2SVG.md` - Marketing content cho Facebook
+
+### Technical Documentation
 - `EMAIL_SETUP_GUIDE.md` - Hướng dẫn setup email với Zoho
 - `VERIFICATION_SYSTEM_GUIDE.md` - Hệ thống xác thực danh tính  
 - `RATE_LIMIT_GUIDE.md` - Rate limiting cho API và email
 - `WORKFLOW_GUIDE.md` - Quy trình phát triển
-- `CSS_REFACTOR_COMPLETE_REPORT.md` - Báo cáo refactor CSS
 - `DATABASE_DOCUMENTATION.md` - Schema và queries
 - `STATIC_FILES_CONFIGURATION.md` - Cấu hình static files
-- **CSS Foundation Migration Documentation:**
-  - `CSS_FOUNDATION_MIGRATION_SUMMARY.md` - Complete migration report
-  - `CSS_ARCHITECTURE_MIGRATION_STATUS.md` - Progress tracker
-  - `CSS_OVERRIDE_PREVENTION_GUIDE.md` - Prevention guidelines
+
+### Package System Documentation
+- `MANUAL_PACKAGE_SPECIFICATION.md` - Hướng dẫn manual package spec
+- `PACKAGE_DETECTION_IMPROVEMENT.md` - Package detection system
+- `CHANGELOG_PACKAGE_OPTIONS.md` - Package options changelog
+- `FINAL_SUMMARY_PACKAGE_OPTIONS.md` - Package system summary
+- `README_PACKAGE_SYSTEM.md` - Package system overview
+- `TROUBLESHOOTING_TEST_CASE_3.md` - Troubleshooting guide
+
+### CSS Architecture Documentation
+- `CSS_FOUNDATION_MIGRATION_SUMMARY.md` - Complete migration report
+- `CSS_ARCHITECTURE_MIGRATION_STATUS.md` - Progress tracker (6/10 complete)
+- `CSS_OVERRIDE_PREVENTION_GUIDE.md` - Prevention guidelines
+- `CSS_REFACTOR_COMPLETE_REPORT.md` - Refactor report
+
+### User Guides
+- `USER_GUIDE_CJK_CHARACTERS.md` - Hướng dẫn sử dụng chữ CJK
+- `CHINESE_CHARACTERS_ANALYSIS.md` - Phân tích Unicode support
+- `FIX_DICT_COMPARISON_ERROR.md` - Troubleshooting guide
 
 ## 🚀 Deployment
 
 ### Production Environment
 - **VPS Setup:** Sử dụng symbolic links cho static files
 - **Database:** MySQL với connection pooling
-- **Web Server:** Gunicorn với multiple workers
+- **Web Server:** Gunicorn với multiple workers (4 workers recommended)
 - **Static Files:** Persistent storage với shared directory
+- **Caching:** Redis cho session và rate limiting
 - **Backup:** Automated database và file backups
+- **Security:** 
+  - HTTPS với SSL certificate
+  - Rate limiting với Redis backend
+  - IP tracking với ProxyFix middleware
+  - CSRF protection enabled
 
 ### Development Environment
-- **Local Setup:** Flask development server
+- **Local Setup:** Flask development server (`python app.py`)
 - **Database:** Local MySQL instance
 - **Email:** Zoho SMTP sandbox
 - **File Storage:** Local static directory
+- **Testing:** pytest với coverage reports
 
-Claude nên tham khảo các file này khi hỗ trợ development.
+### Recent Updates (2024)
+- **Nov 2024:** Package request system, documentation page
+- **Oct 2024:** Likes modal pagination, enhanced search, timezone fixes
+- **Sep 2024:** Profile verification, follow/unfollow, CSS foundation migration
+- **Aug 2024:** Package options support, comments system, rate limiting improvements
+
+Claude nên tham khảo các file documentation này khi hỗ trợ development.
+
+---
+
+## 📄 Main Pages & Routes
+
+### Public Pages
+- **`/` (index.html)** - TikZ editor với CodeMirror, search bar, recent SVGs
+- **`/docs` (docs.html)** - Comprehensive documentation với sidebar TOC
+- **`/packages` (packages.html)** - Package listing (Active & Manual packages)
+- **`/packages/request` (package_request.html)** - Package request form
+- **`/search` (search_results.html)** - Search results với dual-mode (keywords/username)
+- **`/view_svg.html?filename=...`** - SVG detail page với comments system
+- **`/privacy_policy`** - Privacy policy
+- **`/terms_of_service`** - Terms of service
+
+### User Pages (Authentication Required)
+- **`/profile/<user_id>` (profile_svg_files.html)** - User profile với SVG gallery
+- **`/profile/<user_id>/settings` (profile_settings.html)** - Profile settings, avatar upload
+- **`/profile/<user_id>/followed_posts` (profile_followed_posts.html)** - Feed từ followed users
+- **`/profile/verification` (profile_verification.html)** - Email verification flow
+
+### Admin Pages (Admin Only)
+- **`/admin/packages` (admin/packages.html)** - Package management panel
+- **`/admin/analytics` (admin/analytics.html)** - Analytics dashboard
+
+### API Endpoints
+- **GET `/api/svg/<svg_id>/likes`** - Paginated likes list (20 per page)
+- **GET `/api/keywords/search?q=...`** - Keyword auto-suggestions
+- **POST `/api/comments/`** - Create new comment
+- **PUT `/api/comments/<id>`** - Edit comment
+- **DELETE `/api/comments/<id>`** - Delete comment
+- **POST `/api/comments/<id>/like`** - Like/unlike comment
+- **POST `/api/comments/<id>/reply`** - Reply to comment
+
+### Email Templates (Zoho SMTP)
+- **`emails/welcome.html`** - Welcome email for new users
+- **`emails/account_verification.html`** - Email verification code
+- **`emails/profile_settings_verification.html`** - Profile verification
+- **`emails/notification.html`** - General notifications
+- **`emails/svg_verification.html`** - SVG-related notifications
+- **`emails/identity_verification.html`** - Identity verification
 
 ---
 
@@ -427,3 +653,80 @@ Dự án sử dụng CSS Foundation System để đảm bảo consistency và ma
 - **Performance:** No CSS redundancy, optimized loading
 - **Maintainability:** Single source of truth for design tokens
 - **Cross-browser:** webkit-backdrop-filter + backdrop-filter
+
+---
+
+## 🎯 Best Practices khi phát triển
+
+### Khi thêm tính năng mới
+1. **Đọc documentation trước:** Kiểm tra `DOCS_CONTENT_COMPILATION.md` để hiểu hệ thống
+2. **Tuân thủ patterns hiện có:** Follow existing code patterns và conventions
+3. **Security first:** Validate input, escape output, implement rate limiting
+4. **Update documentation:** Cập nhật các file .md liên quan
+5. **Test thoroughly:** Unit tests, integration tests, manual testing
+6. **CSS Foundation:** Sử dụng design system variables, không hardcode
+7. **Accessibility:** Đảm bảo WCAG AAA compliance
+8. **Mobile-first:** Test trên mobile trước khi desktop
+
+### Khi sửa bugs
+1. **Reproduce bug:** Xác nhận bug trên local environment
+2. **Check related code:** Tìm code liên quan có thể bị ảnh hưởng
+3. **Fix root cause:** Sửa nguyên nhân gốc, không chỉ symptoms
+4. **Test regressions:** Đảm bảo fix không gây lỗi mới
+5. **Update tests:** Thêm test cases cho bug đã fix
+6. **Document fix:** Ghi rõ trong commit message và changelog
+
+### Khi làm việc với TikZ Processing
+1. **Test với nhiều cases:** Simple, complex, edge cases
+2. **Handle errors gracefully:** Proper error messages cho users
+3. **Timeout protection:** Không để compilation chạy vô hạn
+4. **Package whitelist:** Chỉ allow packages đã được approve
+5. **Security validation:** Validate all user-provided LaTeX code
+6. **Memory management:** Cleanup temp files sau compilation
+
+### Khi làm việc với Comments System
+1. **XSS protection:** Always escape HTML, double-escape code blocks
+2. **MathJax testing:** Test với complex LaTeX formulas
+3. **Nested braces:** Test TikZ code với nhiều levels của {}
+4. **Character limits:** Enforce 5000 char limit
+5. **Rate limiting:** Prevent comment spam
+6. **Real-time preview:** Ensure MathJax renders correctly
+
+### Khi làm việc với CSS
+1. **Foundation first:** Check master-variables.css trước
+2. **No hardcoding:** Use var(--variable-name) always
+3. **Scoping:** Prefix với .tikz-app
+4. **Responsive:** Test breakpoints (mobile, tablet, desktop)
+5. **Accessibility:** Check contrast ratios
+6. **Browser testing:** Chrome, Firefox, Safari, Edge
+
+### Khi deploy
+1. **Backup database:** Luôn backup trước khi deploy
+2. **Test staging:** Deploy to staging environment first
+3. **Check logs:** Monitor error logs sau deploy
+4. **Performance:** Check page load times, API response times
+5. **Redis:** Ensure Redis running cho rate limiting
+6. **Static files:** Verify symbolic links working
+7. **SSL:** Ensure HTTPS certificates valid
+
+---
+
+## 📞 Support & Communication
+
+### Khi cần giúp đỡ
+- **Documentation:** Check `DOCS_CONTENT_COMPILATION.md` first
+- **Troubleshooting:** Xem `TROUBLESHOOTING_TEST_CASE_3.md`
+- **Package Issues:** Check `PACKAGE_DETECTION_IMPROVEMENT.md`
+- **CSS Issues:** Check `CSS_OVERRIDE_PREVENTION_GUIDE.md`
+- **Workflow:** Follow `WORKFLOW_GUIDE.md`
+
+### Reporting Issues
+- **Bug reports:** Include reproduction steps, screenshots, logs
+- **Feature requests:** Explain use case và benefit
+- **Security issues:** Report privately, không public
+
+### Contributing
+- **Fork & PR:** Follow git workflow
+- **Code review:** Wait for review trước khi merge
+- **Tests:** All PRs must include tests
+- **Documentation:** Update docs trong cùng PR

@@ -25,6 +25,340 @@ Tệp này cung cấp hướng dẫn cho Claude Code (claude.ai/code) khi hỗ t
 
 ---
 
+## ⚠️ CRITICAL: Read These Files First
+
+Before working on this codebase, **YOU MUST** read these 4 critical documentation files. They contain essential information about the project architecture, database schema, API endpoints, and comprehensive feature documentation.
+
+### 📊 Quick Reference Table
+
+| File | Purpose | Key Information | Lines | Status |
+|------|---------|----------------|-------|--------|
+| **DATABASE_DOCUMENTATION.md** | Database schema & queries | 19 tables, relationships, SQL examples | 1,390+ | ✅ Complete |
+| **API_ENDPOINTS_DOCUMENTATION.md** | REST API reference | 80+ endpoints, rate limits, security | 1,700+ | ✅ Complete |
+| **DOCS_CONTENT_COMPILATION.md** | User documentation | 437+ docs sections, features guide | 1,357+ | ✅ Complete |
+| **WORKFLOW_GUIDE.md** | Deployment & configuration | VPS setup, Redis, static files | 517+ | ✅ Complete |
+
+---
+
+### 📁 DATABASE_DOCUMENTATION.md
+
+**File Path:** `/Users/hieplequoc/Projects/claudekit_tikz2svg_api/DATABASE_DOCUMENTATION.md`
+
+**What's Inside:**
+- **19 Database Tables:** Complete schema with CREATE statements, field descriptions, indexes, and foreign keys
+- **Table Categories:**
+  - Core: `user`, `svg_image`, `keyword`, `svg_image_keyword`
+  - Social: `svg_like`, `user_follow`, `svg_comments`, `svg_comment_likes`
+  - Notifications: `notifications`, `email_notifications`, `email_log`
+  - Security: `verification_tokens`, `user_action_log`, `svg_action_log`
+  - Packages: `supported_packages`, `package_requests`, `package_changelog`, `package_usage_stats`
+  - Admin: `admin_permissions`
+- **Relationships Diagram:** Entity-relationship mapping with cardinality
+- **Essential Queries:** 60+ SQL query examples for common operations
+- **Database Report:** Real-time statistics with 10 users, 48 SVGs, 10 comments
+
+**When to Read:**
+- ✅ Before implementing any database-related feature
+- ✅ When adding new tables or modifying schema
+- ✅ When debugging data-related issues
+- ✅ When writing SQL queries or ORM operations
+- ✅ When planning migrations or schema changes
+
+**Key Sections:**
+```bash
+# Jump to specific sections
+grep "### 1. Bảng" DATABASE_DOCUMENTATION.md    # User table
+grep "### 2. Bảng" DATABASE_DOCUMENTATION.md    # SVG images
+grep "### 13. Bảng" DATABASE_DOCUMENTATION.md   # Notifications
+grep "### 14. Bảng" DATABASE_DOCUMENTATION.md   # Comments
+grep "## Các truy vấn chính" DATABASE_DOCUMENTATION.md  # Query examples
+```
+
+**Critical Insights:**
+- Profile verification uses **5-reuse limit** for codes (10-minute window)
+- Comments system supports **nested replies** (1 level)
+- Package usage tracking with **denormalized counters** for performance
+- Email logs track **success/failure** with error messages
+
+---
+
+### 📡 API_ENDPOINTS_DOCUMENTATION.md
+
+**File Path:** `/Users/hieplequoc/Projects/claudekit_tikz2svg_api/API_ENDPOINTS_DOCUMENTATION.md`
+
+**What's Inside:**
+- **80+ REST API Endpoints:** Complete reference with request/response examples
+- **11 Endpoint Categories:**
+  1. System Info & Status (7 endpoints) - Platform info, health checks, metrics
+  2. TikZ Compilation (3 endpoints) - Compile, cache, debug
+  3. User Authentication (3 endpoints) - Login status, verification
+  4. Social Features (9 endpoints) - Likes, follows, follower counts
+  5. Comments System (6 endpoints) - CRUD, likes, replies
+  6. Search & Discovery (3 endpoints) - Search files, keyword suggestions
+  7. Package Management (7 endpoints) - List, request, stats, popular
+  8. File Management (4 endpoints) - Save, convert, caption, delete
+  9. Notifications (4 endpoints) - Unread count, list, mark read
+  10. Admin APIs (6 endpoints) - Metrics, requests, cache control
+  11. Rate Limits & Security - Comprehensive security documentation
+
+**When to Read:**
+- ✅ Before implementing new API endpoints
+- ✅ When integrating frontend with backend
+- ✅ When troubleshooting API errors or rate limits
+- ✅ When adding authentication/authorization
+- ✅ When planning API versioning or changes
+
+**Quick Access Commands:**
+```bash
+# Find specific endpoint categories
+grep "## 1. System Info" API_ENDPOINTS_DOCUMENTATION.md
+grep "## 2. TikZ Compilation" API_ENDPOINTS_DOCUMENTATION.md
+grep "## 5. Comments System" API_ENDPOINTS_DOCUMENTATION.md
+grep "## 11. Rate Limits" API_ENDPOINTS_DOCUMENTATION.md
+
+# Search for specific endpoints
+grep "POST /compile" API_ENDPOINTS_DOCUMENTATION.md
+grep "GET /api/svg" API_ENDPOINTS_DOCUMENTATION.md
+grep "POST /api/comments" API_ENDPOINTS_DOCUMENTATION.md
+```
+
+**Rate Limiting Rules:**
+| Endpoint Category | Limit | Window | Applies To |
+|------------------|-------|--------|------------|
+| General API | 1000 requests | 1 minute | All endpoints |
+| Package Requests | 3 requests | 1 hour | Per user |
+| Email Verification | 5 emails | 1 hour | Per user |
+| Comments | 20 comments | 1 hour | Per user |
+| Compilation | 5 concurrent | - | Global |
+| File Upload | 10 files | 1 day | Per user |
+
+**Security Features:**
+- ✅ 25+ dangerous pattern detection for LaTeX
+- ✅ Package whitelist enforcement (50+ packages)
+- ✅ Resource limits: 45s timeout, 300MB memory, 5 concurrent
+- ✅ Redis-based rate limiting with ProxyFix
+- ✅ XSS protection via HTML escaping
+
+---
+
+### 📚 DOCS_CONTENT_COMPILATION.md
+
+**File Path:** `/Users/hieplequoc/Projects/claudekit_tikz2svg_api/DOCS_CONTENT_COMPILATION.md`
+
+**What's Inside:**
+- **437+ Documentation Sections:** Complete user guide for all features
+- **11 Major Topics:**
+  1. Introduction & Overview - Platform description, tech stack
+  2. Quick Start Guide - Registration, first TikZ conversion
+  3. TikZ Compilation Details - Auto-detection, Unicode support, manual packages
+  4. File Management & Actions - Card UI, menu actions, likes system
+  5. Format Conversion - SVG → PNG/JPEG with DPI customization
+  6. Comments System - LaTeX math, TikZ code blocks, nested replies
+  7. Profile & Social - Follow/unfollow, profile settings, social feed
+  8. Identity Verification - Email verification, security, unlocked features
+  9. Search & Keywords - Dual-mode search, auto-suggestions
+  10. Error Handling & Troubleshooting - Common issues, solutions
+  11. Tips & Best Practices - Code examples, multi-device usage
+
+**When to Read:**
+- ✅ Before implementing user-facing features
+- ✅ When writing UI/UX code or templates
+- ✅ When debugging user workflow issues
+- ✅ When creating help documentation or FAQs
+- ✅ When planning new features that affect user experience
+
+**Feature Highlights:**
+```bash
+# Navigate to key sections
+grep "## 3. 🔧 Chức năng biên dịch" DOCS_CONTENT_COMPILATION.md
+grep "### 3.3 🌏 Unicode" DOCS_CONTENT_COMPILATION.md
+grep "### 3.4 📦 Manual Package" DOCS_CONTENT_COMPILATION.md
+grep "## 6. 💬 Hệ thống Comments" DOCS_CONTENT_COMPILATION.md
+grep "## 8. 🛡️ Xác thực danh tính" DOCS_CONTENT_COMPILATION.md
+```
+
+**User Workflows:**
+1. **First-time User:** Registration → First SVG → Save → Like → Search
+2. **Power User:** Advanced TikZ → Manual packages → Comments → Follow → Feed
+3. **Verified User:** Email verification → Follow users → View followed posts
+4. **Content Creator:** Multiple SVGs → Keywords → Engagement → Profile customization
+
+**Critical User Limits:**
+- SVG files: Max **10MB** per file, **10 files/day**
+- Comments: Max **5000 characters**, rate limit **20/hour**
+- Images: Max **60MP** (60,000,000 pixels), max **2000 DPI**
+- Package requests: **3 requests/hour**
+
+---
+
+### 🔧 WORKFLOW_GUIDE.md
+
+**File Path:** `/Users/hieplequoc/Projects/claudekit_tikz2svg_api/WORKFLOW_GUIDE.md`
+
+**What's Inside:**
+- **VPS Deployment Configuration:** Complete production setup guide
+- **Key Topics:**
+  - Static Files Configuration - Symbolic links, shared storage, file paths
+  - Redis Server Setup - Rate limiting storage, installation, configuration
+  - 502 Bad Gateway Troubleshooting - Symbolic link issues, avatar problems
+  - File Storage Issues - WorkingDirectory, STATIC_ROOT, environment variables
+  - Systemd Service Configuration - Environment files, service overrides
+  - Monitoring & Verification - Health checks, cache stats, Redis monitoring
+
+**When to Read:**
+- ✅ Before deploying to production VPS
+- ✅ When troubleshooting 502 errors or file storage issues
+- ✅ When setting up Redis for rate limiting
+- ✅ When configuring static file paths
+- ✅ When debugging deployment-related issues
+
+**Critical Configurations:**
+```bash
+# Redis Setup (REQUIRED for production)
+sudo apt install redis-server
+echo "REDIS_URL=redis://localhost:6379/0" >> /var/www/tikz2svg_api/shared/.env
+sudo systemctl restart tikz2svg.service
+
+# Static Files Configuration
+ln -s /var/www/tikz2svg_api/shared/static /var/www/tikz2svg_api/current/static
+echo "TIKZ_SVG_DIR=/var/www/tikz2svg_api/shared/static" >> /var/www/tikz2svg_api/shared/.env
+
+# Verify Setup
+redis-cli ping                    # Should return PONG
+ls -la current/static            # Should show symlink → shared/static
+python3 -c "import redis; ..."   # Test Redis connection
+```
+
+**Common Issues & Solutions:**
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| 502 Bad Gateway | Avatars symlink broken | Remove symlink, create real directory |
+| Files saved wrong | STATIC_ROOT misconfigured | Set `TIKZ_SVG_DIR` in `.env` |
+| Rate limiting broken | Redis not running | Install Redis, set `REDIS_URL` |
+| Files lost on deploy | No symbolic links | Create symlink from current → shared |
+
+**Deployment Checklist:**
+- [ ] Redis server installed and running
+- [ ] `REDIS_URL` set in `/var/www/tikz2svg_api/shared/.env`
+- [ ] Systemd service configured with `EnvironmentFile`
+- [ ] Static files symlink created (current → shared)
+- [ ] `TIKZ_SVG_DIR` environment variable set
+- [ ] Service restarted after configuration changes
+- [ ] Health checks passing (logs show Redis storage)
+
+---
+
+### 🔗 Cross-Reference Patterns
+
+**When implementing a new feature, check these files in order:**
+
+1. **Planning Phase:**
+   - Read `DOCS_CONTENT_COMPILATION.md` → Understand user requirements
+   - Read `API_ENDPOINTS_DOCUMENTATION.md` → Plan API design
+   - Read `DATABASE_DOCUMENTATION.md` → Design data schema
+
+2. **Development Phase:**
+   - Reference `DATABASE_DOCUMENTATION.md` → Write SQL queries
+   - Reference `API_ENDPOINTS_DOCUMENTATION.md` → Implement endpoints
+   - Reference `WORKFLOW_GUIDE.md` → Configure production settings
+
+3. **Testing Phase:**
+   - Verify against `API_ENDPOINTS_DOCUMENTATION.md` → Rate limits, responses
+   - Verify against `DATABASE_DOCUMENTATION.md` → Data integrity
+   - Test workflows from `DOCS_CONTENT_COMPILATION.md` → User flows
+
+4. **Deployment Phase:**
+   - Follow `WORKFLOW_GUIDE.md` → Production setup
+   - Verify all checklist items → Ensure stability
+
+**Example: Implementing Comments System**
+```
+Step 1: Read DOCS_CONTENT_COMPILATION.md § 6 (Comments System)
+        → Understand: LaTeX math, TikZ code blocks, nested replies, like/unlike
+
+Step 2: Read DATABASE_DOCUMENTATION.md § 14-15 (svg_comments, svg_comment_likes)
+        → Schema: parent_comment_id, likes_count, content_hash, security fields
+
+Step 3: Read API_ENDPOINTS_DOCUMENTATION.md § 5 (Comments System APIs)
+        → Endpoints: GET/POST/PUT/DELETE, rate limits, authentication
+
+Step 4: Implement backend → Test → Deploy following WORKFLOW_GUIDE.md
+```
+
+---
+
+### ✅ Verification Checklist
+
+Before starting development, confirm you've read:
+
+- [ ] **DATABASE_DOCUMENTATION.md** - I understand the 19 tables, relationships, and key queries
+- [ ] **API_ENDPOINTS_DOCUMENTATION.md** - I understand the 80+ endpoints, rate limits, and security
+- [ ] **DOCS_CONTENT_COMPILATION.md** - I understand user workflows and feature requirements
+- [ ] **WORKFLOW_GUIDE.md** - I understand deployment configuration and common issues
+
+**Quick verification commands:**
+```bash
+# Confirm file existence and size
+ls -lh DATABASE_DOCUMENTATION.md API_ENDPOINTS_DOCUMENTATION.md DOCS_CONTENT_COMPILATION.md WORKFLOW_GUIDE.md
+
+# Count lines to verify completeness
+wc -l DATABASE_DOCUMENTATION.md    # Should be ~1390 lines
+wc -l API_ENDPOINTS_DOCUMENTATION.md  # Should be ~1700 lines
+wc -l DOCS_CONTENT_COMPILATION.md     # Should be ~1357 lines
+wc -l WORKFLOW_GUIDE.md                # Should be ~517 lines
+
+# Quick content scan
+head -20 DATABASE_DOCUMENTATION.md    # See table list
+head -20 API_ENDPOINTS_DOCUMENTATION.md  # See endpoint categories
+head -20 DOCS_CONTENT_COMPILATION.md     # See feature overview
+head -20 WORKFLOW_GUIDE.md               # See deployment topics
+```
+
+---
+
+### 🚀 Example Development Workflows
+
+**Workflow 1: Adding a New Database Table**
+```bash
+1. Read DATABASE_DOCUMENTATION.md § 1-19 (existing tables)
+2. Design new table schema following existing patterns
+3. Write migration SQL with proper indexes and foreign keys
+4. Update DATABASE_DOCUMENTATION.md with new table documentation
+5. Test queries and update § "Các truy vấn chính"
+```
+
+**Workflow 2: Creating a New API Endpoint**
+```bash
+1. Read API_ENDPOINTS_DOCUMENTATION.md (find similar endpoint)
+2. Read DATABASE_DOCUMENTATION.md (understand data requirements)
+3. Read DOCS_CONTENT_COMPILATION.md (understand user workflow)
+4. Implement endpoint following REST conventions
+5. Add rate limiting following § 11 (Rate Limits & Security)
+6. Document in API_ENDPOINTS_DOCUMENTATION.md
+```
+
+**Workflow 3: Implementing a User-Facing Feature**
+```bash
+1. Read DOCS_CONTENT_COMPILATION.md (understand user requirements)
+2. Read API_ENDPOINTS_DOCUMENTATION.md (plan backend API)
+3. Read DATABASE_DOCUMENTATION.md (design data model)
+4. Implement feature (backend + frontend)
+5. Test following user workflows from DOCS_CONTENT_COMPILATION.md
+6. Deploy following WORKFLOW_GUIDE.md checklist
+```
+
+**Workflow 4: Troubleshooting Production Issues**
+```bash
+1. Read WORKFLOW_GUIDE.md § "Troubleshooting" sections
+2. Check logs: sudo journalctl -u tikz2svg.service --no-pager -n 50
+3. Verify Redis: redis-cli KEYS "LIMITER*"
+4. Check static files: ls -la /var/www/tikz2svg_api/current/static
+5. Verify environment: cat /var/www/tikz2svg_api/shared/.env
+6. Test endpoints from API_ENDPOINTS_DOCUMENTATION.md
+```
+
+---
+
 ## ✨ Tính năng chính
 
 ### 1. TikZ Processing System

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-PROJECT_DIR="/Users/hieplequoc/web/work/tikz2svg_api"
+PROJECT_DIR="/Users/hieplequoc/Projects/claudekit_tikz2svg_api"
 cd "$PROJECT_DIR" || { echo "Không tìm thấy: $PROJECT_DIR"; exit 1; }
 
 # Start required services
